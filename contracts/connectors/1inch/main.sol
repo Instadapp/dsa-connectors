@@ -10,6 +10,11 @@ import { Events } from "./events.sol";
 
 contract OneProtoResolver is Helpers, Events {
 
+    /**
+     * @dev 1proto contract swap handler
+     * @param oneProtoContract - 1 proto contract
+     * @param oneProtoData - Struct with swap data defined in interfaces.sol 
+     */
     function oneProtoSwap(
         OneProtoInterface oneProtoContract,
         OneProtoData memory oneProtoData
@@ -44,6 +49,11 @@ contract OneProtoResolver is Helpers, Events {
         require(_slippageAmt <= buyAmt, "Too much slippage");
     }
 
+
+    /**
+     * @dev 1proto contract multi swap handler
+     * @param oneProtoData - Struct with multiple swap data defined in interfaces.sol 
+     */
     function oneProtoSwapMulti(OneProtoMultiData memory oneProtoData) internal returns (uint buyAmt) {
         TokenInterface _sellAddr = oneProtoData.sellToken;
         TokenInterface _buyAddr = oneProtoData.buyToken;
@@ -75,6 +85,10 @@ contract OneProtoResolver is Helpers, Events {
 }
 
 contract OneInchResolver is OneProtoResolver {
+    /**
+     * @dev 1inch swap uses `.call()`. This function restrict it to call only swap/trade functionality
+     * @param callData - calldata to extract the first 4 bytes for checking function signature
+     */
     function checkOneInchSig(bytes memory callData) internal pure returns(bool isOk) {
         bytes memory _data = callData;
         bytes4 sig;
@@ -85,6 +99,11 @@ contract OneInchResolver is OneProtoResolver {
         isOk = sig == getOneInchSig();
     }
 
+    /**
+     * @dev 1inch API swap handler
+     * @param oneInchData - contains data returned from 1inch API. Struct defined in interfaces.sol
+     * @param ethAmt - Eth to swap for .value()
+     */
     function oneInchSwap(
         OneInchData memory oneInchData,
         uint ethAmt
@@ -110,6 +129,13 @@ contract OneInchResolver is OneProtoResolver {
 }
 
 contract OneProtoResolverHelpers is OneInchResolver {
+
+    /**
+     * @dev Gets the swapping data onchain for swaps and calls swap.
+     * @param oneProtoData - Struct with swap data defined in interfaces.sol 
+     * @param getId Get token amount at this ID from `InstaMemory` Contract.
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     */
     function _sell(
         OneProtoData memory oneProtoData,
         uint256 getId,
@@ -141,6 +167,12 @@ contract OneProtoResolverHelpers is OneInchResolver {
         emitLogSell(oneProtoData, getId, setId);
     }
 
+    /**
+     * @dev Gets the swapping data offchian for swaps and calls swap.
+     * @param oneProtoData - Struct with swap data defined in interfaces.sol 
+     * @param getId Get token amount at this ID from `InstaMemory` Contract.
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     */
     function _sellTwo(
         OneProtoData memory oneProtoData,
         uint getId,
@@ -161,6 +193,12 @@ contract OneProtoResolverHelpers is OneInchResolver {
         emitLogSellTwo(oneProtoData, getId, setId);
     }
 
+    /**
+     * @dev Gets the swapping data offchian for swaps and calls swap.
+     * @param oneProtoData - Struct with multiple swap data defined in interfaces.sol 
+     * @param getId Get token amount at this ID from `InstaMemory` Contract.
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     */
     function _sellMulti(
         OneProtoMultiData memory oneProtoData,
         uint getId,
@@ -180,6 +218,12 @@ contract OneProtoResolverHelpers is OneInchResolver {
 }
 
 contract OneInchResolverHelpers is OneProtoResolverHelpers {
+
+    /**
+     * @dev Gets the swapping data from 1inch's API.
+     * @param oneInchData Struct with multiple swap data defined in interfaces.sol 
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     */
     function _sellThree(
         OneInchData memory oneInchData,
         uint setId
