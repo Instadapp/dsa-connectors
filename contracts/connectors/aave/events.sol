@@ -66,4 +66,12 @@ contract Events is Stores {
     ) internal {
         emit LogPayback(token, tokenAmt, getId, setId);
     }
+
+    event LogEnableCollateral(address[] tokens);
+
+    function emitLogEnableCollateral(
+        address[] memory tokens
+    ) internal {
+        emit LogEnableCollateral(tokens);
+    }
 }

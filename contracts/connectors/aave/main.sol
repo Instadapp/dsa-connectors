@@ -34,9 +34,6 @@ contract BasicResolver is Helpers, Events {
         setUint(setId, _amt);
 
         emitLogDeposit(token, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -60,9 +57,6 @@ contract BasicResolver is Helpers, Events {
         setUint(setId, _amt);
 
         emitLogWithdraw(token, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -79,9 +73,6 @@ contract BasicResolver is Helpers, Events {
         setUint(setId, _amt);
 
         emitLogBorrow(token, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogBorrow(address,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -112,12 +103,29 @@ contract BasicResolver is Helpers, Events {
         setUint(setId, _amt);
 
         emitLogPayback(token, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogPayback(address,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
+    }
+
+    /**
+     * @dev Enable collateral
+     * @param tokens Array of tokens to enable collateral
+    */
+    function enableCollateral(address[] calldata tokens) external payable {
+        uint _length = tokens.length;
+        require(_length > 0, "0-tokens-not-allowed");
+
+        AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
+
+        for (uint i = 0; i < _length; i++) {
+            address token = tokens[i];
+            if (getWithdrawBalance(token) > 0 && !getIsColl(aave, token)) {
+                aave.setUserUseReserveAsCollateral(token, true);
+            }
+        }
+
+        emitLogEnableCollateral(tokens);
     }
 }
 
 contract ConnectAave is BasicResolver {
-    string public name = "Aave-v1";
+    string public name = "Aave-v1.1";
 }
