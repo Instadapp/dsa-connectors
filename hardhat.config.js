@@ -18,7 +18,27 @@ module.exports = {
       }
     ]
   },
+  networks: {
+    tenderlyMainnet: {
+      url: 'https://mainnet.tenderly.co',
+      accounts: [process.env.PRIVATE_KEY],
+      chainId: 1,
+      gasPrice: 25120000000,
+      timeout: 500000
+    },
+    tenderlyKovan: {
+      url: 'https://kovan.tenderly.co',
+      accounts: [process.env.PRIVATE_KEY],
+      chainId: 42,
+      gasPrice: 40000000000,
+      timeout: 50000
+    }
+  },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY
+  },
+  tenderly: {
+    project: process.env.TENDERLY_PROJECT,
+    username: process.env.TENDERLY_USERNAME,
   }
 };
