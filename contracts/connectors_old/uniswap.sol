@@ -94,7 +94,7 @@ abstract contract UniswapHelpers is Stores, DSMath {
     }
 
     function convertEthToWeth(TokenInterface token, uint amount) internal {
-        if(address(token) == getAddressWETH()) token.deposit.value(amount)();
+        if(address(token) == getAddressWETH()) token.deposit{value: amount}();
     }
 
     function convertWethToEth(TokenInterface token, uint amount) internal {

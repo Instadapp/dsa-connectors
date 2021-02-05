@@ -81,7 +81,7 @@ abstract contract KyberResolver is KyberHelpers {
             sellContract.approve(getKyberAddr(), _sellAmt);
         }
 
-        uint _buyAmt = KyberInterface(getKyberAddr()).trade.value(ethAmt)(
+        uint _buyAmt = KyberInterface(getKyberAddr()).trade{value: ethAmt}(
             sellAddr,
             _sellAmt,
             buyAddr,

@@ -105,7 +105,7 @@ abstract contract BasicResolver is AaveHelpers {
             tokenContract.approve(getAaveProvider().getLendingPoolCore(), _amt);
         }
 
-        aave.deposit.value(ethAmt)(token, _amt, getReferralCode());
+        aave.deposit{value: ethAmt}(token, _amt, getReferralCode());
 
         if (!getIsColl(aave, token)) aave.setUserUseReserveAsCollateral(token, true);
 
@@ -176,7 +176,7 @@ abstract contract BasicResolver is AaveHelpers {
             TokenInterface(token).approve(getAaveProvider().getLendingPoolCore(), _amt);
         }
 
-        aave.repay.value(ethAmt)(token, _amt, payable(address(this)));
+        aave.repay{value: ethAmt}(token, _amt, payable(address(this)));
 
         setUint(setId, _amt);
 

@@ -398,7 +398,7 @@ contract BasicResolver is MakerHelpers {
 
         if (isEth(address(tokenContract))) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            tokenContract.deposit.value(_amt)();
+            tokenContract.deposit{value: _amt}();
         } else {
             _amt = _amt == uint(-1) ?  tokenContract.balanceOf(address(this)) : _amt;
         }
@@ -671,7 +671,7 @@ contract BasicExtraResolver is BasicResolver {
 
         if (isEth(address(makerData.tokenContract))) {
             _amtDeposit = _amtDeposit == uint(-1) ? address(this).balance : _amtDeposit;
-            makerData.tokenContract.deposit.value(_amtDeposit)();
+            makerData.tokenContract.deposit{value: _amtDeposit}();
         } else {
             _amtDeposit = _amtDeposit == uint(-1) ?  makerData.tokenContract.balanceOf(address(this)) : _amtDeposit;
         }

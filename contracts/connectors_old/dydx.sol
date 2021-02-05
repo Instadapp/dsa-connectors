@@ -167,7 +167,7 @@ abstract contract BasicResolver is DydxHelpers {
         if (token == getEthAddr()) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            tokenContract.deposit.value(_amt)();
+            tokenContract.deposit{value: _amt}();
             tokenContract.approve(getDydxAddress(), _amt);
         } else {
             TokenInterface tokenContract = TokenInterface(token);
@@ -273,7 +273,7 @@ abstract contract BasicResolver is DydxHelpers {
         if (token == getEthAddr()) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             require(address(this).balance >= _amt, "not-enough-eth");
-            tokenContract.deposit.value(_amt)();
+            tokenContract.deposit{value: _amt}();
             tokenContract.approve(getDydxAddress(), _amt);
         } else {
             TokenInterface tokenContract = TokenInterface(token);

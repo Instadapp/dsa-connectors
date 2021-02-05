@@ -160,7 +160,7 @@ abstract contract OneProtoResolver is OneHelpers {
 
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneProtoContract.swap.value(ethAmt)(
+        oneProtoContract.swap{value: ethAmt}(
             _sellAddr,
             _buyAddr,
             _sellAmt,
@@ -201,7 +201,7 @@ abstract contract OneProtoResolver is OneHelpers {
         }
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneSplitContract.swapMulti.value(ethAmt)(
+        oneSplitContract.swapMulti{value: ethAmt}(
             convertToTokenInterface(oneProtoData.tokens),
             _sellAmt,
             _slippageAmt,
@@ -248,7 +248,7 @@ abstract contract OneInchResolver is OneProtoResolver {
         uint initalBal = getTokenBal(buyToken);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, ) = address(getOneInchAddress()).call.value(ethAmt)(oneInchData.callData);
+        (bool success, ) = address(getOneInchAddress()).call{value: ethAmt}(oneInchData.callData);
         if (!success) revert("1Inch-swap-failed");
 
         uint finalBal = getTokenBal(buyToken);

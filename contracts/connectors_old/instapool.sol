@@ -226,7 +226,7 @@ contract LiquidityManage is LiquidityHelpers {
             tokenContract.approve(getLiquidityAddress(), _amt);
         }
 
-        LiqudityInterface(getLiquidityAddress()).deposit.value(ethAmt)(token, _amt);
+        LiqudityInterface(getLiquidityAddress()).deposit{value: ethAmt}(token, _amt);
         setUint(setId, _amt);
 
         emit LogDepositLiquidity(token, _amt, getId, setId);
