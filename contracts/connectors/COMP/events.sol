@@ -1,8 +1,6 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
-import { Stores } from "../../common/stores.sol";
-
-contract Events is Stores {
+contract Events {
     event LogClaimedComp(uint256 compAmt, uint256 setId);
     event LogDelegate(address delegatee);
 }

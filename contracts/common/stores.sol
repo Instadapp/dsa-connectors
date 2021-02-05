@@ -1,9 +1,15 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
 import { MemoryInterface, EventInterface} from "./interfaces.sol";
 
 
-contract Stores {
+abstract contract Stores {
+
+    uint256 internal immutable _id;
+
+    constructor(uint256 id) public {
+        _id = id;
+    }
 
   /**
    * @dev Return ethereum address
@@ -59,7 +65,7 @@ contract Stores {
   * @dev Connector Details - needs to be changed before deployment
   */
   function connectorID() public view returns(uint model, uint id) {
-    (model, id) = (0, 0);
+    (model, id) = (0, _id);
   }
 
 }

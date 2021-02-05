@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
 interface ComptrollerInterface {
     function claimComp(address holder) external;

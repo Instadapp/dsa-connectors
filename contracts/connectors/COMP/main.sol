@@ -1,11 +1,12 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
 import { TokenInterface , MemoryInterface, EventInterface, InstaMapping } from "../../common/interfaces.sol";
+import { Stores } from "../../common/stores.sol";
 import { ComptrollerInterface, COMPInterface } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-contract CompResolver is Events, Helpers {
+abstract contract CompResolver is Events, Helpers {
 
     /**
      * @dev Claim Accrued COMP Token.
@@ -101,4 +102,6 @@ contract CompResolver is Events, Helpers {
 
 contract ConnectCOMP is CompResolver {
     string public name = "COMP-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

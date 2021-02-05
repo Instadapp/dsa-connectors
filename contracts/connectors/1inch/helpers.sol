@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
@@ -6,7 +6,7 @@ import { Basic } from "../../common/basic.sol";
 import { TokenInterface, OneProtoMappingInterface } from "./interface.sol";
 
 
-contract Helpers is DSMath, Basic {
+abstract contract Helpers is DSMath, Basic {
 
     /**
      * @dev Return 1proto mapping Address

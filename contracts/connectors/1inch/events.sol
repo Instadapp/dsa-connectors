@@ -1,9 +1,8 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
 import { OneProtoData, OneProtoMultiData, OneInchData} from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
 
-contract Events is Stores {
+contract Events {
     event LogSell(
         address indexed buyToken,
         address indexed sellToken,

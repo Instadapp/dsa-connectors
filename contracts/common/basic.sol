@@ -1,10 +1,10 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.5;
 
 import { TokenInterface } from "./interfaces.sol";
 import { Stores } from "./stores.sol";
 import { DSMath } from "./math.sol";
 
-contract Basic is DSMath, Stores {
+abstract contract Basic is DSMath, Stores {
 
     function convert18ToDec(uint _dec, uint256 _amt) internal pure returns (uint256 amt) {
         amt = (_amt / 10 ** (18 - _dec));
