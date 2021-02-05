@@ -19,7 +19,7 @@ interface ICurveZap {
 }
 
 
-contract CurveHelpers is Stores, DSMath {
+abstract contract CurveHelpers is Stores, DSMath {
   /**
   * @dev Return Curve Swap Address
   */
@@ -73,7 +73,7 @@ contract CurveHelpers is Stores, DSMath {
   }
 }
 
-contract CurveProtocol is CurveHelpers {
+abstract contract CurveProtocol is CurveHelpers {
 
   event LogSell(
     address indexed buyToken,
@@ -225,4 +225,6 @@ contract CurveProtocol is CurveHelpers {
 
 contract ConnectCurve is CurveProtocol {
   string public name = "Curve-susd-v1.2";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }

@@ -66,7 +66,7 @@ interface SoloMarginContract {
 }
 
 
-contract DydxHelpers is DSMath, Stores {
+abstract contract DydxHelpers is DSMath, Stores {
     /**
      * @dev get WETH address
     */
@@ -142,7 +142,7 @@ contract DydxHelpers is DSMath, Stores {
 }
 
 
-contract BasicResolver is DydxHelpers {
+abstract contract BasicResolver is DydxHelpers {
     event LogDeposit(address indexed token, uint marketId, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdraw(address indexed token, uint marketId, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogBorrow(address indexed token, uint marketId, uint256 tokenAmt, uint256 getId, uint256 setId);
@@ -294,4 +294,6 @@ contract BasicResolver is DydxHelpers {
 
 contract ConnectDydx is BasicResolver {
     string public name = "Dydx-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

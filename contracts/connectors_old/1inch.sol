@@ -62,7 +62,7 @@ interface OneProtoMappingInterface {
 }
 
 
-contract OneHelpers is Stores, DSMath {
+abstract contract OneHelpers is Stores, DSMath {
 
     /**
      * @dev Return 1proto mapping Address
@@ -130,7 +130,7 @@ contract OneHelpers is Stores, DSMath {
 }
 
 
-contract OneProtoResolver is OneHelpers {
+abstract contract OneProtoResolver is OneHelpers {
     struct OneProtoData {
         TokenInterface sellToken;
         TokenInterface buyToken;
@@ -216,7 +216,7 @@ contract OneProtoResolver is OneHelpers {
     }
 }
 
-contract OneInchResolver is OneProtoResolver {
+abstract contract OneInchResolver is OneProtoResolver {
     function checkOneInchSig(bytes memory callData) internal pure returns(bool isOk) {
         bytes memory _data = callData;
         bytes4 sig;
@@ -260,7 +260,7 @@ contract OneInchResolver is OneProtoResolver {
 
 }
 
-contract OneProtoEventResolver is OneInchResolver {
+abstract contract OneProtoEventResolver is OneInchResolver {
     event LogSell(
         address indexed buyToken,
         address indexed sellToken,
@@ -373,7 +373,7 @@ contract OneProtoEventResolver is OneInchResolver {
     }
 }
 
-contract OneInchEventResolver is OneProtoEventResolver {
+abstract contract OneInchEventResolver is OneProtoEventResolver {
     event LogSellThree(
         address indexed buyToken,
         address indexed sellToken,
@@ -410,7 +410,7 @@ contract OneInchEventResolver is OneProtoEventResolver {
     }
 }
 
-contract OneProtoResolverHelpers is OneInchEventResolver {
+abstract contract OneProtoResolverHelpers is OneInchEventResolver {
     function _sell(
         OneProtoData memory oneProtoData,
         uint256 getId,
@@ -480,7 +480,7 @@ contract OneProtoResolverHelpers is OneInchEventResolver {
     }
 }
 
-contract OneInchResolverHelpers is OneProtoResolverHelpers {
+abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
     function _sellThree(
         OneInchData memory oneInchData,
         uint setId
@@ -503,7 +503,7 @@ contract OneInchResolverHelpers is OneProtoResolverHelpers {
     }
 }
 
-contract OneProto is OneInchResolverHelpers {
+abstract contract OneProto is OneInchResolverHelpers {
     /**
      * @dev Sell ETH/ERC20_Token using 1proto.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -602,7 +602,7 @@ contract OneProto is OneInchResolverHelpers {
     }
 }
 
-contract OneInch is OneProto {
+abstract contract OneInch is OneProto {
     /**
      * @dev Sell ETH/ERC20_Token using 1inch.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -635,4 +635,6 @@ contract OneInch is OneProto {
 
 contract ConnectOne is OneInch {
     string public name = "1inch-1proto-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

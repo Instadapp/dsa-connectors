@@ -5,7 +5,7 @@ import { TokenInterface , MemoryInterface, EventInterface} from "../common/inter
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
-contract MockProtocol is Stores, DSMath {
+abstract contract MockProtocol is Stores, DSMath {
 
     event LogMock(uint mockOne, uint mockTwo, uint getId, uint setId);
 
@@ -34,4 +34,6 @@ contract MockProtocol is Stores, DSMath {
 
 contract ConnectMock is MockProtocol {
     string public name = "Mock-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

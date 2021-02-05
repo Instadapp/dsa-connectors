@@ -24,7 +24,7 @@ interface KyberInterface {
 }
 
 
-contract KyberHelpers is DSMath, Stores  {
+abstract contract KyberHelpers is DSMath, Stores  {
     /**
      * @dev Kyber Proxy Address
      */
@@ -41,7 +41,7 @@ contract KyberHelpers is DSMath, Stores  {
 }
 
 
-contract KyberResolver is KyberHelpers {
+abstract contract KyberResolver is KyberHelpers {
     event LogSell(
         address indexed buyToken,
         address indexed sellToken,
@@ -103,4 +103,6 @@ contract KyberResolver is KyberHelpers {
 
 contract ConnectKyber is KyberResolver {
     string public name = "Kyber-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

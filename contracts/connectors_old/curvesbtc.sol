@@ -15,7 +15,7 @@ interface ICurve {
   function calc_withdraw_one_coin(uint256 _token_amount, int128 i) external returns (uint256 amount);
 }
 
-contract CurveSBTCHelpers is Stores, DSMath{
+abstract contract CurveSBTCHelpers is Stores, DSMath{
   /**
   * @dev Return Curve Swap Address
   */
@@ -54,7 +54,7 @@ contract CurveSBTCHelpers is Stores, DSMath{
   }
 }
 
-contract CurveSBTCProtocol is CurveSBTCHelpers {
+abstract contract CurveSBTCProtocol is CurveSBTCHelpers {
 
   // Events
   event LogSell(
@@ -203,5 +203,7 @@ contract CurveSBTCProtocol is CurveSBTCHelpers {
 
 contract ConnectSBTCCurve is CurveSBTCProtocol {
   string public name = "Curve-sbtc-v1";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }
 

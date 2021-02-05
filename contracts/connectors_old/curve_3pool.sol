@@ -11,7 +11,7 @@ interface ICurve {
   function exchange(int128 sellTokenId, int128 buyTokenId, uint256 sellTokenAmt, uint256 minBuyToken) external;
 }
 
-contract CurveHelpers is Stores, DSMath {
+abstract contract CurveHelpers is Stores, DSMath {
   /**
   * @dev Return Curve 3pool Swap Address
   */
@@ -50,7 +50,7 @@ contract CurveHelpers is Stores, DSMath {
   }
 }
 
-contract CurveProtocol is CurveHelpers {
+abstract contract CurveProtocol is CurveHelpers {
 
   event LogSell(
     address indexed buyToken,
@@ -105,4 +105,6 @@ contract CurveProtocol is CurveHelpers {
 
 contract ConnectCurveThreePool is CurveProtocol {
   string public name = "Curve-3pool-v1.0";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }

@@ -23,7 +23,7 @@ interface YTokenInterface {
     function getPricePerFullShare() external view returns (uint256 amount);
 }
 
-contract CurveHelpers is Stores, DSMath {
+abstract contract CurveHelpers is Stores, DSMath {
     /**
     * @dev Return ycurve Swap Address
     */
@@ -90,7 +90,7 @@ contract CurveHelpers is Stores, DSMath {
     }
 }
 
-contract CurveProtocol is CurveHelpers {
+abstract contract CurveProtocol is CurveHelpers {
 
   event LogSell(
     address indexed buyToken,
@@ -242,4 +242,6 @@ contract CurveProtocol is CurveHelpers {
 
 contract ConnectCurveY is CurveProtocol {
   string public name = "Curve-y-v1";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }

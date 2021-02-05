@@ -25,7 +25,7 @@ interface SynthetixMapping {
 
 }
 
-contract StakingHelper is DSMath, Stores {
+abstract contract StakingHelper is DSMath, Stores {
   /**
    * @dev Convert String to bytes32.
    */
@@ -59,7 +59,7 @@ contract StakingHelper is DSMath, Stores {
   }
 }
 
-contract Staking is StakingHelper {
+abstract contract Staking is StakingHelper {
   event LogDeposit(
     address indexed stakingToken,
     bytes32 indexed stakingType,
@@ -193,4 +193,6 @@ contract Staking is StakingHelper {
 
 contract ConnectStaking is Staking {
   string public name = "Staking-v1.1";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }

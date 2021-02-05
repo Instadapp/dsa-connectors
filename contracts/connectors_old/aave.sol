@@ -45,7 +45,7 @@ interface ATokenInterface {
     function principalBalanceOf(address _user) external view returns(uint256);
 }
 
-contract AaveHelpers is DSMath, Stores {
+abstract contract AaveHelpers is DSMath, Stores {
 
     /**
      * @dev get Aave Provider
@@ -77,7 +77,7 @@ contract AaveHelpers is DSMath, Stores {
 }
 
 
-contract BasicResolver is AaveHelpers {
+abstract contract BasicResolver is AaveHelpers {
     event LogDeposit(address indexed token, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdraw(address indexed token, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogBorrow(address indexed token, uint256 tokenAmt, uint256 getId, uint256 setId);
@@ -206,4 +206,6 @@ contract BasicResolver is AaveHelpers {
 
 contract ConnectAave is BasicResolver {
     string public name = "Aave-v1.1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

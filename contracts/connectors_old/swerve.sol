@@ -19,7 +19,7 @@ interface ISwerveZap {
 }
 
 
-contract SwerveHelpers is Stores, DSMath {
+abstract contract SwerveHelpers is Stores, DSMath {
   /**
   * @dev Return Swerve Swap Address
   */
@@ -68,7 +68,7 @@ contract SwerveHelpers is Stores, DSMath {
   }
 }
 
-contract SwerveProtocol is SwerveHelpers {
+abstract contract SwerveProtocol is SwerveHelpers {
 
   event LogSell(
     address indexed buyToken,
@@ -220,4 +220,6 @@ contract SwerveProtocol is SwerveHelpers {
 
 contract ConnectSwerve is SwerveProtocol {
   string public name = "Swerve-swUSD-v1.0";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }

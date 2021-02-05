@@ -9,7 +9,7 @@ interface ICurve {
   function claim(address addr) external;
 }
 
-contract CurveVestingHelpers is Stores, DSMath {
+abstract contract CurveVestingHelpers is Stores, DSMath {
   /**
   * @dev Return Curve Token Address
   */
@@ -25,7 +25,7 @@ contract CurveVestingHelpers is Stores, DSMath {
   }
 }
 
-contract CurveVestingProtocol is CurveVestingHelpers {
+abstract contract CurveVestingProtocol is CurveVestingHelpers {
   event LogClaim(address account, uint256 claimAmount, uint256 getId, uint256 setId);
 
   /**
@@ -53,5 +53,7 @@ contract CurveVestingProtocol is CurveVestingHelpers {
 
 contract ConnectCurveVesting is CurveVestingProtocol {
   string public name = "Curve-vesting-v1";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }
 

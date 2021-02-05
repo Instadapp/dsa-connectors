@@ -16,7 +16,7 @@ interface AccountInterface {
  * @dev Connector to deposit/withdraw assets.
  */
 
-contract BasicResolver is Stores {
+abstract contract BasicResolver is Stores {
     event LogDeposit(address indexed erc20, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdraw(address indexed erc20, uint256 tokenAmt, address indexed to, uint256 getId, uint256 setId);
 
@@ -86,4 +86,6 @@ contract BasicResolver is Stores {
 
 contract ConnectBasic is BasicResolver {
     string public constant name = "Basic-v1.1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

@@ -61,7 +61,7 @@ interface IUniswapV2Factory {
   function createPair(address tokenA, address tokenB) external returns (address pair);
 }
 
-contract UniswapHelpers is Stores, DSMath {
+abstract contract UniswapHelpers is Stores, DSMath {
     /**
      * @dev Return WETH address
      */
@@ -146,7 +146,7 @@ contract UniswapHelpers is Stores, DSMath {
     }
 }
 
-contract LiquidityHelpers is UniswapHelpers {
+abstract contract LiquidityHelpers is UniswapHelpers {
 
     function getMinAmount(
         TokenInterface token,
@@ -246,7 +246,7 @@ contract LiquidityHelpers is UniswapHelpers {
     }
 }
 
-contract UniswapLiquidity is LiquidityHelpers {
+abstract contract UniswapLiquidity is LiquidityHelpers {
     event LogDepositLiquidity(
         address indexed tokenA,
         address indexed tokenB,
@@ -397,7 +397,7 @@ contract UniswapLiquidity is LiquidityHelpers {
     }
 }
 
-contract UniswapResolver is UniswapLiquidity {
+abstract contract UniswapResolver is UniswapLiquidity {
     event LogBuy(
         address indexed buyToken,
         address indexed sellToken,
@@ -528,4 +528,6 @@ contract UniswapResolver is UniswapLiquidity {
 
 contract ConnectUniswapV2 is UniswapResolver {
     string public name = "UniswapV2-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

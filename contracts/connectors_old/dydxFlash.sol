@@ -13,7 +13,7 @@ interface DydxFlashInterface {
     function initiateFlashLoan(address _token, uint256 _amount, bytes calldata data) external;
 }
 
-contract FlashLoanResolver is Stores {
+abstract contract FlashLoanResolver is Stores {
     event LogDydxFlashLoan(address indexed token, uint256 tokenAmt);
 
     /**
@@ -54,4 +54,6 @@ contract FlashLoanResolver is Stores {
 
 contract ConnectDydxFlashLoan is FlashLoanResolver {
     string public constant name = "dydx-flashloan-v1";
+
+    constructor(uint256 _id) Stores(_id) public {}
 }

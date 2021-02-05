@@ -30,7 +30,7 @@ interface ICurveGaugeMapping {
   function gaugeMapping(bytes32) external view returns(GaugeData memory);
 }
 
-contract GaugeHelper is DSMath, Stores{
+abstract contract GaugeHelper is DSMath, Stores{
   function getCurveGaugeMappingAddr() internal virtual view returns (address){
     return 0x1C800eF1bBfE3b458969226A96c56B92a069Cc92;
   }
@@ -51,7 +51,7 @@ contract GaugeHelper is DSMath, Stores{
   }
 }
 
-contract CurveGaugeEvent is GaugeHelper {
+abstract contract CurveGaugeEvent is GaugeHelper {
   event LogDeposit(
     string indexed gaugePoolName,
     uint amount,
@@ -89,7 +89,7 @@ contract CurveGaugeEvent is GaugeHelper {
   }
 }
 
-contract CurveGauge is CurveGaugeEvent {
+abstract contract CurveGauge is CurveGaugeEvent {
   struct Balances{
     uint intialCRVBal;
     uint intialRewardBal;
@@ -237,5 +237,7 @@ contract CurveGauge is CurveGaugeEvent {
 
 contract ConnectCurveGauge is CurveGauge {
   string public name = "Curve-Gauge-v1.0";
+
+  constructor(uint256 _id) Stores(_id) public {}
 }
 
