@@ -19,6 +19,11 @@ module.exports = {
     ]
   },
   networks: {
+    mainnet: {
+      url: process.env.ETH_NODE_URL,
+      chainId: 1,
+      timeout: 500000,
+    },
     tenderlyMainnet: {
       url: 'https://mainnet.tenderly.co',
       accounts: [process.env.PRIVATE_KEY],

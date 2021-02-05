@@ -19,6 +19,10 @@ interface EventInterface {
     function emitEvent(uint connectorType, uint connectorID, bytes32 eventCode, bytes calldata eventData) external;
 }
 
+interface InstaMapping {
+    function cTokenMapping(address) external view returns (address);
+}
+
 struct OneProtoData {
     TokenInterface sellToken;
     TokenInterface buyToken;
