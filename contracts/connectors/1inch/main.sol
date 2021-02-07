@@ -27,7 +27,7 @@ abstract contract OneProtoResolver is Helpers, Events {
         uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneProtoContract), _sellAmt);
@@ -63,7 +63,7 @@ abstract contract OneProtoResolver is Helpers, Events {
 
         OneProtoInterface oneSplitContract = OneProtoInterface(getOneProtoAddress());
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneSplitContract), _sellAmt);
@@ -232,7 +232,7 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
             TokenInterface(_sellAddr).approve(getOneInchAddress(), oneInchData._sellAmt);

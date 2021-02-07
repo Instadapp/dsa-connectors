@@ -36,7 +36,7 @@ abstract contract FlashLoanResolver is Stores {
     function borrowAndCast(address token, uint tokenAmt, bytes memory data) public payable {
         AccountInterface(address(this)).enable(getDydxLoanAddr());
 
-        address _token = token == getEthAddr() ? getWethAddr() : token;
+        address _token = token == ethAddr ? getWethAddr() : token;
 
         DydxFlashInterface(getDydxLoanAddr()).initiateFlashLoan(_token, tokenAmt, data);
 

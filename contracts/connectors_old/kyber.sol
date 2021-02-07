@@ -72,7 +72,7 @@ abstract contract KyberResolver is KyberHelpers {
         uint _sellAmt = getUint(getId, sellAmt);
 
         uint ethAmt;
-        if (sellAddr == getEthAddr()) {
+        if (sellAddr == ethAddr) {
             _sellAmt = _sellAmt == uint(-1) ? address(this).balance : _sellAmt;
             ethAmt = _sellAmt;
         } else {

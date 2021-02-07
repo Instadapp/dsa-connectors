@@ -96,7 +96,7 @@ abstract contract BasicResolver is AaveHelpers {
         AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
 
         uint ethAmt;
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             ethAmt = _amt;
         } else {
@@ -127,9 +127,9 @@ abstract contract BasicResolver is AaveHelpers {
         ATokenInterface atoken = ATokenInterface(aaveCore.getReserveATokenAddress(token));
         TokenInterface tokenContract = TokenInterface(token);
 
-        uint initialBal = token == getEthAddr() ? address(this).balance : tokenContract.balanceOf(address(this));
+        uint initialBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
         atoken.redeem(_amt);
-        uint finalBal = token == getEthAddr() ? address(this).balance : tokenContract.balanceOf(address(this));
+        uint finalBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
 
         _amt = sub(finalBal, initialBal);
         setUint(setId, _amt);
@@ -170,7 +170,7 @@ abstract contract BasicResolver is AaveHelpers {
             _amt = add(_amt, fee);
         }
         uint ethAmt;
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             ethAmt = _amt;
         } else {
             TokenInterface(token).approve(getAaveProvider().getLendingPoolCore(), _amt);

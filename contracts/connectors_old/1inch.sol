@@ -101,12 +101,12 @@ abstract contract OneHelpers is Stores, DSMath {
     }
 
     function getTokenBal(TokenInterface token) internal view returns(uint _amt) {
-        _amt = address(token) == getEthAddr() ? address(this).balance : token.balanceOf(address(this));
+        _amt = address(token) == ethAddr ? address(this).balance : token.balanceOf(address(this));
     }
 
     function getTokensDec(TokenInterface buyAddr, TokenInterface sellAddr) internal view returns(uint buyDec, uint sellDec) {
-        buyDec = address(buyAddr) == getEthAddr() ?  18 : buyAddr.decimals();
-        sellDec = address(sellAddr) == getEthAddr() ?  18 : sellAddr.decimals();
+        buyDec = address(buyAddr) == ethAddr ?  18 : buyAddr.decimals();
+        sellDec = address(sellAddr) == ethAddr ?  18 : sellAddr.decimals();
     }
 
     function getSlippageAmt(
@@ -152,7 +152,7 @@ abstract contract OneProtoResolver is OneHelpers {
         uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneProtoContract), _sellAmt);
@@ -194,7 +194,7 @@ abstract contract OneProtoResolver is OneHelpers {
 
         OneProtoInterface oneSplitContract = OneProtoInterface(getOneProtoAddress());
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneSplitContract), _sellAmt);
@@ -439,7 +439,7 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
             TokenInterface(_sellAddr).approve(getOneInchAddress(), oneInchData._sellAmt);

@@ -130,7 +130,7 @@ abstract contract DydxHelpers is DSMath, Stores {
     */
     function getMarketId(SoloMarginContract solo, address token) internal view returns (uint _marketId) {
         uint markets = solo.getNumMarkets();
-        address _token = token == getEthAddr() ? getWETHAddr() : token;
+        address _token = token == ethAddr ? getWETHAddr() : token;
 
         for (uint i = 0; i < markets; i++) {
             if (_token == solo.getMarketTokenAddress(i)) {
@@ -164,7 +164,7 @@ abstract contract BasicResolver is DydxHelpers {
         (uint depositedAmt, bool sign) = getDydxPosition(dydxContract, _marketId);
         require(depositedAmt == 0 || sign, "token-borrowed");
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             tokenContract.deposit{value: _amt}();
@@ -202,7 +202,7 @@ abstract contract BasicResolver is DydxHelpers {
 
         dydxContract.operate(getAccountArgs(), getActionsArgs(_marketId, _amt, false));
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             tokenContract.approve(address(tokenContract), _amt);
             tokenContract.withdraw(_amt);
@@ -231,7 +231,7 @@ abstract contract BasicResolver is DydxHelpers {
 
         dydxContract.operate(getAccountArgs(), getActionsArgs(_marketId, _amt, false));
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             tokenContract.approve(address(tokenContract), _amt);
             tokenContract.withdraw(_amt);
@@ -261,7 +261,7 @@ abstract contract BasicResolver is DydxHelpers {
         _amt = _amt == uint(-1) ? borrowedAmt : _amt;
         require(_amt <= borrowedAmt, "payback-exceeds");
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             require(address(this).balance >= _amt, "not-enough-eth");
             tokenContract.deposit{value: _amt}();

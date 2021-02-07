@@ -40,7 +40,7 @@ contract BasicResolver is Memory {
     /**
      * @dev ETH Address.
      */
-    function getEthAddr() internal pure returns (address) {
+    function ethAddr internal pure returns (address) {
         return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     }
 
@@ -54,7 +54,7 @@ contract BasicResolver is Memory {
         uint tokenAmt
     ) external payable {
         uint amt;
-        if (erc20 == getEthAddr()) {
+        if (erc20 == ethAddr) {
             amt = tokenAmt == uint(-1) ? address(this).balance : tokenAmt;
             msg.sender.transfer(amt);
         } else {

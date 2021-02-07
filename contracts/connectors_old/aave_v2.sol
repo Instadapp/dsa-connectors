@@ -129,7 +129,7 @@ abstract contract BasicResolver is AaveHelpers {
         AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
         AaveDataProviderInterface aaveData = getAaveDataProvider();
 
-        bool isEth = token == getEthAddr();
+        bool isEth = token == ethAddr;
         address _token = isEth ? getWethAddr() : token;
 
         TokenInterface tokenContract = TokenInterface(_token);
@@ -165,7 +165,7 @@ abstract contract BasicResolver is AaveHelpers {
         uint _amt = getUint(getId, amt);
 
         AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
-        bool isEth = token == getEthAddr();
+        bool isEth = token == ethAddr;
         address _token = isEth ? getWethAddr() : token;
 
         TokenInterface tokenContract = TokenInterface(_token);
@@ -196,7 +196,7 @@ abstract contract BasicResolver is AaveHelpers {
 
         AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
 
-        bool isEth = token == getEthAddr();
+        bool isEth = token == ethAddr;
         address _token = isEth ? getWethAddr() : token;
 
         aave.borrow(_token, _amt, rateMode, getReferralCode(), address(this));
@@ -221,7 +221,7 @@ abstract contract BasicResolver is AaveHelpers {
         AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
         AaveDataProviderInterface aaveData = getAaveDataProvider();
 
-        bool isEth = token == getEthAddr();
+        bool isEth = token == ethAddr;
         address _token = isEth ? getWethAddr() : token;
 
         TokenInterface tokenContract = TokenInterface(_token);

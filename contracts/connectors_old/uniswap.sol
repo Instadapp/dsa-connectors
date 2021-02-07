@@ -85,12 +85,12 @@ abstract contract UniswapHelpers is Stores, DSMath {
     }
 
     function getTokenBalace(address token) internal view returns (uint256 amt) {
-        amt = token == getEthAddr() ? address(this).balance : TokenInterface(token).balanceOf(address(this));
+        amt = token == ethAddr ? address(this).balance : TokenInterface(token).balanceOf(address(this));
     }
 
     function changeEthAddress(address buy, address sell) internal pure returns(TokenInterface _buy, TokenInterface _sell){
-        _buy = buy == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(buy);
-        _sell = sell == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(sell);
+        _buy = buy == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(buy);
+        _sell = sell == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(sell);
     }
 
     function convertEthToWeth(TokenInterface token, uint amount) internal {
@@ -162,8 +162,8 @@ abstract contract LiquidityHelpers is UniswapHelpers {
         address[] memory tokens
     ) internal pure returns(TokenInterface[] memory _tokens) {
         _tokens = new TokenInterface[](2);
-        _tokens[0] = tokens[0] == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[0]);
-        _tokens[1] = tokens[1] == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[1]);
+        _tokens[0] = tokens[0] == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[0]);
+        _tokens[1] = tokens[1] == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[1]);
     }
 
     function _addLiquidity(
@@ -463,7 +463,7 @@ abstract contract UniswapResolver is UniswapLiquidity {
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         if (_sellAmt == uint(-1)) {
-            _sellAmt = sellAddr == getEthAddr() ? address(this).balance : _sellAddr.balanceOf(address(this));
+            _sellAmt = sellAddr == ethAddr ? address(this).balance : _sellAddr.balanceOf(address(this));
         }
 
         uint _slippageAmt = convert18ToDec(_buyAddr.decimals(),
