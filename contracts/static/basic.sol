@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 /**
  * @title StaticConnectBasic.
@@ -40,9 +40,7 @@ contract BasicResolver is Memory {
     /**
      * @dev ETH Address.
      */
-    function ethAddr internal pure returns (address) {
-        return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    }
+    address constant internal ethAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
    /**
      * @dev Withdraw Assets To Smart Account.
