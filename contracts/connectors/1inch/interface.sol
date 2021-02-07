@@ -1,4 +1,4 @@
-pragma solidity ^0.6.5;
+pragma solidity ^0.7.0;
 
 import { TokenInterface } from "../../common/interfaces.sol";
 
@@ -55,4 +55,34 @@ interface OneProtoInterface {
 
 interface OneProtoMappingInterface {
     function oneProtoAddress() external view returns(address);
+}
+
+struct OneProtoData {
+    TokenInterface sellToken;
+    TokenInterface buyToken;
+    uint _sellAmt;
+    uint _buyAmt;
+    uint unitAmt;
+    uint[] distribution;
+    uint disableDexes;
+}
+
+struct OneProtoMultiData {
+    address[] tokens;
+    TokenInterface sellToken;
+    TokenInterface buyToken;
+    uint _sellAmt;
+    uint _buyAmt;
+    uint unitAmt;
+    uint[] distribution;
+    uint[] disableDexes;
+}
+
+struct OneInchData {
+    TokenInterface sellToken;
+    TokenInterface buyToken;
+    uint _sellAmt;
+    uint _buyAmt;
+    uint unitAmt;
+    bytes callData;
 }

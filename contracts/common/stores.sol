@@ -1,15 +1,9 @@
-pragma solidity ^0.6.5;
+pragma solidity ^0.7.0;
 
-import { MemoryInterface, EventInterface} from "./interfaces.sol";
+import { MemoryInterface } from "./interfaces.sol";
 
 
 abstract contract Stores {
-
-    uint256 internal immutable _id;
-
-    constructor(uint256 id) public {
-        _id = id;
-    }
 
   /**
    * @dev Return ethereum address
@@ -23,13 +17,6 @@ abstract contract Stores {
    */
   function getMemoryAddr() internal pure returns (address) {
     return 0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F; // InstaMemory Address
-  }
-
-  /**
-   * @dev Return InstaEvent Address.
-   */
-  function getEventAddr() internal pure returns (address) {
-    return 0x2af7ea6Cb911035f3eb1ED895Cb6692C39ecbA97; // InstaEvent Address
   }
 
   /**
@@ -51,21 +38,6 @@ abstract contract Stores {
   */
   function setUint(uint setId, uint val) virtual internal {
     if (setId != 0) MemoryInterface(getMemoryAddr()).setUint(setId, val);
-  }
-
-  /**
-  * @dev emit event on event contract
-  */
-  function emitEvent(bytes32 eventCode, bytes memory eventData) virtual internal {
-    (uint model, uint id) = connectorID();
-    EventInterface(getEventAddr()).emitEvent(model, id, eventCode, eventData);
-  }
-
-  /**
-  * @dev Connector Details - needs to be changed before deployment
-  */
-  function connectorID() public view returns(uint model, uint id) {
-    (model, id) = (0, _id);
   }
 
 }

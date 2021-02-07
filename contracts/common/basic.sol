@@ -1,4 +1,4 @@
-pragma solidity ^0.6.5;
+pragma solidity ^0.7.0;
 
 import { TokenInterface } from "./interfaces.sol";
 import { Stores } from "./stores.sol";
@@ -21,6 +21,10 @@ abstract contract Basic is DSMath, Stores {
     function getTokensDec(TokenInterface buyAddr, TokenInterface sellAddr) internal view returns(uint buyDec, uint sellDec) {
         buyDec = address(buyAddr) == getEthAddr() ?  18 : buyAddr.decimals();
         sellDec = address(sellAddr) == getEthAddr() ?  18 : sellAddr.decimals();
+    }
+
+    function encodeEvent(string eventName, bytes eventParam) internal pure returns (bytes memory) {
+        return abi.encode(eventName, eventParam);
     }
 
 }

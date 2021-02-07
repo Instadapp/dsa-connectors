@@ -1,4 +1,4 @@
-pragma solidity ^0.6.5;
+pragma solidity ^0.7.0;
 
 import { TokenInterface , MemoryInterface, EventInterface, InstaMapping } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
@@ -12,7 +12,7 @@ abstract contract CompResolver is Events, Helpers {
      * @dev Claim Accrued COMP Token.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimComp(uint setId) external payable {
+    function ClaimComp(uint setId) external payable returns (bytes calldata) {
         TokenInterface compToken = TokenInterface(getCompTokenAddress());
         uint intialBal = compToken.balanceOf(address(this));
         ComptrollerInterface(getComptrollerAddress()).claimComp(address(this));
@@ -21,11 +21,7 @@ abstract contract CompResolver is Events, Helpers {
 
         setUint(setId, amt);
 
-        emit LogClaimedComp(amt, setId);
-        bytes32 _eventCode = keccak256("LogClaimedComp(uint256,uint256)");
-        bytes memory _eventParam = abi.encode(amt, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
+        return encodeEvent("LogClaimedComp(uint256,uint256)", abi.encode(amt, setId));
     }
 
     /**
@@ -33,7 +29,7 @@ abstract contract CompResolver is Events, Helpers {
      * @param tokens Array of tokens supplied and borrowed.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimCompTwo(address[] calldata tokens, uint setId) external payable {
+    function ClaimCompTwo(address[] calldata tokens, uint setId) external payable returns (bytes calldata) {
         uint _len = tokens.length;
         address[] memory ctokens = new address[](_len);
         for (uint i = 0; i < _len; i++) {
@@ -48,11 +44,7 @@ abstract contract CompResolver is Events, Helpers {
 
         setUint(setId, amt);
 
-        emit LogClaimedComp(amt, setId);
-        bytes32 _eventCode = keccak256("LogClaimedComp(uint256,uint256)");
-        bytes memory _eventParam = abi.encode(amt, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
+        return encodeEvent("LogClaimedComp(uint256,uint256)", abi.encode(amt, setId));
     }
 
     /**
@@ -61,7 +53,7 @@ abstract contract CompResolver is Events, Helpers {
      * @param borrowTokens Array of tokens borrowed.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint setId) external payable {
+    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint setId) external payable returns (bytes calldata) {
        (address[] memory ctokens, bool isBorrow, bool isSupply) = mergeTokenArr(supplyTokens, borrowTokens);
 
         address[] memory holders = new address[](1);
@@ -75,33 +67,23 @@ abstract contract CompResolver is Events, Helpers {
 
         setUint(setId, amt);
 
-        emit LogClaimedComp(amt, setId);
-        bytes32 _eventCode = keccak256("LogClaimedComp(uint256,uint256)");
-        bytes memory _eventParam = abi.encode(amt, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
+        return encodeEvent("LogClaimedComp(uint256,uint256)", abi.encode(amt, setId));
     }
 
     /**
      * @dev Delegate votes.
      * @param delegatee The address to delegate votes to.
     */
-    function delegate(address delegatee) external payable {
+    function delegate(address delegatee) external payable returns (bytes calldata) {
         COMPInterface compToken = COMPInterface(getCompTokenAddress());
         require(compToken.delegates(address(this)) != delegatee, "Already delegated to same delegatee.");
 
         compToken.delegate(delegatee);
 
-        emit LogDelegate(delegatee);
-        bytes32 _eventCode = keccak256("LogDelegate(address)");
-        bytes memory _eventParam = abi.encode(delegatee);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
+        return encodeEvent("LogDelegate(address)", abi.encode(delegatee));
     }
 }
 
 contract ConnectCOMP is CompResolver {
     string public name = "COMP-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }
