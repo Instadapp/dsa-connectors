@@ -1,6 +1,6 @@
 pragma solidity ^0.7.0;
 
-import { MemoryInterface } from "./interfaces.sol";
+import { MemoryInterface, InstaMapping } from "./interfaces.sol";
 
 
 abstract contract Stores {
@@ -8,36 +8,30 @@ abstract contract Stores {
   /**
    * @dev Return ethereum address
    */
-  function getEthAddr() internal pure returns (address) {
-    return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // ETH Address
-  }
+  address constant internal ethAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   /**
    * @dev Return memory variable address
    */
-  function getMemoryAddr() internal pure returns (address) {
-    return 0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F; // InstaMemory Address
-  }
+  MemoryInterface constant internal instaMemory = MemoryInterface(0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F);
 
   /**
    * @dev Return InstaDApp Mapping Addresses
    */
-  function getMappingAddr() internal pure returns (address) {
-    return 0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88; // InstaMapping Address
-  }
+  InstaMapping constant internal instaMapping = InstaMapping(0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88);
 
   /**
    * @dev Get Uint value from InstaMemory Contract.
    */
   function getUint(uint getId, uint val) internal returns (uint returnVal) {
-    returnVal = getId == 0 ? val : MemoryInterface(getMemoryAddr()).getUint(getId);
+    returnVal = getId == 0 ? val : instaMemory.getUint(getId);
   }
 
   /**
   * @dev Set Uint value in InstaMemory Contract.
   */
   function setUint(uint setId, uint val) virtual internal {
-    if (setId != 0) MemoryInterface(getMemoryAddr()).setUint(setId, val);
+    if (setId != 0) instaMemory.setUint(setId, val);
   }
 
 }
