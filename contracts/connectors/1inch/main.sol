@@ -1,10 +1,10 @@
-pragma solidity ^0.6.5;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface, OneProtoData, OneProtoMultiData, OneInchData} from "../../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
-import { OneInchInterace, OneProtoInterface, OneProtoMappingInterface } from "./interface.sol";
+import { OneInchInterace, OneProtoInterface, OneProtoMappingInterface, OneProtoData, OneProtoMultiData, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
@@ -379,6 +379,4 @@ abstract contract OneInch is OneProto {
 
 contract ConnectOne is OneInch {
     string public name = "1inch-1proto-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

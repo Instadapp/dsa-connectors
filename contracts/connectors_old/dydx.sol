@@ -1,8 +1,8 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -179,9 +179,6 @@ abstract contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogDeposit(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -214,9 +211,6 @@ abstract contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogWithdraw(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -246,9 +240,6 @@ abstract contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogBorrow(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogBorrow(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -285,15 +276,10 @@ abstract contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogPayback(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogPayback(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 }
 
 
 contract ConnectDydx is BasicResolver {
     string public name = "Dydx-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

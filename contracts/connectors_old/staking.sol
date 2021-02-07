@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
@@ -111,9 +111,6 @@ abstract contract Staking is StakingHelper {
 
     setUint(setId, _amt);
     emit LogDeposit(address(stakingToken), stakingType, _amt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(address,bytes32,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(address(stakingToken), stakingType, _amt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -151,14 +148,8 @@ abstract contract Staking is StakingHelper {
     setUint(setIdReward, rewardAmt);
 
     emit LogWithdraw(address(stakingToken), stakingType, _amt, getId, setIdAmount);
-    bytes32 _eventCodeWithdraw = keccak256("LogWithdraw(address,bytes32,uint256,uint256,uint256)");
-    bytes memory _eventParamWithdraw = abi.encode(address(stakingToken), stakingType, _amt, getId, setIdAmount);
-    emitEvent(_eventCodeWithdraw, _eventParamWithdraw);
 
     emit LogClaimedReward(address(rewardToken), stakingType, rewardAmt, setIdReward);
-    bytes32 _eventCodeReward = keccak256("LogClaimedReward(address,bytes32,uint256,uint256)");
-    bytes memory _eventParamReward = abi.encode(address(rewardToken), stakingType, rewardAmt, setIdReward);
-    emitEvent(_eventCodeReward, _eventParamReward);
   }
 
   /**
@@ -185,14 +176,9 @@ abstract contract Staking is StakingHelper {
 
     setUint(setId, rewardAmt);
     emit LogClaimedReward(address(rewardToken), stakingType, rewardAmt, setId);
-    bytes32 _eventCode = keccak256("LogClaimedReward(address,bytes32,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(address(rewardToken), stakingType, rewardAmt, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 
 contract ConnectStaking is Staking {
   string public name = "Staking-v1.1";
-
-  constructor(uint256 _id) Stores(_id) public {}
 }

@@ -23,7 +23,7 @@ abstract contract Basic is DSMath, Stores {
         sellDec = address(sellAddr) == getEthAddr() ?  18 : sellAddr.decimals();
     }
 
-    function encodeEvent(string eventName, bytes eventParam) internal pure returns (bytes memory) {
+    function encodeEvent(string memory eventName, bytes memory eventParam) internal pure returns (bytes memory) {
         return abi.encode(eventName, eventParam);
     }
 

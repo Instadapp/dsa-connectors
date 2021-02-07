@@ -1,10 +1,10 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -42,10 +42,6 @@ abstract contract BasicResolver is Stores {
         setUint(setId, amt);
 
         emit LogDeposit(erc20, amt, getId, setId);
-
-        bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(erc20, amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
    /**
@@ -76,16 +72,10 @@ abstract contract BasicResolver is Stores {
         setUint(setId, amt);
 
         emit LogWithdraw(erc20, amt, to, getId, setId);
-
-        bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,address,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(erc20, amt, to, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 }
 
 
 contract ConnectBasic is BasicResolver {
     string public constant name = "Basic-v1.1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

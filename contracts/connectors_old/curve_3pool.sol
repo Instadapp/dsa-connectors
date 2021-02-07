@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -96,15 +96,9 @@ abstract contract CurveProtocol is CurveHelpers {
     setUint(setId, _buyAmt);
 
     emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
-
   }
 }
 
 contract ConnectCurveThreePool is CurveProtocol {
   string public name = "Curve-3pool-v1.0";
-
-  constructor(uint256 _id) Stores(_id) public {}
 }

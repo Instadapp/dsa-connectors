@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -94,15 +94,10 @@ abstract contract KyberResolver is KyberHelpers {
         setUint(setId, _buyAmt);
 
         emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        bytes32 eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-        bytes memory eventData = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        emitEvent(eventCode, eventData);
     }
 }
 
 
 contract ConnectKyber is KyberResolver {
     string public name = "Kyber-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
@@ -76,16 +76,10 @@ abstract contract CurveGaugeEvent is GaugeHelper {
 
   function emitLogWithdraw(string memory gaugePoolName, uint _amt, uint getId, uint setId) internal {
     emit LogWithdraw(gaugePoolName, _amt, getId, setId);
-    bytes32 _eventCodeWithdraw = keccak256("LogWithdraw(string,uint256,uint256,uint256)");
-    bytes memory _eventParamWithdraw = abi.encode(gaugePoolName, _amt, getId, setId);
-    emitEvent(_eventCodeWithdraw, _eventParamWithdraw);
   }
 
   function emitLogClaimedReward(string memory gaugePoolName, uint crvAmt, uint rewardAmt, uint setIdCrv, uint setIdReward) internal {
     emit LogClaimedReward(gaugePoolName, crvAmt, rewardAmt, setIdCrv, setIdReward);
-    bytes32 _eventCode = keccak256("LogClaimedReward(string,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(gaugePoolName, crvAmt, rewardAmt, setIdCrv, setIdReward);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 
@@ -129,9 +123,6 @@ abstract contract CurveGauge is CurveGaugeEvent {
     setUint(setId, _amt);
 
     emit LogDeposit(gaugePoolName, _amt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(string,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(gaugePoolName, _amt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -237,7 +228,5 @@ abstract contract CurveGauge is CurveGaugeEvent {
 
 contract ConnectCurveGauge is CurveGauge {
   string public name = "Curve-Gauge-v1.0";
-
-  constructor(uint256 _id) Stores(_id) public {}
 }
 

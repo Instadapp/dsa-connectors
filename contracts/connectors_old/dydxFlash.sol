@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 
 interface AccountInterface {
@@ -43,10 +43,6 @@ abstract contract FlashLoanResolver is Stores {
         AccountInterface(address(this)).disable(getDydxLoanAddr());
 
         emit LogDydxFlashLoan(token, tokenAmt);
-        bytes32 _eventCode = keccak256("LogDydxFlashLoan(address,uint256)");
-        bytes memory _eventParam = abi.encode(token, tokenAmt);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
 }
@@ -54,6 +50,4 @@ abstract contract FlashLoanResolver is Stores {
 
 contract ConnectDydxFlashLoan is FlashLoanResolver {
     string public constant name = "dydx-flashloan-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

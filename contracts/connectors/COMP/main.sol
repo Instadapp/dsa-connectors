@@ -1,6 +1,6 @@
 pragma solidity ^0.7.0;
 
-import { TokenInterface , MemoryInterface, EventInterface, InstaMapping } from "../../common/interfaces.sol";
+import { TokenInterface , MemoryInterface, InstaMapping } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { ComptrollerInterface, COMPInterface } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
@@ -12,7 +12,7 @@ abstract contract CompResolver is Events, Helpers {
      * @dev Claim Accrued COMP Token.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimComp(uint setId) external payable returns (bytes calldata) {
+    function ClaimComp(uint setId) external payable returns (bytes memory) {
         TokenInterface compToken = TokenInterface(getCompTokenAddress());
         uint intialBal = compToken.balanceOf(address(this));
         ComptrollerInterface(getComptrollerAddress()).claimComp(address(this));
@@ -29,7 +29,7 @@ abstract contract CompResolver is Events, Helpers {
      * @param tokens Array of tokens supplied and borrowed.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimCompTwo(address[] calldata tokens, uint setId) external payable returns (bytes calldata) {
+    function ClaimCompTwo(address[] calldata tokens, uint setId) external payable returns (bytes memory) {
         uint _len = tokens.length;
         address[] memory ctokens = new address[](_len);
         for (uint i = 0; i < _len; i++) {
@@ -53,7 +53,7 @@ abstract contract CompResolver is Events, Helpers {
      * @param borrowTokens Array of tokens borrowed.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint setId) external payable returns (bytes calldata) {
+    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint setId) external payable returns (bytes memory) {
        (address[] memory ctokens, bool isBorrow, bool isSupply) = mergeTokenArr(supplyTokens, borrowTokens);
 
         address[] memory holders = new address[](1);
@@ -74,7 +74,7 @@ abstract contract CompResolver is Events, Helpers {
      * @dev Delegate votes.
      * @param delegatee The address to delegate votes to.
     */
-    function delegate(address delegatee) external payable returns (bytes calldata) {
+    function delegate(address delegatee) external payable returns (bytes memory) {
         COMPInterface compToken = COMPInterface(getCompTokenAddress());
         require(compToken.delegates(address(this)) != delegatee, "Already delegated to same delegatee.");
 

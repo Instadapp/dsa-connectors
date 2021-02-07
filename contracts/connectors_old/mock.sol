@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -25,15 +25,10 @@ abstract contract MockProtocol is Stores, DSMath {
 
         // common event standard
         emit LogMock(mockNumber, mockBalance, getId, setId);
-        bytes32 eventCode = keccak256("LogMock(uint256,uint256,uint256,uint256)");
-        bytes memory eventData = abi.encode(mockNumber, mockBalance, getId, setId);
-        emitEvent(eventCode, eventData);
     }
 
 }
 
 contract ConnectMock is MockProtocol {
     string public name = "Mock-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

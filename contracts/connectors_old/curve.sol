@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -121,10 +121,6 @@ abstract contract CurveProtocol is CurveHelpers {
     setUint(setId, _buyAmt);
 
     emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
-
   }
 
   /**
@@ -166,9 +162,6 @@ abstract contract CurveProtocol is CurveHelpers {
     setUint(setId, mintAmt);
 
     emit LogDeposit(token, _amt, mintAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, mintAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -216,15 +209,10 @@ abstract contract CurveProtocol is CurveHelpers {
     setUint(setId, _amt);
 
     emit LogWithdraw(token, _amt, _curveAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, _curveAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
 }
 
 contract ConnectCurve is CurveProtocol {
   string public name = "Curve-susd-v1.2";
-
-  constructor(uint256 _id) Stores(_id) public {}
 }

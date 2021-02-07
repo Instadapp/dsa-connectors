@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -275,8 +275,6 @@ abstract contract OneProtoEventResolver is OneInchResolver {
         uint256 getId,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSell(
             address(oneProtoData.buyToken),
             address(oneProtoData.sellToken),
@@ -285,16 +283,6 @@ abstract contract OneProtoEventResolver is OneInchResolver {
             getId,
             setId
         );
-        _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     event LogSellTwo(
@@ -311,8 +299,6 @@ abstract contract OneProtoEventResolver is OneInchResolver {
         uint256 getId,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSellTwo(
             address(oneProtoData.buyToken),
             address(oneProtoData.sellToken),
@@ -321,16 +307,6 @@ abstract contract OneProtoEventResolver is OneInchResolver {
             getId,
             setId
         );
-        _eventCode = keccak256("LogSellTwo(address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     event LogSellMulti(
@@ -348,8 +324,6 @@ abstract contract OneProtoEventResolver is OneInchResolver {
         uint256 getId,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSellMulti(
             oneProtoData.tokens,
             address(oneProtoData.buyToken),
@@ -359,17 +333,6 @@ abstract contract OneProtoEventResolver is OneInchResolver {
             getId,
             setId
         );
-        _eventCode = keccak256("LogSellMulti(address[],address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            oneProtoData.tokens,
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 }
 
@@ -387,8 +350,6 @@ abstract contract OneInchEventResolver is OneProtoEventResolver {
         OneInchData memory oneInchData,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSellThree(
             address(oneInchData.buyToken),
             address(oneInchData.sellToken),
@@ -397,16 +358,6 @@ abstract contract OneInchEventResolver is OneProtoEventResolver {
             0,
             setId
         );
-        _eventCode = keccak256("LogSellThree(address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            address(oneInchData.buyToken),
-            address(oneInchData.sellToken),
-            oneInchData._buyAmt,
-            oneInchData._sellAmt,
-            0,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 }
 
@@ -635,6 +586,4 @@ abstract contract OneInch is OneProto {
 
 contract ConnectOne is OneInch {
     string public name = "1inch-1proto-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

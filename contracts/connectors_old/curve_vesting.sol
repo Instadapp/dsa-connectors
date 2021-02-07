@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
 import { Stores } from "../common/stores.sol";
@@ -45,15 +45,10 @@ abstract contract CurveVestingProtocol is CurveVestingHelpers {
     setUint(setId, claimedAmt);
 
     emit LogClaim(address(this), claimedAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogClaim(address,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(address(this), claimedAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 
 contract ConnectCurveVesting is CurveVestingProtocol {
   string public name = "Curve-vesting-v1";
-
-  constructor(uint256 _id) Stores(_id) public {}
 }
 

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
 import { Stores } from "../common/stores.sol";
@@ -103,9 +103,6 @@ abstract contract CurveSBTCProtocol is CurveSBTCHelpers {
     setUint(setId, _buyAmt);
 
     emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -147,9 +144,6 @@ abstract contract CurveSBTCProtocol is CurveSBTCHelpers {
     setUint(setId, mintAmt);
 
     emit LogDeposit(token, _amt, mintAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, mintAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -195,15 +189,10 @@ abstract contract CurveSBTCProtocol is CurveSBTCHelpers {
     setUint(setId, _amt);
 
     emit LogWithdraw(token, _amt, _curveAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, _curveAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 
 contract ConnectSBTCCurve is CurveSBTCProtocol {
   string public name = "Curve-sbtc-v1";
-
-  constructor(uint256 _id) Stores(_id) public {}
 }
 

@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -206,6 +206,4 @@ abstract contract BasicResolver is AaveHelpers {
 
 contract ConnectAave is BasicResolver {
     string public name = "Aave-v1.1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }

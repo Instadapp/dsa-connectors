@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -194,7 +194,7 @@ abstract contract LiquidityHelpers is UniswapHelpers {
             minAmtA,
             minAmtB,
             address(this),
-            now + 1
+            block.timestamp + 1
         );
     }
 
@@ -223,7 +223,7 @@ abstract contract LiquidityHelpers is UniswapHelpers {
             minAmtA,
             minAmtB,
             address(this),
-            now + 1
+            block.timestamp + 1
         );
         }
         convertWethToEth(_tokenA, _amtA);
@@ -285,18 +285,6 @@ abstract contract UniswapLiquidity is LiquidityHelpers {
             getId,
             setId
         );
-
-        bytes32 _eventCode = keccak256("LogDepositLiquidity(address,address,uint256,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(
-            tokenA,
-            tokenB,
-            _amtA,
-            _amtB,
-            _uniAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     function emitWithdraw(
@@ -317,17 +305,6 @@ abstract contract UniswapLiquidity is LiquidityHelpers {
             getId,
             setIds
         );
-        bytes32 _eventCode = keccak256("LogWithdrawLiquidity(address,address,uint256,uint256,uint256,uint256,uint256[])");
-        bytes memory _eventParam = abi.encode(
-            tokenA,
-            tokenB,
-            _amtA,
-            _amtB,
-            _uniAmt,
-            getId,
-            setIds
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -454,7 +431,7 @@ abstract contract UniswapResolver is UniswapLiquidity {
             _expectedAmt,
             paths,
             address(this),
-            now + 1
+            block.timestamp + 1
         )[0];
 
         convertWethToEth(_buyAddr, _buyAmt);
@@ -462,10 +439,6 @@ abstract contract UniswapResolver is UniswapLiquidity {
         setUint(setId, _sellAmt);
 
         emit LogBuy(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        bytes32 _eventCode = keccak256("LogBuy(address,address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
     /**
@@ -510,7 +483,7 @@ abstract contract UniswapResolver is UniswapLiquidity {
             _expectedAmt,
             paths,
             address(this),
-            now + 1
+            block.timestamp + 1
         )[1];
 
         convertWethToEth(_buyAddr, _buyAmt);
@@ -518,16 +491,10 @@ abstract contract UniswapResolver is UniswapLiquidity {
         setUint(setId, _buyAmt);
 
         emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 }
 
 
 contract ConnectUniswapV2 is UniswapResolver {
     string public name = "UniswapV2-v1";
-
-    constructor(uint256 _id) Stores(_id) public {}
 }
