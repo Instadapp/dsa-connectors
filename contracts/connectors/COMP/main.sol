@@ -1,6 +1,6 @@
 pragma solidity ^0.7.0;
 
-import { TokenInterface , MemoryInterface, InstaMapping } from "../../common/interfaces.sol";
+import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { ComptrollerInterface, COMPInterface } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
@@ -21,7 +21,7 @@ abstract contract CompResolver is Events, Helpers {
 
         setUint(setId, amt);
 
-        eventName = "LogClaimedComp(uint256,uint256)";
+        _eventName = "LogClaimedComp(uint256,uint256)";
         _eventParam = abi.encode(amt, setId);
     }
 
@@ -34,7 +34,7 @@ abstract contract CompResolver is Events, Helpers {
         uint _len = tokens.length;
         address[] memory ctokens = new address[](_len);
         for (uint i = 0; i < _len; i++) {
-            ctokens[i] = InstaMapping(getMappingAddr()).cTokenMapping(tokens[i]);
+            ctokens[i] = instaMapping.cTokenMapping(tokens[i]);
         }
 
         TokenInterface compToken = TokenInterface(getCompTokenAddress());
@@ -45,7 +45,7 @@ abstract contract CompResolver is Events, Helpers {
 
         setUint(setId, amt);
 
-        eventName = "LogClaimedComp(uint256,uint256)";
+        _eventName = "LogClaimedComp(uint256,uint256)";
         _eventParam = abi.encode(amt, setId);
     }
 
@@ -69,7 +69,7 @@ abstract contract CompResolver is Events, Helpers {
 
         setUint(setId, amt);
 
-        eventName = "LogClaimedComp(uint256,uint256)";
+        _eventName = "LogClaimedComp(uint256,uint256)";
         _eventParam = abi.encode(amt, setId);
     }
 
@@ -83,8 +83,8 @@ abstract contract CompResolver is Events, Helpers {
 
         compToken.delegate(delegatee);
 
-        eventName = "LogClaimedComp(uint256,uint256)";
-        _eventParam = abi.encode(amt, setId);
+        _eventName = "LogDelegate(address)";
+        _eventParam = abi.encode(delegatee);
     }
 }
 

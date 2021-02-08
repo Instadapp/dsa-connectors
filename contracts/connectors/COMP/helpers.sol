@@ -1,6 +1,5 @@
 pragma solidity ^0.7.0;
 
-import { InstaMapping } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 
@@ -32,14 +31,14 @@ abstract contract Helpers is DSMath, Basic {
         isSupply;
         if(_supplyLen > 0) {
             for (uint i = 0; i < _supplyLen; i++) {
-                ctokens[i] = InstaMapping(getMappingAddr()).cTokenMapping(supplyTokens[i]);
+                ctokens[i] = instaMapping.cTokenMapping(supplyTokens[i]);
             }
             isSupply = true;
         }
 
         if(_borrowLen > 0) {
             for (uint i = 0; i < _borrowLen; i++) {
-                ctokens[_supplyLen + i] = InstaMapping(getMappingAddr()).cTokenMapping(borrowTokens[i]);
+                ctokens[_supplyLen + i] = instaMapping.cTokenMapping(borrowTokens[i]);
             }
             isBorrow = true;
         }

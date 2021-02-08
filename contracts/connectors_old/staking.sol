@@ -57,6 +57,10 @@ abstract contract StakingHelper is DSMath, Stores {
     stakingToken = TokenInterface(stakingData.stakingToken);
     rewardToken = TokenInterface(stakingData.rewardToken);
   }
+
+  function getMappingAddr() internal virtual view returns (address) {
+    return 0x772590F33eD05b0E83553650BF9e75A04b337526; // InstaMapping Address
+  }
 }
 
 abstract contract Staking is StakingHelper {
