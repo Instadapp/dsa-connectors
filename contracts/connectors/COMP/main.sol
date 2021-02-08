@@ -2,7 +2,6 @@ pragma solidity ^0.7.0;
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
-import { ComptrollerInterface, COMPInterface } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
@@ -13,10 +12,10 @@ abstract contract CompResolver is Events, Helpers {
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
     function ClaimComp(uint setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        TokenInterface compToken = TokenInterface(getCompTokenAddress());
-        uint intialBal = compToken.balanceOf(address(this));
-        ComptrollerInterface(getComptrollerAddress()).claimComp(address(this));
-        uint finalBal = compToken.balanceOf(address(this));
+        TokenInterface _compToken = TokenInterface(address(compToken));
+        uint intialBal = _compToken.balanceOf(address(this));
+        troller.claimComp(address(this));
+        uint finalBal = _compToken.balanceOf(address(this));
         uint amt = sub(finalBal, intialBal);
 
         setUint(setId, amt);
@@ -37,10 +36,10 @@ abstract contract CompResolver is Events, Helpers {
             ctokens[i] = instaMapping.cTokenMapping(tokens[i]);
         }
 
-        TokenInterface compToken = TokenInterface(getCompTokenAddress());
-        uint intialBal = compToken.balanceOf(address(this));
-        ComptrollerInterface(getComptrollerAddress()).claimComp(address(this), ctokens);
-        uint finalBal = compToken.balanceOf(address(this));
+        TokenInterface _compToken = TokenInterface(address(compToken));
+        uint intialBal = _compToken.balanceOf(address(this));
+        troller.claimComp(address(this), ctokens);
+        uint finalBal = _compToken.balanceOf(address(this));
         uint amt = sub(finalBal, intialBal);
 
         setUint(setId, amt);
@@ -61,10 +60,10 @@ abstract contract CompResolver is Events, Helpers {
         address[] memory holders = new address[](1);
         holders[0] = address(this);
 
-        TokenInterface compToken = TokenInterface(getCompTokenAddress());
-        uint intialBal = compToken.balanceOf(address(this));
-        ComptrollerInterface(getComptrollerAddress()).claimComp(holders, ctokens, isBorrow, isSupply);
-        uint finalBal = compToken.balanceOf(address(this));
+        TokenInterface _compToken = TokenInterface(address(compToken));
+        uint intialBal = _compToken.balanceOf(address(this));
+        troller.claimComp(holders, ctokens, isBorrow, isSupply);
+        uint finalBal = _compToken.balanceOf(address(this));
         uint amt = sub(finalBal, intialBal);
 
         setUint(setId, amt);
@@ -78,7 +77,6 @@ abstract contract CompResolver is Events, Helpers {
      * @param delegatee The address to delegate votes to.
     */
     function delegate(address delegatee) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        COMPInterface compToken = COMPInterface(getCompTokenAddress());
         require(compToken.delegates(address(this)) != delegatee, "Already delegated to same delegatee.");
 
         compToken.delegate(delegatee);

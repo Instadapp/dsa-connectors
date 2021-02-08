@@ -2,21 +2,18 @@ pragma solidity ^0.7.0;
 
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
+import { ComptrollerInterface, COMPInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
-     * @dev Return Compound Comptroller Address
+     * @dev Compound Comptroller
      */
-    function getComptrollerAddress() internal pure returns (address) {
-        return 0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B;
-    }
+    ComptrollerInterface internal constant troller = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
 
     /**
-     * @dev Return COMP Token Address.
+     * @dev COMP Token
      */
-    function getCompTokenAddress() internal pure returns (address) {
-        return 0xc00e94Cb662C3520282E6f5717214004A7f26888;
-    }
+    COMPInterface internal constant compToken = COMPInterface(0xc00e94Cb662C3520282E6f5717214004A7f26888);
 
     function mergeTokenArr(address[] memory supplyTokens, address[] memory borrowTokens)
         internal
