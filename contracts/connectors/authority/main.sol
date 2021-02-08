@@ -32,3 +32,7 @@ abstract contract AuthorityResolver is Events, Helpers {
         _eventParam = abi.encode(msg.sender, authority);
     }
 }
+
+contract ConnectAuth is AuthorityResolver {
+    string public constant name = "Auth-v1";
+}
