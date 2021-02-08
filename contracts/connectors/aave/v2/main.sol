@@ -2,12 +2,11 @@ pragma solidity ^0.7.0;
 
 import { TokenInterface } from "../../../common/interfaces.sol";
 import { Stores } from "../../../common/stores.sol";
-import { Utils } from "../../../common/utils.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { AaveInterface } from "./interface.sol";
 
-abstract contract AaveResolver is Events, Helpers, Utils {
+abstract contract AaveResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
      * @param token token address to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)

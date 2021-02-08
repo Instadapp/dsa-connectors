@@ -18,3 +18,9 @@ interface MemoryInterface {
 interface InstaMapping {
     function cTokenMapping(address) external view returns (address);
 }
+
+interface AccountInterface {
+    function enable(address) external;
+    function disable(address) external;
+    function isAuth(address) external view returns (bool);
+}

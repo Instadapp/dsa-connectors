@@ -27,4 +27,14 @@ abstract contract Basic is DSMath, Stores {
         return abi.encode(eventName, eventParam);
     }
 
+    function convertEthToWeth(bool isEth, TokenInterface token, uint amount) internal {
+        if(isEth) token.deposit{value: amount}();
+    }
+
+    function convertWethToEth(bool isEth, TokenInterface token, uint amount) internal {
+       if(isEth) {
+            token.approve(address(token), amount);
+            token.withdraw(amount);
+        }
+    }
 }
