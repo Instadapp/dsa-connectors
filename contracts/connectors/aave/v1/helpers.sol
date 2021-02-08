@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
 
-import { DSMath } from "../../common/math.sol";
-import { Basic } from "../../common/basic.sol";
+import { DSMath } from "../../../common/math.sol";
+import { Basic } from "../../../common/basic.sol";
 import { AaveProviderInterface, AaveInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
@@ -17,6 +17,8 @@ abstract contract Helpers is DSMath, Basic {
 
     /**
      * @dev Checks if collateral is enabled for an asset
+     * @param aave Aave Interface
+     * @param token token address of the asset.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
     */
     function getIsColl(AaveInterface aave, address token) internal view returns (bool isCol) {
         (, , , , , , , , , isCol) = aave.getUserReserveData(token, address(this));
@@ -27,7 +29,7 @@ abstract contract Helpers is DSMath, Basic {
      * @param aave Aave Interface
      * @param token token address of the collateral.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
     */
-    function getWithdrawBalance(AaveInterface aave, address token) internal view returns (uint bal) {
+    function getCollateralBalance(AaveInterface aave, address token) internal view returns (uint bal) {
         (bal, , , , , , , , , ) = aave.getUserReserveData(token, address(this));
     }
 

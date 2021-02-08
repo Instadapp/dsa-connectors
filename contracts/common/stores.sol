@@ -11,6 +11,11 @@ abstract contract Stores {
   address constant internal ethAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
   /**
+   * @dev Return Wrapped ETH address
+   */
+  address constant internal wethAddr = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+
+  /**
    * @dev Return memory variable address
    */
   MemoryInterface constant internal instaMemory = MemoryInterface(0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F);
