@@ -35,7 +35,6 @@ abstract contract LiquidityManage is Helpers, Events {
         instaPool.deposit{value: ethAmt}(token, _amt);
         setUint(setId, _amt);
 
-        emit LogDepositLiquidity(token, _amt, getId, setId);
         _eventName = "LogDepositLiquidity(address,uint256,uint256,uint256)";
         _eventParam = abi.encode(token, _amt, getId, setId);
     }

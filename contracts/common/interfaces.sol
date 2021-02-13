@@ -17,6 +17,7 @@ interface MemoryInterface {
 
 interface InstaMapping {
     function cTokenMapping(address) external view returns (address);
+    function gemJoinMapping(bytes32) external view returns (address);
 }
 
 interface AccountInterface {

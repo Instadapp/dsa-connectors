@@ -38,4 +38,13 @@ contract DSMath {
     z = SafeMath.add(SafeMath.mul(x, y), RAY / 2) / RAY;
   }
 
+  function toInt(uint x) internal pure returns (int y) {
+    y = int(x);
+    require(y >= 0, "int-overflow");
+  }
+
+  function toRad(uint wad) internal pure returns (uint rad) {
+    rad = mul(wad, 10 ** 27);
+  }
+
 }
