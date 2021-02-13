@@ -6,7 +6,7 @@ import { KyberInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
-     * @dev Kyver Interface
+     * @dev Kyber Interface
      */
     KyberInterface internal constant kyber = KyberInterface(0x818E6FECD516Ecc3849DAf6845e3EC868087B755);
 
