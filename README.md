@@ -14,6 +14,12 @@ You can create a PR to request a support for specific protocol or external contr
 
 **Open a Maker vault** of the `collateralType`. E.g. "ETH-A", "USDC-B", etc...
 
+### `close(vault)`
+
+**Close a Maker vault**
+
+`vault` - Vault ID (Use 0 for last opened vault)
+
 ### `deposit(vault, amt, getId, setId)`
 
 **Deposit collateral to a Maker vault.**
@@ -29,3 +35,37 @@ You can create a PR to request a support for specific protocol or external contr
 `vault` - Vault ID (Use 0 for last opened vault)
 
 `amt` - Amount of collteral to withdraw
+
+### `borrow(vault, amt, getId, setId)`
+
+**Borrow DAI from a Maker vault.**
+
+`vault` - Vault ID (Use 0 for last opened vault)
+
+`amt` - Amount of DAI to borrow
+
+### `payback(vault, amt, getId, setId)`
+
+**Payback DAI to a Maker vault.**
+
+`vault` - Vault ID (Use 0 for last opened vault)
+
+`amt` - Amount of DAI to payback
+
+### `withdrawLiquidated(vault, amt, getId, setId)`
+
+**Withdraw leftover collateral after liquidation.**
+
+`vault` - Vault ID (Use 0 for last opened vault)
+
+`amt` - Amount of collateral to withdraw
+
+### `depositAndBorrow(vault, depositAmt, borrowAmt, getIdDeposit, getIdBorrow, setIdDeposit, setIdBorrow)`
+
+**Deposit collateral & borrow DAI from a vault.**
+
+`vault` - Vault ID (Use 0 for last opened vault)
+
+`depositAmt` - Amount of collateral to deposit
+
+`borrowAmt` - Amount of DAI to borrow
