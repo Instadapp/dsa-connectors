@@ -69,3 +69,116 @@ You can create a PR to request a support for specific protocol or external contr
 `depositAmt` - Amount of collateral to deposit
 
 `borrowAmt` - Amount of DAI to borrow
+
+## Compound
+
+[Code](contracts/connectors_old/compound.sol)
+
+### `deposit(token, amt, getId, setId)`
+
+**Deposit token to Compound.**
+
+`token` - Address of the token to deposit
+
+`amt` - Amount of token to deposit
+
+### `withdraw(token, amt, getId, setId)`
+
+**Withdraw token from Compound.**
+
+`token` - Address of the token to withdraw
+
+`amt` - Amount of token to withdraw
+
+### `borrow(token, amt, getId, setId)`
+
+**Borrow token from Compound.**
+
+`token` - Address of the token to borrow
+
+`amt` - Amount of token to borrow
+
+### `payback(token, amt, getId, setId)`
+
+**Payback debt to Compound.**
+
+`token` - Address of the token to payback
+
+`amt` - Amount of token to payback
+
+## Aave v1
+
+[Code](contracts/connectors_old/aave.sol)
+
+### `deposit(token, amt, getId, setId)`
+
+**Deposit token to Aave.**
+
+`token` - Address of the token to deposit
+
+`amt` - Amount of token to deposit
+
+### `withdraw(token, amt, getId, setId)`
+
+**Withdraw token from Aave.**
+
+`token` - Address of the token to withdraw
+
+`amt` - Amount of token to withdraw
+
+### `borrow(token, amt, getId, setId)`
+
+**Borrow token from Aave.**
+
+`token` - Address of the token to borrow
+
+`amt` - Amount of token to borrow
+
+### `payback(token, amt, getId, setId)`
+
+**Payback debt to Aave.**
+
+`token` - Address of the token to payback
+
+`amt` - Amount of token to payback
+
+## Aave v2
+
+[Code](contracts/connectors_old/aave_v2.sol)
+
+### `deposit(token, amt, getId, setId)`
+
+**Deposit token to Aave.**
+
+`token` - Address of the token to deposit
+
+`amt` - Amount of token to deposit
+
+### `withdraw(token, amt, getId, setId)`
+
+**Withdraw token from Aave.**
+
+`token` - Address of the token to withdraw
+
+`amt` - Amount of token to withdraw
+
+### `borrow(token, amt, rateMode, getId, setId)`
+
+**Borrow token from Aave.**
+
+`token` - Address of the token to borrow
+
+`amt` - Amount of token to borrow
+
+`rateMode` - Borrow interest rate mode (1 = Stable & 2 = Variable)
+
+### `payback(token, amt, rateMode, getId, setId)`
+
+**Payback debt to Aave.**
+
+`token` - Address of the token to payback
+
+`amt` - Amount of token to payback
+
+`rateMode` - Borrow interest rate mode (1 = Stable & 2 = Variable)
+
