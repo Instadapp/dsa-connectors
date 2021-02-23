@@ -6,6 +6,44 @@ DSAs are powerful because they can easily be extended with connectors. Every new
 
 You can create a PR to request a support for specific protocol or external contracts. Following is the list of all the supported connectors. Following is the list of all the primary connectors used to cast spells:
 
+## Authority
+
+[Code](contracts/connectors_old/authority.sol)
+
+### `add(authority)`
+
+**Add an address authority**
+
+`authority` - Address of the authority to add
+
+### `remove(authority)`
+
+**Remove an address authority**
+
+`authority` - Address of the authority to remove
+
+## Basic
+
+[Code](contracts/connectors_old/basic.sol)
+
+### `deposit(erc20, amt, getId, setId)`
+
+**Deposit a token or ETH to DSA.**
+
+`erc20` - Address of the token to deposit. ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
+
+`amt` - Amount of token to deposit
+
+In case of an ERC20 Token, allowance must be given to DSA before depositing
+
+### `withdraw(erc20, amt, getId, setId)`
+
+**Withdraw a token or ETH from DSA.**
+
+`erc20` - Address of the token to withdraw. ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
+
+`amt` - Amount of token to withdraw
+
 ## MakerDAO
 
 [Code](contracts/connectors_old/makerdao.sol)
@@ -106,6 +144,34 @@ You can create a PR to request a support for specific protocol or external contr
 
 `amt` - Amount of token to payback
 
+## COMP
+
+[Code](contracts/connectors_old/COMP.sol)
+
+### `ClaimComp(setId)`
+
+**Claim unclaimed COMP**
+
+### `ClaimCompTwo(tokens, setId)`
+
+**Claim unclaimed COMP**
+
+`tokens` - List of tokens supplied or borrowed
+
+### `ClaimCompThree(supplyTokens, borrowTokens, setId)`
+
+**Claim unclaimed COMP**
+
+`supplyTokens` - List of tokens supplied
+
+`borrowTokens` - List of tokens borrowed
+
+### `delegate(delegatee)`
+
+**Delegate COMP votes**
+
+`delegatee` - Address of the delegatee
+
 ## Aave v1
 
 [Code](contracts/connectors_old/aave.sol)
@@ -182,3 +248,95 @@ You can create a PR to request a support for specific protocol or external contr
 
 `rateMode` - Borrow interest rate mode (1 = Stable & 2 = Variable)
 
+## dYdX
+
+[Code](contracts/connectors_old/dydx.sol)
+
+### `deposit(token, amt, getId, setId)`
+
+**Deposit token to dYdX.**
+
+`token` - Address of the token to deposit
+
+`amt` - Amount of token to deposit
+
+### `withdraw(token, amt, getId, setId)`
+
+**Withdraw token from dYdX.**
+
+`token` - Address of the token to withdraw
+
+`amt` - Amount of token to withdraw
+
+### `borrow(token, amt, getId, setId)`
+
+**Borrow token from dYdX.**
+
+`token` - Address of the token to borrow
+
+`amt` - Amount of token to borrow
+
+### `payback(token, amt, getId, setId)`
+
+**Payback debt to dYdX.**
+
+`token` - Address of the token to payback
+
+`amt` - Amount of token to payback
+
+## Uniswap
+
+[Code](contracts/connectors_old/uniswap.sol)
+
+### `deposit(tokenA, tokenB, amtA, unitAmt, slippage, getId, setId)`
+
+**Deposit liquidity to tokenA/tokenB pool**
+
+`tokenA` - Address of token A
+
+`tokenB` - Address of token B
+
+`amtA` - Amount of token A to deposit
+
+`unitAmt` - Unit amount of amtB/amtA with slippage.
+
+`slippage` - Slippage amount in wei
+
+
+### `withdraw(tokenA, tokenB, uniAmt, unitAmtA, unitAmtB, getId, setId)`
+
+**Withdraw liquidity from tokenA/tokenB pool**
+
+`tokenA` - Address of token A
+
+`tokenB` - Address of token B
+
+`uniAmt` - Amount of LP tokens to withdraw
+
+`unitAmtA` - Unit amount of amtA/uniAmt with slippage.
+
+`unitAmtB` - Unit amount of amtB/uniAmt with slippage.
+
+### `buy(buyAddr, sellAddr, buyAmt, unitAmt, getId, setId)`
+
+**Buy a token/ETH**
+
+`buyAddr` - Address of the buying token
+
+`sellAddr` - Address of the selling token
+
+`buyAmt` - Amount of tokens to buy
+
+`unitAmt` - Unit amount of sellAmt/buyAmt with slippage
+
+### `sell(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
+
+**Buy a token/ETH**
+
+`buyAddr` - Address of the buying token
+
+`sellAddr` - Address of the selling token
+
+`sellAmt` - Amount of tokens to sell
+
+`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
