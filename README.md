@@ -6,6 +6,8 @@ DSAs are powerful because they can easily be extended with connectors. Every new
 
 You can create a PR to request a support for specific protocol or external contracts. Following is the list of all the supported connectors. Following is the list of all the primary connectors used to cast spells:
 
+[Read this post to learn about getId and setId used in the connectors](https://discuss.instadapp.io/t/how-to-use-getid-setid/104)
+
 ## Authority
 
 [Code](contracts/connectors_old/authority.sol)
@@ -331,7 +333,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ### `sell(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
 
-**Buy a token/ETH**
+**Sell a token/ETH**
 
 `buyAddr` - Address of the buying token
 
@@ -340,3 +342,51 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 `sellAmt` - Amount of tokens to sell
 
 `unitAmt` - Unit amount of buyAmt/sellAmt with slippage
+
+## 1Inch
+
+[Code](contracts/connectors_old/1inch.sol)
+
+### `sell(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
+
+**Sell ETH/ERC20 using 1proto**
+
+`buyAddr` - Address of the buying token
+
+`sellAddr` - Address of the selling token
+
+`sellAmt` - Amount of tokens to sell
+
+`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
+
+### `sellTwo(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
+
+**Sell ETH/ERC20 using 1proto**
+
+`buyAddr` - Address of the buying token
+
+`sellAddr` - Address of the selling token
+
+`sellAmt` - Amount of tokens to sell
+
+`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
+
+`[]distribution` - Distribution of swap across different dex.
+
+`disableDexes` - Disable a dex. (To disable none: 0)
+
+### `sellTwo(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
+
+**Sell ETH/ERC20 using 1inch**
+
+Use [1Inch API](https://docs.1inch.exchange/api/) for calldata
+
+`buyAddr` - Address of the buying token
+
+`sellAddr` - Address of the selling token
+
+`sellAmt` - Amount of tokens to sell
+
+`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
+
+`callData` - Data from 1inch API
