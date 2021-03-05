@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -45,7 +45,7 @@ interface ATokenInterface {
     function principalBalanceOf(address _user) external view returns(uint256);
 }
 
-contract AaveHelpers is DSMath, Stores {
+abstract contract AaveHelpers is DSMath, Stores {
 
     /**
      * @dev get Aave Provider
@@ -77,7 +77,7 @@ contract AaveHelpers is DSMath, Stores {
 }
 
 
-contract BasicResolver is AaveHelpers {
+abstract contract BasicResolver is AaveHelpers {
     event LogDeposit(address indexed token, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdraw(address indexed token, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogBorrow(address indexed token, uint256 tokenAmt, uint256 getId, uint256 setId);
@@ -96,7 +96,7 @@ contract BasicResolver is AaveHelpers {
         AaveInterface aave = AaveInterface(getAaveProvider().getLendingPool());
 
         uint ethAmt;
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             ethAmt = _amt;
         } else {
@@ -105,7 +105,7 @@ contract BasicResolver is AaveHelpers {
             tokenContract.approve(getAaveProvider().getLendingPoolCore(), _amt);
         }
 
-        aave.deposit.value(ethAmt)(token, _amt, getReferralCode());
+        aave.deposit{value: ethAmt}(token, _amt, getReferralCode());
 
         if (!getIsColl(aave, token)) aave.setUserUseReserveAsCollateral(token, true);
 
@@ -127,9 +127,9 @@ contract BasicResolver is AaveHelpers {
         ATokenInterface atoken = ATokenInterface(aaveCore.getReserveATokenAddress(token));
         TokenInterface tokenContract = TokenInterface(token);
 
-        uint initialBal = token == getEthAddr() ? address(this).balance : tokenContract.balanceOf(address(this));
+        uint initialBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
         atoken.redeem(_amt);
-        uint finalBal = token == getEthAddr() ? address(this).balance : tokenContract.balanceOf(address(this));
+        uint finalBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
 
         _amt = sub(finalBal, initialBal);
         setUint(setId, _amt);
@@ -170,13 +170,13 @@ contract BasicResolver is AaveHelpers {
             _amt = add(_amt, fee);
         }
         uint ethAmt;
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             ethAmt = _amt;
         } else {
             TokenInterface(token).approve(getAaveProvider().getLendingPoolCore(), _amt);
         }
 
-        aave.repay.value(ethAmt)(token, _amt, payable(address(this)));
+        aave.repay{value: ethAmt}(token, _amt, payable(address(this)));
 
         setUint(setId, _amt);
 

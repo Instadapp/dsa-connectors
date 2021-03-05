@@ -1,14 +1,15 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface, OneProtoData, OneProtoMultiData, OneInchData} from "../../common/interfaces.sol";
-import { OneInchInterace, OneProtoInterface, OneProtoMappingInterface } from "./interface.sol";
+import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
+import { Stores } from "../../common/stores.sol";
+import { OneInchInterace, OneProtoInterface, OneProtoMappingInterface, OneProtoData, OneProtoMultiData, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
 
-contract OneProtoResolver is Helpers, Events {
+abstract contract OneProtoResolver is Helpers, Events {
 
     /**
      * @dev 1proto contract swap handler
@@ -26,7 +27,7 @@ contract OneProtoResolver is Helpers, Events {
         uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneProtoContract), _sellAmt);
@@ -34,7 +35,7 @@ contract OneProtoResolver is Helpers, Events {
 
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneProtoContract.swap.value(ethAmt)(
+        oneProtoContract.swap{value: ethAmt}(
             _sellAddr,
             _buyAddr,
             _sellAmt,
@@ -62,14 +63,14 @@ contract OneProtoResolver is Helpers, Events {
 
         OneProtoInterface oneSplitContract = OneProtoInterface(getOneProtoAddress());
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneSplitContract), _sellAmt);
         }
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneSplitContract.swapMulti.value(ethAmt)(
+        oneSplitContract.swapMulti{value: ethAmt}(
             convertToTokenInterface(oneProtoData.tokens),
             _sellAmt,
             _slippageAmt,
@@ -84,7 +85,7 @@ contract OneProtoResolver is Helpers, Events {
     }
 }
 
-contract OneInchResolver is OneProtoResolver {
+abstract contract OneInchResolver is OneProtoResolver {
     /**
      * @dev 1inch swap uses `.call()`. This function restrict it to call only swap/trade functionality
      * @param callData - calldata to extract the first 4 bytes for checking function signature
@@ -116,7 +117,7 @@ contract OneInchResolver is OneProtoResolver {
         uint initalBal = getTokenBal(buyToken);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, ) = address(getOneInchAddress()).call.value(ethAmt)(oneInchData.callData);
+        (bool success, ) = address(getOneInchAddress()).call{value: ethAmt}(oneInchData.callData);
         if (!success) revert("1Inch-swap-failed");
 
         uint finalBal = getTokenBal(buyToken);
@@ -128,7 +129,7 @@ contract OneInchResolver is OneProtoResolver {
 
 }
 
-contract OneProtoResolverHelpers is OneInchResolver {
+abstract contract OneProtoResolverHelpers is OneInchResolver {
 
     /**
      * @dev Gets the swapping data onchain for swaps and calls swap.
@@ -217,7 +218,7 @@ contract OneProtoResolverHelpers is OneInchResolver {
     }
 }
 
-contract OneInchResolverHelpers is OneProtoResolverHelpers {
+abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
 
     /**
      * @dev Gets the swapping data from 1inch's API.
@@ -231,7 +232,7 @@ contract OneInchResolverHelpers is OneProtoResolverHelpers {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
             TokenInterface(_sellAddr).approve(getOneInchAddress(), oneInchData._sellAmt);
@@ -246,7 +247,7 @@ contract OneInchResolverHelpers is OneProtoResolverHelpers {
     }
 }
 
-contract OneProto is OneInchResolverHelpers {
+abstract contract OneProto is OneInchResolverHelpers {
     /**
      * @dev Sell ETH/ERC20_Token using 1proto.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -345,7 +346,7 @@ contract OneProto is OneInchResolverHelpers {
     }
 }
 
-contract OneInch is OneProto {
+abstract contract OneInch is OneProto {
     /**
      * @dev Sell ETH/ERC20_Token using 1inch.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)

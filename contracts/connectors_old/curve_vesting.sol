@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
 import { Stores } from "../common/stores.sol";
@@ -9,7 +9,7 @@ interface ICurve {
   function claim(address addr) external;
 }
 
-contract CurveVestingHelpers is Stores, DSMath {
+abstract contract CurveVestingHelpers is Stores, DSMath {
   /**
   * @dev Return Curve Token Address
   */
@@ -25,7 +25,7 @@ contract CurveVestingHelpers is Stores, DSMath {
   }
 }
 
-contract CurveVestingProtocol is CurveVestingHelpers {
+abstract contract CurveVestingProtocol is CurveVestingHelpers {
   event LogClaim(address account, uint256 claimAmount, uint256 getId, uint256 setId);
 
   /**
@@ -45,9 +45,6 @@ contract CurveVestingProtocol is CurveVestingHelpers {
     setUint(setId, claimedAmt);
 
     emit LogClaim(address(this), claimedAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogClaim(address,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(address(this), claimedAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 

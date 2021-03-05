@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
@@ -226,7 +226,7 @@ contract LiquidityManage is LiquidityHelpers {
             tokenContract.approve(getLiquidityAddress(), _amt);
         }
 
-        LiqudityInterface(getLiquidityAddress()).deposit.value(ethAmt)(token, _amt);
+        LiqudityInterface(getLiquidityAddress()).deposit{value: ethAmt}(token, _amt);
         setUint(setId, _amt);
 
         emit LogDepositLiquidity(token, _amt, getId, setId);

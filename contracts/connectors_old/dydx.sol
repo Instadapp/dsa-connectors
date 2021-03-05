@@ -1,8 +1,8 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -66,7 +66,7 @@ interface SoloMarginContract {
 }
 
 
-contract DydxHelpers is DSMath, Stores {
+abstract contract DydxHelpers is DSMath, Stores {
     /**
      * @dev get WETH address
     */
@@ -130,7 +130,7 @@ contract DydxHelpers is DSMath, Stores {
     */
     function getMarketId(SoloMarginContract solo, address token) internal view returns (uint _marketId) {
         uint markets = solo.getNumMarkets();
-        address _token = token == getEthAddr() ? getWETHAddr() : token;
+        address _token = token == ethAddr ? getWETHAddr() : token;
 
         for (uint i = 0; i < markets; i++) {
             if (_token == solo.getMarketTokenAddress(i)) {
@@ -142,7 +142,7 @@ contract DydxHelpers is DSMath, Stores {
 }
 
 
-contract BasicResolver is DydxHelpers {
+abstract contract BasicResolver is DydxHelpers {
     event LogDeposit(address indexed token, uint marketId, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdraw(address indexed token, uint marketId, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogBorrow(address indexed token, uint marketId, uint256 tokenAmt, uint256 getId, uint256 setId);
@@ -164,10 +164,10 @@ contract BasicResolver is DydxHelpers {
         (uint depositedAmt, bool sign) = getDydxPosition(dydxContract, _marketId);
         require(depositedAmt == 0 || sign, "token-borrowed");
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            tokenContract.deposit.value(_amt)();
+            tokenContract.deposit{value: _amt}();
             tokenContract.approve(getDydxAddress(), _amt);
         } else {
             TokenInterface tokenContract = TokenInterface(token);
@@ -179,9 +179,6 @@ contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogDeposit(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -205,7 +202,7 @@ contract BasicResolver is DydxHelpers {
 
         dydxContract.operate(getAccountArgs(), getActionsArgs(_marketId, _amt, false));
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             tokenContract.approve(address(tokenContract), _amt);
             tokenContract.withdraw(_amt);
@@ -214,9 +211,6 @@ contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogWithdraw(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -237,7 +231,7 @@ contract BasicResolver is DydxHelpers {
 
         dydxContract.operate(getAccountArgs(), getActionsArgs(_marketId, _amt, false));
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             tokenContract.approve(address(tokenContract), _amt);
             tokenContract.withdraw(_amt);
@@ -246,9 +240,6 @@ contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogBorrow(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogBorrow(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -270,10 +261,10 @@ contract BasicResolver is DydxHelpers {
         _amt = _amt == uint(-1) ? borrowedAmt : _amt;
         require(_amt <= borrowedAmt, "payback-exceeds");
 
-        if (token == getEthAddr()) {
+        if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(getWETHAddr());
             require(address(this).balance >= _amt, "not-enough-eth");
-            tokenContract.deposit.value(_amt)();
+            tokenContract.deposit{value: _amt}();
             tokenContract.approve(getDydxAddress(), _amt);
         } else {
             TokenInterface tokenContract = TokenInterface(token);
@@ -285,9 +276,6 @@ contract BasicResolver is DydxHelpers {
         setUint(setId, _amt);
 
         emit LogPayback(token, _marketId, _amt, getId, setId);
-        bytes32 _eventCode = keccak256("LogPayback(address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(token, _marketId, _amt, getId, setId);
-        emitEvent(_eventCode, _eventParam);
     }
 }
 

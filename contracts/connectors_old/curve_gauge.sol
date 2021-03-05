@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
@@ -30,7 +30,7 @@ interface ICurveGaugeMapping {
   function gaugeMapping(bytes32) external view returns(GaugeData memory);
 }
 
-contract GaugeHelper is DSMath, Stores{
+abstract contract GaugeHelper is DSMath, Stores{
   function getCurveGaugeMappingAddr() internal virtual view returns (address){
     return 0x1C800eF1bBfE3b458969226A96c56B92a069Cc92;
   }
@@ -51,7 +51,7 @@ contract GaugeHelper is DSMath, Stores{
   }
 }
 
-contract CurveGaugeEvent is GaugeHelper {
+abstract contract CurveGaugeEvent is GaugeHelper {
   event LogDeposit(
     string indexed gaugePoolName,
     uint amount,
@@ -76,20 +76,14 @@ contract CurveGaugeEvent is GaugeHelper {
 
   function emitLogWithdraw(string memory gaugePoolName, uint _amt, uint getId, uint setId) internal {
     emit LogWithdraw(gaugePoolName, _amt, getId, setId);
-    bytes32 _eventCodeWithdraw = keccak256("LogWithdraw(string,uint256,uint256,uint256)");
-    bytes memory _eventParamWithdraw = abi.encode(gaugePoolName, _amt, getId, setId);
-    emitEvent(_eventCodeWithdraw, _eventParamWithdraw);
   }
 
   function emitLogClaimedReward(string memory gaugePoolName, uint crvAmt, uint rewardAmt, uint setIdCrv, uint setIdReward) internal {
     emit LogClaimedReward(gaugePoolName, crvAmt, rewardAmt, setIdCrv, setIdReward);
-    bytes32 _eventCode = keccak256("LogClaimedReward(string,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(gaugePoolName, crvAmt, rewardAmt, setIdCrv, setIdReward);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 
-contract CurveGauge is CurveGaugeEvent {
+abstract contract CurveGauge is CurveGaugeEvent {
   struct Balances{
     uint intialCRVBal;
     uint intialRewardBal;
@@ -129,9 +123,6 @@ contract CurveGauge is CurveGaugeEvent {
     setUint(setId, _amt);
 
     emit LogDeposit(gaugePoolName, _amt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(string,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(gaugePoolName, _amt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**

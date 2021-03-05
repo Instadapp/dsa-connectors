@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -19,7 +19,7 @@ interface ISwerveZap {
 }
 
 
-contract SwerveHelpers is Stores, DSMath {
+abstract contract SwerveHelpers is Stores, DSMath {
   /**
   * @dev Return Swerve Swap Address
   */
@@ -68,7 +68,7 @@ contract SwerveHelpers is Stores, DSMath {
   }
 }
 
-contract SwerveProtocol is SwerveHelpers {
+abstract contract SwerveProtocol is SwerveHelpers {
 
   event LogSell(
     address indexed buyToken,
@@ -116,9 +116,6 @@ contract SwerveProtocol is SwerveHelpers {
     setUint(setId, _buyAmt);
 
     emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
 
   }
 
@@ -161,9 +158,6 @@ contract SwerveProtocol is SwerveHelpers {
     setUint(setId, mintAmt);
 
     emit LogDeposit(token, _amt, mintAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, mintAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -211,9 +205,6 @@ contract SwerveProtocol is SwerveHelpers {
     setUint(setId, _amt);
 
     emit LogWithdraw(token, _amt, _swerveAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, _swerveAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
 }

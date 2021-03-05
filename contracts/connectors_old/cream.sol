@@ -195,7 +195,7 @@ contract BasicResolver is CompoundHelpers {
         enterMarket(cToken);
         if (token == getAddressETH()) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            CETHInterface(cToken).mint.value(_amt)();
+            CETHInterface(cToken).mint{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
@@ -276,7 +276,7 @@ contract BasicResolver is CompoundHelpers {
 
         if (token == getAddressETH()) {
             require(address(this).balance >= _amt, "not-enough-eth");
-            CETHInterface(cToken).repayBorrow.value(_amt)();
+            CETHInterface(cToken).repayBorrow{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
@@ -343,7 +343,7 @@ contract ExtraResolver is BasicResolver {
 
         if (token == getAddressETH()) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            CETHInterface(cToken).mint.value(_amt)();
+            CETHInterface(cToken).mint{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
@@ -414,7 +414,7 @@ contract ExtraResolver is BasicResolver {
         _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(borrower) : _amt;
         if (tokenToPay == getAddressETH()) {
             require(address(this).balance >= _amt, "not-enought-eth");
-            CETHInterface(cTokenPay).liquidateBorrow.value(_amt)(borrower, cTokenColl);
+            CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(borrower, cTokenColl);
         } else {
             TokenInterface tokenContract = TokenInterface(tokenToPay);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 interface TokenInterface {
     function approve(address, uint256) external;
@@ -15,36 +15,13 @@ interface MemoryInterface {
     function setUint(uint id, uint val) external;
 }
 
-interface EventInterface {
-    function emitEvent(uint connectorType, uint connectorID, bytes32 eventCode, bytes calldata eventData) external;
+interface InstaMapping {
+    function cTokenMapping(address) external view returns (address);
+    function gemJoinMapping(bytes32) external view returns (address);
 }
 
-struct OneProtoData {
-    TokenInterface sellToken;
-    TokenInterface buyToken;
-    uint _sellAmt;
-    uint _buyAmt;
-    uint unitAmt;
-    uint[] distribution;
-    uint disableDexes;
-}
-
-struct OneProtoMultiData {
-    address[] tokens;
-    TokenInterface sellToken;
-    TokenInterface buyToken;
-    uint _sellAmt;
-    uint _buyAmt;
-    uint unitAmt;
-    uint[] distribution;
-    uint[] disableDexes;
-}
-
-struct OneInchData {
-    TokenInterface sellToken;
-    TokenInterface buyToken;
-    uint _sellAmt;
-    uint _buyAmt;
-    uint unitAmt;
-    bytes callData;
+interface AccountInterface {
+    function enable(address) external;
+    function disable(address) external;
+    function isAuth(address) external view returns (bool);
 }

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
@@ -36,6 +36,15 @@ contract DSMath {
 
   function rmul(uint x, uint y) internal pure returns (uint z) {
     z = SafeMath.add(SafeMath.mul(x, y), RAY / 2) / RAY;
+  }
+
+  function toInt(uint x) internal pure returns (int y) {
+    y = int(x);
+    require(y >= 0, "int-overflow");
+  }
+
+  function toRad(uint wad) internal pure returns (uint rad) {
+    rad = mul(wad, 10 ** 27);
   }
 
 }

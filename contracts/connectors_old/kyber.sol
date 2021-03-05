@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -24,7 +24,7 @@ interface KyberInterface {
 }
 
 
-contract KyberHelpers is DSMath, Stores  {
+abstract contract KyberHelpers is DSMath, Stores  {
     /**
      * @dev Kyber Proxy Address
      */
@@ -41,7 +41,7 @@ contract KyberHelpers is DSMath, Stores  {
 }
 
 
-contract KyberResolver is KyberHelpers {
+abstract contract KyberResolver is KyberHelpers {
     event LogSell(
         address indexed buyToken,
         address indexed sellToken,
@@ -72,7 +72,7 @@ contract KyberResolver is KyberHelpers {
         uint _sellAmt = getUint(getId, sellAmt);
 
         uint ethAmt;
-        if (sellAddr == getEthAddr()) {
+        if (sellAddr == ethAddr) {
             _sellAmt = _sellAmt == uint(-1) ? address(this).balance : _sellAmt;
             ethAmt = _sellAmt;
         } else {
@@ -81,7 +81,7 @@ contract KyberResolver is KyberHelpers {
             sellContract.approve(getKyberAddr(), _sellAmt);
         }
 
-        uint _buyAmt = KyberInterface(getKyberAddr()).trade.value(ethAmt)(
+        uint _buyAmt = KyberInterface(getKyberAddr()).trade{value: ethAmt}(
             sellAddr,
             _sellAmt,
             buyAddr,
@@ -94,9 +94,6 @@ contract KyberResolver is KyberHelpers {
         setUint(setId, _buyAmt);
 
         emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        bytes32 eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-        bytes memory eventData = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        emitEvent(eventCode, eventData);
     }
 }
 

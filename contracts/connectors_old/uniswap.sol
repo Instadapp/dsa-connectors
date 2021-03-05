@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -61,7 +61,7 @@ interface IUniswapV2Factory {
   function createPair(address tokenA, address tokenB) external returns (address pair);
 }
 
-contract UniswapHelpers is Stores, DSMath {
+abstract contract UniswapHelpers is Stores, DSMath {
     /**
      * @dev Return WETH address
      */
@@ -85,16 +85,16 @@ contract UniswapHelpers is Stores, DSMath {
     }
 
     function getTokenBalace(address token) internal view returns (uint256 amt) {
-        amt = token == getEthAddr() ? address(this).balance : TokenInterface(token).balanceOf(address(this));
+        amt = token == ethAddr ? address(this).balance : TokenInterface(token).balanceOf(address(this));
     }
 
     function changeEthAddress(address buy, address sell) internal pure returns(TokenInterface _buy, TokenInterface _sell){
-        _buy = buy == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(buy);
-        _sell = sell == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(sell);
+        _buy = buy == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(buy);
+        _sell = sell == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(sell);
     }
 
     function convertEthToWeth(TokenInterface token, uint amount) internal {
-        if(address(token) == getAddressWETH()) token.deposit.value(amount)();
+        if(address(token) == getAddressWETH()) token.deposit{value: amount}();
     }
 
     function convertWethToEth(TokenInterface token, uint amount) internal {
@@ -146,7 +146,7 @@ contract UniswapHelpers is Stores, DSMath {
     }
 }
 
-contract LiquidityHelpers is UniswapHelpers {
+abstract contract LiquidityHelpers is UniswapHelpers {
 
     function getMinAmount(
         TokenInterface token,
@@ -162,8 +162,8 @@ contract LiquidityHelpers is UniswapHelpers {
         address[] memory tokens
     ) internal pure returns(TokenInterface[] memory _tokens) {
         _tokens = new TokenInterface[](2);
-        _tokens[0] = tokens[0] == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[0]);
-        _tokens[1] = tokens[1] == getEthAddr() ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[1]);
+        _tokens[0] = tokens[0] == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[0]);
+        _tokens[1] = tokens[1] == ethAddr ? TokenInterface(getAddressWETH()) : TokenInterface(tokens[1]);
     }
 
     function _addLiquidity(
@@ -194,7 +194,7 @@ contract LiquidityHelpers is UniswapHelpers {
             minAmtA,
             minAmtB,
             address(this),
-            now + 1
+            block.timestamp + 1
         );
     }
 
@@ -223,7 +223,7 @@ contract LiquidityHelpers is UniswapHelpers {
             minAmtA,
             minAmtB,
             address(this),
-            now + 1
+            block.timestamp + 1
         );
         }
         convertWethToEth(_tokenA, _amtA);
@@ -246,7 +246,7 @@ contract LiquidityHelpers is UniswapHelpers {
     }
 }
 
-contract UniswapLiquidity is LiquidityHelpers {
+abstract contract UniswapLiquidity is LiquidityHelpers {
     event LogDepositLiquidity(
         address indexed tokenA,
         address indexed tokenB,
@@ -285,18 +285,6 @@ contract UniswapLiquidity is LiquidityHelpers {
             getId,
             setId
         );
-
-        bytes32 _eventCode = keccak256("LogDepositLiquidity(address,address,uint256,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(
-            tokenA,
-            tokenB,
-            _amtA,
-            _amtB,
-            _uniAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     function emitWithdraw(
@@ -317,17 +305,6 @@ contract UniswapLiquidity is LiquidityHelpers {
             getId,
             setIds
         );
-        bytes32 _eventCode = keccak256("LogWithdrawLiquidity(address,address,uint256,uint256,uint256,uint256,uint256[])");
-        bytes memory _eventParam = abi.encode(
-            tokenA,
-            tokenB,
-            _amtA,
-            _amtB,
-            _uniAmt,
-            getId,
-            setIds
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     /**
@@ -397,7 +374,7 @@ contract UniswapLiquidity is LiquidityHelpers {
     }
 }
 
-contract UniswapResolver is UniswapLiquidity {
+abstract contract UniswapResolver is UniswapLiquidity {
     event LogBuy(
         address indexed buyToken,
         address indexed sellToken,
@@ -454,7 +431,7 @@ contract UniswapResolver is UniswapLiquidity {
             _expectedAmt,
             paths,
             address(this),
-            now + 1
+            block.timestamp + 1
         )[0];
 
         convertWethToEth(_buyAddr, _buyAmt);
@@ -462,10 +439,6 @@ contract UniswapResolver is UniswapLiquidity {
         setUint(setId, _sellAmt);
 
         emit LogBuy(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        bytes32 _eventCode = keccak256("LogBuy(address,address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 
     /**
@@ -490,7 +463,7 @@ contract UniswapResolver is UniswapLiquidity {
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         if (_sellAmt == uint(-1)) {
-            _sellAmt = sellAddr == getEthAddr() ? address(this).balance : _sellAddr.balanceOf(address(this));
+            _sellAmt = sellAddr == ethAddr ? address(this).balance : _sellAddr.balanceOf(address(this));
         }
 
         uint _slippageAmt = convert18ToDec(_buyAddr.decimals(),
@@ -510,7 +483,7 @@ contract UniswapResolver is UniswapLiquidity {
             _expectedAmt,
             paths,
             address(this),
-            now + 1
+            block.timestamp + 1
         )[1];
 
         convertWethToEth(_buyAddr, _buyAmt);
@@ -518,10 +491,6 @@ contract UniswapResolver is UniswapLiquidity {
         setUint(setId, _buyAmt);
 
         emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-        bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-        (uint _type, uint _id) = connectorID();
-        EventInterface(getEventAddr()).emitEvent(_type, _id, _eventCode, _eventParam);
     }
 }
 

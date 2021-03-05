@@ -1,58 +1,42 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
-import { MemoryInterface, EventInterface} from "./interfaces.sol";
+import { MemoryInterface, InstaMapping } from "./interfaces.sol";
 
 
-contract Stores {
+abstract contract Stores {
 
   /**
    * @dev Return ethereum address
    */
-  function getEthAddr() internal pure returns (address) {
-    return 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE; // ETH Address
-  }
+  address constant internal ethAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+  /**
+   * @dev Return Wrapped ETH address
+   */
+  address constant internal wethAddr = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
   /**
    * @dev Return memory variable address
    */
-  function getMemoryAddr() internal pure returns (address) {
-    return 0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F; // InstaMemory Address
-  }
+  MemoryInterface constant internal instaMemory = MemoryInterface(0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F);
 
   /**
-   * @dev Return InstaEvent Address.
+   * @dev Return InstaDApp Mapping Addresses
    */
-  function getEventAddr() internal pure returns (address) {
-    return 0x2af7ea6Cb911035f3eb1ED895Cb6692C39ecbA97; // InstaEvent Address
-  }
+  InstaMapping constant internal instaMapping = InstaMapping(0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88);
 
   /**
    * @dev Get Uint value from InstaMemory Contract.
    */
   function getUint(uint getId, uint val) internal returns (uint returnVal) {
-    returnVal = getId == 0 ? val : MemoryInterface(getMemoryAddr()).getUint(getId);
+    returnVal = getId == 0 ? val : instaMemory.getUint(getId);
   }
 
   /**
   * @dev Set Uint value in InstaMemory Contract.
   */
   function setUint(uint setId, uint val) virtual internal {
-    if (setId != 0) MemoryInterface(getMemoryAddr()).setUint(setId, val);
-  }
-
-  /**
-  * @dev emit event on event contract
-  */
-  function emitEvent(bytes32 eventCode, bytes memory eventData) virtual internal {
-    (uint model, uint id) = connectorID();
-    EventInterface(getEventAddr()).emitEvent(model, id, eventCode, eventData);
-  }
-
-  /**
-  * @dev Connector Details - needs to be changed before deployment
-  */
-  function connectorID() public view returns(uint model, uint id) {
-    (model, id) = (0, 0);
+    if (setId != 0) instaMemory.setUint(setId, val);
   }
 
 }

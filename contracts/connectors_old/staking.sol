@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
@@ -25,14 +25,7 @@ interface SynthetixMapping {
 
 }
 
-contract StakingHelper is DSMath, Stores {
-  /**
-   * @dev Return InstaDApp Staking Mapping Addresses
-   */
-  function getMappingAddr() internal virtual view returns (address) {
-    return 0x772590F33eD05b0E83553650BF9e75A04b337526; // InstaMapping Address
-  }
-
+abstract contract StakingHelper is DSMath, Stores {
   /**
    * @dev Convert String to bytes32.
    */
@@ -64,9 +57,13 @@ contract StakingHelper is DSMath, Stores {
     stakingToken = TokenInterface(stakingData.stakingToken);
     rewardToken = TokenInterface(stakingData.rewardToken);
   }
+
+  function getMappingAddr() internal virtual view returns (address) {
+    return 0x772590F33eD05b0E83553650BF9e75A04b337526; // InstaMapping Address
+  }
 }
 
-contract Staking is StakingHelper {
+abstract contract Staking is StakingHelper {
   event LogDeposit(
     address indexed stakingToken,
     bytes32 indexed stakingType,
@@ -118,9 +115,6 @@ contract Staking is StakingHelper {
 
     setUint(setId, _amt);
     emit LogDeposit(address(stakingToken), stakingType, _amt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(address,bytes32,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(address(stakingToken), stakingType, _amt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -158,14 +152,8 @@ contract Staking is StakingHelper {
     setUint(setIdReward, rewardAmt);
 
     emit LogWithdraw(address(stakingToken), stakingType, _amt, getId, setIdAmount);
-    bytes32 _eventCodeWithdraw = keccak256("LogWithdraw(address,bytes32,uint256,uint256,uint256)");
-    bytes memory _eventParamWithdraw = abi.encode(address(stakingToken), stakingType, _amt, getId, setIdAmount);
-    emitEvent(_eventCodeWithdraw, _eventParamWithdraw);
 
     emit LogClaimedReward(address(rewardToken), stakingType, rewardAmt, setIdReward);
-    bytes32 _eventCodeReward = keccak256("LogClaimedReward(address,bytes32,uint256,uint256)");
-    bytes memory _eventParamReward = abi.encode(address(rewardToken), stakingType, rewardAmt, setIdReward);
-    emitEvent(_eventCodeReward, _eventParamReward);
   }
 
   /**
@@ -192,9 +180,6 @@ contract Staking is StakingHelper {
 
     setUint(setId, rewardAmt);
     emit LogClaimedReward(address(rewardToken), stakingType, rewardAmt, setId);
-    bytes32 _eventCode = keccak256("LogClaimedReward(address,bytes32,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(address(rewardToken), stakingType, rewardAmt, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 

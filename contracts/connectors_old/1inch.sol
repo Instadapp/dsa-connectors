@@ -1,8 +1,8 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -62,7 +62,7 @@ interface OneProtoMappingInterface {
 }
 
 
-contract OneHelpers is Stores, DSMath {
+abstract contract OneHelpers is Stores, DSMath {
 
     /**
      * @dev Return 1proto mapping Address
@@ -101,12 +101,12 @@ contract OneHelpers is Stores, DSMath {
     }
 
     function getTokenBal(TokenInterface token) internal view returns(uint _amt) {
-        _amt = address(token) == getEthAddr() ? address(this).balance : token.balanceOf(address(this));
+        _amt = address(token) == ethAddr ? address(this).balance : token.balanceOf(address(this));
     }
 
     function getTokensDec(TokenInterface buyAddr, TokenInterface sellAddr) internal view returns(uint buyDec, uint sellDec) {
-        buyDec = address(buyAddr) == getEthAddr() ?  18 : buyAddr.decimals();
-        sellDec = address(sellAddr) == getEthAddr() ?  18 : sellAddr.decimals();
+        buyDec = address(buyAddr) == ethAddr ?  18 : buyAddr.decimals();
+        sellDec = address(sellAddr) == ethAddr ?  18 : sellAddr.decimals();
     }
 
     function getSlippageAmt(
@@ -130,7 +130,7 @@ contract OneHelpers is Stores, DSMath {
 }
 
 
-contract OneProtoResolver is OneHelpers {
+abstract contract OneProtoResolver is OneHelpers {
     struct OneProtoData {
         TokenInterface sellToken;
         TokenInterface buyToken;
@@ -152,7 +152,7 @@ contract OneProtoResolver is OneHelpers {
         uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneProtoContract), _sellAmt);
@@ -160,7 +160,7 @@ contract OneProtoResolver is OneHelpers {
 
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneProtoContract.swap.value(ethAmt)(
+        oneProtoContract.swap{value: ethAmt}(
             _sellAddr,
             _buyAddr,
             _sellAmt,
@@ -194,14 +194,14 @@ contract OneProtoResolver is OneHelpers {
 
         OneProtoInterface oneSplitContract = OneProtoInterface(getOneProtoAddress());
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
             _sellAddr.approve(address(oneSplitContract), _sellAmt);
         }
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneSplitContract.swapMulti.value(ethAmt)(
+        oneSplitContract.swapMulti{value: ethAmt}(
             convertToTokenInterface(oneProtoData.tokens),
             _sellAmt,
             _slippageAmt,
@@ -216,7 +216,7 @@ contract OneProtoResolver is OneHelpers {
     }
 }
 
-contract OneInchResolver is OneProtoResolver {
+abstract contract OneInchResolver is OneProtoResolver {
     function checkOneInchSig(bytes memory callData) internal pure returns(bool isOk) {
         bytes memory _data = callData;
         bytes4 sig;
@@ -248,7 +248,7 @@ contract OneInchResolver is OneProtoResolver {
         uint initalBal = getTokenBal(buyToken);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, ) = address(getOneInchAddress()).call.value(ethAmt)(oneInchData.callData);
+        (bool success, ) = address(getOneInchAddress()).call{value: ethAmt}(oneInchData.callData);
         if (!success) revert("1Inch-swap-failed");
 
         uint finalBal = getTokenBal(buyToken);
@@ -260,7 +260,7 @@ contract OneInchResolver is OneProtoResolver {
 
 }
 
-contract OneProtoEventResolver is OneInchResolver {
+abstract contract OneProtoEventResolver is OneInchResolver {
     event LogSell(
         address indexed buyToken,
         address indexed sellToken,
@@ -275,8 +275,6 @@ contract OneProtoEventResolver is OneInchResolver {
         uint256 getId,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSell(
             address(oneProtoData.buyToken),
             address(oneProtoData.sellToken),
@@ -285,16 +283,6 @@ contract OneProtoEventResolver is OneInchResolver {
             getId,
             setId
         );
-        _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     event LogSellTwo(
@@ -311,8 +299,6 @@ contract OneProtoEventResolver is OneInchResolver {
         uint256 getId,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSellTwo(
             address(oneProtoData.buyToken),
             address(oneProtoData.sellToken),
@@ -321,16 +307,6 @@ contract OneProtoEventResolver is OneInchResolver {
             getId,
             setId
         );
-        _eventCode = keccak256("LogSellTwo(address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 
     event LogSellMulti(
@@ -348,8 +324,6 @@ contract OneProtoEventResolver is OneInchResolver {
         uint256 getId,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSellMulti(
             oneProtoData.tokens,
             address(oneProtoData.buyToken),
@@ -359,21 +333,10 @@ contract OneProtoEventResolver is OneInchResolver {
             getId,
             setId
         );
-        _eventCode = keccak256("LogSellMulti(address[],address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            oneProtoData.tokens,
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 }
 
-contract OneInchEventResolver is OneProtoEventResolver {
+abstract contract OneInchEventResolver is OneProtoEventResolver {
     event LogSellThree(
         address indexed buyToken,
         address indexed sellToken,
@@ -387,8 +350,6 @@ contract OneInchEventResolver is OneProtoEventResolver {
         OneInchData memory oneInchData,
         uint256 setId
     ) internal {
-        bytes32 _eventCode;
-        bytes memory _eventParam;
         emit LogSellThree(
             address(oneInchData.buyToken),
             address(oneInchData.sellToken),
@@ -397,20 +358,10 @@ contract OneInchEventResolver is OneProtoEventResolver {
             0,
             setId
         );
-        _eventCode = keccak256("LogSellThree(address,address,uint256,uint256,uint256,uint256)");
-        _eventParam = abi.encode(
-            address(oneInchData.buyToken),
-            address(oneInchData.sellToken),
-            oneInchData._buyAmt,
-            oneInchData._sellAmt,
-            0,
-            setId
-        );
-        emitEvent(_eventCode, _eventParam);
     }
 }
 
-contract OneProtoResolverHelpers is OneInchEventResolver {
+abstract contract OneProtoResolverHelpers is OneInchEventResolver {
     function _sell(
         OneProtoData memory oneProtoData,
         uint256 getId,
@@ -480,7 +431,7 @@ contract OneProtoResolverHelpers is OneInchEventResolver {
     }
 }
 
-contract OneInchResolverHelpers is OneProtoResolverHelpers {
+abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
     function _sellThree(
         OneInchData memory oneInchData,
         uint setId
@@ -488,7 +439,7 @@ contract OneInchResolverHelpers is OneProtoResolverHelpers {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
-        if (address(_sellAddr) == getEthAddr()) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
             TokenInterface(_sellAddr).approve(getOneInchAddress(), oneInchData._sellAmt);
@@ -503,7 +454,7 @@ contract OneInchResolverHelpers is OneProtoResolverHelpers {
     }
 }
 
-contract OneProto is OneInchResolverHelpers {
+abstract contract OneProto is OneInchResolverHelpers {
     /**
      * @dev Sell ETH/ERC20_Token using 1proto.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -602,7 +553,7 @@ contract OneProto is OneInchResolverHelpers {
     }
 }
 
-contract OneInch is OneProto {
+abstract contract OneInch is OneProto {
     /**
      * @dev Sell ETH/ERC20_Token using 1inch.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)

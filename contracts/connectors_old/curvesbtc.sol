@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
 import { Stores } from "../common/stores.sol";
@@ -15,7 +15,7 @@ interface ICurve {
   function calc_withdraw_one_coin(uint256 _token_amount, int128 i) external returns (uint256 amount);
 }
 
-contract CurveSBTCHelpers is Stores, DSMath{
+abstract contract CurveSBTCHelpers is Stores, DSMath{
   /**
   * @dev Return Curve Swap Address
   */
@@ -54,7 +54,7 @@ contract CurveSBTCHelpers is Stores, DSMath{
   }
 }
 
-contract CurveSBTCProtocol is CurveSBTCHelpers {
+abstract contract CurveSBTCProtocol is CurveSBTCHelpers {
 
   // Events
   event LogSell(
@@ -103,9 +103,6 @@ contract CurveSBTCProtocol is CurveSBTCHelpers {
     setUint(setId, _buyAmt);
 
     emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -147,9 +144,6 @@ contract CurveSBTCProtocol is CurveSBTCHelpers {
     setUint(setId, mintAmt);
 
     emit LogDeposit(token, _amt, mintAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogDeposit(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, mintAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 
   /**
@@ -195,9 +189,6 @@ contract CurveSBTCProtocol is CurveSBTCHelpers {
     setUint(setId, _amt);
 
     emit LogWithdraw(token, _amt, _curveAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogWithdraw(address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(token, _amt, _curveAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
   }
 }
 

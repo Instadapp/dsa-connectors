@@ -1,7 +1,7 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 
 // import files from common directory
-import { TokenInterface , MemoryInterface, EventInterface} from "../common/interfaces.sol";
+import { TokenInterface , MemoryInterface } from "../common/interfaces.sol";
 import { Stores } from "../common/stores.sol";
 import { DSMath } from "../common/math.sol";
 
@@ -11,7 +11,7 @@ interface ICurve {
   function exchange(int128 sellTokenId, int128 buyTokenId, uint256 sellTokenAmt, uint256 minBuyToken) external;
 }
 
-contract CurveHelpers is Stores, DSMath {
+abstract contract CurveHelpers is Stores, DSMath {
   /**
   * @dev Return Curve 3pool Swap Address
   */
@@ -50,7 +50,7 @@ contract CurveHelpers is Stores, DSMath {
   }
 }
 
-contract CurveProtocol is CurveHelpers {
+abstract contract CurveProtocol is CurveHelpers {
 
   event LogSell(
     address indexed buyToken,
@@ -96,10 +96,6 @@ contract CurveProtocol is CurveHelpers {
     setUint(setId, _buyAmt);
 
     emit LogSell(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    bytes32 _eventCode = keccak256("LogSell(address,address,uint256,uint256,uint256,uint256)");
-    bytes memory _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
-    emitEvent(_eventCode, _eventParam);
-
   }
 }
 
