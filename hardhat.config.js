@@ -1,4 +1,5 @@
 require("@tenderly/hardhat-tenderly");
+require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config();
 
 /**
