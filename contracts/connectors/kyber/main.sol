@@ -52,5 +52,5 @@ abstract contract KyberResolver is Helpers, Events {
 }
 
 contract ConnectV2Kyber is KyberResolver {
-    string public name = "Kyber-v2.1";
+    string public name = "Kyber-v2";
 }

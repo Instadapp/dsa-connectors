@@ -484,5 +484,5 @@ abstract contract MakerResolver is Helpers, Events {
 }
 
 contract ConnectV2Maker is MakerResolver {
-    string public constant name = "MakerDao-v1.4";
+    string public constant name = "MakerDao-v1";
 }

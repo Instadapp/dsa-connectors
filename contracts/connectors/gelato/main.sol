@@ -163,5 +163,5 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
 }
 
 contract ConnectV2Gelato is GelatoResolver {
-    string public name = "Gelato-v1.0";
+    string public name = "Gelato-v1";
 }
