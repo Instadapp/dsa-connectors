@@ -227,7 +227,7 @@ abstract contract MakerResolver is Helpers, Events {
 
         setUint(setId, _amt);
 
-        _eventName = "LogBorrow(uint256,bytes32,uint256,uint256,uint256)";
+        _eventName = "LogPayback(uint256,bytes32,uint256,uint256,uint256)";
         _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
     }
 
@@ -272,7 +272,7 @@ abstract contract MakerResolver is Helpers, Events {
 
         setUint(setId, _amt);
 
-        _eventName = "LogBorrow(uint256,bytes32,uint256,uint256,uint256)";
+        _eventName = "LogWithdrawLiquidated(uint256,bytes32,uint256,uint256,uint256)";
         _eventParam = abi.encode(vault, ilk, _amt, getId, setId);
     }
 
