@@ -24,6 +24,6 @@ abstract contract ChiResolver is Events, Helpers {
         chi.free(_amt);
     }
 }
-contract ConnectCHI is ChiResolver {
+contract ConnectV2CHI is ChiResolver {
     string public name = "CHI-v1";
 }

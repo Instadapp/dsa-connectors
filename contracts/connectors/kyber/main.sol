@@ -50,3 +50,7 @@ abstract contract KyberResolver is Helpers, Events {
         _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
     }
 }
+
+contract ConnectV2Kyber is KyberResolver {
+    string public name = "Kyber-v2.1";
+}

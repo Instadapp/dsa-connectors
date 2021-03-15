@@ -245,6 +245,6 @@ abstract contract CompoundResolver is Events, Helpers {
     }
 }
 
-contract ConnectCompound is CompoundResolver {
+contract ConnectV2Compound is CompoundResolver {
     string public name = "Compound-v1.3";
 }

@@ -117,6 +117,6 @@ contract OasisResolver is DSMath, Basic, Events {
     }
 }
 
-contract ConnectOasis is OasisResolver {
+contract ConnectV2Oasis is OasisResolver {
     string public name = "Oasis-v1.1";
 }

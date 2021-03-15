@@ -377,6 +377,6 @@ abstract contract OneInch is OneProto {
     }
 }
 
-contract ConnectOne is OneInch {
+contract ConnectV2OneInch is OneInch {
     string public name = "1inch-1proto-v1";
 }

@@ -33,6 +33,6 @@ abstract contract FlashLoanResolver is DSMath, Basic, Events {
     }
 }
 
-contract ConnectDydxFlashLoan is FlashLoanResolver {
+contract ConnectV2DydxFlashLoan is FlashLoanResolver {
     string public constant name = "dydx-flashloan-v1";
 }

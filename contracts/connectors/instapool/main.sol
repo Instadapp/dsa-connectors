@@ -272,6 +272,6 @@ contract LiquidityAccessMulti is LiquidityAccess {
     // }
 }
 
-contract ConnectInstaPool is LiquidityAccessMulti {
+contract ConnectV2InstaPool is LiquidityAccessMulti {
     string public name = "InstaPool-v2.1";
 }
