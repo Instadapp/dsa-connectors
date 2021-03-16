@@ -141,7 +141,7 @@ abstract contract OneProtoResolverHelpers is OneInchResolver {
         OneProtoData memory oneProtoData,
         uint256 getId,
         uint256 setId
-    ) internal {
+    ) internal returns (OneProtoData memory) {
         uint _sellAmt = getUint(getId, oneProtoData._sellAmt);
 
         oneProtoData._sellAmt = _sellAmt == uint(-1) ?
@@ -165,7 +165,7 @@ abstract contract OneProtoResolverHelpers is OneInchResolver {
 
         setUint(setId, oneProtoData._buyAmt);
 
-        emitLogSell(oneProtoData, getId, setId);
+        return oneProtoData;
     }
 
     /**
@@ -178,7 +178,7 @@ abstract contract OneProtoResolverHelpers is OneInchResolver {
         OneProtoData memory oneProtoData,
         uint getId,
         uint setId
-    ) internal {
+    ) internal returns (OneProtoData memory) {
         uint _sellAmt = getUint(getId, oneProtoData._sellAmt);
 
         oneProtoData._sellAmt = _sellAmt == uint(-1) ?
@@ -191,7 +191,8 @@ abstract contract OneProtoResolverHelpers is OneInchResolver {
         );
 
         setUint(setId, oneProtoData._buyAmt);
-        emitLogSellTwo(oneProtoData, getId, setId);
+        
+        return oneProtoData;
     }
 
     /**
@@ -204,7 +205,7 @@ abstract contract OneProtoResolverHelpers is OneInchResolver {
         OneProtoMultiData memory oneProtoData,
         uint getId,
         uint setId
-    ) internal {
+    ) internal returns (OneProtoMultiData memory) {
         uint _sellAmt = getUint(getId, oneProtoData._sellAmt);
 
         oneProtoData._sellAmt = _sellAmt == uint(-1) ?
@@ -214,7 +215,9 @@ abstract contract OneProtoResolverHelpers is OneInchResolver {
         oneProtoData._buyAmt = oneProtoSwapMulti(oneProtoData);
         setUint(setId, oneProtoData._buyAmt);
 
-        emitLogSellMulti(oneProtoData, getId, setId);
+        // emitLogSellMulti(oneProtoData, getId, setId);
+
+        return oneProtoData;
     }
 }
 
@@ -228,7 +231,7 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
     function _sellThree(
         OneInchData memory oneInchData,
         uint setId
-    ) internal {
+    ) internal returns (OneInchData memory) {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
@@ -243,7 +246,9 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
         oneInchData._buyAmt = oneInchSwap(oneInchData, ethAmt);
         setUint(setId, oneInchData._buyAmt);
 
-        emitLogSellThree(oneInchData, setId);
+        return oneInchData;
+
+        // emitLogSellThree(oneInchData, setId);
     }
 }
 
@@ -264,7 +269,7 @@ abstract contract OneProto is OneInchResolverHelpers {
         uint unitAmt,
         uint getId,
         uint setId
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         OneProtoData memory oneProtoData = OneProtoData({
             buyToken: TokenInterface(buyAddr),
             sellToken: TokenInterface(sellAddr),
@@ -275,7 +280,10 @@ abstract contract OneProto is OneInchResolverHelpers {
             disableDexes: 0
         });
 
-        _sell(oneProtoData, getId, setId);
+        oneProtoData = _sell(oneProtoData, getId, setId);
+
+        _eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(buyAddr, sellAddr, oneProtoData._buyAmt, oneProtoData._sellAmt, getId, setId);
     }
 
     /**
@@ -298,7 +306,7 @@ abstract contract OneProto is OneInchResolverHelpers {
         uint disableDexes,
         uint getId,
         uint setId
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         OneProtoData memory oneProtoData = OneProtoData({
             buyToken: TokenInterface(buyAddr),
             sellToken: TokenInterface(sellAddr),
@@ -309,7 +317,10 @@ abstract contract OneProto is OneInchResolverHelpers {
             _buyAmt: 0
         });
 
-        _sellTwo(oneProtoData, getId, setId);
+        oneProtoData = _sellTwo(oneProtoData, getId, setId);
+
+        _eventName = "LogSellTwo(address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(buyAddr, sellAddr, oneProtoData._buyAmt, oneProtoData._sellAmt, getId, setId);
     }
 
     /**
@@ -330,10 +341,11 @@ abstract contract OneProto is OneInchResolverHelpers {
         uint[] calldata disableDexes,
         uint getId,
         uint setId
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _length = tokens.length;
         OneProtoMultiData memory oneProtoData = OneProtoMultiData({
             tokens: tokens,
-            buyToken: TokenInterface(address(tokens[tokens.length - 1])),
+            buyToken: TokenInterface(address(tokens[_length - 1])),
             sellToken: TokenInterface(address(tokens[0])),
             unitAmt: unitAmt,
             distribution: distribution,
@@ -342,7 +354,18 @@ abstract contract OneProto is OneInchResolverHelpers {
             _buyAmt: 0
         });
 
-        _sellMulti(oneProtoData, getId, setId);
+        oneProtoData = _sellMulti(oneProtoData, getId, setId);
+
+        _eventName = "LogSellMulti(address[],address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(
+            tokens,
+            address(oneProtoData.buyToken),
+            address(oneProtoData.sellToken),
+            oneProtoData._buyAmt,
+            oneProtoData._sellAmt,
+            getId,
+            setId
+        );
     }
 }
 
@@ -363,7 +386,7 @@ abstract contract OneInch is OneProto {
         uint unitAmt,
         bytes calldata callData,
         uint setId
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         OneInchData memory oneInchData = OneInchData({
             buyToken: TokenInterface(buyAddr),
             sellToken: TokenInterface(sellAddr),
@@ -373,10 +396,13 @@ abstract contract OneInch is OneProto {
             _buyAmt: 0
         });
 
-        _sellThree(oneInchData, setId);
+        oneInchData = _sellThree(oneInchData, setId);
+
+        _eventName = "LogSellThree(address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(buyAddr, sellAddr, oneInchData._buyAmt, oneInchData._sellAmt, 0, setId);
     }
 }
 
-contract ConnectOne is OneInch {
+contract ConnectV2OneInch is OneInch {
     string public name = "1inch-1proto-v1";
 }

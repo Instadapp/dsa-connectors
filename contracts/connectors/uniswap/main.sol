@@ -178,6 +178,6 @@ abstract contract UniswapResolver is Helpers, Events {
     }
 }
 
-contract ConnectUniswapV2 is UniswapResolver {
+contract ConnectV2UniswapV2 is UniswapResolver {
     string public name = "UniswapV2-v1";
 }

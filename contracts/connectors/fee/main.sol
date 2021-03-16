@@ -25,6 +25,6 @@ abstract contract FeeResolver is DSMath, Basic {
     }
 }
 
-contract ConnectFee is FeeResolver {
+contract ConnectV2Fee is FeeResolver {
     string public constant name = "Fee-v1";
 }
