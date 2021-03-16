@@ -1,6 +1,10 @@
+require("@nomiclabs/hardhat-ethers");
 require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config();
+
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const ALCHEMY_ID = process.env.ALCHEMY_ID;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -27,17 +31,22 @@ module.exports = {
       url: process.env.ETH_NODE_URL,
       chainId: 1,
       timeout: 500000,
+      accounts: [`0x${PRIVATE_KEY}`]
+    },
+    kovan: {
+      url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`]
     },
     tenderlyMainnet: {
       url: 'https://mainnet.tenderly.co',
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [`0x${PRIVATE_KEY}`],
       chainId: 1,
       gasPrice: 25120000000,
       timeout: 500000
     },
     tenderlyKovan: {
       url: 'https://kovan.tenderly.co',
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [`0x${PRIVATE_KEY}`],
       chainId: 42,
       gasPrice: 40000000000,
       timeout: 50000

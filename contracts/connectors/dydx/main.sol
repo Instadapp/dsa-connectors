@@ -155,6 +155,6 @@ abstract contract DyDxResolver is Events, Helpers {
 
 }
 
-contract ConnectDydx is DyDxResolver {
+contract ConnectV2Dydx is DyDxResolver {
     string public name = "Dydx-v1";
 }

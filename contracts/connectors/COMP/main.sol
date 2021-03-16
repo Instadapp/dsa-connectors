@@ -86,6 +86,6 @@ abstract contract CompResolver is Events, Helpers {
     }
 }
 
-contract ConnectCOMP is CompResolver {
+contract ConnectV2COMP is CompResolver {
     string public name = "COMP-v1";
 }
