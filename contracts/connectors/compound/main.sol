@@ -1,10 +1,11 @@
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { CETHInterface, CTokenInterface } from "./interface.sol";
+import { CETHInterface, CTokenInterface, LiquidateData } from "./interface.sol";
 
 abstract contract CompoundResolver is Events, Helpers {
     /**
@@ -16,12 +17,13 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function deposit(
         address token,
+        string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = instaMapping.cTokenMapping(token);
+        address cToken = compMapping.cTokenMapping(tokenId);
         enterMarket(cToken);
         if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
@@ -34,8 +36,8 @@ abstract contract CompoundResolver is Events, Helpers {
         }
         setUint(setId, _amt);
 
-        _eventName = "LogDeposit(address,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+        _eventName = "LogDeposit(address,string,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
     }
 
     /**
@@ -47,12 +49,13 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function withdraw(
         address token,
+        string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = instaMapping.cTokenMapping(token);
+        address cToken = compMapping.cTokenMapping(tokenId);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
@@ -65,8 +68,8 @@ abstract contract CompoundResolver is Events, Helpers {
         }
         setUint(setId, _amt);
 
-        _eventName = "LogWithdraw(address,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+        _eventName = "LogWithdraw(address,string,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
     }
 
     /**
@@ -78,18 +81,19 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function borrow(
         address token,
+        string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = instaMapping.cTokenMapping(token);
+        address cToken = compMapping.cTokenMapping(tokenId);
         enterMarket(cToken);
         require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
         setUint(setId, _amt);
 
-        _eventName = "LogBorrow(address,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+        _eventName = "LogBorrow(address,string,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
     }
 
     /**
@@ -101,12 +105,13 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function payback(
         address token,
+        string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = instaMapping.cTokenMapping(token);
+        address cToken = compMapping.cTokenMapping(tokenId);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
 
@@ -121,8 +126,8 @@ abstract contract CompoundResolver is Events, Helpers {
         }
         setUint(setId, _amt);
 
-        _eventName = "LogPayback(address,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+        _eventName = "LogPayback(address,string,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
     }
 
     /**
@@ -134,12 +139,13 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function depositCToken(
         address token,
+        string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = instaMapping.cTokenMapping(token);
+        address cToken = compMapping.cTokenMapping(tokenId);
         enterMarket(cToken);
 
         CTokenInterface ctokenContract = CTokenInterface(cToken);
@@ -159,8 +165,8 @@ abstract contract CompoundResolver is Events, Helpers {
         uint _cAmt = finalBal - initialBal;
         setUint(setId, _cAmt);
 
-        _eventName = "LogDepositCToken(address,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, cToken, _amt, _cAmt, getId, setId);
+        _eventName = "LogDepositCToken(address,string,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, tokenId, cToken, _amt, _cAmt, getId, setId);
     }
 
     /**
@@ -172,63 +178,62 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function withdrawCToken(
         address token,
+        string calldata tokenId,
         uint cTokenAmt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _cAmt = getUint(getId, cTokenAmt);
-        address cToken = instaMapping.cTokenMapping(token);
+        address cToken = compMapping.cTokenMapping(tokenId);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         TokenInterface tokenContract = TokenInterface(token);
         _cAmt = _cAmt == uint(-1) ? cTokenContract.balanceOf(address(this)) : _cAmt;
 
-        uint initialBal = token != ethAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
-        require(cTokenContract.redeem(_cAmt) == 0, "redeem-failed");
-        uint finalBal = token != ethAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
+        uint withdrawAmt;
+        {
+            uint initialBal = token != ethAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
+            require(cTokenContract.redeem(_cAmt) == 0, "redeem-failed");
+            uint finalBal = token != ethAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
 
-        uint withdrawAmt = sub(finalBal, initialBal);
+            withdrawAmt = sub(finalBal, initialBal);
+        }
+
         setUint(setId, withdrawAmt);
 
-        _eventName = "LogWithdrawCToken(address,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, cToken, withdrawAmt, _cAmt, getId, setId);
+        _eventName = "LogWithdrawCToken(address,string,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, tokenId, cToken, withdrawAmt, _cAmt, getId, setId);
     }
 
     /**
      * @dev Liquidate a position.
-     * @param borrower Borrower's Address.
-     * @param tokenToPay token address to pay for liquidation.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param tokenInReturn token address to return for liquidation.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt token amount to pay for liquidation.
+     * @param data Liquidation data
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function liquidate(
-        address borrower,
-        address tokenToPay,
-        address tokenInReturn,
-        uint amt,
+        LiquidateData calldata data,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _amt = getUint(getId, amt);
-        address cTokenPay = instaMapping.cTokenMapping(tokenToPay);
-        address cTokenColl = instaMapping.cTokenMapping(tokenInReturn);
+        uint _amt = getUint(getId, data.amt);
+        address cTokenPay = compMapping.cTokenMapping(data.tokenPayId);
+        address cTokenColl = compMapping.cTokenMapping(data.tokenReturnId);
         CTokenInterface cTokenContract = CTokenInterface(cTokenPay);
 
         {
-            (,, uint shortfal) = troller.getAccountLiquidity(borrower);
+            (,, uint shortfal) = troller.getAccountLiquidity(data.borrower);
             require(shortfal != 0, "account-cannot-be-liquidated");
         }
 
-        _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(borrower) : _amt;
-        if (tokenToPay == ethAddr) {
+        _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(data.borrower) : _amt;
+        if (data.tokenToPay == ethAddr) {
             require(address(this).balance >= _amt, "not-enought-eth");
-            CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(borrower, cTokenColl);
+            CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(data.borrower, cTokenColl);
         } else {
-            TokenInterface tokenContract = TokenInterface(tokenToPay);
+            TokenInterface tokenContract = TokenInterface(data.tokenToPay);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
             tokenContract.approve(cTokenPay, _amt);
-            require(cTokenContract.liquidateBorrow(borrower, _amt, cTokenColl) == 0, "liquidate-failed");
+            require(cTokenContract.liquidateBorrow(data.borrower, _amt, cTokenColl) == 0, "liquidate-failed");
         }
         
         setUint(setId, _amt);
@@ -236,8 +241,8 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventName = "LogLiquidate(address,address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             address(this),
-            tokenToPay,
-            tokenInReturn, 
+            data.tokenToPay,
+            data.tokenInReturn, 
             _amt,
             getId,
             setId
@@ -245,6 +250,6 @@ abstract contract CompoundResolver is Events, Helpers {
     }
 }
 
-contract ConnectCompound is CompoundResolver {
-    string public name = "Compound-v1.3";
+contract ConnectV2Compound is CompoundResolver {
+    string public name = "Compound-v1";
 }
