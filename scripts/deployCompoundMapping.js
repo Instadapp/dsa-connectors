@@ -19,10 +19,24 @@ async function main() {
     "ZRX-A": "0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407"
   }
 
+  const tokenMapping = {
+    "ETH-A": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "BAT-A": "0x0D8775F648430679A709E98d2b0Cb6250d2887EF",
+    "COMP-A": "0xc00e94cb662c3520282e6f5717214004a7f26888",
+    "DAI-A": "0x6b175474e89094c44da98b954eedeac495271d0f",
+    "REP-A": "0x1985365e9f78359a9B6AD760e32412f4a445E862",
+    "UNI-A": "0x221657776846890989a759ba2973e427dff5c9bb",
+    "USDC-A": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "USDT-A": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "WBTC-A": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    "ZRX-A": "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  }
+
   const Mapping = await ethers.getContractFactory("InstaCompoundMapping");
   const mapping = await Mapping.deploy(
     CONNECTORS_V2,
     Object.keys(ctokenMapping),
+    Object.values(tokenMapping),
     Object.values(ctokenMapping)
   );
   await mapping.deployed();
@@ -35,6 +49,7 @@ async function main() {
         constructorArguments: [
           CONNECTORS_V2,
           Object.keys(ctokenMapping),
+          Object.values(tokenMapping),
           Object.values(ctokenMapping)
         ]
       }
