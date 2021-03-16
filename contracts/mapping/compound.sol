@@ -66,7 +66,7 @@ abstract contract Helpers {
 
 }
 
-contract InstaMapping is Helpers {
+contract InstaCompoundMapping is Helpers {
     string constant public name = "Compound-Mapping-v1";
 
     constructor(
