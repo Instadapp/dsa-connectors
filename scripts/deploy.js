@@ -8,18 +8,18 @@ async function main() {
     const wallet = accounts[0]
     
     const connectMapping = {
-        '1inch-A': 'ConnectV2OneInch',
-        'aave-v1-A': 'ConnectV2AaveV1',
-        'aave-v2-A': 'ConnectV2AaveV2',
-        'authority-A': 'ConnectV2Auth',
-        'basic-A': 'ConnectV2Basic',
-        'comp-A': 'ConnectV2COMP',
-        'compound-A': 'ConnectV2Compound',
-        'dydx-A': 'ConnectV2Dydx',
-        'fee-A': 'ConnectV2Fee',
-        'gelato-A': 'ConnectV2Gelato',
-        'makerdao-A': 'ConnectV2Maker',
-        'uniswap-A': 'ConnectV2UniswapV2'
+        '1INCH-A': 'ConnectV2OneInch',
+        'AAVE-V1-A': 'ConnectV2AaveV1',
+        'AAVE-V2-A': 'ConnectV2AaveV2',
+        'AUTHORITY-A': 'ConnectV2Auth',
+        'BASIC-A': 'ConnectV2Basic',
+        'COMP-A': 'ConnectV2COMP',
+        'COMPOUND-A': 'ConnectV2Compound',
+        'DYDX-A': 'ConnectV2Dydx',
+        'FEE-A': 'ConnectV2Fee',
+        'GELATO-A': 'ConnectV2Gelato',
+        'MAKERDAO-A': 'ConnectV2Maker',
+        'UNISWAP-A': 'ConnectV2UniswapV2'
     }
     
     const addressMapping = {}
