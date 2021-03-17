@@ -10,20 +10,19 @@ import { CETHInterface, CTokenInterface, LiquidateData } from "./interface.sol";
 abstract contract CompoundResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
-     * @param token token address to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenId token id of the token to deposit.(For eg: ETH-A)
      * @param amt token amount to deposit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function deposit(
-        address token,
         string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = compMapping.cTokenMapping(tokenId);
+        (address token, address cToken) = compMapping.getMapping(tokenId);
         enterMarket(cToken);
         if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
@@ -42,20 +41,19 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
-     * @param token token address to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenId token id of the token to withdraw.(For eg: ETH-A)
      * @param amt token amount to withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdraw(
-        address token,
         string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = compMapping.cTokenMapping(tokenId);
+        (address token, address cToken) = compMapping.getMapping(tokenId);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
@@ -74,20 +72,19 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Borrow ETH/ERC20_Token.
-     * @param token token address to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenId token id of the token to borrow.(For eg: DAI-A)
      * @param amt token amount to borrow.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function borrow(
-        address token,
         string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = compMapping.cTokenMapping(tokenId);
+        (address token, address cToken) = compMapping.getMapping(tokenId);
         enterMarket(cToken);
         require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
         setUint(setId, _amt);
@@ -98,20 +95,19 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Payback borrowed ETH/ERC20_Token.
-     * @param token token address to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenId token id of the token to payback.(For eg: COMP-A)
      * @param amt token amount to payback.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function payback(
-        address token,
         string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = compMapping.cTokenMapping(tokenId);
+        (address token, address cToken) = compMapping.getMapping(tokenId);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
 
@@ -132,20 +128,19 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Deposit ETH/ERC20_Token.
-     * @param token token address to depositCToken.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenId token id of the token to depositCToken.(For eg: DAI-A)
      * @param amt token amount to depositCToken.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
     function depositCToken(
-        address token,
         string calldata tokenId,
         uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        address cToken = compMapping.cTokenMapping(tokenId);
+        (address token, address cToken) = compMapping.getMapping(tokenId);
         enterMarket(cToken);
 
         CTokenInterface ctokenContract = CTokenInterface(cToken);
@@ -161,9 +156,13 @@ abstract contract CompoundResolver is Events, Helpers {
             require(ctokenContract.mint(_amt) == 0, "deposit-ctoken-failed.");
         }
 
-        uint finalBal = ctokenContract.balanceOf(address(this));
-        uint _cAmt = finalBal - initialBal;
-        setUint(setId, _cAmt);
+        uint _cAmt;
+
+        {
+            uint finalBal = ctokenContract.balanceOf(address(this));
+            finalBal - initialBal;
+            setUint(setId, _cAmt);
+        }
 
         _eventName = "LogDepositCToken(address,string,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(token, tokenId, cToken, _amt, _cAmt, getId, setId);
@@ -171,20 +170,19 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw CETH/CERC20_Token using cToken Amt.
-     * @param token token address to withdraw CToken.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenId token id of the token to withdraw CToken.(For eg: ETH-A)
      * @param cTokenAmt ctoken amount to withdrawCToken.
      * @param getId Get ctoken amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdrawCToken(
-        address token,
         string calldata tokenId,
         uint cTokenAmt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _cAmt = getUint(getId, cTokenAmt);
-        address cToken = compMapping.cTokenMapping(tokenId);
+        (address token, address cToken) = compMapping.getMapping(tokenId);
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         TokenInterface tokenContract = TokenInterface(token);
         _cAmt = _cAmt == uint(-1) ? cTokenContract.balanceOf(address(this)) : _cAmt;
@@ -206,34 +204,43 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Liquidate a position.
-     * @param data Liquidation data
+     * @param borrower Borrower's Address.
+     * @param tokenIdToPay token id of the token to pay for liquidation.(For eg: ETH-A)
+     * @param tokenIdInReturn token id of the token to return for liquidation.(For eg: USDC-A)
+     * @param amt token amount to pay for liquidation.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function liquidate(
-        LiquidateData calldata data,
+        address borrower,
+        string calldata tokenIdToPay,
+        string calldata tokenIdInReturn,
+        uint amt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _amt = getUint(getId, data.amt);
-        address cTokenPay = compMapping.cTokenMapping(data.tokenPayId);
-        address cTokenColl = compMapping.cTokenMapping(data.tokenReturnId);
-        CTokenInterface cTokenContract = CTokenInterface(cTokenPay);
+        uint _amt = getUint(getId, amt);
+
+        LiquidateData memory data;
+
+        (data.tokenToPay, data.cTokenPay) = compMapping.getMapping(tokenIdToPay);
+        (data.tokenInReturn, data.cTokenColl) = compMapping.getMapping(tokenIdInReturn);
+        data.cTokenContract = CTokenInterface(data.cTokenPay);
 
         {
-            (,, uint shortfal) = troller.getAccountLiquidity(data.borrower);
+            (,, uint shortfal) = troller.getAccountLiquidity(borrower);
             require(shortfal != 0, "account-cannot-be-liquidated");
+            _amt = _amt == uint(-1) ? data.cTokenContract.borrowBalanceCurrent(borrower) : _amt;
         }
 
-        _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(data.borrower) : _amt;
         if (data.tokenToPay == ethAddr) {
             require(address(this).balance >= _amt, "not-enought-eth");
-            CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(data.borrower, cTokenColl);
+            CETHInterface(data.cTokenPay).liquidateBorrow{value: _amt}(borrower, data.cTokenColl);
         } else {
             TokenInterface tokenContract = TokenInterface(data.tokenToPay);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
-            tokenContract.approve(cTokenPay, _amt);
-            require(cTokenContract.liquidateBorrow(data.borrower, _amt, cTokenColl) == 0, "liquidate-failed");
+            tokenContract.approve(data.cTokenPay, _amt);
+            require(data.cTokenContract.liquidateBorrow(borrower, _amt, data.cTokenColl) == 0, "liquidate-failed");
         }
         
         setUint(setId, _amt);

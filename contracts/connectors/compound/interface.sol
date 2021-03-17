@@ -32,13 +32,13 @@ interface ComptrollerInterface {
 
 interface CompoundMappingInterface {
     function cTokenMapping(string calldata tokenId) external view returns (address);
+    function getMapping(string calldata tokenId) external view returns (address, address);
 }
 
 struct LiquidateData {
-    address borrower;
     address tokenToPay;
-    string tokenPayId;
     address tokenInReturn;
-    string tokenReturnId;
-    uint amt;
+    address cTokenPay;
+    address cTokenColl;
+    CTokenInterface cTokenContract;
 }
