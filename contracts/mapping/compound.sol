@@ -11,9 +11,15 @@ interface ConnectorsInterface {
 
 interface CTokenInterface {
     function isCToken() external view returns (bool);
+    function underlying() external view returns (address);
 }
 
 abstract contract Helpers {
+
+    struct TokenMap {
+        address ctoken;
+        address token;
+    }
 
     event LogCTokensAdded(string[] names, address[] tokens, address[] ctokens);
     event LogCTokensUpdated(string[] names, address[] tokens, address[] ctokens);
@@ -23,8 +29,9 @@ abstract contract Helpers {
     // InstaIndex Address.
     IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
 
-    mapping (string => address) public cTokenMapping;
-    mapping (string => address) public tokenMapping;
+    address public constant ethAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    mapping (string => TokenMap) public cTokenMapping;
 
     modifier isChief {
         require(msg.sender == instaIndex.master() || connectors.chief(msg.sender), "not-an-chief");
@@ -44,16 +51,25 @@ abstract contract Helpers {
         require(_names.length == _ctokens.length, "addCtokenMapping: not same length");
 
         for (uint i = 0; i < _ctokens.length; i++) {
-            require(tokenMapping[_names[i]] == address(0), "addCtokenMapping: mapping added already");
-            require(cTokenMapping[_names[i]] == address(0), "addCtokenMapping: mapping added already");
+            TokenMap memory _data = cTokenMapping[_names[i]];
+
+            require(_data.ctoken == address(0), "addCtokenMapping: mapping added already");
+            require(_data.token == address(0), "addCtokenMapping: mapping added already");
 
             require(_tokens[i] != address(0), "addCtokenMapping: _tokens address not vaild");
             require(_ctokens[i] != address(0), "addCtokenMapping: _ctokens address not vaild");
 
-            require(CTokenInterface(_ctokens[i]).isCToken(), "addCtokenMapping: not a cToken");
+            CTokenInterface _ctokenContract = CTokenInterface(_ctokens[i]);
 
-            tokenMapping[_names[i]] = _tokens[i];
-            cTokenMapping[_names[i]] = _ctokens[i];
+            require(_ctokenContract.isCToken(), "addCtokenMapping: not a cToken");
+            if (_tokens[i] != ethAddr) {
+                require(_ctokenContract.underlying() == _tokens[i], "addCtokenMapping: mapping mismatch");
+            }
+
+            cTokenMapping[_names[i]] = TokenMap(
+                _ctokens[i],
+                _tokens[i]
+            );
         }
         emit LogCTokensAdded(_names, _tokens, _ctokens);
     }
@@ -69,16 +85,25 @@ abstract contract Helpers {
         require(_names.length == _ctokens.length, "updateCtokenMapping: not same length");
 
         for (uint i = 0; i < _ctokens.length; i++) {
-            require(tokenMapping[_names[i]] != address(0), "updateCtokenMapping: mapping does not exist");
-            require(cTokenMapping[_names[i]] != address(0), "updateCtokenMapping: mapping does not exist");
+            TokenMap memory _data = cTokenMapping[_names[i]];
+
+            require(_data.ctoken != address(0), "updateCtokenMapping: mapping does not exist");
+            require(_data.token != address(0), "updateCtokenMapping: mapping does not exist");
 
             require(_tokens[i] != address(0), "updateCtokenMapping: _tokens address not vaild");
             require(_ctokens[i] != address(0), "updateCtokenMapping: _ctokens address not vaild");
 
-            require(CTokenInterface(_ctokens[i]).isCToken(), "updateCtokenMapping: not a cToken");
+            CTokenInterface _ctokenContract = CTokenInterface(_ctokens[i]);
 
-            tokenMapping[_names[i]] = _tokens[i];
-            cTokenMapping[_names[i]] = _ctokens[i];
+            require(_ctokenContract.isCToken(), "updateCtokenMapping: not a cToken");
+            if (_tokens[i] != ethAddr) {
+                require(_ctokenContract.underlying() == _tokens[i], "addCtokenMapping: mapping mismatch");
+            }
+
+            cTokenMapping[_names[i]] = TokenMap(
+                _ctokens[i],
+                _tokens[i]
+            );
         }
         emit LogCTokensUpdated(_names, _tokens, _ctokens);
     }
@@ -91,9 +116,9 @@ abstract contract Helpers {
         _addCtokenMapping(_names, _tokens, _ctokens);
     }
 
-    function getMapping(string memory _tokenId) external view returns (address _token, address _ctoken) {
-        _token = tokenMapping[_tokenId];
-        _ctoken = cTokenMapping[_tokenId];
+    function getMapping(string memory _tokenId) external view returns (address, address) {
+        TokenMap memory _data = cTokenMapping[_tokenId];
+        return (_data.token, _data.ctoken);
     }
 
 }
