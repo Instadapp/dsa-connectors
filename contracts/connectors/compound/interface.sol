@@ -29,3 +29,16 @@ interface ComptrollerInterface {
     function getAccountLiquidity(address account) external view returns (uint, uint, uint);
     function claimComp(address) external;
 }
+
+interface CompoundMappingInterface {
+    function cTokenMapping(string calldata tokenId) external view returns (address);
+    function getMapping(string calldata tokenId) external view returns (address, address);
+}
+
+struct LiquidateData {
+    address tokenToPay;
+    address tokenInReturn;
+    address cTokenPay;
+    address cTokenColl;
+    CTokenInterface cTokenContract;
+}
