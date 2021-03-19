@@ -21,8 +21,8 @@ abstract contract Helpers {
         address token;
     }
 
-    event LogCTokensAdded(string[] names, address[] tokens, address[] ctokens);
-    event LogCTokensUpdated(string[] names, address[] tokens, address[] ctokens);
+    event LogCTokenAdded(string indexed name, address indexed token, address indexed ctoken);
+    event LogCTokenUpdated(string indexed name, address indexed token, address indexed ctoken);
 
     ConnectorsInterface public immutable connectors;
 
@@ -70,8 +70,8 @@ abstract contract Helpers {
                 _ctokens[i],
                 _tokens[i]
             );
+            emit LogCTokenAdded(_names[i], _tokens[i], _ctokens[i]);
         }
-        emit LogCTokensAdded(_names, _tokens, _ctokens);
     }
 
     function updateCtokenMapping(
@@ -104,8 +104,8 @@ abstract contract Helpers {
                 _ctokens[i],
                 _tokens[i]
             );
+            emit LogCTokensUpdated(_names[i], _tokens[i], _ctokens[i]);
         }
-        emit LogCTokensUpdated(_names, _tokens, _ctokens);
     }
 
     function addCtokenMapping(
@@ -124,7 +124,7 @@ abstract contract Helpers {
 }
 
 contract InstaCompoundMapping is Helpers {
-    string constant public name = "Compound-Mapping-v1";
+    string constant public name = "Compound-Mapping-v1.1";
 
     constructor(
         address _connectors,
