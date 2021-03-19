@@ -3,8 +3,7 @@ const { ethers } = hre;
 
 async function main() {
 
-  // TODO - Replace with actual contract address after deployment
-  const CONNECTORS_V2 = "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723";
+  const CONNECTORS_V2 = "0xFE2390DAD597594439f218190fC2De40f9Cf1179";
 
   const ctokenMapping = {
     "ETH-A": "0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5",
@@ -16,6 +15,7 @@ async function main() {
     "USDC-A": "0x39aa39c021dfbae8fac545936693ac917d5e7563",
     "USDT-A": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
     "WBTC-A": "0xc11b1268c1a384e55c48c2391d8d480264a3a7f4",
+    "WBTC-B": "0xccF4429DB6322D5C611ee964527D42E5d685DD6a",
     "ZRX-A": "0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407"
   }
 
@@ -25,10 +25,11 @@ async function main() {
     "COMP-A": "0xc00e94cb662c3520282e6f5717214004a7f26888",
     "DAI-A": "0x6b175474e89094c44da98b954eedeac495271d0f",
     "REP-A": "0x1985365e9f78359a9B6AD760e32412f4a445E862",
-    "UNI-A": "0x221657776846890989a759ba2973e427dff5c9bb",
+    "UNI-A": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
     "USDC-A": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     "USDT-A": "0xdac17f958d2ee523a2206206994597c13d831ec7",
     "WBTC-A": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    "WBTC-B": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
     "ZRX-A": "0xe41d2489571d322189246dafa5ebde1f4699f498"
   }
 
