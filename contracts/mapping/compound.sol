@@ -104,7 +104,7 @@ abstract contract Helpers {
                 _ctokens[i],
                 _tokens[i]
             );
-            emit LogCTokensUpdated(_names[i], _tokens[i], _ctokens[i]);
+            emit LogCTokenUpdated(_names[i], _tokens[i], _ctokens[i]);
         }
     }
 

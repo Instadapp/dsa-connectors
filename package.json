@@ -50,6 +50,6 @@
     "sol-merger": "^2.0.1",
     "solidity-coverage": "0.5.11",
     "solium": "1.2.3",
-    "web3": "^1.2.9"
+    "web3": "^1.2.6"
   }
 }
