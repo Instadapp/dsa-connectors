@@ -23,7 +23,7 @@ abstract contract MakerResolver is Helpers, Events {
      * @dev Close Vault
      * @param vault Vault ID to close.
     */
-    function close(uint vault) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    function close(uint256 vault) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _vault = getVault(vault);
         (bytes32 ilk, address urn) = getVaultData(_vault);
         (uint ink, uint art) = VatLike(managerContract.vat()).urns(ilk, urn);
@@ -45,10 +45,10 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function deposit(
-        uint vault,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 vault,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         uint _vault = getVault(vault);
@@ -91,10 +91,10 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdraw(
-        uint vault,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 vault,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         uint _vault = getVault(vault);
@@ -146,10 +146,10 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function borrow(
-        uint vault,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 vault,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         uint _vault = getVault(vault);
@@ -194,10 +194,10 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function payback(
-        uint vault,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 vault,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         uint _vault = getVault(vault);
@@ -239,10 +239,10 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdrawLiquidated(
-        uint vault,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 vault,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         (bytes32 ilk, address urn) = getVaultData(vault);
@@ -294,13 +294,13 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setIdBorrow Set borrow token amount at this ID in `InstaMemory` Contract.
     */
     function depositAndBorrow(
-        uint vault,
-        uint depositAmt,
-        uint borrowAmt,
-        uint getIdDeposit,
-        uint getIdBorrow,
-        uint setIdDeposit,
-        uint setIdBorrow
+        uint256 vault,
+        uint256 depositAmt,
+        uint256 borrowAmt,
+        uint256 getIdDeposit,
+        uint256 getIdBorrow,
+        uint256 setIdDeposit,
+        uint256 setIdBorrow
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         MakerData memory makerData;
         uint _amtDeposit = getUint(getIdDeposit, depositAmt);
@@ -350,10 +350,6 @@ abstract contract MakerResolver is Helpers, Events {
         setUint(setIdDeposit, _amtDeposit);
         setUint(setIdBorrow, _amtBorrow);
 
-        emit LogDeposit(makerData._vault, ilk, _amtDeposit, getIdDeposit, setIdDeposit);
-
-        emit LogBorrow(makerData._vault, ilk, _amtBorrow, getIdBorrow, setIdBorrow);
-
         _eventName = "LogDepositAndBorrow(uint256,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             makerData._vault,
@@ -375,10 +371,10 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function exitDai(
-        uint vault,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 vault,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         uint _vault = getVault(vault);
@@ -415,9 +411,9 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function depositDai(
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
@@ -448,9 +444,9 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdrawDai(
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
