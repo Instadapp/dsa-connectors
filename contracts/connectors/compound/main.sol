@@ -17,12 +17,15 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function deposit(
         string calldata tokenId,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
+
         (address token, address cToken) = compMapping.getMapping(tokenId);
+        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+
         enterMarket(cToken);
         if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
@@ -48,12 +51,15 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function withdraw(
         string calldata tokenId,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
+        
         (address token, address cToken) = compMapping.getMapping(tokenId);
+        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
@@ -79,12 +85,14 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function borrow(
         string calldata tokenId,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         (address token, address cToken) = compMapping.getMapping(tokenId);
+        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+
         enterMarket(cToken);
         require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
         setUint(setId, _amt);
@@ -102,12 +110,14 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function payback(
         string calldata tokenId,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         (address token, address cToken) = compMapping.getMapping(tokenId);
+        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
 
@@ -135,12 +145,14 @@ abstract contract CompoundResolver is Events, Helpers {
     */
     function depositCToken(
         string calldata tokenId,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         (address token, address cToken) = compMapping.getMapping(tokenId);
+        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+
         enterMarket(cToken);
 
         CTokenInterface ctokenContract = CTokenInterface(cToken);
@@ -183,6 +195,8 @@ abstract contract CompoundResolver is Events, Helpers {
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _cAmt = getUint(getId, cTokenAmt);
         (address token, address cToken) = compMapping.getMapping(tokenId);
+        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         TokenInterface tokenContract = TokenInterface(token);
         _cAmt = _cAmt == uint(-1) ? cTokenContract.balanceOf(address(this)) : _cAmt;
@@ -215,9 +229,9 @@ abstract contract CompoundResolver is Events, Helpers {
         address borrower,
         string calldata tokenIdToPay,
         string calldata tokenIdInReturn,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
@@ -245,7 +259,7 @@ abstract contract CompoundResolver is Events, Helpers {
         
         setUint(setId, _amt);
 
-        _eventName = "LogLiquidate(address,address,address,uint256,uint256,uint256,uint256)";
+        _eventName = "LogLiquidate(address,address,address,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             address(this),
             data.tokenToPay,
