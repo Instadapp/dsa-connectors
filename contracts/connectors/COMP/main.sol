@@ -11,7 +11,7 @@ abstract contract CompResolver is Events, Helpers {
      * @dev Claim Accrued COMP Token.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimComp(uint setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    function ClaimComp(uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         TokenInterface _compToken = TokenInterface(address(compToken));
         uint intialBal = _compToken.balanceOf(address(this));
         troller.claimComp(address(this));
@@ -29,7 +29,7 @@ abstract contract CompResolver is Events, Helpers {
      * @param tokens Array of tokens supplied and borrowed.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimCompTwo(address[] calldata tokens, uint setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    function ClaimCompTwo(address[] calldata tokens, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _len = tokens.length;
         address[] memory ctokens = new address[](_len);
         for (uint i = 0; i < _len; i++) {
@@ -54,7 +54,7 @@ abstract contract CompResolver is Events, Helpers {
      * @param borrowTokens Array of tokens borrowed.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
        (address[] memory ctokens, bool isBorrow, bool isSupply) = mergeTokenArr(supplyTokens, borrowTokens);
 
         address[] memory holders = new address[](1);
@@ -87,5 +87,5 @@ abstract contract CompResolver is Events, Helpers {
 }
 
 contract ConnectV2COMP is CompResolver {
-    string public name = "COMP-v1";
+    string public constant name = "COMP-v1";
 }
