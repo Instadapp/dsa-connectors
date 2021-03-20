@@ -4,21 +4,21 @@ contract Events {
     event LogDepositLiquidity(
         address indexed tokenA,
         address indexed tokenB,
-        uint amtA,
-        uint amtB,
-        uint uniAmount,
-        uint getId,
-        uint setId
+        uint256 amtA,
+        uint256 amtB,
+        uint256 uniAmount,
+        uint256 getId,
+        uint256 setId
     );
 
     event LogWithdrawLiquidity(
         address indexed tokenA,
         address indexed tokenB,
-        uint amountA,
-        uint amountB,
-        uint uniAmount,
-        uint getId,
-        uint[] setId
+        uint256 amountA,
+        uint256 amountB,
+        uint256 uniAmount,
+        uint256 getId,
+        uint256[] setId
     );
     
     event LogBuy(

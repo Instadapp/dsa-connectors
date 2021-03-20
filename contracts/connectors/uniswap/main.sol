@@ -18,11 +18,11 @@ abstract contract UniswapResolver is Helpers, Events {
     function deposit(
         address tokenA,
         address tokenB,
-        uint amtA,
-        uint unitAmt,
-        uint slippage,
-        uint getId,
-        uint setId
+        uint256 amtA,
+        uint256 unitAmt,
+        uint256 slippage,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amtA);
 
@@ -52,11 +52,11 @@ abstract contract UniswapResolver is Helpers, Events {
     function withdraw(
         address tokenA,
         address tokenB,
-        uint uniAmt,
-        uint unitAmtA,
-        uint unitAmtB,
-        uint getId,
-        uint[] calldata setIds
+        uint256 uniAmt,
+        uint256 unitAmtA,
+        uint256 unitAmtB,
+        uint256 getId,
+        uint256[] calldata setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, uniAmt);
 
@@ -87,10 +87,10 @@ abstract contract UniswapResolver is Helpers, Events {
     function buy(
         address buyAddr,
         address sellAddr,
-        uint buyAmt,
-        uint unitAmt,
-        uint getId,
-        uint setId
+        uint256 buyAmt,
+        uint256 unitAmt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _buyAmt = getUint(getId, buyAmt);
         (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(buyAddr, sellAddr);
@@ -137,10 +137,10 @@ abstract contract UniswapResolver is Helpers, Events {
     function sell(
         address buyAddr,
         address sellAddr,
-        uint sellAmt,
-        uint unitAmt,
-        uint getId,
-        uint setId
+        uint256 sellAmt,
+        uint256 unitAmt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _sellAmt = getUint(getId, sellAmt);
         (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(buyAddr, sellAddr);
@@ -183,5 +183,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV2 is UniswapResolver {
-    string public name = "UniswapV2-v1";
+    string public constant name = "UniswapV2-v1";
 }
