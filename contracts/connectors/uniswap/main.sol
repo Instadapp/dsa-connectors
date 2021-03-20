@@ -32,10 +32,10 @@ abstract contract UniswapResolver is Helpers, Events {
                                             _amt,
                                             unitAmt,
                                             slippage
-                                            );
+                                        );
         setUint(setId, _uniAmt);
         
-        _eventName = "LogDepositLiquidity(address,address,uint256,uint256,uint256,uint256)";
+        _eventName = "LogDepositLiquidity(address,address,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(tokenA, tokenB, _amtA, _amtB, _uniAmt, getId, setId);
     }
 
@@ -71,7 +71,7 @@ abstract contract UniswapResolver is Helpers, Events {
         setUint(setIds[0], _amtA);
         setUint(setIds[1], _amtB);
         
-        _eventName = "LogWithdrawLiquidity(address,address,uint256,uint256,uint256,uint256[])";
+        _eventName = "LogWithdrawLiquidity(address,address,uint256,uint256,uint256,uint256,uint256[])";
         _eventParam = abi.encode(tokenA, tokenB, _amtA, _amtB, _uniAmt, getId, setIds);
     }
 
@@ -97,7 +97,8 @@ abstract contract UniswapResolver is Helpers, Events {
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         uint _slippageAmt = convert18ToDec(_sellAddr.decimals(),
-            wmul(unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt)));
+            wmul(unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
+        );
 
         checkPair(paths);
         uint _expectedAmt = getExpectedSellAmt(paths, _buyAmt);
@@ -146,11 +147,14 @@ abstract contract UniswapResolver is Helpers, Events {
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         if (_sellAmt == uint(-1)) {
-            _sellAmt = sellAddr == ethAddr ? address(this).balance : _sellAddr.balanceOf(address(this));
+            _sellAmt = sellAddr == ethAddr ?
+                address(this).balance :
+                _sellAddr.balanceOf(address(this));
         }
 
         uint _slippageAmt = convert18ToDec(_buyAddr.decimals(),
-            wmul(unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt)));
+            wmul(unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt))
+        );
 
         checkPair(paths);
         uint _expectedAmt = getExpectedBuyAmt(paths, _sellAmt);
