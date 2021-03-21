@@ -4,88 +4,11 @@ pragma experimental ABIEncoderV2;
 // import files from common directory
 import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
-import { OneInchInterace, OneProtoInterface, OneProtoMappingInterface, OneProtoData, OneProtoMultiData, OneInchData } from "./interface.sol";
+import { OneInchInterace, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-
-abstract contract OneProtoResolver is Helpers, Events {
-
-    /**
-     * @dev 1proto contract swap handler
-     * @param oneProtoContract - 1 proto contract
-     * @param oneProtoData - Struct with swap data defined in interfaces.sol 
-     */
-    function oneProtoSwap(
-        OneProtoInterface oneProtoContract,
-        OneProtoData memory oneProtoData
-    ) internal returns (uint buyAmt) {
-        TokenInterface _sellAddr = oneProtoData.sellToken;
-        TokenInterface _buyAddr = oneProtoData.buyToken;
-        uint _sellAmt = oneProtoData._sellAmt;
-
-        uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
-
-        uint ethAmt;
-        if (address(_sellAddr) == ethAddr) {
-            ethAmt = _sellAmt;
-        } else {
-            _sellAddr.approve(address(oneProtoContract), _sellAmt);
-        }
-
-
-        uint initalBal = getTokenBal(_buyAddr);
-        oneProtoContract.swap{value: ethAmt}(
-            _sellAddr,
-            _buyAddr,
-            _sellAmt,
-            _slippageAmt,
-            oneProtoData.distribution,
-            oneProtoData.disableDexes
-        );
-        uint finalBal = getTokenBal(_buyAddr);
-
-        buyAmt = sub(finalBal, initalBal);
-
-        require(_slippageAmt <= buyAmt, "Too much slippage");
-    }
-
-
-    /**
-     * @dev 1proto contract multi swap handler
-     * @param oneProtoData - Struct with multiple swap data defined in interfaces.sol 
-     */
-    function oneProtoSwapMulti(OneProtoMultiData memory oneProtoData) internal returns (uint buyAmt) {
-        TokenInterface _sellAddr = oneProtoData.sellToken;
-        TokenInterface _buyAddr = oneProtoData.buyToken;
-        uint _sellAmt = oneProtoData._sellAmt;
-        uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
-
-        OneProtoInterface oneSplitContract = OneProtoInterface(getOneProtoAddress());
-        uint ethAmt;
-        if (address(_sellAddr) == ethAddr) {
-            ethAmt = _sellAmt;
-        } else {
-            _sellAddr.approve(address(oneSplitContract), _sellAmt);
-        }
-
-        uint initalBal = getTokenBal(_buyAddr);
-        oneSplitContract.swapMulti{value: ethAmt}(
-            convertToTokenInterface(oneProtoData.tokens),
-            _sellAmt,
-            _slippageAmt,
-            oneProtoData.distribution,
-            oneProtoData.disableDexes
-        );
-        uint finalBal = getTokenBal(_buyAddr);
-
-        buyAmt = sub(finalBal, initalBal);
-
-        require(_slippageAmt <= buyAmt, "Too much slippage");
-    }
-}
-
-abstract contract OneInchResolver is OneProtoResolver {
+abstract contract OneInchResolver is Helpers, Events {
     /**
      * @dev 1inch swap uses `.call()`. This function restrict it to call only swap/trade functionality
      * @param callData - calldata to extract the first 4 bytes for checking function signature
@@ -97,7 +20,7 @@ abstract contract OneInchResolver is OneProtoResolver {
         assembly {
             sig := mload(add(_data, 32))
         }
-        isOk = sig == getOneInchSig();
+        isOk = sig == oneInchSig;
     }
 
     /**
@@ -117,7 +40,7 @@ abstract contract OneInchResolver is OneProtoResolver {
         uint initalBal = getTokenBal(buyToken);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, ) = address(getOneInchAddress()).call{value: ethAmt}(oneInchData.callData);
+        (bool success, ) = oneInchAddr.call{value: ethAmt}(oneInchData.callData);
         if (!success) revert("1Inch-swap-failed");
 
         uint finalBal = getTokenBal(buyToken);
@@ -129,106 +52,14 @@ abstract contract OneInchResolver is OneProtoResolver {
 
 }
 
-abstract contract OneProtoResolverHelpers is OneInchResolver {
-
-    /**
-     * @dev Gets the swapping data onchain for swaps and calls swap.
-     * @param oneProtoData - Struct with swap data defined in interfaces.sol 
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-     */
-    function _sell(
-        OneProtoData memory oneProtoData,
-        uint256 getId,
-        uint256 setId
-    ) internal returns (OneProtoData memory) {
-        uint _sellAmt = getUint(getId, oneProtoData._sellAmt);
-
-        oneProtoData._sellAmt = _sellAmt == uint(-1) ?
-            getTokenBal(oneProtoData.sellToken) :
-            _sellAmt;
-
-        OneProtoInterface oneProtoContract = OneProtoInterface(getOneProtoAddress());
-
-        (, oneProtoData.distribution) = oneProtoContract.getExpectedReturn(
-                oneProtoData.sellToken,
-                oneProtoData.buyToken,
-                oneProtoData._sellAmt,
-                5,
-                0
-            );
-
-        oneProtoData._buyAmt = oneProtoSwap(
-            oneProtoContract,
-            oneProtoData
-        );
-
-        setUint(setId, oneProtoData._buyAmt);
-
-        return oneProtoData;
-    }
-
-    /**
-     * @dev Gets the swapping data offchian for swaps and calls swap.
-     * @param oneProtoData - Struct with swap data defined in interfaces.sol 
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-     */
-    function _sellTwo(
-        OneProtoData memory oneProtoData,
-        uint getId,
-        uint setId
-    ) internal returns (OneProtoData memory) {
-        uint _sellAmt = getUint(getId, oneProtoData._sellAmt);
-
-        oneProtoData._sellAmt = _sellAmt == uint(-1) ?
-            getTokenBal(oneProtoData.sellToken) :
-            _sellAmt;
-
-        oneProtoData._buyAmt = oneProtoSwap(
-            OneProtoInterface(getOneProtoAddress()),
-            oneProtoData
-        );
-
-        setUint(setId, oneProtoData._buyAmt);
-        
-        return oneProtoData;
-    }
-
-    /**
-     * @dev Gets the swapping data offchian for swaps and calls swap.
-     * @param oneProtoData - Struct with multiple swap data defined in interfaces.sol 
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-     */
-    function _sellMulti(
-        OneProtoMultiData memory oneProtoData,
-        uint getId,
-        uint setId
-    ) internal returns (OneProtoMultiData memory) {
-        uint _sellAmt = getUint(getId, oneProtoData._sellAmt);
-
-        oneProtoData._sellAmt = _sellAmt == uint(-1) ?
-            getTokenBal(oneProtoData.sellToken) :
-            _sellAmt;
-
-        oneProtoData._buyAmt = oneProtoSwapMulti(oneProtoData);
-        setUint(setId, oneProtoData._buyAmt);
-
-        // emitLogSellMulti(oneProtoData, getId, setId);
-
-        return oneProtoData;
-    }
-}
-
-abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
+abstract contract OneInchResolverHelpers is OneInchResolver {
 
     /**
      * @dev Gets the swapping data from 1inch's API.
      * @param oneInchData Struct with multiple swap data defined in interfaces.sol 
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
      */
-    function _sellThree(
+    function _sell(
         OneInchData memory oneInchData,
         uint setId
     ) internal returns (OneInchData memory) {
@@ -238,7 +69,7 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
-            TokenInterface(_sellAddr).approve(getOneInchAddress(), oneInchData._sellAmt);
+            TokenInterface(_sellAddr).approve(oneInchAddr, oneInchData._sellAmt);
         }
 
         require(checkOneInchSig(oneInchData.callData), "Not-swap-function");
@@ -252,124 +83,7 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
     }
 }
 
-abstract contract OneProto is OneInchResolverHelpers {
-    /**
-     * @dev Sell ETH/ERC20_Token using 1proto.
-     * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr selling token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-    */
-    function sell(
-        address buyAddr,
-        address sellAddr,
-        uint sellAmt,
-        uint unitAmt,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        OneProtoData memory oneProtoData = OneProtoData({
-            buyToken: TokenInterface(buyAddr),
-            sellToken: TokenInterface(sellAddr),
-            _sellAmt: sellAmt,
-            unitAmt: unitAmt,
-            distribution: new uint[](0),
-            _buyAmt: 0,
-            disableDexes: 0
-        });
-
-        oneProtoData = _sell(oneProtoData, getId, setId);
-
-        _eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(buyAddr, sellAddr, oneProtoData._buyAmt, oneProtoData._sellAmt, getId, setId);
-    }
-
-    /**
-     * @dev Sell ETH/ERC20_Token using 1proto using off-chain calculation.
-     * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr selling token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
-     * @param distribution distribution of swap across different dex.
-     * @param disableDexes disable a dex. (To disable none: 0)
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-    */
-    function sellTwo(
-        address buyAddr,
-        address sellAddr,
-        uint sellAmt,
-        uint unitAmt,
-        uint[] calldata distribution,
-        uint disableDexes,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        OneProtoData memory oneProtoData = OneProtoData({
-            buyToken: TokenInterface(buyAddr),
-            sellToken: TokenInterface(sellAddr),
-            _sellAmt: sellAmt,
-            unitAmt: unitAmt,
-            distribution: distribution,
-            disableDexes: disableDexes,
-            _buyAmt: 0
-        });
-
-        oneProtoData = _sellTwo(oneProtoData, getId, setId);
-
-        _eventName = "LogSellTwo(address,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(buyAddr, sellAddr, oneProtoData._buyAmt, oneProtoData._sellAmt, getId, setId);
-    }
-
-    /**
-     * @dev Sell ETH/ERC20_Token using 1proto using muliple token.
-     * @param tokens array of tokens.
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
-     * @param distribution distribution of swap across different dex.
-     * @param disableDexes disable a dex. (To disable none: 0)
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-    */
-    function sellMulti(
-        address[] calldata tokens,
-        uint sellAmt,
-        uint unitAmt,
-        uint[] calldata distribution,
-        uint[] calldata disableDexes,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _length = tokens.length;
-        OneProtoMultiData memory oneProtoData = OneProtoMultiData({
-            tokens: tokens,
-            buyToken: TokenInterface(address(tokens[_length - 1])),
-            sellToken: TokenInterface(address(tokens[0])),
-            unitAmt: unitAmt,
-            distribution: distribution,
-            disableDexes: disableDexes,
-            _sellAmt: sellAmt,
-            _buyAmt: 0
-        });
-
-        oneProtoData = _sellMulti(oneProtoData, getId, setId);
-
-        _eventName = "LogSellMulti(address[],address,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(
-            tokens,
-            address(oneProtoData.buyToken),
-            address(oneProtoData.sellToken),
-            oneProtoData._buyAmt,
-            oneProtoData._sellAmt,
-            getId,
-            setId
-        );
-    }
-}
-
-abstract contract OneInch is OneProto {
+abstract contract OneInch is OneInchResolverHelpers {
     /**
      * @dev Sell ETH/ERC20_Token using 1inch.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -379,7 +93,7 @@ abstract contract OneInch is OneProto {
      * @param callData Data from 1inch API.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function sellThree(
+    function sell(
         address buyAddr,
         address sellAddr,
         uint sellAmt,
@@ -396,13 +110,13 @@ abstract contract OneInch is OneProto {
             _buyAmt: 0
         });
 
-        oneInchData = _sellThree(oneInchData, setId);
+        oneInchData = _sell(oneInchData, setId);
 
-        _eventName = "LogSellThree(address,address,uint256,uint256,uint256,uint256)";
+        _eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(buyAddr, sellAddr, oneInchData._buyAmt, oneInchData._sellAmt, 0, setId);
     }
 }
 
 contract ConnectV2OneInch is OneInch {
-    string public name = "1inch-1proto-v1";
+    string public name = "1inch-v1";
 }
