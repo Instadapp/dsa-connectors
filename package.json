@@ -26,10 +26,11 @@
     "@openzeppelin/upgrades": "^2.8.0",
     "@truffle/artifactor": "^4.0.45",
     "chalk": "^4.0.0",
+    "commander": "^7.1.0",
     "dotenv": "^7.0.0",
     "ethereumjs-abi": "^0.6.8",
     "minimist": "^1.2.5",
-    "solc": "^0.6.0",
+    "solc": "^0.7.0",
     "truffle-assertions": "^0.9.2",
     "truffle-hdwallet-provider": "^1.0.17",
     "truffle-plugin-verify": "^0.3.10",
@@ -50,6 +51,6 @@
     "sol-merger": "^2.0.1",
     "solidity-coverage": "0.5.11",
     "solium": "1.2.3",
-    "web3": "^1.2.9"
+    "web3": "^1.2.6"
   }
 }

@@ -3,6 +3,8 @@ require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config();
 
+const { utils } = require("ethers");
+
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
 
@@ -37,20 +39,19 @@ module.exports = {
       url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`]
     },
-    tenderlyMainnet: {
-      url: 'https://mainnet.tenderly.co',
+    mainnet: {
+      url: `https://eth.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
-      chainId: 1,
-      gasPrice: 25120000000,
-      timeout: 500000
+      timeout: 150000,
+      gasPrice: parseInt(utils.parseUnits("161", "gwei"))
     },
-    tenderlyKovan: {
-      url: 'https://kovan.tenderly.co',
-      accounts: [`0x${PRIVATE_KEY}`],
-      chainId: 42,
-      gasPrice: 40000000000,
-      timeout: 50000
-    }
+    hardhat: {
+      forking: {
+        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
+        blockNumber: 12070498,
+      },
+      blockGasLimit: 12000000,
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY

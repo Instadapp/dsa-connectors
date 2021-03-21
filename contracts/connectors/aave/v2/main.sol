@@ -16,9 +16,9 @@ abstract contract AaveResolver is Events, Helpers {
     */
     function deposit(
         address token,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
@@ -59,9 +59,9 @@ abstract contract AaveResolver is Events, Helpers {
     */
     function withdraw(
         address token,
-        uint amt,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
@@ -95,10 +95,10 @@ abstract contract AaveResolver is Events, Helpers {
     */
     function borrow(
         address token,
-        uint amt,
-        uint rateMode,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 rateMode,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
@@ -126,10 +126,10 @@ abstract contract AaveResolver is Events, Helpers {
     */
     function payback(
         address token,
-        uint amt,
-        uint rateMode,
-        uint getId,
-        uint setId
+        uint256 amt,
+        uint256 rateMode,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
@@ -179,5 +179,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV2 is AaveResolver {
-    string public name = "AaveV2-v1";
+    string constant public name = "AaveV2-v1";
 }

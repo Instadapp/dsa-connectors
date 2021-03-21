@@ -18,11 +18,11 @@ abstract contract UniswapResolver is Helpers, Events {
     function deposit(
         address tokenA,
         address tokenB,
-        uint amtA,
-        uint unitAmt,
-        uint slippage,
-        uint getId,
-        uint setId
+        uint256 amtA,
+        uint256 unitAmt,
+        uint256 slippage,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amtA);
 
@@ -32,10 +32,10 @@ abstract contract UniswapResolver is Helpers, Events {
                                             _amt,
                                             unitAmt,
                                             slippage
-                                            );
+                                        );
         setUint(setId, _uniAmt);
         
-        _eventName = "LogDepositLiquidity(address,address,uint256,uint256,uint256,uint256)";
+        _eventName = "LogDepositLiquidity(address,address,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(tokenA, tokenB, _amtA, _amtB, _uniAmt, getId, setId);
     }
 
@@ -52,11 +52,11 @@ abstract contract UniswapResolver is Helpers, Events {
     function withdraw(
         address tokenA,
         address tokenB,
-        uint uniAmt,
-        uint unitAmtA,
-        uint unitAmtB,
-        uint getId,
-        uint[] calldata setIds
+        uint256 uniAmt,
+        uint256 unitAmtA,
+        uint256 unitAmtB,
+        uint256 getId,
+        uint256[] calldata setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, uniAmt);
 
@@ -71,7 +71,7 @@ abstract contract UniswapResolver is Helpers, Events {
         setUint(setIds[0], _amtA);
         setUint(setIds[1], _amtB);
         
-        _eventName = "LogWithdrawLiquidity(address,address,uint256,uint256,uint256,uint256[])";
+        _eventName = "LogWithdrawLiquidity(address,address,uint256,uint256,uint256,uint256,uint256[])";
         _eventParam = abi.encode(tokenA, tokenB, _amtA, _amtB, _uniAmt, getId, setIds);
     }
 
@@ -87,17 +87,18 @@ abstract contract UniswapResolver is Helpers, Events {
     function buy(
         address buyAddr,
         address sellAddr,
-        uint buyAmt,
-        uint unitAmt,
-        uint getId,
-        uint setId
+        uint256 buyAmt,
+        uint256 unitAmt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _buyAmt = getUint(getId, buyAmt);
         (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(buyAddr, sellAddr);
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         uint _slippageAmt = convert18ToDec(_sellAddr.decimals(),
-            wmul(unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt)));
+            wmul(unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
+        );
 
         checkPair(paths);
         uint _expectedAmt = getExpectedSellAmt(paths, _buyAmt);
@@ -136,21 +137,24 @@ abstract contract UniswapResolver is Helpers, Events {
     function sell(
         address buyAddr,
         address sellAddr,
-        uint sellAmt,
-        uint unitAmt,
-        uint getId,
-        uint setId
+        uint256 sellAmt,
+        uint256 unitAmt,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _sellAmt = getUint(getId, sellAmt);
         (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(buyAddr, sellAddr);
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         if (_sellAmt == uint(-1)) {
-            _sellAmt = sellAddr == ethAddr ? address(this).balance : _sellAddr.balanceOf(address(this));
+            _sellAmt = sellAddr == ethAddr ?
+                address(this).balance :
+                _sellAddr.balanceOf(address(this));
         }
 
         uint _slippageAmt = convert18ToDec(_buyAddr.decimals(),
-            wmul(unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt)));
+            wmul(unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt))
+        );
 
         checkPair(paths);
         uint _expectedAmt = getExpectedBuyAmt(paths, _sellAmt);
@@ -179,5 +183,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV2 is UniswapResolver {
-    string public name = "UniswapV2-v1";
+    string public constant name = "UniswapV2-v1";
 }

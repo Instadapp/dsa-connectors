@@ -12,63 +12,63 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 
     /**
      * @dev Deposit Assets To Smart Account.
-     * @param erc20 Token Address.
-     * @param tokenAmt Token Amount.
+     * @param token Token Address.
+     * @param amt Token Amount.
      * @param getId Get Storage ID.
      * @param setId Set Storage ID.
      */
     function deposit(
-        address erc20,
-        uint tokenAmt,
-        uint getId,
-        uint setId
+        address token,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint amt = getUint(getId, tokenAmt);
-        if (erc20 != ethAddr) {
-            IERC20 token = IERC20(erc20);
-            amt = amt == uint(-1) ? token.balanceOf(msg.sender) : amt;
-            token.safeTransferFrom(msg.sender, address(this), amt);
+        uint _amt = getUint(getId, amt);
+        if (token != ethAddr) {
+            IERC20 tokenContract = IERC20(token);
+            _amt = _amt == uint(-1) ? tokenContract.balanceOf(msg.sender) : _amt;
+            tokenContract.safeTransferFrom(msg.sender, address(this), _amt);
         } else {
-            require(msg.value == amt || amt == uint(-1), "invalid-ether-amount");
-            amt = msg.value;
+            require(msg.value == _amt || _amt == uint(-1), "invalid-ether-amount");
+            _amt = msg.value;
         }
-        setUint(setId, amt);
+        setUint(setId, _amt);
 
         _eventName = "LogDeposit(address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(erc20, amt, getId, setId);
+        _eventParam = abi.encode(token, _amt, getId, setId);
     }
 
     /**
      * @dev Withdraw Assets To Smart Account.
-     * @param erc20 Token Address.
-     * @param tokenAmt Token Amount.
+     * @param token Token Address.
+     * @param amt Token Amount.
      * @param to Withdraw token address.
      * @param getId Get Storage ID.
      * @param setId Set Storage ID.
      */
     function withdraw(
-        address erc20,
-        uint tokenAmt,
+        address token,
+        uint amt,
         address payable to,
         uint getId,
         uint setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint amt = getUint(getId, tokenAmt);
-        if (erc20 == ethAddr) {
-            amt = amt == uint(-1) ? address(this).balance : amt;
-            to.transfer(amt);
+        uint _amt = getUint(getId, amt);
+        if (token == ethAddr) {
+            _amt = _amt == uint(-1) ? address(this).balance : _amt;
+            to.call{value: _amt}("");
         } else {
-            IERC20 token = IERC20(erc20);
-            amt = amt == uint(-1) ? token.balanceOf(address(this)) : amt;
-            token.safeTransfer(to, amt);
+            IERC20 tokenContract = IERC20(token);
+            _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
+            tokenContract.safeTransfer(to, _amt);
         }
-        setUint(setId, amt);
+        setUint(setId, _amt);
 
         _eventName = "LogWithdraw(address,uint256,address,uint256,uint256)";
-        _eventParam = abi.encode(erc20, amt, to, getId, setId);
+        _eventParam = abi.encode(token, _amt, to, getId, setId);
     }
 }
 
 contract ConnectV2Basic is BasicResolver {
-    string public constant name = "Basic-v1";
+    string constant public name = "Basic-v1";
 }
