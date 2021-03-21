@@ -10,11 +10,9 @@ import { Events } from "./events.sol";
 abstract contract OneProtoResolver is Helpers, Events {
     /**
      * @dev 1proto contract swap handler
-     * @param oneProtoContract - 1 proto contract
      * @param oneProtoData - Struct with swap data defined in interfaces.sol 
      */
     function oneProtoSwap(
-        OneProtoInterface oneProtoContract,
         OneProtoData memory oneProtoData
     ) internal returns (uint buyAmt) {
         TokenInterface _sellAddr = oneProtoData.sellToken;
@@ -27,12 +25,12 @@ abstract contract OneProtoResolver is Helpers, Events {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            _sellAddr.approve(address(oneProtoContract), _sellAmt);
+            _sellAddr.approve(address(oneProto), _sellAmt);
         }
 
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneProtoContract.swap{value: ethAmt}(
+        oneProto.swap{value: ethAmt}(
             _sellAddr,
             _buyAddr,
             _sellAmt,
@@ -57,16 +55,15 @@ abstract contract OneProtoResolver is Helpers, Events {
         uint _sellAmt = oneProtoData._sellAmt;
         uint _slippageAmt = getSlippageAmt(_buyAddr, _sellAddr, _sellAmt, oneProtoData.unitAmt);
 
-        OneProtoInterface oneSplitContract = OneProtoInterface(getOneProtoAddress());
         uint ethAmt;
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            _sellAddr.approve(address(oneSplitContract), _sellAmt);
+            _sellAddr.approve(address(oneProto), _sellAmt);
         }
 
         uint initalBal = getTokenBal(_buyAddr);
-        oneSplitContract.swapMulti{value: ethAmt}(
+        oneProto.swapMulti{value: ethAmt}(
             convertToTokenInterface(oneProtoData.tokens),
             _sellAmt,
             _slippageAmt,
@@ -99,10 +96,7 @@ abstract contract OneProtoResolverHelpers is OneProtoResolver {
             getTokenBal(oneProtoData.sellToken) :
             _sellAmt;
 
-        oneProtoData._buyAmt = oneProtoSwap(
-            OneProtoInterface(getOneProtoAddress()),
-            oneProtoData
-        );
+        oneProtoData._buyAmt = oneProtoSwap(oneProtoData);
 
         setUint(setId, oneProtoData._buyAmt);
         

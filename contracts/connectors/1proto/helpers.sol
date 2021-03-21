@@ -3,20 +3,13 @@ pragma solidity ^0.7.0;
 import { TokenInterface } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
-import { TokenInterface, OneProtoMappingInterface } from "./interface.sol";
+import { TokenInterface, OneProtoInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
-     * @dev 1proto mapping Address
+     * @dev 1proto Address
      */
-    OneProtoMappingInterface constant internal oneProtoMapping = OneProtoMappingInterface(0x8d0287AFa7755BB5f2eFe686AA8d4F0A7BC4AE7F);
-
-    /**
-     * @dev Return 1proto Address
-     */
-    function getOneProtoAddress() internal virtual view returns (address payable) {
-        return payable(oneProtoMapping.oneProtoAddress());
-    }
+    OneProtoInterface constant internal oneProto = OneProtoInterface(0x50FDA034C0Ce7a8f7EFDAebDA7Aa7cA21CC1267e);
 
     function getSlippageAmt(
         TokenInterface _buyAddr,
