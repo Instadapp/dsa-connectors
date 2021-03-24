@@ -131,15 +131,16 @@ abstract contract OneProtoResolverHelpers is OneProtoResolver {
 
 abstract contract OneProto is OneProtoResolverHelpers {
     /**
-     * @dev Sell ETH/ERC20_Token using 1proto using off-chain calculation.
-     * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr selling token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
-     * @param distribution distribution of swap across different dex.
-     * @param disableDexes disable a dex. (To disable none: 0)
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @dev Sell ETH/ERC20_Token using 1Proto using off-chain calculation.
+     * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
+     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAmt The amount of the token to sell.
+     * @param unitAmt The amount of buyAmt/sellAmt with slippage.
+     * @param distribution The distribution of swap across different DEXs.
+     * @param disableDexes Disable a dex. (To disable none: 0)
+     * @param getId ID to retrieve sellAmt.
+     * @param setId ID stores the amount of token brought.
     */
     function sell(
         address buyAddr,
@@ -168,14 +169,15 @@ abstract contract OneProto is OneProtoResolverHelpers {
     }
 
     /**
-     * @dev Sell ETH/ERC20_Token using 1proto using muliple token.
-     * @param tokens array of tokens.
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
-     * @param distribution distribution of swap across different dex.
-     * @param disableDexes disable a dex. (To disable none: 0)
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @dev Sell Multiple tokens using 1proto using off-chain calculation.
+     * @notice Swap multiple tokens from exchanges like Uniswap, Kyber, 0x etc, with calculation done off-chain.
+     * @param tokens Array of tokens.
+     * @param sellAmt The amount of the token to sell.
+     * @param unitAmt The amount of buyAmt/sellAmt with slippage.
+     * @param distribution The distribution of swap across different DEXs.
+     * @param disableDexes Disable a dex. (To disable none: 0)
+     * @param getId ID to retrieve sellAmt.
+     * @param setId ID stores the amount of token brought.
     */
     function sellMulti(
         address[] calldata tokens,

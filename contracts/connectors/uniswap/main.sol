@@ -7,13 +7,14 @@ import { Events } from "./events.sol";
 abstract contract UniswapResolver is Helpers, Events {
     /**
      * @dev Deposit Liquidity.
-     * @param tokenA tokenA address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param tokenB tokenB address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amtA tokenA amount.
-     * @param unitAmt unit amount of amtB/amtA with slippage.
-     * @param slippage slippage amount.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Deposit Liquidity to a Uniswap pool.
+     * @param tokenA The address of token A.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenB The address of token B.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amtA The amount of A tokens to deposit.
+     * @param unitAmt The unit amount of of amtB/amtA with slippage.
+     * @param slippage Slippage amount.
+     * @param getId ID to retrieve amtA.
+     * @param setId ID stores the amount of pools tokens received.
     */
     function deposit(
         address tokenA,
@@ -41,13 +42,14 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Withdraw Liquidity.
-     * @param tokenA tokenA address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param tokenB tokenB address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param uniAmt uni token amount.
-     * @param unitAmtA unit amount of amtA/uniAmt with slippage.
-     * @param unitAmtB unit amount of amtB/uniAmt with slippage.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setIds Set token amounts at this IDs in `InstaMemory` Contract.
+     * @notice Withdraw Liquidity from a Uniswap pool.
+     * @param tokenA The address of token A.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenB The address of token B.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param uniAmt The amount of pool tokens to withdraw.
+     * @param unitAmtA The unit amount of amtA/uniAmt with slippage.
+     * @param unitAmtB The unit amount of amtB/uniAmt with slippage.
+     * @param getId ID to retrieve uniAmt.
+     * @param setIds Array of IDs to store the amount tokens received.
     */
     function withdraw(
         address tokenA,
@@ -77,12 +79,13 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Buy ETH/ERC20_Token.
-     * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr selling token amount.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param buyAmt buying token amount.
-     * @param unitAmt unit amount of sellAmt/buyAmt with slippage.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Buy a token using a Uniswap pool
+     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAmt The amount of tokens to buy.
+     * @param unitAmt The unit amount of sellAmt/buyAmt with slippage.
+     * @param getId ID to retrieve buyAmt.
+     * @param setId ID to store the amount of tokens sold.
     */
     function buy(
         address buyAddr,
@@ -127,12 +130,13 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Sell ETH/ERC20_Token.
-     * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr selling token amount.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Sell a token using a Uniswap pool
+     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAmt The amount of the token to sell.
+     * @param unitAmt The unit amount of buyAmt/sellAmt with slippage.
+     * @param getId ID to retrieve sellAmt.
+     * @param setId ID stores the amount of token brought.
     */
     function sell(
         address buyAddr,

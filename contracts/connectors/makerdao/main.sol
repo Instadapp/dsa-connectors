@@ -8,6 +8,7 @@ import { VatLike, TokenJoinInterface } from "./interface.sol";
 abstract contract MakerResolver is Helpers, Events {
     /**
      * @dev Open Vault
+     * @notice Open a Maker Vault
      * @param colType Type of Collateral.(eg: 'ETH-A')
     */
     function open(string calldata colType) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -21,6 +22,7 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Close Vault
+     * @notice Close a Maker Vault
      * @param vault Vault ID to close.
     */
     function close(uint256 vault) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -39,10 +41,11 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Deposit ETH/ERC20_Token Collateral.
-     * @param vault Vault ID.
-     * @param amt token amount to deposit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Deposit collateral to a Maker vault
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposited.
     */
     function deposit(
         uint256 vault,
@@ -85,10 +88,11 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Withdraw ETH/ERC20_Token Collateral.
-     * @param vault Vault ID.
-     * @param amt token amount to withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Withdraw collateral from a Maker vault
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param amt The amount of tokens to withdraw. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdraw(
         uint256 vault,
@@ -140,10 +144,11 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Borrow DAI.
-     * @param vault Vault ID.
-     * @param amt token amount to borrow.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Borrow DAI using a Maker vault
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param amt The amount of DAI to borrow.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of DAI borrowed.
     */
     function borrow(
         uint256 vault,
@@ -188,10 +193,11 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Payback borrowed DAI.
-     * @param vault Vault ID.
-     * @param amt token amount to payback.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Payback DAI debt owed by a Maker vault
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param amt The amount of DAI to payback. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of DAI paid back.
     */
     function payback(
         uint256 vault,
@@ -233,10 +239,11 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Withdraw leftover ETH/ERC20_Token after Liquidation.
-     * @param vault Vault ID.
-     * @param amt token amount to Withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Withdraw leftover collateral after Liquidation.
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param amt token amount to Withdraw. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of collateral withdrawn.
     */
     function withdrawLiquidated(
         uint256 vault,
@@ -285,13 +292,14 @@ abstract contract MakerResolver is Helpers, Events {
     }
     /**
      * @dev Deposit ETH/ERC20_Token Collateral and Borrow DAI.
-     * @param vault Vault ID.
-     * @param depositAmt token deposit amount to Withdraw.
-     * @param borrowAmt token borrow amount to Withdraw.
-     * @param getIdDeposit Get deposit token amount at this ID from `InstaMemory` Contract.
-     * @param getIdBorrow Get borrow token amount at this ID from `InstaMemory` Contract.
-     * @param setIdDeposit Set deposit token amount at this ID in `InstaMemory` Contract.
-     * @param setIdBorrow Set borrow token amount at this ID in `InstaMemory` Contract.
+     * @notice Deposit collateral and borrow DAI.
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param depositAmt The amount of tokens to deposit. (For max: `uint256(-1)`)
+     * @param borrowAmt The amount of DAI to borrow.
+     * @param getIdDeposit ID to retrieve depositAmt.
+     * @param getIdBorrow ID to retrieve borrowAmt.
+     * @param setIdDeposit ID stores the amount of tokens deposited.
+     * @param setIdBorrow ID stores the amount of DAI borrowed.
     */
     function depositAndBorrow(
         uint256 vault,
@@ -365,10 +373,11 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Exit DAI from urn.
-     * @param vault Vault ID.
-     * @param amt token amount to exit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Exit DAI from urn.
+     * @param vault Vault ID. (Use 0 for last opened vault)
+     * @param amt The amount of DAI to exit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of DAI exited.
     */
     function exitDai(
         uint256 vault,
@@ -406,9 +415,10 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Deposit DAI in DSR.
-     * @param amt DAI amount to deposit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Deposit DAI in DSR.
+     * @param amt The amount of DAI to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of DAI deposited.
     */
     function depositDai(
         uint256 amt,
@@ -439,9 +449,10 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Withdraw DAI from DSR.
-     * @param amt DAI amount to withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Withdraw DAI from DSR.
+     * @param amt The amount of DAI to withdraw. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of DAI withdrawn.
     */
     function withdrawDai(
         uint256 amt,
