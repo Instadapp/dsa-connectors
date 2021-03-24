@@ -132,7 +132,7 @@ abstract contract OneProtoResolverHelpers is OneProtoResolver {
 abstract contract OneProto is OneProtoResolverHelpers {
     /**
      * @dev Sell ETH/ERC20_Token using 1Proto using off-chain calculation.
-     * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
+     * @notice Swap tokens from exchanges like Uniswap, Kyber etc, with calculation done off-chain.
      * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
@@ -170,7 +170,7 @@ abstract contract OneProto is OneProtoResolverHelpers {
 
     /**
      * @dev Sell Multiple tokens using 1proto using off-chain calculation.
-     * @notice Swap multiple tokens from exchanges like Uniswap, Kyber, 0x etc, with calculation done off-chain.
+     * @notice Swap multiple tokens from exchanges like Uniswap, Kyber etc, with calculation done off-chain.
      * @param tokens Array of tokens.
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
