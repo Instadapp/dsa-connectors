@@ -7,7 +7,7 @@ import { Events } from "./events.sol";
 abstract contract UniswapResolver is Helpers, Events {
     /**
      * @dev Deposit Liquidity.
-     * @notice Deposit Liquidity to a Uniswap pool.
+     * @notice Deposit Liquidity to a Uniswap v2 pool.
      * @param tokenA The address of token A.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param tokenB The address of token B.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amtA The amount of A tokens to deposit.
@@ -42,7 +42,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Withdraw Liquidity.
-     * @notice Withdraw Liquidity from a Uniswap pool.
+     * @notice Withdraw Liquidity from a Uniswap v2 pool.
      * @param tokenA The address of token A.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param tokenB The address of token B.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param uniAmt The amount of pool tokens to withdraw.
@@ -79,7 +79,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Buy ETH/ERC20_Token.
-     * @notice Buy a token using a Uniswap pool
+     * @notice Buy a token using a Uniswap v2
      * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param buyAmt The amount of tokens to buy.
@@ -130,7 +130,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Sell ETH/ERC20_Token.
-     * @notice Sell a token using a Uniswap pool
+     * @notice Sell a token using a Uniswap v2
      * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.

@@ -8,7 +8,7 @@ import { VatLike, TokenJoinInterface } from "./interface.sol";
 abstract contract MakerResolver is Helpers, Events {
     /**
      * @dev Open Vault
-     * @notice Open a Maker Vault
+     * @notice Open a MakerDAO Vault
      * @param colType Type of Collateral.(eg: 'ETH-A')
     */
     function open(string calldata colType) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -22,7 +22,7 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Close Vault
-     * @notice Close a Maker Vault
+     * @notice Close a MakerDAO Vault
      * @param vault Vault ID to close.
     */
     function close(uint256 vault) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -41,7 +41,7 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Deposit ETH/ERC20_Token Collateral.
-     * @notice Deposit collateral to a Maker vault
+     * @notice Deposit collateral to a MakerDAO vault
      * @param vault Vault ID. (Use 0 for last opened vault)
      * @param amt The amount of tokens to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -88,7 +88,7 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Withdraw ETH/ERC20_Token Collateral.
-     * @notice Withdraw collateral from a Maker vault
+     * @notice Withdraw collateral from a MakerDAO vault
      * @param vault Vault ID. (Use 0 for last opened vault)
      * @param amt The amount of tokens to withdraw. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -144,7 +144,7 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Borrow DAI.
-     * @notice Borrow DAI using a Maker vault
+     * @notice Borrow DAI using a MakerDAO vault
      * @param vault Vault ID. (Use 0 for last opened vault)
      * @param amt The amount of DAI to borrow.
      * @param getId ID to retrieve amt.
@@ -193,7 +193,7 @@ abstract contract MakerResolver is Helpers, Events {
 
     /**
      * @dev Payback borrowed DAI.
-     * @notice Payback DAI debt owed by a Maker vault
+     * @notice Payback DAI debt owed by a MakerDAO vault
      * @param vault Vault ID. (Use 0 for last opened vault)
      * @param amt The amount of DAI to payback. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
