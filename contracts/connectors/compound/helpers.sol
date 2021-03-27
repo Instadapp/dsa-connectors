@@ -13,7 +13,7 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Compound Mapping
      */
-    CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88); // Update the address
+    CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F);
 
     /**
      * @dev enter compound market
