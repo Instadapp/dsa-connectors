@@ -15,15 +15,15 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function deposit(
-        string calldata tokenId,
+    function depositRaw(
+        address token,
+        address cToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        (address token, address cToken) = compMapping.getMapping(tokenId);
         require(token != address(0) && cToken != address(0), "ctoken mapping not found");
 
         enterMarket(cToken);
@@ -38,8 +38,18 @@ abstract contract CompoundResolver is Events, Helpers {
         }
         setUint(setId, _amt);
 
-        _eventName = "LogDeposit(address,string,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
+        _eventName = "LogDeposit(address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+    }
+
+    function deposit(
+        string calldata tokenId,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = depositRaw(token, cToken, amt, getId, setId);
     }
 
     /**

@@ -3,7 +3,6 @@ pragma solidity ^0.7.0;
 contract Events {
     event LogDeposit(
         address indexed token,
-        string tokenId,
         address cToken,
         uint256 tokenAmt,
         uint256 getId,
