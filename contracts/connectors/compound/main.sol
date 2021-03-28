@@ -59,15 +59,15 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function withdraw(
-        string calldata tokenId,
+    function withdrawRaw(
+        address token,
+        address cToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         
-        (address token, address cToken) = compMapping.getMapping(tokenId);
         require(token != address(0) && cToken != address(0), "ctoken mapping not found");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
@@ -82,8 +82,18 @@ abstract contract CompoundResolver is Events, Helpers {
         }
         setUint(setId, _amt);
 
-        _eventName = "LogWithdraw(address,string,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
+        _eventName = "LogWithdraw(address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+    }
+
+    function withdraw(
+        string calldata tokenId,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = withdrawRaw(token, cToken, amt, getId, setId);
     }
 
     /**
@@ -93,22 +103,33 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function borrow(
-        string calldata tokenId,
+    function borrowRaw(
+        address token,
+        address cToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+
         require(token != address(0) && cToken != address(0), "ctoken mapping not found");
 
         enterMarket(cToken);
         require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
         setUint(setId, _amt);
 
-        _eventName = "LogBorrow(address,string,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
+        _eventName = "LogBorrow(address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+    }
+
+    function borrow(
+        string calldata tokenId,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = borrowRaw(token, cToken, amt, getId, setId);
     }
 
     /**
@@ -118,14 +139,15 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function payback(
-        string calldata tokenId,
+    function paybackRaw(
+        address token,
+        address cToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+
         require(token != address(0) && cToken != address(0), "ctoken mapping not found");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
@@ -142,8 +164,18 @@ abstract contract CompoundResolver is Events, Helpers {
         }
         setUint(setId, _amt);
 
-        _eventName = "LogPayback(address,string,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, tokenId, cToken, _amt, getId, setId);
+        _eventName = "LogPayback(address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, _amt, getId, setId);
+    }
+
+    function payback(
+        string calldata tokenId,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = paybackRaw(token, cToken, amt, getId, setId);
     }
 
     /**
@@ -153,14 +185,15 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
     */
-    function depositCToken(
-        string calldata tokenId,
+    function depositCTokenRaw(
+        address token,
+        address cToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+
         require(token != address(0) && cToken != address(0), "ctoken mapping not found");
 
         enterMarket(cToken);
@@ -186,8 +219,18 @@ abstract contract CompoundResolver is Events, Helpers {
             setUint(setId, _cAmt);
         }
 
-        _eventName = "LogDepositCToken(address,string,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, tokenId, cToken, _amt, _cAmt, getId, setId);
+        _eventName = "LogDepositCToken(address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, _amt, _cAmt, getId, setId);
+    }
+
+    function depositCToken(
+        string calldata tokenId,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = depositCTokenRaw(token, cToken, amt, getId, setId);
     }
 
     /**
@@ -197,14 +240,14 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param getId Get ctoken amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function withdrawCToken(
-        string calldata tokenId,
+    function withdrawCTokenRaw(
+        address token,
+        address cToken,
         uint cTokenAmt,
         uint getId,
         uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _cAmt = getUint(getId, cTokenAmt);
-        (address token, address cToken) = compMapping.getMapping(tokenId);
         require(token != address(0) && cToken != address(0), "ctoken mapping not found");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
@@ -222,8 +265,18 @@ abstract contract CompoundResolver is Events, Helpers {
 
         setUint(setId, withdrawAmt);
 
-        _eventName = "LogWithdrawCToken(address,string,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(token, tokenId, cToken, withdrawAmt, _cAmt, getId, setId);
+        _eventName = "LogWithdrawCToken(address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, withdrawAmt, _cAmt, getId, setId);
+    }
+
+    function withdrawCToken(
+        string calldata tokenId,
+        uint cTokenAmt,
+        uint getId,
+        uint setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = withdrawCTokenRaw(token, cToken, amt, getId, setId);
     }
 
     /**

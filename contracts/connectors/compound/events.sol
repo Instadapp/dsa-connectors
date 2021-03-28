@@ -11,7 +11,6 @@ contract Events {
 
     event LogWithdraw(
         address indexed token,
-        string tokenId,
         address cToken,
         uint256 tokenAmt,
         uint256 getId,
@@ -20,7 +19,6 @@ contract Events {
 
     event LogBorrow(
         address indexed token,
-        string tokenId,
         address cToken,
         uint256 tokenAmt,
         uint256 getId,
@@ -29,7 +27,6 @@ contract Events {
 
     event LogPayback(
         address indexed token,
-        string tokenId,
         address cToken,
         uint256 tokenAmt,
         uint256 getId,
@@ -38,7 +35,6 @@ contract Events {
 
     event LogDepositCToken(
         address indexed token,
-        string tokenId,
         address cToken,
         uint256 tokenAmt,
         uint256 cTokenAmt,
@@ -48,7 +44,6 @@ contract Events {
 
     event LogWithdrawCToken(
         address indexed token,
-        string tokenId,
         address cToken,
         uint256 tokenAmt,
         uint256 cTokenAmt,
