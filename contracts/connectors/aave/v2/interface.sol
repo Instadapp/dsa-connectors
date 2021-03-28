@@ -12,6 +12,7 @@ interface AaveInterface {
     ) external;
     function repay(address _asset, uint256 _amount, uint256 _rateMode, address _onBehalfOf) external;
     function setUserUseReserveAsCollateral(address _asset, bool _useAsCollateral) external;
+    function swapBorrowRateMode(address _asset, uint256 _rateMode) external;
 }
 
 interface AaveLendingPoolProviderInterface {
