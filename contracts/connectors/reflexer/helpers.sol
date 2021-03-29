@@ -3,57 +3,57 @@ pragma solidity ^0.7.0;
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
-import { ManagerLike, CoinJoinInterface, SafeEngineLike, TaxCollectorLike } from "./interface.sol";
+import { ManagerLike, CoinJoinInterface, SafeEngineLike, TaxCollectorLike, TokenJoinInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Manager Interface
      */
-    ManagerLike internal constant managerContract = ManagerLike(0x5ef30b9986345249bc32d8928B7ee64DE9435E39);
+    ManagerLike internal constant managerContract = ManagerLike(0xEfe0B4cA532769a3AE758fD82E1426a03A94F185);
 
     /**
-     * @dev DAI Join
+     * @dev Coin Join
      */
-    CoinJoinInterface internal constant daiJoinContract = CoinJoinInterface(0x9759A6Ac90977b93B58547b4A71c78317f391A28);
+    CoinJoinInterface internal constant coinJoinContract = CoinJoinInterface(0x0A5653CCa4DB1B6E265F47CAf6969e64f1CFdC45);
 
     /**
-     * @dev Maker MCD Jug Address.
+     * @dev Reflexer Tax collector Address.
     */
-    TaxCollectorLike internal constant mcdJug = TaxCollectorLike(0x19c0976f590D67707E62397C87829d896Dc0f1F1);
+    TaxCollectorLike internal constant taxCollectorContract = TaxCollectorLike(0xcDB05aEda142a1B0D6044C09C64e4226c1a281EB);
 
     /**
-     * @dev Return Close Vault Address.
+     * @dev Return Close Safe Address.
     */
     address internal constant giveAddr = 0x4dD58550eb15190a5B3DfAE28BB14EeC181fC267;
 
     /**
-     * @dev Get Vault's ilk.
+     * @dev Get Safe's collateral type.
     */
-    function getVaultData(uint vault) internal view returns (bytes32 ilk, address urn) {
-        ilk = managerContract.collateralTypes(vault);
-        urn = managerContract.safes(vault);
+    function getSafeData(uint safe) internal view returns (bytes32 collateralType, address handler) {
+        collateralType = managerContract.collateralTypes(safe);
+        handler = managerContract.safes(safe);
     }
 
     /**
-     * @dev Gem Join address is ETH type collateral.
+     * @dev Collateral Join address is ETH type collateral.
     */
     function isEth(address tknAddr) internal pure returns (bool) {
         return tknAddr == ethAddr ? true : false;
     }
 
     /**
-     * @dev Get Vault Debt Amount.
+     * @dev Get Safe Debt Amount.
     */
-    function _getVaultDebt(
-        address vat,
-        bytes32 ilk,
-        address urn
+    function _getSafeDebt(
+        address safeEngine,
+        bytes32 collateralType,
+        address handler
     ) internal view returns (uint wad) {
-        (, uint rate,,,) = SafeEngineLike(vat).collateralTypes(ilk);
-        (, uint art) = SafeEngineLike(vat).safes(ilk, urn);
-        uint coin = SafeEngineLike(vat).coin(urn);
+        (, uint rate,,,) = SafeEngineLike(safeEngine).collateralTypes(collateralType);
+        (, uint debt) = SafeEngineLike(safeEngine).safes(collateralType, handler);
+        uint coin = SafeEngineLike(safeEngine).coin(handler);
 
-        uint rad = sub(mul(art, rate), coin);
+        uint rad = sub(mul(debt, rate), coin);
         wad = rad / RAY;
 
         wad = mul(wad, RAY) < rad ? wad + 1 : wad;
@@ -63,17 +63,17 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Get Borrow Amount.
     */
     function _getBorrowAmt(
-        address vat,
-        address urn,
-        bytes32 ilk,
+        address safeEngine,
+        address handler,
+        bytes32 collateralType,
         uint amt
-    ) internal returns (int dart)
+    ) internal returns (int deltaDebt)
     {
-        uint rate = mcdJug.taxSingle(ilk);
-        uint coin = SafeEngineLike(vat).coin(urn);
+        uint rate = taxCollectorContract.taxSingle(collateralType);
+        uint coin = SafeEngineLike(safeEngine).coin(handler);
         if (coin < mul(amt, RAY)) {
-            dart = toInt(sub(mul(amt, RAY), coin) / rate);
-            dart = mul(uint(dart), rate) < mul(amt, RAY) ? dart + 1 : dart;
+            deltaDebt = toInt(sub(mul(amt, RAY), coin) / rate);
+            deltaDebt = mul(uint(deltaDebt), rate) < mul(amt, RAY) ? deltaDebt + 1 : deltaDebt;
         }
     }
 
@@ -81,16 +81,16 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Get Payback Amount.
     */
     function _getWipeAmt(
-        address vat,
+        address safeEngine,
         uint amt,
-        address urn,
-        bytes32 ilk
-    ) internal view returns (int dart)
+        address handler,
+        bytes32 collateralType
+    ) internal view returns (int deltaDebt)
     {
-        (, uint rate,,,) = SafeEngineLike(vat).collateralTypes(ilk);
-        (, uint art) = SafeEngineLike(vat).safes(ilk, urn);
-        dart = toInt(amt / rate);
-        dart = uint(dart) <= art ? - dart : - toInt(art);
+        (, uint rate,,,) = SafeEngineLike(safeEngine).collateralTypes(collateralType);
+        (, uint debt) = SafeEngineLike(safeEngine).safes(collateralType, handler);
+        deltaDebt = toInt(amt / rate);
+        deltaDebt = uint(deltaDebt) <= debt ? - deltaDebt : - toInt(debt);
     }
 
     /**
@@ -105,14 +105,14 @@ abstract contract Helpers is DSMath, Basic {
     }
 
     /**
-     * @dev Get vault ID. If `vault` is 0, get lastSAFEID opened vault.
+     * @dev Get safe ID. If `safe` is 0, get lastSAFEID opened safe.
     */
-    function getVault(uint vault) internal view returns (uint _vault) {
-        if (vault == 0) {
-            require(managerContract.safeCount(address(this)) > 0, "no-vault-opened");
-            _vault = managerContract.lastSAFEID(address(this));
+    function getSafe(uint safe) internal view returns (uint _safe) {
+        if (safe == 0) {
+            require(managerContract.safeCount(address(this)) > 0, "no-safe-opened");
+            _safe = managerContract.lastSAFEID(address(this));
         } else {
-            _vault = vault;
+            _safe = safe;
         }
     }
 

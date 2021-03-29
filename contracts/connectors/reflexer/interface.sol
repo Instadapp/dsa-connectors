@@ -18,7 +18,7 @@ interface ManagerLike {
 }
 
 interface SafeEngineLike {
-    function can(address, address) external view returns (uint);
+    function safeRights(address, address) external view returns (uint);
     function collateralTypes(bytes32) external view returns (uint, uint, uint, uint, uint);
     function coin(address) external view returns (uint);
     function safes(bytes32, address) external view returns (uint, uint);
@@ -38,6 +38,7 @@ interface SafeEngineLike {
 interface TokenJoinInterface {
     function decimals() external returns (uint);
     function collateral() external returns (TokenInterface);
+    function collateralType() external returns (bytes32);
     function join(address, uint) external payable;
     function exit(address, uint) external;
 }
@@ -51,4 +52,12 @@ interface CoinJoinInterface {
 
 interface TaxCollectorLike {
     function taxSingle(bytes32) external returns (uint);
+}
+
+interface ConnectorsInterface {
+    function chief(address) external view returns (bool);
+}
+
+interface IndexInterface {
+    function master() external view returns (address);
 }

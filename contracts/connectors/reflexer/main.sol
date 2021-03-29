@@ -5,56 +5,56 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { SafeEngineLike, TokenJoinInterface } from "./interface.sol";
 
-abstract contract MakerResolver is Helpers, Events {
+abstract contract GebResolver is Helpers, Events {
     /**
-     * @dev Open Vault
+     * @dev Open Safe
      * @param colType Type of Collateral.(eg: 'ETH-A')
     */
     function open(string calldata colType) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        bytes32 ilk = stringToBytes32(colType);
-        require(instaMapping.gemJoinMapping(ilk) != address(0), "wrong-col-type");
-        uint256 vault = managerContract.openSAFE(ilk, address(this));
+        bytes32 collateralType = stringToBytes32(colType);
+        require(instaMapping.gemJoinMapping(collateralType) != address(0), "wrong-col-type");
+        uint256 safe = managerContract.openSAFE(collateralType, address(this));
 
         _eventName = "LogOpen(uint256,bytes32)";
-        _eventParam = abi.encode(vault, ilk);
+        _eventParam = abi.encode(safe, collateralType);
     }
 
     /**
-     * @dev Close Vault
-     * @param vault Vault ID to close.
+     * @dev Close Safe
+     * @param safe Safe ID to close.
     */
-    function close(uint256 vault) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(_vault);
-        (uint ink, uint art) = SafeEngineLike(managerContract.safeEngine()).safes(ilk, urn);
+    function close(uint256 safe) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(_safe);
+        (uint collateral, uint debt) = SafeEngineLike(managerContract.safeEngine()).safes(collateralType, handler);
 
-        require(ink == 0 && art == 0, "vault-has-assets");
-        require(managerContract.ownsSAFE(_vault) == address(this), "not-owner");
+        require(collateral == 0 && debt == 0, "safe-has-assets");
+        require(managerContract.ownsSAFE(_safe) == address(this), "not-owner");
 
-        managerContract.transferSAFEOwnership(_vault, giveAddr);
+        managerContract.transferSAFEOwnership(_safe, giveAddr);
 
         _eventName = "LogClose(uint256,bytes32)";
-        _eventParam = abi.encode(_vault, ilk);
+        _eventParam = abi.encode(_safe, collateralType);
     }
 
     /**
      * @dev Deposit ETH/ERC20_Token Collateral.
-     * @param vault Vault ID.
+     * @param safe Safe ID.
      * @param amt token amount to deposit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function deposit(
-        uint256 vault,
+        uint256 safe,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        uint _vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(_vault);
+        uint _safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        address colAddr = instaMapping.gemJoinMapping(ilk);
+        address colAddr = instaMapping.gemJoinMapping(collateralType);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
         TokenInterface tokenContract = tokenJoinContract.collateral();
 
@@ -69,8 +69,8 @@ abstract contract MakerResolver is Helpers, Events {
         tokenJoinContract.join(address(this), _amt);
 
         SafeEngineLike(managerContract.safeEngine()).modifySAFECollateralization(
-            ilk,
-            urn,
+            collateralType,
+            handler,
             address(this),
             address(this),
             toInt(convertTo18(tokenJoinContract.decimals(), _amt)),
@@ -80,45 +80,45 @@ abstract contract MakerResolver is Helpers, Events {
         setUint(setId, _amt);
 
         _eventName = "LogDeposit(uint256,bytes32,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
+        _eventParam = abi.encode(_safe, collateralType, _amt, getId, setId);
     }
 
     /**
      * @dev Withdraw ETH/ERC20_Token Collateral.
-     * @param vault Vault ID.
+     * @param safe Safe ID.
      * @param amt token amount to withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdraw(
-        uint256 vault,
+        uint256 safe,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        uint _vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(_vault);
+        uint _safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        address colAddr = instaMapping.gemJoinMapping(ilk);
+        address colAddr = instaMapping.gemJoinMapping(collateralType);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
 
         uint _amt18;
         if (_amt == uint(-1)) {
-            (_amt18,) = SafeEngineLike(managerContract.safeEngine()).safes(ilk, urn);
+            (_amt18,) = SafeEngineLike(managerContract.safeEngine()).safes(collateralType, handler);
             _amt = convert18ToDec(tokenJoinContract.decimals(), _amt18);
         } else {
             _amt18 = convertTo18(tokenJoinContract.decimals(), _amt);
         }
 
         managerContract.modifySAFECollateralization(
-            _vault,
+            _safe,
             -toInt(_amt18),
             0
         );
 
         managerContract.transferCollateral(
-            _vault,
+            _safe,
             address(this),
             _amt18
         );
@@ -135,131 +135,131 @@ abstract contract MakerResolver is Helpers, Events {
         setUint(setId, _amt);
 
         _eventName = "LogWithdraw(uint256,bytes32,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
+        _eventParam = abi.encode(_safe, collateralType, _amt, getId, setId);
     }
 
     /**
-     * @dev Borrow DAI.
-     * @param vault Vault ID.
+     * @dev Borrow Coin.
+     * @param safe Safe ID.
      * @param amt token amount to borrow.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function borrow(
-        uint256 vault,
+        uint256 safe,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        uint _vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(_vault);
+        uint _safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        SafeEngineLike vatContract = SafeEngineLike(managerContract.safeEngine());
+        SafeEngineLike safeEngineContract = SafeEngineLike(managerContract.safeEngine());
 
         managerContract.modifySAFECollateralization(
-            _vault,
+            _safe,
             0,
             _getBorrowAmt(
-                address(vatContract),
-                urn,
-                ilk,
+                address(safeEngineContract),
+                handler,
+                collateralType,
                 _amt
             )
         );
 
         managerContract.transferInternalCoins(
-            _vault,
+            _safe,
             address(this),
             toRad(_amt)
         );
 
-        if (vatContract.can(address(this), address(daiJoinContract)) == 0) {
-            vatContract.approveSAFEModification(address(daiJoinContract));
+        if (safeEngineContract.safeRights(address(this), address(coinJoinContract)) == 0) {
+            safeEngineContract.approveSAFEModification(address(coinJoinContract));
         }
 
-        daiJoinContract.exit(address(this), _amt);
+        coinJoinContract.exit(address(this), _amt);
 
         setUint(setId, _amt);
 
         _eventName = "LogBorrow(uint256,bytes32,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
+        _eventParam = abi.encode(_safe, collateralType, _amt, getId, setId);
     }
 
     /**
-     * @dev Payback borrowed DAI.
-     * @param vault Vault ID.
+     * @dev Payback borrowed Coin.
+     * @param safe Safe ID.
      * @param amt token amount to payback.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function payback(
-        uint256 vault,
+        uint256 safe,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        uint _vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(_vault);
+        uint _safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        address vat = managerContract.safeEngine();
+        address safeEngine = managerContract.safeEngine();
 
-        uint _maxDebt = _getVaultDebt(vat, ilk, urn);
+        uint _maxDebt = _getSafeDebt(safeEngine, collateralType, handler);
 
         _amt = _amt == uint(-1) ? _maxDebt : _amt;
 
         require(_maxDebt >= _amt, "paying-excess-debt");
 
-        daiJoinContract.coin().approve(address(daiJoinContract), _amt);
-        daiJoinContract.join(urn, _amt);
+        coinJoinContract.coin().approve(address(coinJoinContract), _amt);
+        coinJoinContract.join(handler, _amt);
 
         managerContract.modifySAFECollateralization(
-            _vault,
+            _safe,
             0,
             _getWipeAmt(
-                vat,
-                SafeEngineLike(vat).coin(urn),
-                urn,
-                ilk
+                safeEngine,
+                SafeEngineLike(safeEngine).coin(handler),
+                handler,
+                collateralType
             )
         );
 
         setUint(setId, _amt);
 
         _eventName = "LogPayback(uint256,bytes32,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
+        _eventParam = abi.encode(_safe, collateralType, _amt, getId, setId);
     }
 
     /**
      * @dev Withdraw leftover ETH/ERC20_Token after Liquidation.
-     * @param vault Vault ID.
+     * @param safe Safe ID.
      * @param amt token amount to Withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function withdrawLiquidated(
-        uint256 vault,
+        uint256 safe,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        (bytes32 ilk, address urn) = getVaultData(vault);
+        (bytes32 collateralType, address handler) = getSafeData(safe);
 
-        address colAddr = instaMapping.gemJoinMapping(ilk);
+        address colAddr = instaMapping.gemJoinMapping(collateralType);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
 
         uint _amt18;
         if (_amt == uint(-1)) {
-            _amt18 = SafeEngineLike(managerContract.safeEngine()).tokenCollateral(ilk, urn);
+            _amt18 = SafeEngineLike(managerContract.safeEngine()).tokenCollateral(collateralType, handler);
             _amt = convert18ToDec(tokenJoinContract.decimals(), _amt18);
         } else {
             _amt18 = convertTo18(tokenJoinContract.decimals(), _amt);
         }
 
         managerContract.transferCollateral(
-            vault,
+            safe,
             address(this),
             _amt18
         );
@@ -273,19 +273,19 @@ abstract contract MakerResolver is Helpers, Events {
         setUint(setId, _amt);
 
         _eventName = "LogWithdrawLiquidated(uint256,bytes32,uint256,uint256,uint256)";
-        _eventParam = abi.encode(vault, ilk, _amt, getId, setId);
+        _eventParam = abi.encode(safe, collateralType, _amt, getId, setId);
     }
 
-    struct MakerData {
-        uint _vault;
+    struct GebData {
+        uint _safe;
         address colAddr;
         TokenJoinInterface tokenJoinContract;
-        SafeEngineLike vatContract;
+        SafeEngineLike safeEngineContract;
         TokenInterface tokenContract;
     }
     /**
-     * @dev Deposit ETH/ERC20_Token Collateral and Borrow DAI.
-     * @param vault Vault ID.
+     * @dev Deposit ETH/ERC20_Token Collateral and Borrow Coin.
+     * @param safe Safe ID.
      * @param depositAmt token deposit amount to Withdraw.
      * @param borrowAmt token borrow amount to Withdraw.
      * @param getIdDeposit Get deposit token amount at this ID from `InstaMemory` Contract.
@@ -294,7 +294,7 @@ abstract contract MakerResolver is Helpers, Events {
      * @param setIdBorrow Set borrow token amount at this ID in `InstaMemory` Contract.
     */
     function depositAndBorrow(
-        uint256 vault,
+        uint256 safe,
         uint256 depositAmt,
         uint256 borrowAmt,
         uint256 getIdDeposit,
@@ -302,58 +302,58 @@ abstract contract MakerResolver is Helpers, Events {
         uint256 setIdDeposit,
         uint256 setIdBorrow
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        MakerData memory makerData;
+        GebData memory gebData;
         uint _amtDeposit = getUint(getIdDeposit, depositAmt);
         uint _amtBorrow = getUint(getIdBorrow, borrowAmt);
 
-        makerData._vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(makerData._vault);
+        gebData._safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(gebData._safe);
 
-        makerData.colAddr = instaMapping.gemJoinMapping(ilk);
-        makerData.tokenJoinContract = TokenJoinInterface(makerData.colAddr);
-        makerData.vatContract = SafeEngineLike(managerContract.safeEngine());
-        makerData.tokenContract = makerData.tokenJoinContract.collateral();
+        gebData.colAddr = instaMapping.gemJoinMapping(collateralType);
+        gebData.tokenJoinContract = TokenJoinInterface(gebData.colAddr);
+        gebData.safeEngineContract = SafeEngineLike(managerContract.safeEngine());
+        gebData.tokenContract = gebData.tokenJoinContract.collateral();
 
-        if (isEth(address(makerData.tokenContract))) {
+        if (isEth(address(gebData.tokenContract))) {
             _amtDeposit = _amtDeposit == uint(-1) ? address(this).balance : _amtDeposit;
-            makerData.tokenContract.deposit{value: _amtDeposit}();
+            gebData.tokenContract.deposit{value: _amtDeposit}();
         } else {
-            _amtDeposit = _amtDeposit == uint(-1) ?  makerData.tokenContract.balanceOf(address(this)) : _amtDeposit;
+            _amtDeposit = _amtDeposit == uint(-1) ?  gebData.tokenContract.balanceOf(address(this)) : _amtDeposit;
         }
 
-        makerData.tokenContract.approve(address(makerData.colAddr), _amtDeposit);
-        makerData.tokenJoinContract.join(urn, _amtDeposit);
+        gebData.tokenContract.approve(address(gebData.colAddr), _amtDeposit);
+        gebData.tokenJoinContract.join(handler, _amtDeposit);
 
         managerContract.modifySAFECollateralization(
-            makerData._vault,
-            toInt(convertTo18(makerData.tokenJoinContract.decimals(), _amtDeposit)),
+            gebData._safe,
+            toInt(convertTo18(gebData.tokenJoinContract.decimals(), _amtDeposit)),
             _getBorrowAmt(
-                address(makerData.vatContract),
-                urn,
-                ilk,
+                address(gebData.safeEngineContract),
+                handler,
+                collateralType,
                 _amtBorrow
             )
         );
 
         managerContract.transferInternalCoins(
-            makerData._vault,
+            gebData._safe,
             address(this),
             toRad(_amtBorrow)
         );
 
-        if (makerData.vatContract.can(address(this), address(daiJoinContract)) == 0) {
-            makerData.vatContract.approveSAFEModification(address(daiJoinContract));
+        if (gebData.safeEngineContract.safeRights(address(this), address(coinJoinContract)) == 0) {
+            gebData.safeEngineContract.approveSAFEModification(address(coinJoinContract));
         }
 
-        daiJoinContract.exit(address(this), _amtBorrow);
+        coinJoinContract.exit(address(this), _amtBorrow);
 
         setUint(setIdDeposit, _amtDeposit);
         setUint(setIdBorrow, _amtBorrow);
 
         _eventName = "LogDepositAndBorrow(uint256,bytes32,uint256,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
-            makerData._vault,
-            ilk,
+            gebData._safe,
+            collateralType,
             _amtDeposit,
             _amtBorrow,
             getIdDeposit,
@@ -364,48 +364,48 @@ abstract contract MakerResolver is Helpers, Events {
     }
 
     /**
-     * @dev Exit DAI from urn.
-     * @param vault Vault ID.
+     * @dev Exit Coin from handler.
+     * @param safe Safe ID.
      * @param amt token amount to exit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
-    function exitDai(
-        uint256 vault,
+    function exit(
+        uint256 safe,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        uint _vault = getVault(vault);
-        (bytes32 ilk, address urn) = getVaultData(_vault);
+        uint _safe = getSafe(safe);
+        (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        SafeEngineLike vatContract = SafeEngineLike(managerContract.safeEngine());
+        SafeEngineLike safeEngineContract = SafeEngineLike(managerContract.safeEngine());
         if(_amt == uint(-1)) {
-            _amt = vatContract.coin(urn);
+            _amt = safeEngineContract.coin(handler);
             _amt = _amt / 10 ** 27;
         }
 
         managerContract.transferInternalCoins(
-            _vault,
+            _safe,
             address(this),
             toRad(_amt)
         );
 
-        if (vatContract.can(address(this), address(daiJoinContract)) == 0) {
-            vatContract.approveSAFEModification(address(daiJoinContract));
+        if (safeEngineContract.safeRights(address(this), address(coinJoinContract)) == 0) {
+            safeEngineContract.approveSAFEModification(address(coinJoinContract));
         }
 
-        daiJoinContract.exit(address(this), _amt);
+        coinJoinContract.exit(address(this), _amt);
 
         setUint(setId, _amt);
 
-        _eventName = "LogExitDai(uint256,bytes32,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
+        _eventName = "LogExit(uint256,bytes32,uint256,uint256,uint256)";
+        _eventParam = abi.encode(_safe, collateralType, _amt, getId, setId);
     }
 
 }
 
-contract ConnectV2Maker is MakerResolver {
-    string public constant name = "MakerDao-v1";
+contract ConnectV2Reflexer is GebResolver {
+    string public constant name = "Reflexer-v1";
 }
