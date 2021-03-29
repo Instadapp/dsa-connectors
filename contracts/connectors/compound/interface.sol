@@ -34,11 +34,3 @@ interface CompoundMappingInterface {
     function cTokenMapping(string calldata tokenId) external view returns (address);
     function getMapping(string calldata tokenId) external view returns (address, address);
 }
-
-struct LiquidateData {
-    address tokenToPay;
-    address tokenInReturn;
-    address cTokenPay;
-    address cTokenColl;
-    CTokenInterface cTokenContract;
-}
