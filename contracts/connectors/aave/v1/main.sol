@@ -9,10 +9,11 @@ import { AaveInterface, AaveCoreInterface, ATokenInterface } from "./interface.s
 abstract contract AaveResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
-     * @param token token address to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt token amount to deposit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Deposit a token to Aave v1 for lending / collaterization.
+     * @param token The address of the token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposited.
     */
     function deposit(
         address token,
@@ -45,10 +46,11 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
-     * @param token token address to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt token amount to withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Withdraw deposited token from Aave v1
+     * @param token The address of the token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdraw(
         address token,
@@ -74,10 +76,11 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Borrow ETH/ERC20_Token.
-     * @param token token address to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt token amount to borrow.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Borrow a token using Aave v1
+     * @param token The address of the token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of the token to borrow.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens borrowed.
     */
     function borrow(
         address token,
@@ -96,10 +99,11 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Payback borrowed ETH/ERC20_Token.
-     * @param token token address to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt token amount to payback.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @notice Payback debt owed.
+     * @param token The address of the token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens paid back.
     */
     function payback(
         address token,
@@ -132,6 +136,7 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Enable collateral
+     * @notice Enable an array of tokens as collateral
      * @param tokens Array of tokens to enable collateral
     */
     function enableCollateral(

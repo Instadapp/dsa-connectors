@@ -10,11 +10,12 @@ import { CETHInterface, CTokenInterface } from "./interface.sol";
 abstract contract CompoundResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
+     * @notice Deposit a token to Compound for lending / collaterization.
      * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
-     * @param amt token amount to deposit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposited.
     */
     function depositRaw(
         address token,
@@ -63,11 +64,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
+     * @notice Withdraw deposited token from Compound
      * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
-     * @param amt token amount to withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdrawRaw(
         address token,
@@ -116,11 +118,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Borrow ETH/ERC20_Token.
+     * @notice Borrow a token using Compound
      * @param token The address of the token to borrow. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
-     * @param amt token amount to borrow.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param amt The amount of the token to borrow.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens borrowed.
     */
     function borrowRaw(
         address token,
@@ -161,11 +164,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Payback borrowed ETH/ERC20_Token.
+     * @notice Payback debt owed.
      * @param token The address of the token to payback. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
-     * @param amt token amount to payback.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens paid back.
     */
     function paybackRaw(
         address token,
@@ -216,11 +220,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Deposit ETH/ERC20_Token.
+     * @notice Same as depositRaw. The only difference is this method stores cToken amount in set ID.
      * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
-     * @param amt token amount to depositCToken.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of cTokens received.
     */
     function depositCTokenRaw(
         address token,
@@ -280,11 +285,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw CETH/CERC20_Token using cToken Amt.
+     * @notice Same as withdrawRaw. The only difference is this method fetch cToken amount in get ID.
      * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
-     * @param cTokenAmt ctoken amount to withdrawCToken.
-     * @param getId Get ctoken amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param cTokenAmt The amount of cTokens to withdraw
+     * @param getId ID to retrieve cTokenAmt 
+     * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdrawCTokenRaw(
         address token,
@@ -335,14 +341,15 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Liquidate a position.
+     * @notice Liquidate a position.
      * @param borrower Borrower's Address.
      * @param tokenToPay The address of the token to pay for liquidation.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cTokenPay Corresponding cToken address.
      * @param tokenInReturn The address of the token to return for liquidation.
      * @param cTokenColl Corresponding cToken address.
      * @param amt The token amount to pay for liquidation.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of paid for liquidation.
     */
     function liquidateRaw(
         address borrower,
@@ -391,12 +398,13 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Liquidate a position using the mapping.
+     * @notice Liquidate a position using the mapping.
      * @param borrower Borrower's Address.
      * @param tokenIdToPay token id of the token to pay for liquidation.(For eg: ETH-A)
      * @param tokenIdInReturn token id of the token to return for liquidation.(For eg: USDC-A)
      * @param amt token amount to pay for liquidation.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of paid for liquidation.
     */
     function liquidate(
         address borrower,

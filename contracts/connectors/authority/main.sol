@@ -7,7 +7,8 @@ import { Events } from "./events.sol";
 abstract contract AuthorityResolver is Events, Helpers {
     /**
      * @dev Add New authority
-     * @param authority authority Address.
+     * @notice Add an address as account authority
+     * @param authority The authority Address.
      */
     function add(
         address authority
@@ -20,7 +21,8 @@ abstract contract AuthorityResolver is Events, Helpers {
 
     /**
      * @dev Remove authority
-     * @param authority authority Address.
+     * @notice Remove an address as account authority
+     * @param authority The authority Address.
      */
     function remove(
         address authority

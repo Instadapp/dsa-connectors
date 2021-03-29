@@ -85,13 +85,14 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
 
 abstract contract OneInch is OneInchResolverHelpers {
     /**
-     * @dev Sell ETH/ERC20_Token using 1inch.
-     * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr selling token amount.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAmt selling token amount.
-     * @param unitAmt unit amount of buyAmt/sellAmt with slippage.
+     * @dev Sell ETH/ERC20_Token using 1Inch.
+     * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
+     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAmt The amount of the token to sell.
+     * @param unitAmt The amount of buyAmt/sellAmt with slippage.
      * @param callData Data from 1inch API.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @param setId ID stores the amount of token brought.
     */
     function sell(
         address buyAddr,
@@ -118,5 +119,5 @@ abstract contract OneInch is OneInchResolverHelpers {
 }
 
 contract ConnectV2OneInch is OneInch {
-    string public name = "1inch-v1";
+    string public name = "1Inch-v1";
 }
