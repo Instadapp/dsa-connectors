@@ -9,7 +9,8 @@ abstract contract CompResolver is Events, Helpers {
 
     /**
      * @dev Claim Accrued COMP Token.
-     * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
+     * @notice Claim Accrued COMP Token.
+     * @param setId ID stores the amount of COMP claimed.
     */
     function ClaimComp(uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         TokenInterface _compToken = TokenInterface(address(compToken));
@@ -26,8 +27,9 @@ abstract contract CompResolver is Events, Helpers {
 
     /**
      * @dev Claim Accrued COMP Token.
+     * @notice Claim Accrued COMP Token.
      * @param tokens Array of tokens supplied and borrowed.
-     * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
+     * @param setId ID stores the amount of COMP claimed.
     */
     function ClaimCompTwo(address[] calldata tokens, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _len = tokens.length;
@@ -50,9 +52,10 @@ abstract contract CompResolver is Events, Helpers {
 
     /**
      * @dev Claim Accrued COMP Token.
+     * @notice Claim Accrued COMP Token.
      * @param supplyTokens Array of tokens supplied.
      * @param borrowTokens Array of tokens borrowed.
-     * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
+     * @param setId ID stores the amount of COMP claimed.
     */
     function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
        (address[] memory ctokens, bool isBorrow, bool isSupply) = mergeTokenArr(supplyTokens, borrowTokens);
@@ -74,7 +77,8 @@ abstract contract CompResolver is Events, Helpers {
 
     /**
      * @dev Delegate votes.
-     * @param delegatee The address to delegate votes to.
+     * @notice Delegate votes.
+     * @param delegatee The address to delegate the votes to.
     */
     function delegate(address delegatee) external payable returns (string memory _eventName, bytes memory _eventParam) {
         require(compToken.delegates(address(this)) != delegatee, "Already delegated to same delegatee.");

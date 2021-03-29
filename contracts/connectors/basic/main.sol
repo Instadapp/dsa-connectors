@@ -12,10 +12,11 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 
     /**
      * @dev Deposit Assets To Smart Account.
-     * @param token Token Address.
-     * @param amt Token Amount.
-     * @param getId Get Storage ID.
-     * @param setId Set Storage ID.
+     * @notice Deposit a token to DSA
+     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)` (Not valid for ETH))
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposited.
      */
     function deposit(
         address token,
@@ -39,12 +40,13 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     }
 
     /**
-     * @dev Withdraw Assets To Smart Account.
-     * @param token Token Address.
-     * @param amt Token Amount.
-     * @param to Withdraw token address.
-     * @param getId Get Storage ID.
-     * @param setId Set Storage ID.
+     * @dev Withdraw Assets from Smart  Account
+     * @notice Withdraw a token from DSA
+     * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of tokens to withdraw. (For max: `uint256(-1)`)
+     * @param to The address to receive the token upon withdrawal
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens withdrawn.
      */
     function withdraw(
         address token,
