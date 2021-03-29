@@ -173,8 +173,30 @@ abstract contract AaveResolver is Events, Helpers {
             }
         }
 
-        _eventName = "LogEnableCollateral(address[]);";
+        _eventName = "LogEnableCollateral(address[])";
         _eventParam = abi.encode(tokens);
+    }
+
+    /**
+     * @dev Swap borrow rate mode
+     * @notice Swaps user borrow rate mode between variable and stable
+     * @param token The address of the token to swap borrow rate.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
+    */
+    function swapBorrowRateMode(
+        address token,
+        uint rateMode
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
+
+        uint currentRateMode = rateMode == 1 ? 2 : 1;
+
+        if (getPaybackBalance(token, currentRateMode) > 0) {
+            aave.swapBorrowRateMode(token, rateMode);
+        }
+
+        _eventName = "LogSwapRateMode(address,uint256)";
+        _eventParam = abi.encode(token, rateMode);
     }
 }
 
