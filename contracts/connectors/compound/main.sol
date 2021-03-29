@@ -42,6 +42,14 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventParam = abi.encode(token, cToken, _amt, getId, setId);
     }
 
+    /**
+     * @dev Deposit ETH/ERC20_Token using the Mapping.
+     * @notice Deposit a token to Compound for lending / collaterization.
+     * @param tokenId The token id of the token to deposit.(For eg: ETH-A)
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposited.
+    */
     function deposit(
         string calldata tokenId,
         uint256 amt,
@@ -86,6 +94,14 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventParam = abi.encode(token, cToken, _amt, getId, setId);
     }
 
+    /**
+     * @dev Withdraw ETH/ERC20_Token using the Mapping.
+     * @notice Withdraw deposited token from Compound
+     * @param tokenId The token id of the token to withdraw.(For eg: ETH-A)
+     * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens withdrawn.
+    */
     function withdraw(
         string calldata tokenId,
         uint256 amt,
@@ -122,6 +138,14 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventParam = abi.encode(token, cToken, _amt, getId, setId);
     }
 
+     /**
+     * @dev Borrow ETH/ERC20_Token using the Mapping.
+     * @notice Borrow a token using Compound
+     * @param tokenId The token id of the token to borrow.(For eg: DAI-A)
+     * @param amt The amount of the token to borrow.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens borrowed.
+    */
     function borrow(
         string calldata tokenId,
         uint256 amt,
@@ -168,6 +192,14 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventParam = abi.encode(token, cToken, _amt, getId, setId);
     }
 
+    /**
+     * @dev Payback borrowed ETH/ERC20_Token using the Mapping.
+     * @notice Payback debt owed.
+     * @param tokenId The token id of the token to payback.(For eg: COMP-A)
+     * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens paid back.
+    */
     function payback(
         string calldata tokenId,
         uint256 amt,
@@ -223,6 +255,14 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventParam = abi.encode(token, cToken, _amt, _cAmt, getId, setId);
     }
 
+    /**
+     * @dev Deposit ETH/ERC20_Token using the Mapping.
+     * @notice Same as deposit. The only difference is this method stores cToken amount in set ID.
+     * @param tokenId The token id of the token to depositCToken.(For eg: DAI-A)
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of cTokens received.
+    */
     function depositCToken(
         string calldata tokenId,
         uint256 amt,
@@ -269,6 +309,14 @@ abstract contract CompoundResolver is Events, Helpers {
         _eventParam = abi.encode(token, cToken, withdrawAmt, _cAmt, getId, setId);
     }
 
+    /**
+     * @dev Withdraw CETH/CERC20_Token using cToken Amt & the Mapping.
+     * @notice Same as withdraw. The only difference is this method fetch cToken amount in get ID.
+     * @param tokenId The token id of the token to withdraw CToken.(For eg: ETH-A)
+     * @param cTokenAmt The amount of cTokens to withdraw
+     * @param getId ID to retrieve cTokenAmt 
+     * @param setId ID stores the amount of tokens withdrawn.
+    */
     function withdrawCToken(
         string calldata tokenId,
         uint cTokenAmt,
