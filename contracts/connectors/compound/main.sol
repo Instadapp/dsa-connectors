@@ -10,7 +10,8 @@ import { CETHInterface, CTokenInterface, LiquidateData } from "./interface.sol";
 abstract contract CompoundResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
-     * @param tokenId token id of the token to deposit.(For eg: ETH-A)
+     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
      * @param amt token amount to deposit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
@@ -62,7 +63,8 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
-     * @param tokenId token id of the token to withdraw.(For eg: ETH-A)
+     * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
      * @param amt token amount to withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
@@ -114,7 +116,8 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Borrow ETH/ERC20_Token.
-     * @param tokenId token id of the token to borrow.(For eg: DAI-A)
+     * @param token The address of the token to borrow. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
      * @param amt token amount to borrow.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
@@ -158,7 +161,8 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Payback borrowed ETH/ERC20_Token.
-     * @param tokenId token id of the token to payback.(For eg: COMP-A)
+     * @param token The address of the token to payback. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
      * @param amt token amount to payback.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
@@ -212,7 +216,8 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Deposit ETH/ERC20_Token.
-     * @param tokenId token id of the token to depositCToken.(For eg: DAI-A)
+     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
      * @param amt token amount to depositCToken.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set ctoken amount at this ID in `InstaMemory` Contract.
@@ -275,7 +280,8 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw CETH/CERC20_Token using cToken Amt.
-     * @param tokenId token id of the token to withdraw CToken.(For eg: ETH-A)
+     * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
      * @param cTokenAmt ctoken amount to withdrawCToken.
      * @param getId Get ctoken amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
@@ -324,7 +330,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         (address token, address cToken) = compMapping.getMapping(tokenId);
-        (_eventName, _eventParam) = withdrawCTokenRaw(token, cToken, amt, getId, setId);
+        (_eventName, _eventParam) = withdrawCTokenRaw(token, cToken, cTokenAmt, getId, setId);
     }
 
     /**
