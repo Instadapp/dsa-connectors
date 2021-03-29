@@ -5,7 +5,7 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { CETHInterface, CTokenInterface, LiquidateData } from "./interface.sol";
+import { CETHInterface, CTokenInterface } from "./interface.sol";
 
 abstract contract CompoundResolver is Events, Helpers {
     /**
@@ -25,7 +25,7 @@ abstract contract CompoundResolver is Events, Helpers {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         enterMarket(cToken);
         if (token == ethAddr) {
@@ -78,7 +78,7 @@ abstract contract CompoundResolver is Events, Helpers {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         
-        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         if (_amt == uint(-1)) {
@@ -131,7 +131,7 @@ abstract contract CompoundResolver is Events, Helpers {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         enterMarket(cToken);
         require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
@@ -176,7 +176,7 @@ abstract contract CompoundResolver is Events, Helpers {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
@@ -231,7 +231,7 @@ abstract contract CompoundResolver is Events, Helpers {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         enterMarket(cToken);
 
@@ -294,7 +294,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _cAmt = getUint(getId, cTokenAmt);
-        require(token != address(0) && cToken != address(0), "ctoken mapping not found");
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
         TokenInterface tokenContract = TokenInterface(token);
@@ -336,6 +336,62 @@ abstract contract CompoundResolver is Events, Helpers {
     /**
      * @dev Liquidate a position.
      * @param borrower Borrower's Address.
+     * @param tokenToPay The address of the token to pay for liquidation.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cTokenPay Corresponding cToken address.
+     * @param tokenInReturn The address of the token to return for liquidation.
+     * @param cTokenColl Corresponding cToken address.
+     * @param amt The token amount to pay for liquidation.
+     * @param getId Get token amount at this ID from `InstaMemory` Contract.
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+    */
+    function liquidateRaw(
+        address borrower,
+        address tokenToPay,
+        address cTokenPay,
+        address tokenInReturn,
+        address cTokenColl,
+        uint256 amt,
+        uint256 getId,
+        uint256 setId
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _amt = getUint(getId, amt);
+        require(tokenToPay != address(0) && cTokenPay != address(0), "invalid token/ctoken address");
+        require(tokenInReturn != address(0) && cTokenColl != address(0), "invalid token/ctoken address");
+
+        CTokenInterface cTokenContract = CTokenInterface(cTokenPay);
+
+        {
+            (,, uint shortfal) = troller.getAccountLiquidity(borrower);
+            require(shortfal != 0, "account-cannot-be-liquidated");
+            _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(borrower) : _amt;
+        }
+
+        if (tokenToPay == ethAddr) {
+            require(address(this).balance >= _amt, "not-enought-eth");
+            CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(borrower, cTokenColl);
+        } else {
+            TokenInterface tokenContract = TokenInterface(tokenToPay);
+            require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
+            tokenContract.approve(cTokenPay, _amt);
+            require(cTokenContract.liquidateBorrow(borrower, _amt, cTokenColl) == 0, "liquidate-failed");
+        }
+        
+        setUint(setId, _amt);
+
+        _eventName = "LogLiquidate(address,address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(
+            address(this),
+            tokenToPay,
+            tokenInReturn, 
+            _amt,
+            getId,
+            setId
+        );
+    }
+
+    /**
+     * @dev Liquidate a position using the mapping.
+     * @param borrower Borrower's Address.
      * @param tokenIdToPay token id of the token to pay for liquidation.(For eg: ETH-A)
      * @param tokenIdInReturn token id of the token to return for liquidation.(For eg: USDC-A)
      * @param amt token amount to pay for liquidation.
@@ -350,38 +406,16 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _amt = getUint(getId, amt);
+        (address tokenToPay, address cTokenToPay) = compMapping.getMapping(tokenIdToPay);
+        (address tokenInReturn, address cTokenColl) = compMapping.getMapping(tokenIdInReturn);
 
-        LiquidateData memory data;
-
-        (data.tokenToPay, data.cTokenPay) = compMapping.getMapping(tokenIdToPay);
-        (data.tokenInReturn, data.cTokenColl) = compMapping.getMapping(tokenIdInReturn);
-        data.cTokenContract = CTokenInterface(data.cTokenPay);
-
-        {
-            (,, uint shortfal) = troller.getAccountLiquidity(borrower);
-            require(shortfal != 0, "account-cannot-be-liquidated");
-            _amt = _amt == uint(-1) ? data.cTokenContract.borrowBalanceCurrent(borrower) : _amt;
-        }
-
-        if (data.tokenToPay == ethAddr) {
-            require(address(this).balance >= _amt, "not-enought-eth");
-            CETHInterface(data.cTokenPay).liquidateBorrow{value: _amt}(borrower, data.cTokenColl);
-        } else {
-            TokenInterface tokenContract = TokenInterface(data.tokenToPay);
-            require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
-            tokenContract.approve(data.cTokenPay, _amt);
-            require(data.cTokenContract.liquidateBorrow(borrower, _amt, data.cTokenColl) == 0, "liquidate-failed");
-        }
-        
-        setUint(setId, _amt);
-
-        _eventName = "LogLiquidate(address,address,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(
-            address(this),
-            data.tokenToPay,
-            data.tokenInReturn, 
-            _amt,
+        (_eventName, _eventParam) = liquidateRaw(
+            borrower,
+            tokenToPay,
+            cTokenToPay,
+            tokenInReturn,
+            cTokenColl,
+            amt,
             getId,
             setId
         );
