@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
-import { ManagerLike, DaiJoinInterface, PotLike, VatLike, JugLike } from "./interface.sol";
+import { ManagerLike, CoinJoinInterface, SafeEngineLike, TaxCollectorLike } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
@@ -14,17 +14,12 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev DAI Join
      */
-    DaiJoinInterface internal constant daiJoinContract = DaiJoinInterface(0x9759A6Ac90977b93B58547b4A71c78317f391A28);
-
-    /**
-     * @dev Pot
-     */
-    PotLike internal constant potContract = PotLike(0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7);
+    CoinJoinInterface internal constant daiJoinContract = CoinJoinInterface(0x9759A6Ac90977b93B58547b4A71c78317f391A28);
 
     /**
      * @dev Maker MCD Jug Address.
     */
-    JugLike internal constant mcdJug = JugLike(0x19c0976f590D67707E62397C87829d896Dc0f1F1);
+    TaxCollectorLike internal constant mcdJug = TaxCollectorLike(0x19c0976f590D67707E62397C87829d896Dc0f1F1);
 
     /**
      * @dev Return Close Vault Address.
@@ -35,8 +30,8 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Get Vault's ilk.
     */
     function getVaultData(uint vault) internal view returns (bytes32 ilk, address urn) {
-        ilk = managerContract.ilks(vault);
-        urn = managerContract.urns(vault);
+        ilk = managerContract.collateralTypes(vault);
+        urn = managerContract.safes(vault);
     }
 
     /**
@@ -54,11 +49,11 @@ abstract contract Helpers is DSMath, Basic {
         bytes32 ilk,
         address urn
     ) internal view returns (uint wad) {
-        (, uint rate,,,) = VatLike(vat).ilks(ilk);
-        (, uint art) = VatLike(vat).urns(ilk, urn);
-        uint dai = VatLike(vat).dai(urn);
+        (, uint rate,,,) = SafeEngineLike(vat).collateralTypes(ilk);
+        (, uint art) = SafeEngineLike(vat).safes(ilk, urn);
+        uint coin = SafeEngineLike(vat).coin(urn);
 
-        uint rad = sub(mul(art, rate), dai);
+        uint rad = sub(mul(art, rate), coin);
         wad = rad / RAY;
 
         wad = mul(wad, RAY) < rad ? wad + 1 : wad;
@@ -74,10 +69,10 @@ abstract contract Helpers is DSMath, Basic {
         uint amt
     ) internal returns (int dart)
     {
-        uint rate = mcdJug.drip(ilk);
-        uint dai = VatLike(vat).dai(urn);
-        if (dai < mul(amt, RAY)) {
-            dart = toInt(sub(mul(amt, RAY), dai) / rate);
+        uint rate = mcdJug.taxSingle(ilk);
+        uint coin = SafeEngineLike(vat).coin(urn);
+        if (coin < mul(amt, RAY)) {
+            dart = toInt(sub(mul(amt, RAY), coin) / rate);
             dart = mul(uint(dart), rate) < mul(amt, RAY) ? dart + 1 : dart;
         }
     }
@@ -92,8 +87,8 @@ abstract contract Helpers is DSMath, Basic {
         bytes32 ilk
     ) internal view returns (int dart)
     {
-        (, uint rate,,,) = VatLike(vat).ilks(ilk);
-        (, uint art) = VatLike(vat).urns(ilk, urn);
+        (, uint rate,,,) = SafeEngineLike(vat).collateralTypes(ilk);
+        (, uint art) = SafeEngineLike(vat).safes(ilk, urn);
         dart = toInt(amt / rate);
         dart = uint(dart) <= art ? - dart : - toInt(art);
     }
@@ -110,12 +105,12 @@ abstract contract Helpers is DSMath, Basic {
     }
 
     /**
-     * @dev Get vault ID. If `vault` is 0, get last opened vault.
+     * @dev Get vault ID. If `vault` is 0, get lastSAFEID opened vault.
     */
     function getVault(uint vault) internal view returns (uint _vault) {
         if (vault == 0) {
-            require(managerContract.count(address(this)) > 0, "no-vault-opened");
-            _vault = managerContract.last(address(this));
+            require(managerContract.safeCount(address(this)) > 0, "no-vault-opened");
+            _vault = managerContract.lastSAFEID(address(this));
         } else {
             _vault = vault;
         }

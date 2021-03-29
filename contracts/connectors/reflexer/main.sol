@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { VatLike, TokenJoinInterface } from "./interface.sol";
+import { SafeEngineLike, TokenJoinInterface } from "./interface.sol";
 
 abstract contract MakerResolver is Helpers, Events {
     /**
@@ -13,7 +13,7 @@ abstract contract MakerResolver is Helpers, Events {
     function open(string calldata colType) external payable returns (string memory _eventName, bytes memory _eventParam) {
         bytes32 ilk = stringToBytes32(colType);
         require(instaMapping.gemJoinMapping(ilk) != address(0), "wrong-col-type");
-        uint256 vault = managerContract.open(ilk, address(this));
+        uint256 vault = managerContract.openSAFE(ilk, address(this));
 
         _eventName = "LogOpen(uint256,bytes32)";
         _eventParam = abi.encode(vault, ilk);
@@ -26,12 +26,12 @@ abstract contract MakerResolver is Helpers, Events {
     function close(uint256 vault) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _vault = getVault(vault);
         (bytes32 ilk, address urn) = getVaultData(_vault);
-        (uint ink, uint art) = VatLike(managerContract.vat()).urns(ilk, urn);
+        (uint ink, uint art) = SafeEngineLike(managerContract.safeEngine()).safes(ilk, urn);
 
         require(ink == 0 && art == 0, "vault-has-assets");
-        require(managerContract.owns(_vault) == address(this), "not-owner");
+        require(managerContract.ownsSAFE(_vault) == address(this), "not-owner");
 
-        managerContract.give(_vault, giveAddr);
+        managerContract.transferSAFEOwnership(_vault, giveAddr);
 
         _eventName = "LogClose(uint256,bytes32)";
         _eventParam = abi.encode(_vault, ilk);
@@ -56,7 +56,7 @@ abstract contract MakerResolver is Helpers, Events {
 
         address colAddr = instaMapping.gemJoinMapping(ilk);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
-        TokenInterface tokenContract = tokenJoinContract.gem();
+        TokenInterface tokenContract = tokenJoinContract.collateral();
 
         if (isEth(address(tokenContract))) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
@@ -68,12 +68,12 @@ abstract contract MakerResolver is Helpers, Events {
         tokenContract.approve(address(colAddr), _amt);
         tokenJoinContract.join(address(this), _amt);
 
-        VatLike(managerContract.vat()).frob(
+        SafeEngineLike(managerContract.safeEngine()).modifySAFECollateralization(
             ilk,
             urn,
             address(this),
             address(this),
-            toInt(convertTo18(tokenJoinContract.dec(), _amt)),
+            toInt(convertTo18(tokenJoinContract.decimals(), _amt)),
             0
         );
 
@@ -105,25 +105,25 @@ abstract contract MakerResolver is Helpers, Events {
 
         uint _amt18;
         if (_amt == uint(-1)) {
-            (_amt18,) = VatLike(managerContract.vat()).urns(ilk, urn);
-            _amt = convert18ToDec(tokenJoinContract.dec(), _amt18);
+            (_amt18,) = SafeEngineLike(managerContract.safeEngine()).safes(ilk, urn);
+            _amt = convert18ToDec(tokenJoinContract.decimals(), _amt18);
         } else {
-            _amt18 = convertTo18(tokenJoinContract.dec(), _amt);
+            _amt18 = convertTo18(tokenJoinContract.decimals(), _amt);
         }
 
-        managerContract.frob(
+        managerContract.modifySAFECollateralization(
             _vault,
             -toInt(_amt18),
             0
         );
 
-        managerContract.flux(
+        managerContract.transferCollateral(
             _vault,
             address(this),
             _amt18
         );
 
-        TokenInterface tokenContract = tokenJoinContract.gem();
+        TokenInterface tokenContract = tokenJoinContract.collateral();
 
         if (isEth(address(tokenContract))) {
             tokenJoinContract.exit(address(this), _amt);
@@ -155,9 +155,9 @@ abstract contract MakerResolver is Helpers, Events {
         uint _vault = getVault(vault);
         (bytes32 ilk, address urn) = getVaultData(_vault);
 
-        VatLike vatContract = VatLike(managerContract.vat());
+        SafeEngineLike vatContract = SafeEngineLike(managerContract.safeEngine());
 
-        managerContract.frob(
+        managerContract.modifySAFECollateralization(
             _vault,
             0,
             _getBorrowAmt(
@@ -168,14 +168,14 @@ abstract contract MakerResolver is Helpers, Events {
             )
         );
 
-        managerContract.move(
+        managerContract.transferInternalCoins(
             _vault,
             address(this),
             toRad(_amt)
         );
 
         if (vatContract.can(address(this), address(daiJoinContract)) == 0) {
-            vatContract.hope(address(daiJoinContract));
+            vatContract.approveSAFEModification(address(daiJoinContract));
         }
 
         daiJoinContract.exit(address(this), _amt);
@@ -203,7 +203,7 @@ abstract contract MakerResolver is Helpers, Events {
         uint _vault = getVault(vault);
         (bytes32 ilk, address urn) = getVaultData(_vault);
 
-        address vat = managerContract.vat();
+        address vat = managerContract.safeEngine();
 
         uint _maxDebt = _getVaultDebt(vat, ilk, urn);
 
@@ -211,15 +211,15 @@ abstract contract MakerResolver is Helpers, Events {
 
         require(_maxDebt >= _amt, "paying-excess-debt");
 
-        daiJoinContract.dai().approve(address(daiJoinContract), _amt);
+        daiJoinContract.coin().approve(address(daiJoinContract), _amt);
         daiJoinContract.join(urn, _amt);
 
-        managerContract.frob(
+        managerContract.modifySAFECollateralization(
             _vault,
             0,
             _getWipeAmt(
                 vat,
-                VatLike(vat).dai(urn),
+                SafeEngineLike(vat).coin(urn),
                 urn,
                 ilk
             )
@@ -252,19 +252,19 @@ abstract contract MakerResolver is Helpers, Events {
 
         uint _amt18;
         if (_amt == uint(-1)) {
-            _amt18 = VatLike(managerContract.vat()).gem(ilk, urn);
-            _amt = convert18ToDec(tokenJoinContract.dec(), _amt18);
+            _amt18 = SafeEngineLike(managerContract.safeEngine()).tokenCollateral(ilk, urn);
+            _amt = convert18ToDec(tokenJoinContract.decimals(), _amt18);
         } else {
-            _amt18 = convertTo18(tokenJoinContract.dec(), _amt);
+            _amt18 = convertTo18(tokenJoinContract.decimals(), _amt);
         }
 
-        managerContract.flux(
+        managerContract.transferCollateral(
             vault,
             address(this),
             _amt18
         );
 
-        TokenInterface tokenContract = tokenJoinContract.gem();
+        TokenInterface tokenContract = tokenJoinContract.collateral();
         tokenJoinContract.exit(address(this), _amt);
         if (isEth(address(tokenContract))) {
             tokenContract.withdraw(_amt);
@@ -280,7 +280,7 @@ abstract contract MakerResolver is Helpers, Events {
         uint _vault;
         address colAddr;
         TokenJoinInterface tokenJoinContract;
-        VatLike vatContract;
+        SafeEngineLike vatContract;
         TokenInterface tokenContract;
     }
     /**
@@ -311,8 +311,8 @@ abstract contract MakerResolver is Helpers, Events {
 
         makerData.colAddr = instaMapping.gemJoinMapping(ilk);
         makerData.tokenJoinContract = TokenJoinInterface(makerData.colAddr);
-        makerData.vatContract = VatLike(managerContract.vat());
-        makerData.tokenContract = makerData.tokenJoinContract.gem();
+        makerData.vatContract = SafeEngineLike(managerContract.safeEngine());
+        makerData.tokenContract = makerData.tokenJoinContract.collateral();
 
         if (isEth(address(makerData.tokenContract))) {
             _amtDeposit = _amtDeposit == uint(-1) ? address(this).balance : _amtDeposit;
@@ -324,9 +324,9 @@ abstract contract MakerResolver is Helpers, Events {
         makerData.tokenContract.approve(address(makerData.colAddr), _amtDeposit);
         makerData.tokenJoinContract.join(urn, _amtDeposit);
 
-        managerContract.frob(
+        managerContract.modifySAFECollateralization(
             makerData._vault,
-            toInt(convertTo18(makerData.tokenJoinContract.dec(), _amtDeposit)),
+            toInt(convertTo18(makerData.tokenJoinContract.decimals(), _amtDeposit)),
             _getBorrowAmt(
                 address(makerData.vatContract),
                 urn,
@@ -335,14 +335,14 @@ abstract contract MakerResolver is Helpers, Events {
             )
         );
 
-        managerContract.move(
+        managerContract.transferInternalCoins(
             makerData._vault,
             address(this),
             toRad(_amtBorrow)
         );
 
         if (makerData.vatContract.can(address(this), address(daiJoinContract)) == 0) {
-            makerData.vatContract.hope(address(daiJoinContract));
+            makerData.vatContract.approveSAFEModification(address(daiJoinContract));
         }
 
         daiJoinContract.exit(address(this), _amtBorrow);
@@ -380,20 +380,20 @@ abstract contract MakerResolver is Helpers, Events {
         uint _vault = getVault(vault);
         (bytes32 ilk, address urn) = getVaultData(_vault);
 
-        VatLike vatContract = VatLike(managerContract.vat());
+        SafeEngineLike vatContract = SafeEngineLike(managerContract.safeEngine());
         if(_amt == uint(-1)) {
-            _amt = vatContract.dai(urn);
+            _amt = vatContract.coin(urn);
             _amt = _amt / 10 ** 27;
         }
 
-        managerContract.move(
+        managerContract.transferInternalCoins(
             _vault,
             address(this),
             toRad(_amt)
         );
 
         if (vatContract.can(address(this), address(daiJoinContract)) == 0) {
-            vatContract.hope(address(daiJoinContract));
+            vatContract.approveSAFEModification(address(daiJoinContract));
         }
 
         daiJoinContract.exit(address(this), _amt);
@@ -404,79 +404,6 @@ abstract contract MakerResolver is Helpers, Events {
         _eventParam = abi.encode(_vault, ilk, _amt, getId, setId);
     }
 
-    /**
-     * @dev Deposit DAI in DSR.
-     * @param amt DAI amount to deposit.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-    */
-    function depositDai(
-        uint256 amt,
-        uint256 getId,
-        uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _amt = getUint(getId, amt);
-
-        _amt = _amt == uint(-1) ?
-            daiJoinContract.dai().balanceOf(address(this)) :
-            _amt;
-
-        VatLike vat = daiJoinContract.vat();
-        uint chi = potContract.drip();
-
-        daiJoinContract.dai().approve(address(daiJoinContract), _amt);
-        daiJoinContract.join(address(this), _amt);
-        if (vat.can(address(this), address(potContract)) == 0) {
-            vat.hope(address(potContract));
-        }
-
-        potContract.join(mul(_amt, RAY) / chi);
-        setUint(setId, _amt);
-
-        _eventName = "LogDepositDai(uint256,uint256,uint256)";
-        _eventParam = abi.encode(_amt, getId, setId);
-    }
-
-    /**
-     * @dev Withdraw DAI from DSR.
-     * @param amt DAI amount to withdraw.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
-    */
-    function withdrawDai(
-        uint256 amt,
-        uint256 getId,
-        uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _amt = getUint(getId, amt);
-
-        VatLike vat = daiJoinContract.vat();
-
-        uint chi = potContract.drip();
-        uint pie;
-        if (_amt == uint(-1)) {
-            pie = potContract.pie(address(this));
-            _amt = mul(chi, pie) / RAY;
-        } else {
-            pie = mul(_amt, RAY) / chi;
-        }
-
-        potContract.exit(pie);
-
-        uint bal = vat.dai(address(this));
-        if (vat.can(address(this), address(daiJoinContract)) == 0) {
-            vat.hope(address(daiJoinContract));
-        }
-        daiJoinContract.exit(
-            address(this),
-            bal >= mul(_amt, RAY) ? _amt : bal / RAY
-        );
-
-        setUint(setId, _amt);
-
-        _eventName = "LogWithdrawDai(uint256,uint256,uint256)";
-        _eventParam = abi.encode(_amt, getId, setId);
-    }
 }
 
 contract ConnectV2Maker is MakerResolver {
