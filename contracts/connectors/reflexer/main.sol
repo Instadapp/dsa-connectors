@@ -12,7 +12,7 @@ abstract contract GebResolver is Helpers, Events {
     */
     function open(string calldata colType) external payable returns (string memory _eventName, bytes memory _eventParam) {
         bytes32 collateralType = stringToBytes32(colType);
-        require(instaMapping.gemJoinMapping(collateralType) != address(0), "wrong-col-type");
+        require(getCollateralJoinAddress(collateralType) != address(0), "wrong-col-type");
         uint256 safe = managerContract.openSAFE(collateralType, address(this));
 
         _eventName = "LogOpen(uint256,bytes32)";
@@ -54,7 +54,7 @@ abstract contract GebResolver is Helpers, Events {
         uint _safe = getSafe(safe);
         (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        address colAddr = instaMapping.gemJoinMapping(collateralType);
+        address colAddr = getCollateralJoinAddress(collateralType);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
         TokenInterface tokenContract = tokenJoinContract.collateral();
 
@@ -100,7 +100,7 @@ abstract contract GebResolver is Helpers, Events {
         uint _safe = getSafe(safe);
         (bytes32 collateralType, address handler) = getSafeData(_safe);
 
-        address colAddr = instaMapping.gemJoinMapping(collateralType);
+        address colAddr = getCollateralJoinAddress(collateralType);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
 
         uint _amt18;
@@ -247,7 +247,7 @@ abstract contract GebResolver is Helpers, Events {
         uint _amt = getUint(getId, amt);
         (bytes32 collateralType, address handler) = getSafeData(safe);
 
-        address colAddr = instaMapping.gemJoinMapping(collateralType);
+        address colAddr = getCollateralJoinAddress(collateralType);
         TokenJoinInterface tokenJoinContract = TokenJoinInterface(colAddr);
 
         uint _amt18;
@@ -309,7 +309,7 @@ abstract contract GebResolver is Helpers, Events {
         gebData._safe = getSafe(safe);
         (bytes32 collateralType, address handler) = getSafeData(gebData._safe);
 
-        gebData.colAddr = instaMapping.gemJoinMapping(collateralType);
+        gebData.colAddr = getCollateralJoinAddress(collateralType);
         gebData.tokenJoinContract = TokenJoinInterface(gebData.colAddr);
         gebData.safeEngineContract = SafeEngineLike(managerContract.safeEngine());
         gebData.tokenContract = gebData.tokenJoinContract.collateral();

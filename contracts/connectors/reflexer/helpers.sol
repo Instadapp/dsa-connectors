@@ -3,7 +3,14 @@ pragma solidity ^0.7.0;
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
-import { ManagerLike, CoinJoinInterface, SafeEngineLike, TaxCollectorLike, TokenJoinInterface } from "./interface.sol";
+import { 
+    ManagerLike, 
+    CoinJoinInterface, 
+    SafeEngineLike, 
+    TaxCollectorLike, 
+    TokenJoinInterface,
+    GebMapping 
+} from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
@@ -25,6 +32,18 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Return Close Safe Address.
     */
     address internal constant giveAddr = 0x4dD58550eb15190a5B3DfAE28BB14EeC181fC267;
+
+     /**
+     * @dev Return Reflexer mapping Address.
+     */
+    function getGebMappingAddress() internal pure returns (address) {
+        // TODO: Set the real deployed Reflexer mapping address
+        return 0x0000000000000000000000000000000000000000;
+    }
+
+    function getCollateralJoinAddress(bytes32 collateralType) internal view returns (address) {
+        return GebMapping(getGebMappingAddress()).collateralJoinMapping(collateralType);
+    }
 
     /**
      * @dev Get Safe's collateral type.

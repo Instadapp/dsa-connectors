@@ -61,3 +61,7 @@ interface ConnectorsInterface {
 interface IndexInterface {
     function master() external view returns (address);
 }
+
+interface GebMapping {
+    function collateralJoinMapping(bytes32) external view returns(address);
+}
