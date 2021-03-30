@@ -134,7 +134,7 @@ abstract contract GebResolver is Helpers, Events {
 
         setUint(setId, _amt);
 
-        _eventName = "LogWithdrawCoin(uint256,bytes32,uint256,uint256,uint256)";
+        _eventName = "LogWithdraw(uint256,bytes32,uint256,uint256,uint256)";
         _eventParam = abi.encode(_safe, collateralType, _amt, getId, setId);
     }
 
