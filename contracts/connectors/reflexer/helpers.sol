@@ -70,7 +70,7 @@ abstract contract Helpers is DSMath, Basic {
     ) internal view returns (uint wad) {
         (, uint rate,,,) = SafeEngineLike(safeEngine).collateralTypes(collateralType);
         (, uint debt) = SafeEngineLike(safeEngine).safes(collateralType, handler);
-        uint coin = SafeEngineLike(safeEngine).coin(handler);
+        uint coin = SafeEngineLike(safeEngine).coinBalance(handler);
 
         uint rad = sub(mul(debt, rate), coin);
         wad = rad / RAY;
@@ -89,7 +89,7 @@ abstract contract Helpers is DSMath, Basic {
     ) internal returns (int deltaDebt)
     {
         uint rate = taxCollectorContract.taxSingle(collateralType);
-        uint coin = SafeEngineLike(safeEngine).coin(handler);
+        uint coin = SafeEngineLike(safeEngine).coinBalance(handler);
         if (coin < mul(amt, RAY)) {
             deltaDebt = toInt(sub(mul(amt, RAY), coin) / rate);
             deltaDebt = mul(uint(deltaDebt), rate) < mul(amt, RAY) ? deltaDebt + 1 : deltaDebt;

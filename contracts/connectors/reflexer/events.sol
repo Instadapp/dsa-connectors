@@ -10,8 +10,8 @@ contract Events {
     event LogPayback(uint256 indexed safe, bytes32 indexed collateralType, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdrawLiquidated(uint256 indexed safe, bytes32 indexed collateralType, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogExit(uint256 indexed safe, bytes32 indexed collateralType, uint256 tokenAmt, uint256 getId, uint256 setId);
-    event LogDeposit(uint256 tokenAmt, uint256 getId, uint256 setId);
-    event LogWithdraw(uint256 tokenAmt, uint256 getId, uint256 setId);
+    event LogDepositCoin(uint256 tokenAmt, uint256 getId, uint256 setId);
+    event LogWithdrawCoin(uint256 tokenAmt, uint256 getId, uint256 setId);
 
     event LogDepositAndBorrow(
         uint256 indexed safe,

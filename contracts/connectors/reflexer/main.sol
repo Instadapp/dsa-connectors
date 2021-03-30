@@ -211,7 +211,7 @@ abstract contract GebResolver is Helpers, Events {
 
         require(_maxDebt >= _amt, "paying-excess-debt");
 
-        coinJoinContract.coin().approve(address(coinJoinContract), _amt);
+        coinJoinContract.systemCoin().approve(address(coinJoinContract), _amt);
         coinJoinContract.join(handler, _amt);
 
         managerContract.modifySAFECollateralization(
@@ -219,7 +219,7 @@ abstract contract GebResolver is Helpers, Events {
             0,
             _getWipeAmt(
                 safeEngine,
-                SafeEngineLike(safeEngine).coin(handler),
+                SafeEngineLike(safeEngine).coinBalance(handler),
                 handler,
                 collateralType
             )
@@ -382,7 +382,7 @@ abstract contract GebResolver is Helpers, Events {
 
         SafeEngineLike safeEngineContract = SafeEngineLike(managerContract.safeEngine());
         if(_amt == uint(-1)) {
-            _amt = safeEngineContract.coin(handler);
+            _amt = safeEngineContract.coinBalance(handler);
             _amt = _amt / 10 ** 27;
         }
 

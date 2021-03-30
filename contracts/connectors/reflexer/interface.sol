@@ -20,7 +20,7 @@ interface ManagerLike {
 interface SafeEngineLike {
     function safeRights(address, address) external view returns (uint);
     function collateralTypes(bytes32) external view returns (uint, uint, uint, uint, uint);
-    function coin(address) external view returns (uint);
+    function coinBalance(address) external view returns (uint);
     function safes(bytes32, address) external view returns (uint, uint);
     function modifySAFECollateralization(
         bytes32,
@@ -45,7 +45,7 @@ interface TokenJoinInterface {
 
 interface CoinJoinInterface {
     function safeEngine() external returns (SafeEngineLike);
-    function coin() external returns (TokenInterface);
+    function systemCoin() external returns (TokenInterface);
     function join(address, uint) external payable;
     function exit(address, uint) external;
 }
