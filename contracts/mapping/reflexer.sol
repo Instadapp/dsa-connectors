@@ -15,8 +15,8 @@ interface IndexInterface {
 
 
 contract Helpers {
-    address public constant connectors = 0xD6A602C01a023B98Ecfb29Df02FBA380d3B21E0c;
-    address public constant instaIndex = 0x2971AdFa57b20E5a416aE5a708A8655A9c74f723;
+    ConnectorsInterface public constant connectors = ConnectorsInterface(0x7D53E606308A2E0A1D396F30dc305cc7f8483436);
+    IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
     uint public version = 1;
 
     mapping (bytes32 => address) public collateralJoinMapping;
@@ -24,9 +24,7 @@ contract Helpers {
     event LogAddCollateralJoinMapping(address[] collateralJoin);
     
     modifier isChief {
-        require(
-            ConnectorsInterface(connectors).chief(msg.sender) ||
-            IndexInterface(instaIndex).master() == msg.sender, "not-Chief");
+        require(connectors.chief(msg.sender) || instaIndex.master() == msg.sender, "not-a-chief");
         _;
     }
 
@@ -49,6 +47,7 @@ contract Helpers {
 
 contract GebMapping is Helpers {
     string constant public name = "Reflexer-Mapping-v1";
+    
     constructor() public {
         address[] memory collateralJoins = new address[](1);
         collateralJoins[0] = 0x2D3cD7b81c93f188F3CB8aD87c8Acc73d6226e3A; // ETH-A Join contract address
