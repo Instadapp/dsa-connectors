@@ -29,12 +29,7 @@ module.exports = {
     ]
   },
   networks: {
-    mainnet: {
-      url: process.env.ETH_NODE_URL,
-      chainId: 1,
-      timeout: 500000,
-      accounts: [`0x${PRIVATE_KEY}`]
-    },
+    default: "hardhat",
     kovan: {
       url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`]
