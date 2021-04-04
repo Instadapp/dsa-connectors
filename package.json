@@ -2,14 +2,11 @@
   "name": "dsa-connectors",
   "version": "1.0.0",
   "description": "",
-  "main": "truffle-config.js",
   "directories": {},
   "scripts": {
-    "test": "truffle test",
+    "test": "hardhat test",
     "coverage": "./node_modules/.bin/solidity-coverage",
-    "solium": "solium -d contracts/",
-    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build",
-    "ganache": "ganache-cli"
+    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
   },
   "repository": {
     "type": "git",
@@ -23,23 +20,16 @@
   "homepage": "https://github.com/InstaDApp/dsa-connectors-new#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.0-solc-0.7",
-    "@openzeppelin/upgrades": "^2.8.0",
-    "@truffle/artifactor": "^4.0.45",
     "chalk": "^4.0.0",
     "commander": "^7.1.0",
     "dotenv": "^7.0.0",
     "ethereumjs-abi": "^0.6.8",
     "hardhat-docgen": "^1.1.0",
     "minimist": "^1.2.5",
-    "solc": "^0.7.0",
-    "truffle-assertions": "^0.9.2",
-    "truffle-hdwallet-provider": "^1.0.17",
-    "truffle-plugin-verify": "^0.3.10",
-    "truffle-verify": "^1.0.8"
+    "solc": "^0.7.0"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.3.8",
-    "@nomiclabs/buidler-truffle5": "^1.3.4",
     "@nomiclabs/buidler-web3": "^1.3.4",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.1",
@@ -48,7 +38,6 @@
     "@studydefi/money-legos": "^2.3.7",
     "@tenderly/hardhat-tenderly": "^1.0.6",
     "ethers": "^5.0.32",
-    "ganache-cli": "^6.10.0-beta.2",
     "hardhat": "^2.0.8",
     "sol-merger": "^2.0.1",
     "solidity-coverage": "0.5.11",
