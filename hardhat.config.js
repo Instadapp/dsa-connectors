@@ -29,16 +29,16 @@ module.exports = {
     ]
   },
   networks: {
-    default: "hardhat",
+    // default: "hardhat",
     kovan: {
       url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`]
     },
     mainnet: {
-      url: `https://eth.alchemyapi.io/v2/${ALCHEMY_ID}`,
+      url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("161", "gwei"))
+      gasPrice: parseInt(utils.parseUnits("132", "gwei"))
     },
     hardhat: {
       forking: {
@@ -47,6 +47,12 @@ module.exports = {
       },
       blockGasLimit: 12000000,
     },
+    matic: {
+      url: "https://rpc-mainnet.maticvigil.com/",
+      accounts: [`0x${PRIVATE_KEY}`],
+      timeout: 150000,
+      gasPrice: parseInt(utils.parseUnits("1", "gwei"))
+    }
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY
