@@ -6,6 +6,15 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
 abstract contract PolygonBridgeResolver is Events, Helpers {
+    /**
+     * @dev Deposit assets to the bridge.
+     * @notice Deposit assets to the bridge.
+     * @param targetDsa The address to receive the token on Polygon
+     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)`)
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposit.
+    */
     function deposit(
         address targetDsa,
         address token,
