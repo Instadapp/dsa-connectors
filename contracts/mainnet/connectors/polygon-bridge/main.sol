@@ -41,6 +41,6 @@ abstract contract PolygonBridgeResolver is Events, Helpers {
     }
 }
 
-contract ConnectPolygonBridge is PolygonBridgeResolver {
-    string public constant name = "COMP-v1";
+contract ConnectV2PolygonBridge is PolygonBridgeResolver {
+    string public constant name = "Polygon-Bridge-v1";
 }
