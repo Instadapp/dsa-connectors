@@ -39,22 +39,6 @@ abstract contract PolygonBridgeResolver is Events, Helpers {
         _eventName = "LogDeposit(address,address,uint256,uint256,uint256)";
         _eventParam = abi.encode(targetDsa, token, _amt, getId, setId);
     }
-
-    /**
-     * @dev Withdraw assets from Polygon.
-     * @notice Complete withdraw by submitting burn tx hash.
-     * @param proof The proof generated from burn tx.
-    */
-    function withdraw(
-        bytes calldata proof
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        require(proof.length > 0, "invalid-proof");
-
-        migrator.exit(proof);
-
-        _eventName = "LogWithdraw(bytes)";
-        _eventParam = abi.encode(proof);
-    }
 }
 
 contract ConnectPolygonBridge is PolygonBridgeResolver {
