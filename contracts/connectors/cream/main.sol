@@ -7,10 +7,10 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CETHInterface, CTokenInterface } from "./interface.sol";
 
-abstract contract CompoundResolver is Events, Helpers {
+abstract contract CreamResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
-     * @notice Deposit a token to Compound for lending / collaterization.
+     * @notice Deposit a token to Cream for lending / collaterization.
      * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
@@ -46,7 +46,7 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Deposit ETH/ERC20_Token using the Mapping.
-     * @notice Deposit a token to Compound for lending / collaterization.
+     * @notice Deposit a token to Cream for lending / collaterization.
      * @param tokenId The token id of the token to deposit.(For eg: ETH-A)
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -58,13 +58,13 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (address token, address cToken) = creamMapping.getMapping(tokenId);
         (_eventName, _eventParam) = depositRaw(token, cToken, amt, getId, setId);
     }
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
-     * @notice Withdraw deposited token from Compound
+     * @notice Withdraw deposited token from Cream
      * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
      * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
@@ -79,7 +79,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        
+
         require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         CTokenInterface cTokenContract = CTokenInterface(cToken);
@@ -100,7 +100,7 @@ abstract contract CompoundResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token using the Mapping.
-     * @notice Withdraw deposited token from Compound
+     * @notice Withdraw deposited token from Cream
      * @param tokenId The token id of the token to withdraw.(For eg: ETH-A)
      * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -112,13 +112,13 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (address token, address cToken) = creamMapping.getMapping(tokenId);
         (_eventName, _eventParam) = withdrawRaw(token, cToken, amt, getId, setId);
     }
 
     /**
      * @dev Borrow ETH/ERC20_Token.
-     * @notice Borrow a token using Compound
+     * @notice Borrow a token using Cream
      * @param token The address of the token to borrow. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
      * @param amt The amount of the token to borrow.
@@ -146,7 +146,7 @@ abstract contract CompoundResolver is Events, Helpers {
 
      /**
      * @dev Borrow ETH/ERC20_Token using the Mapping.
-     * @notice Borrow a token using Compound
+     * @notice Borrow a token using Cream
      * @param tokenId The token id of the token to borrow.(For eg: DAI-A)
      * @param amt The amount of the token to borrow.
      * @param getId ID to retrieve amt.
@@ -158,7 +158,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (address token, address cToken) = creamMapping.getMapping(tokenId);
         (_eventName, _eventParam) = borrowRaw(token, cToken, amt, getId, setId);
     }
 
@@ -214,7 +214,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (address token, address cToken) = creamMapping.getMapping(tokenId);
         (_eventName, _eventParam) = paybackRaw(token, cToken, amt, getId, setId);
     }
 
@@ -279,7 +279,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (address token, address cToken) = creamMapping.getMapping(tokenId);
         (_eventName, _eventParam) = depositCTokenRaw(token, cToken, amt, getId, setId);
     }
 
@@ -289,7 +289,7 @@ abstract contract CompoundResolver is Events, Helpers {
      * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param cToken The address of the corresponding cToken.
      * @param cTokenAmt The amount of cTokens to withdraw
-     * @param getId ID to retrieve cTokenAmt 
+     * @param getId ID to retrieve cTokenAmt
      * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdrawCTokenRaw(
@@ -326,7 +326,7 @@ abstract contract CompoundResolver is Events, Helpers {
      * @notice Same as withdraw. The only difference is this method fetch cToken amount in get ID.
      * @param tokenId The token id of the token to withdraw CToken.(For eg: ETH-A)
      * @param cTokenAmt The amount of cTokens to withdraw
-     * @param getId ID to retrieve cTokenAmt 
+     * @param getId ID to retrieve cTokenAmt
      * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdrawCToken(
@@ -335,7 +335,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (address token, address cToken) = creamMapping.getMapping(tokenId);
         (_eventName, _eventParam) = withdrawCTokenRaw(token, cToken, cTokenAmt, getId, setId);
     }
 
@@ -368,13 +368,13 @@ abstract contract CompoundResolver is Events, Helpers {
         CTokenInterface cTokenContract = CTokenInterface(cTokenPay);
 
         {
-            (,, uint shortfal) = troller.getAccountLiquidity(borrower);
-            require(shortfal != 0, "account-cannot-be-liquidated");
+            (,, uint shortfall) = troller.getAccountLiquidity(borrower);
+            require(shortfall != 0, "account-cannot-be-liquidated");
             _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(borrower) : _amt;
         }
 
         if (tokenToPay == ethAddr) {
-            require(address(this).balance >= _amt, "not-enought-eth");
+            require(address(this).balance >= _amt, "not-enough-eth");
             CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(borrower, cTokenColl);
         } else {
             TokenInterface tokenContract = TokenInterface(tokenToPay);
@@ -382,14 +382,14 @@ abstract contract CompoundResolver is Events, Helpers {
             tokenContract.approve(cTokenPay, _amt);
             require(cTokenContract.liquidateBorrow(borrower, _amt, cTokenColl) == 0, "liquidate-failed");
         }
-        
+
         setUint(setId, _amt);
 
         _eventName = "LogLiquidate(address,address,address,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             address(this),
             tokenToPay,
-            tokenInReturn, 
+            tokenInReturn,
             _amt,
             getId,
             setId
@@ -414,8 +414,8 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address tokenToPay, address cTokenToPay) = compMapping.getMapping(tokenIdToPay);
-        (address tokenInReturn, address cTokenColl) = compMapping.getMapping(tokenIdInReturn);
+        (address tokenToPay, address cTokenToPay) = creamMapping.getMapping(tokenIdToPay);
+        (address tokenInReturn, address cTokenColl) = creamMapping.getMapping(tokenIdInReturn);
 
         (_eventName, _eventParam) = liquidateRaw(
             borrower,
@@ -430,6 +430,6 @@ abstract contract CompoundResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2Compound is CompoundResolver {
-    string public name = "Compound-v1";
+contract ConnectV2Cream is CreamResolver {
+    string public name = "Cream-v1";
 }

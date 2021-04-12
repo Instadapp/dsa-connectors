@@ -30,7 +30,7 @@ interface ComptrollerInterface {
     function claimComp(address) external;
 }
 
-interface CompoundMappingInterface {
+interface CreamMappingInterface {
     function cTokenMapping(string calldata tokenId) external view returns (address);
     function getMapping(string calldata tokenId) external view returns (address, address);
 }

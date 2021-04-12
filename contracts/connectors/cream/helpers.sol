@@ -2,21 +2,22 @@ pragma solidity ^0.7.0;
 
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
-import { ComptrollerInterface, CompoundMappingInterface } from "./interface.sol";
+import { ComptrollerInterface, CreamMappingInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
-     * @dev Compound Comptroller
+     * @dev Cream Comptroller
      */
-    ComptrollerInterface internal constant troller = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
+    ComptrollerInterface internal constant troller = ComptrollerInterface(0x3d5BC3c8d13dcB8bF317092d84783c2697AE9258);
 
     /**
-     * @dev Compound Mapping
+     * @dev Cream Mapping
      */
-    CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0xA8F9D4aA7319C54C04404765117ddBf9448E2082);
+    // TODO: wait for the cream mapping contract address
+    CreamMappingInterface internal constant creamMapping = CreamMappingInterface();
 
     /**
-     * @dev enter compound market
+     * @dev enter cream market
      */
     function enterMarket(address cToken) internal {
         address[] memory markets = troller.getAssetsIn(address(this));

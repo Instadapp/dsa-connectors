@@ -123,8 +123,8 @@ abstract contract Helpers {
 
 }
 
-contract InstaCompoundMapping is Helpers {
-    string constant public name = "Compound-Mapping-v1.1";
+contract InstaCreamMapping is Helpers {
+    string constant public name = "Cream-Mapping-v1.1";
 
     constructor(
         address _connectors,
