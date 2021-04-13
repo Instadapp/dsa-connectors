@@ -26,3 +26,7 @@ abstract contract IncentivesResolver is Helpers, Events {
         _eventParam = abi.encode(assets, _amt, stake, getId, setId);
     }
 }
+
+contract ConnectV2AaveIncentives is IncentivesResolver {
+    string public constant name = "Aave-Incentives-v1";
+}
