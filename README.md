@@ -10,7 +10,7 @@ You can create a PR to request a support for specific protocol or external contr
 
 ## Authority
 
-[Code](contracts/connectors_old/authority.sol)
+[Code](contracts/mainnet/connectors/authority.sol)
 
 ### `add(authority)`
 
@@ -26,7 +26,7 @@ You can create a PR to request a support for specific protocol or external contr
 
 ## Basic
 
-[Code](contracts/connectors_old/basic.sol)
+[Code](contracts/mainnet/connectors/basic.sol)
 
 ### `deposit(erc20, amt, getId, setId)`
 
@@ -48,7 +48,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## MakerDAO
 
-[Code](contracts/connectors_old/makerdao.sol)
+[Code](contracts/mainnet/connectors/makerdao.sol)
 
 ### `open(collateralType)`
 
@@ -112,7 +112,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## Compound
 
-[Code](contracts/connectors_old/compound.sol)
+[Code](contracts/mainnet/connectors/compound.sol)
 
 ### `deposit(token, amt, getId, setId)`
 
@@ -148,7 +148,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## COMP
 
-[Code](contracts/connectors_old/COMP.sol)
+[Code](contracts/mainnet/connectors/COMP.sol)
 
 ### `ClaimComp(setId)`
 
@@ -176,7 +176,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## Aave v1
 
-[Code](contracts/connectors_old/aave.sol)
+[Code](contracts/mainnet/connectors/aave.sol)
 
 ### `deposit(token, amt, getId, setId)`
 
@@ -212,7 +212,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## Aave v2
 
-[Code](contracts/connectors_old/aave_v2.sol)
+[Code](contracts/mainnet/connectors/aave_v2.sol)
 
 ### `deposit(token, amt, getId, setId)`
 
@@ -252,7 +252,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## dYdX
 
-[Code](contracts/connectors_old/dydx.sol)
+[Code](contracts/mainnet/connectors/dydx.sol)
 
 ### `deposit(token, amt, getId, setId)`
 
@@ -288,7 +288,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## Uniswap
 
-[Code](contracts/connectors_old/uniswap.sol)
+[Code](contracts/mainnet/connectors/uniswap.sol)
 
 ### `deposit(tokenA, tokenB, amtA, unitAmt, slippage, getId, setId)`
 
@@ -345,7 +345,7 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 ## 1Inch
 
-[Code](contracts/connectors_old/1inch.sol)
+[Code](contracts/mainnet/connectors/1inch.sol)
 
 ### `sell(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
 
