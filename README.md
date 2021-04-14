@@ -46,6 +46,8 @@ In case of an ERC20 Token, allowance must be given to DSA before depositing
 
 `amt` - Amount of token to withdraw
 
+`to` - Address to which token will be withdrawn 
+
 ## MakerDAO
 
 [Code](contracts/mainnet/connectors/makerdao/main.sol)
