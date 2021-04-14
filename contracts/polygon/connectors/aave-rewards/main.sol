@@ -12,14 +12,12 @@ abstract contract IncentivesResolver is Helpers, Events {
      * @notice Claim Pending Rewards from Aave incentives contract.
      * @param assets The list of assets supplied and borrowed.
      * @param amt The amount of reward to claim. (uint(-1) for max)
-     * @param stake Whether to stake the claimed rewards or not.
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of rewards claimed.
     */
     function claim(
         address[] calldata assets,
         uint256 amt,
-        bool stake,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -27,12 +25,12 @@ abstract contract IncentivesResolver is Helpers, Events {
 
         require(assets.length > 0, "invalid-assets");
 
-        _amt = incentives.claimRewards(assets, _amt, address(this), stake);
+        _amt = incentives.claimRewards(assets, _amt, address(this));
 
         setUint(setId, _amt);
 
-        _eventName = "LogClaimed(address[],uint256,bool,uint256,uint256)";
-        _eventParam = abi.encode(assets, _amt, stake, getId, setId);
+        _eventName = "LogClaimed(address[],uint256,uint256,uint256)";
+        _eventParam = abi.encode(assets, _amt, getId, setId);
     }
 }
 
