@@ -7,6 +7,15 @@ import { Events } from "./events.sol";
 
 abstract contract IncentivesResolver is Helpers, Events {
 
+    /**
+     * @dev Claim Pending Rewards.
+     * @notice Claim Pending Rewards from Aave incentives contract.
+     * @param assets The list of assets supplied and borrowed.
+     * @param amt The amount of reward to claim. (uint(-1) for max)
+     * @param stake Whether to stake the claimed rewards or not.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of rewards claimed.
+    */
     function claim(
         address[] calldata assets,
         uint256 amt,
