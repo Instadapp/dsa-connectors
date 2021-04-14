@@ -8,5 +8,5 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Aave Incentives
      */
-    AaveIncentivesInterface internal constant incentives = AaveIncentivesInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
+    AaveIncentivesInterface internal constant incentives = AaveIncentivesInterface(0x357D51124f59836DeD84c8a1730D72B749d8BC23);
 }
