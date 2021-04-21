@@ -34,3 +34,7 @@ abstract contract ParaswapResolver is Helpers {
         );
     }
 }
+
+contract ConnectParaswap is ParaswapResolver {
+    string public name = "Paraswap-v1";
+}
