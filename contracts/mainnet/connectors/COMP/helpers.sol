@@ -1,8 +1,9 @@
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
-import { ComptrollerInterface, COMPInterface } from "./interface.sol";
+import { ComptrollerInterface, COMPInterface, CompoundMappingInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
@@ -15,29 +16,38 @@ abstract contract Helpers is DSMath, Basic {
      */
     COMPInterface internal constant compToken = COMPInterface(0xc00e94Cb662C3520282E6f5717214004A7f26888);
 
-    function mergeTokenArr(address[] memory supplyTokens, address[] memory borrowTokens)
-        internal
-        view
-        returns (address[] memory ctokens, bool isBorrow, bool isSupply)
-    {
-         uint _supplyLen = supplyTokens.length;
-        uint _borrowLen = borrowTokens.length;
+    /**
+     * @dev Compound Mapping
+     */
+    CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0xA8F9D4aA7319C54C04404765117ddBf9448E2082);
+
+    function getMergedCTokens(
+        string[] memory supplyIds,
+        string[] memory borrowIds
+    ) internal view returns (address[] memory ctokens, bool isBorrow, bool isSupply) {
+        uint _supplyLen = supplyIds.length;
+        uint _borrowLen = borrowIds.length;
         uint _totalLen = add(_supplyLen, _borrowLen);
         ctokens = new address[](_totalLen);
-        isBorrow;
-        isSupply;
+
         if(_supplyLen > 0) {
-            for (uint i = 0; i < _supplyLen; i++) {
-                ctokens[i] = instaMapping.cTokenMapping(supplyTokens[i]);
-            }
             isSupply = true;
+            for (uint i = 0; i < _supplyLen; i++) {
+                (address token, address cToken) = compMapping.getMapping(supplyIds[i]);
+                require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
+
+                ctokens[i] = cToken;
+            }
         }
 
         if(_borrowLen > 0) {
-            for (uint i = 0; i < _borrowLen; i++) {
-                ctokens[_supplyLen + i] = instaMapping.cTokenMapping(borrowTokens[i]);
-            }
             isBorrow = true;
+            for (uint i = 0; i < _borrowLen; i++) {
+                (address token, address cToken) = compMapping.getMapping(supplyIds[i]);
+                require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
+
+                ctokens[_supplyLen + i] = cToken;
+            }
         }
     }
 }

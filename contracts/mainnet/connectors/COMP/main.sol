@@ -1,4 +1,5 @@
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
@@ -28,14 +29,17 @@ abstract contract CompResolver is Events, Helpers {
     /**
      * @dev Claim Accrued COMP Token.
      * @notice Claim Accrued COMP Token.
-     * @param tokens Array of tokens supplied and borrowed.
+     * @param tokenIds Array of supplied and borrowed token IDs.
      * @param setId ID stores the amount of COMP claimed.
     */
-    function ClaimCompTwo(address[] calldata tokens, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _len = tokens.length;
+    function ClaimCompTwo(string[] calldata tokenIds, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _len = tokenIds.length;
         address[] memory ctokens = new address[](_len);
         for (uint i = 0; i < _len; i++) {
-            ctokens[i] = instaMapping.cTokenMapping(tokens[i]);
+            (address token, address cToken) = compMapping.getMapping(tokenIds[i]);
+            require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
+
+            ctokens[i] = cToken;
         }
 
         TokenInterface _compToken = TokenInterface(address(compToken));
@@ -53,12 +57,12 @@ abstract contract CompResolver is Events, Helpers {
     /**
      * @dev Claim Accrued COMP Token.
      * @notice Claim Accrued COMP Token.
-     * @param supplyTokens Array of tokens supplied.
-     * @param borrowTokens Array of tokens borrowed.
+     * @param supplyTokenIds Array of supplied tokenIds.
+     * @param borrowTokenIds Array of borrowed tokenIds.
      * @param setId ID stores the amount of COMP claimed.
     */
-    function ClaimCompThree(address[] calldata supplyTokens, address[] calldata borrowTokens, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
-       (address[] memory ctokens, bool isBorrow, bool isSupply) = mergeTokenArr(supplyTokens, borrowTokens);
+    function ClaimCompThree(string[] calldata supplyTokenIds, string[] calldata borrowTokenIds, uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
+       (address[] memory ctokens, bool isBorrow, bool isSupply) = getMergedCTokens(supplyTokenIds, borrowTokenIds);
 
         address[] memory holders = new address[](1);
         holders[0] = address(this);
