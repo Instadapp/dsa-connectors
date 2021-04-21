@@ -10,3 +10,8 @@ interface COMPInterface {
     function delegate(address delegatee) external;
     function delegates(address) external view returns(address);
 }
+
+interface CompoundMappingInterface {
+    function cTokenMapping(string calldata tokenId) external view returns (address);
+    function getMapping(string calldata tokenId) external view returns (address, address);
+}
