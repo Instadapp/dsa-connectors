@@ -14,7 +14,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Cream Mapping
      */
     // TODO: wait for the cream mapping contract address
-    CreamMappingInterface internal constant creamMapping = CreamMappingInterface();
+    CreamMappingInterface internal constant creamMapping = CreamMappingInterface(address(0));
 
     /**
      * @dev enter cream market
