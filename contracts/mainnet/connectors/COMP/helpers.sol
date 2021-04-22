@@ -22,8 +22,8 @@ abstract contract Helpers is DSMath, Basic {
     CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0xA8F9D4aA7319C54C04404765117ddBf9448E2082);
 
     function getMergedCTokens(
-        string[] memory supplyIds,
-        string[] memory borrowIds
+        string[] calldata supplyIds,
+        string[] calldata borrowIds
     ) internal view returns (address[] memory ctokens, bool isBorrow, bool isSupply) {
         uint _supplyLen = supplyIds.length;
         uint _borrowLen = borrowIds.length;
