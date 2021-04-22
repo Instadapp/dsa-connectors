@@ -43,7 +43,7 @@ abstract contract Helpers is DSMath, Basic {
         if(_borrowLen > 0) {
             isBorrow = true;
             for (uint i = 0; i < _borrowLen; i++) {
-                (address token, address cToken) = compMapping.getMapping(supplyIds[i]);
+                (address token, address cToken) = compMapping.getMapping(borrowIds[i]);
                 require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
                 ctokens[_supplyLen + i] = cToken;
