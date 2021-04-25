@@ -121,3 +121,8 @@ abstract contract AaveResolver is Helpers, Events {
         _eventParam = abi.encode(delegatee, delegateAave, delegateStkAave, aaveDelegationType, stkAaveDelegationType);
     }
 }
+
+
+contract ConnectV2AaveStake is AaveResolver {
+    string public constant name = "Aave-Stake-v1";
+}
