@@ -3,6 +3,7 @@ pragma solidity ^0.7.0;
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
+import { AugustusSwapperInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
 
@@ -43,7 +44,8 @@ abstract contract Helpers is DSMath, Basic {
         if (address(_sellAddr) == maticAddr) {
             maticAmt = swapData._sellAmt;
         } else {
-            TokenInterface(_sellAddr).approve(paraswap, swapData._sellAmt);
+            address tokenProxy = AugustusSwapperInterface(paraswap).getTokenTransferProxy();
+            TokenInterface(_sellAddr).approve(tokenProxy, swapData._sellAmt);
         }
 
         swapData._buyAmt = _swapHelper(swapData, maticAmt);
