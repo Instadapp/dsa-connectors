@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
@@ -32,9 +32,14 @@ interface CETHInterface {
     function repayBorrow() external payable;
 }
 
-interface InstaMapping {
-    function cTokenMapping(address) external view returns (address);
-    function gemJoinMapping(bytes32) external view returns (address);
+// interface InstaMapping {
+//     function cTokenMapping(address) external view returns (address);
+//     function gemJoinMapping(bytes32) external view returns (address);
+// }
+
+interface CompoundMappingInterface {
+    function cTokenMapping(string calldata tokenId) external view returns (address);
+    function getMapping(string calldata tokenId) external view returns (address, address);
 }
 
 interface ComptrollerInterface {
@@ -185,7 +190,7 @@ contract Helpers is DSMath {
      * @dev Return InstaDApp Mapping Address
      */
     function getMappingAddr() internal pure returns (address) {
-        return 0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88; // InstaMapping Address
+        return 0xA8F9D4aA7319C54C04404765117ddBf9448E2082; // CompoundMapping Address
     }
 
     /**
@@ -311,11 +316,12 @@ contract Helpers is DSMath {
         return _tokens;
     }
 
-    function getCtokenInterfaces(uint length, address[] memory tokens) internal view returns (CTokenInterface[] memory) {
+    function getCtokenInterfaces(uint length, string[] memory tokenIds) internal view returns (CTokenInterface[] memory) {
         CTokenInterface[] memory _ctokens = new CTokenInterface[](length);
         for (uint i = 0; i < length; i++) {
-            address _cToken = InstaMapping(getMappingAddr()).cTokenMapping(tokens[i]);
-            _ctokens[i] = CTokenInterface(_cToken);
+            (address token, address cToken) = CompoundMappingInterface(getMappingAddr()).getMapping(tokenIds[i]);
+            require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
+            _ctokens[i] = CTokenInterface(cToken);
         }
         return _ctokens;
     }
@@ -842,6 +848,7 @@ contract RefinanceResolver is AaveV2Helpers {
         uint collateralFee;
         uint debtFee;
         address[] tokens;
+        string[] ctokenIds;
         uint[] borrowAmts;
         uint[] withdrawAmts;
         uint[] borrowRateModes;
@@ -858,6 +865,7 @@ contract RefinanceResolver is AaveV2Helpers {
         require(data.withdrawAmts.length == length, "length-mismatch");
         require(data.borrowRateModes.length == length, "length-mismatch");
         require(data.paybackRateModes.length == length, "length-mismatch");
+        require(data.ctokenIds.length == length, "length-mismatch");
 
         AaveV2Interface aaveV2 = AaveV2Interface(getAaveV2Provider().getLendingPool());
         AaveV1Interface aaveV1 = AaveV1Interface(getAaveProvider().getLendingPool());
@@ -868,7 +876,7 @@ contract RefinanceResolver is AaveV2Helpers {
         uint[] memory paybackAmts;
 
         TokenInterface[] memory tokens = getTokenInterfaces(length, data.tokens);
-        CTokenInterface[] memory _ctokens = getCtokenInterfaces(length, data.tokens);
+        CTokenInterface[] memory _ctokens = getCtokenInterfaces(length, data.ctokenIds);
 
         if (data.source == Protocol.Aave && data.target == Protocol.AaveV2) {
             AaveV2BorrowData memory _aaveV2BorrowData;
@@ -1048,5 +1056,5 @@ contract RefinanceResolver is AaveV2Helpers {
 }
 
 contract ConnectRefinance is RefinanceResolver {
-    string public name = "Refinance-v1.1";
+    string public name = "Refinance-v1.2";
 }
