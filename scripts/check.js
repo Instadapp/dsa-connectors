@@ -62,5 +62,5 @@ const checkLoop = async (parentPath, codePath = './main.sol') => {
     const childForbidden = await checkLoop(connectors[index].path)
     forbidden.push(...childForbidden)
   }
-  console.log(forbidden)
+  console.log(forbidden.join('\n'))
 })()

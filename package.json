@@ -6,6 +6,7 @@
   "scripts": {
     "test": "hardhat test",
     "coverage": "./node_modules/.bin/solidity-coverage",
+    "check": "node scripts/check.js ",
     "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
   },
   "repository": {
