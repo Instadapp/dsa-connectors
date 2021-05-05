@@ -32,11 +32,6 @@ interface CETHInterface {
     function repayBorrow() external payable;
 }
 
-// interface InstaMapping {
-//     function cTokenMapping(address) external view returns (address);
-//     function gemJoinMapping(bytes32) external view returns (address);
-// }
-
 interface CompoundMappingInterface {
     function cTokenMapping(string calldata tokenId) external view returns (address);
     function getMapping(string calldata tokenId) external view returns (address, address);
@@ -177,13 +172,6 @@ contract Helpers is DSMath {
     function getWethAddr() internal pure returns (address) {
         return 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // Mainnet WETH Address
         // return 0xd0A1E359811322d97991E03f863a0C30C2cF029C; // Kovan WETH Address
-    }
-
-    /**
-     * @dev Connector Details.
-    */
-    function connectorID() public pure returns(uint _type, uint _id) {
-        (_type, _id) = (1, 73);
     }
 
     /**
@@ -1056,5 +1044,12 @@ contract RefinanceResolver is AaveV2Helpers {
 }
 
 contract ConnectRefinance is RefinanceResolver {
+     /**
+     * @dev Connector Details.
+    */
+    function connectorID() public pure returns(uint _type, uint _id) {
+        (_type, _id) = (1, 96);
+    }
+
     string public name = "Refinance-v1.2";
 }
