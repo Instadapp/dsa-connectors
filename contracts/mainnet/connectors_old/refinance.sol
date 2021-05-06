@@ -253,7 +253,7 @@ contract Helpers is DSMath {
     }
 
     function convertEthToWeth(bool isEth, TokenInterface token, uint amount) internal {
-        if(isEth) token.deposit.value(amount)();
+        if(isEth) token.deposit{value:amount}();
     }
 
     function convertWethToEth(bool isEth, TokenInterface token, uint amount) internal {
@@ -387,7 +387,7 @@ contract CompoundHelpers is Helpers {
                 token.approve(address(ctoken), _amt);
                 require(ctoken.mint(_amt) == 0, "deposit-failed");
             } else {
-                CETHInterface(address(ctoken)).mint.value(_amt)();
+                CETHInterface(address(ctoken)).mint{value:_amt}();
             }
             transferFees(_token, feeAmt);
         }
@@ -442,7 +442,7 @@ contract CompoundHelpers is Helpers {
                 token.approve(address(ctoken), amt);
                 require(ctoken.repayBorrow(amt) == 0, "repay-failed.");
             } else {
-                CETHInterface(address(ctoken)).repayBorrow.value(amt)();
+                CETHInterface(address(ctoken)).repayBorrow{value:amt}();
             }
         }
         return amt;
@@ -551,7 +551,7 @@ contract AaveV1Helpers is CompoundHelpers {
 
             transferFees(_token, feeAmt);
 
-            aave.deposit.value(ethAmt)(_token, _amt, getReferralCode());
+            aave.deposit{value:ethAmt}(_token, _amt, getReferralCode());
 
             if (!getIsColl(aave, _token))
                 aave.setUserUseReserveAsCollateral(_token, true);
@@ -627,7 +627,7 @@ contract AaveV1Helpers is CompoundHelpers {
                 token.approve(address(aaveCore), amt);
             }
 
-            aave.repay.value(ethAmt)(_token, amt, payable(address(this)));
+            aave.repay{value:ethAmt}(_token, amt, payable(address(this)));
         }
         return amt;
     }
