@@ -32,10 +32,13 @@ const getConnectorsList = async () => {
 const checkCodeForbidden = async (code, codePath) => {
   try {
     const forbidden = []
-    for (let index = 0; index < forbiddenStrings.length; index++) {
-      const str = forbiddenStrings[index]
-      if (code.includes(str)) {
-        forbidden.push(`found '${str}' in ${codePath}`)
+    for (let i1 = 0; i1 < forbiddenStrings.length; i1++) {
+      const forbiddenStr = forbiddenStrings[i1]
+      const strs = code.split('\n')
+      for (let i2 = 0; i2 < strs.length; i2++) {
+        if (strs[i2].includes(forbiddenStr)) {
+          forbidden.push(`found '${forbiddenStr}' in ${codePath}:${i2 + 1}`)
+        }
       }
     }
     return forbidden
@@ -77,6 +80,7 @@ const checkEvents = async (connector) => {
     const errors = []
     const warnings = []
     const eventsPath = `${connector.path}/events.sol`
+    const mainPath = `${connector.path}/main.sol`
     if (connector.events.length) {
       const eventNames = []
       for (let i1 = 0; i1 < connector.mainEvents.length; i1++) {
@@ -88,13 +92,12 @@ const checkEvents = async (connector) => {
           const mainEventArgs = mainEvent.split('(')[1].split(')')[0].split(',').map(a => a.trim())
           const eventArgs = event.split('(')[1].split(')')[0].split(',').map(a => a.trim())
           if (mainEventArgs.length !== eventArgs.length) {
-            errors.push(`arguments amount don't match for ${name} at ${eventsPath}`)
+            errors.push(`arguments amount don't match for ${name} at ${mainPath}:${connector.mainEventsLines[i1]}`)
             continue
           }
           for (let i2 = 0; i2 < mainEventArgs.length; i2++) {
             if (!mainEventArgs[i2].startsWith(eventArgs[i2].split(' ')[0])) {
-              errors.push(`invalid argument ${mainEventArgs[i2]} for ${name} at ${eventsPath}`)
-              continue
+              errors.push(`invalid argument #${i2 + 1} for ${name} at ${mainPath}:${connector.mainEventsLines[i1]}`)
             }
           }
         } else {
@@ -112,7 +115,7 @@ const checkEvents = async (connector) => {
         warnings.push(`${deprecatedEvents.map(e => e.split('(')[0].split(' ')[1]).join(', ')} event(s) not used at ${connector.path}/main.sol`)
       }
     } else {
-      errors.push(`missing events file for ${connector.path}/main.sol`)
+      warnings.push(`missing events file for ${connector.path}/main.sol`)
     }
     return { eventsErrors: errors, eventsWarnings: warnings }
   } catch (error) {
@@ -152,24 +155,27 @@ const getCommments = async (strs) => {
 const parseCode = async (connector) => {
   try {
     const strs = connector.code.split('\n')
+    const events = []
+    const eventsFirstLines = []
     let func = []
     let funcs = []
     let event = []
     let mainEvents = []
-    let fStart
-    const events = []
+    let firstLine
+    let mainEventsLines = []
     for (let index = 0; index < strs.length; index++) {
       const str = strs[index]
       if (str.includes('function') && !str.trim().startsWith('//')) {
         func = [str]
-        fStart = index
+        firstLine = index + 1
       } else if (func.length && !str.trim().startsWith('//')) {
         func.push(str)
       }
       if (func.length && str.startsWith(`${func[0].split('function')[0]}}`)) {
         funcs.push({
           raw: func.map(str => str.trim()).join(' '),
-          comments: await getCommments(strs.slice(0, fStart))
+          comments: await getCommments(strs.slice(0, firstLine)),
+          firstLine
         })
         func = []
       }
@@ -199,17 +205,20 @@ const parseCode = async (connector) => {
       mainEvents = funcs
         .map(({ raw }) => raw.split('_eventName')[2].trim().split('"')[1])
         .filter(raw => !!raw)
+      mainEventsLines = mainEvents.map(me => strs.findIndex(str => str.includes(me)) + 1)
       const eventsCode = fs.readFileSync(eventsPath, { encoding: 'utf8' })
       const eventsStrs = eventsCode.split('\n')
       for (let index = 0; index < eventsStrs.length; index++) {
         const str = eventsStrs[index]
         if (str.includes('event')) {
           event = [str]
+          firstLine = index + 1
         } else if (event.length && !str.trim().startsWith('//')) {
           event.push(str)
         }
         if (event.length && str.includes(')')) {
           events.push(event.map(str => str.trim()).join(' '))
+          eventsFirstLines.push(firstLine)
           event = []
         }
       }
@@ -217,7 +226,9 @@ const parseCode = async (connector) => {
     return {
       ...connector,
       events,
+      eventsFirstLines,
       mainEvents,
+      mainEventsLines,
       funcs
     }
   } catch (error) {
@@ -232,14 +243,16 @@ const checkComments = async (connector) => {
       const func = connector.funcs[i1]
       for (let i2 = 0; i2 < func.args.length; i2++) {
         const argName = func.args[i2].split(' ').pop()
-        if (!func.comments.some(comment => comment.includes(argName) && comment.startsWith('@param'))) {
-          errors.push(`argument ${argName} has no @param for function ${func.name} at ${connector.path}/main.sol`)
+        if (!func.comments.some(
+          comment => comment.startsWith('@param') && comment.split(' ')[1] === argName
+        )) {
+          errors.push(`argument ${argName} has no @param for function ${func.name} at ${connector.path}/main.sol:${func.firstLine}`)
         }
       }
       const reqs = ['@dev', '@notice']
       for (let i3 = 0; i3 < reqs.length; i3++) {
         if (!func.comments.some(comment => comment.startsWith(reqs[i3]))) {
-          errors.push(`no ${reqs[i3]} for function ${func.name} at ${connector.path}/main.sol`)
+          errors.push(`no ${reqs[i3]} for function ${func.name} at ${connector.path}/main.sol:${func.firstLine}`)
         }
       }
     }
@@ -284,10 +297,18 @@ const checkName = async (connector) => {
       errors.push(...nameErrors)
       warnings.push(...eventsWarnings)
     }
-    console.log(`Total errors: ${errors.length}`)
-    console.error(errors.join('\n'))
-    console.log(`Total warnings: ${warnings.length}`)
-    console.warn(warnings.join('\n'))
+    if (errors.length) {
+      console.log('\x1b[31m%s\x1b[0m', `Total errors: ${errors.length}`)
+      console.log('\x1b[31m%s\x1b[0m', errors.join('\n'))
+    } else {
+      console.log('\x1b[32m%s\x1b[0m', 'No Errors Found')
+    }
+    if (warnings.length) {
+      console.log('\x1b[33m%s\x1b[0m', `Total warnings: ${warnings.length}`)
+      console.log('\x1b[33m%s\x1b[0m', warnings.join('\n'))
+    } else {
+      console.log('\x1b[32m%s\x1b[0m', 'No Warnings Found')
+    }
   } catch (error) {
     console.error('check execution error:', error)
   }
