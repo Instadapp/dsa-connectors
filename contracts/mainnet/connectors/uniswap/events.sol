@@ -2,7 +2,6 @@ pragma solidity ^0.7.0;
 
 contract Events {
     event LogDepositLiquidity(
-        address indexed tokenA,
         address indexed tokenB,
         uint256 amtA,
         uint256 amtB,
