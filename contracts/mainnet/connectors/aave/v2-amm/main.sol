@@ -9,6 +9,7 @@ import { AaveInterface } from "./interface.sol";
 abstract contract AaveResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
+     * @notice Deposit a token to Aave v2 AMM for lending / collaterization.
      * @param token token address to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to deposit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -52,6 +53,7 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
+     * @notice Withdraw deposited token from Aave v2 AMM
      * @param token token address to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -87,6 +89,7 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Borrow ETH/ERC20_Token.
+     * @notice Borrow a token using Aave v2 AMM
      * @param token token address to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to borrow.
      * @param rateMode type of borrow debt.(For Stable: 1, Variable: 2)
@@ -118,6 +121,7 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Payback borrowed ETH/ERC20_Token.
+     * @notice Payback debt owed on Aave v2 AMM.
      * @param token token address to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to payback.
      * @param rateMode type of borrow debt.(For Stable: 1, Variable: 2)
@@ -156,6 +160,7 @@ abstract contract AaveResolver is Events, Helpers {
 
     /**
      * @dev Enable collateral
+     * @notice Enable an array of tokens as collateral
      * @param tokens Array of tokens to enable collateral
     */
     function enableCollateral(

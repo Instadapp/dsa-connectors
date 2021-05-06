@@ -5,7 +5,8 @@ import { Events } from "./events.sol";
 
 abstract contract ChiResolver is Events, Helpers {
     /**
-     * @dev Mint CHI token.
+     * @dev Mint token.
+     * @notice Mint CHI token.
      * @param amt token amount to mint.
      */
     function mint(uint amt) public payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -18,7 +19,8 @@ abstract contract ChiResolver is Events, Helpers {
     }
 
     /**
-     * @dev burn CHI token.
+     * @dev Burn token.
+     * @notice burns CHI token.
      * @param amt token amount to burn.
      */
     function burn(uint amt) public payable returns (string memory _eventName, bytes memory _eventParam) {

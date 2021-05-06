@@ -13,12 +13,15 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
     // ===== Gelato ENTRY APIs ======
 
     /**
-     * @dev Enables first time users to  pre-fund eth, whitelist an executor & register the
+     * @dev Enables to use Gelato
+     * @notice Enables first time users to  pre-fund eth, whitelist an executor & register the
      * ProviderModuleDSA.sol to be able to use Gelato
      * @param _executor address of single execot node or gelato'S decentralized execution market
      * @param _taskSpecs enables external providers to whitelist TaskSpecs on gelato
      * @param _modules address of ProviderModuleDSA
      * @param _ethToDeposit amount of eth to deposit on Gelato, only for self-providers
+     * @param _getId get token amount at this IDs from `InstaMemory` Contract.
+     * @param _setId set token amount at this IDs in `InstaMemory` Contract.
     */
     function multiProvide(
         address _executor,
@@ -44,7 +47,8 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
     }
 
     /**
-     * @dev Submits a single, one-time task to Gelato
+     * @dev Submit task
+     * @notice Submits a single, one-time task to Gelato
      * @param _provider Consists of proxy module address (DSA) and provider address ()
      * who will pay for the transaction execution
      * @param _task Task specifying the condition and the action connectors
@@ -62,7 +66,8 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
     }
 
     /**
-     * @dev Submits single or mulitple Task Sequences to Gelato
+     * @dev Submit Task Sequences
+     * @notice Submits single or mulitple Task Sequences to Gelato
      * @param _provider Consists of proxy module address (DSA) and provider address ()
      * who will pay for the transaction execution
      * @param _tasks A sequence of Tasks, can be a single or multiples
@@ -87,7 +92,8 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
     }
 
     /**
-     * @dev Submits single or mulitple Task Chains to Gelato
+     * @dev Submit Task Chains
+     * @notice Submits single or mulitple Task Chains to Gelato
      * @param _provider Consists of proxy module address (DSA) and provider address ()
      * who will pay for the transaction execution
      * @param _tasks A sequence of Tasks, can be a single or multiples
@@ -115,11 +121,15 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
     // ===== Gelato EXIT APIs ======
 
     /**
-     * @dev Withdraws funds from Gelato, de-whitelists TaskSpecs and Provider Modules
+     * @dev Withdraws ETH, de-whitelists Tasks and Modules
+     * in one tx
+     * @notice Withdraws funds from Gelato, de-whitelists TaskSpecs and Provider Modules
      * in one tx
      * @param _withdrawAmount Amount of ETH to withdraw from Gelato
      * @param _taskSpecs List of Task Specs to de-whitelist, default empty []
      * @param _modules List of Provider Modules to de-whitelist, default empty []
+     * @param _getId get token amount at this IDs from `InstaMemory` Contract.
+     * @param _setId set token amount at this IDs in `InstaMemory` Contract.
     */
     function multiUnprovide(
         uint256 _withdrawAmount,
@@ -146,7 +156,8 @@ abstract contract GelatoResolver is DSMath, Basic, Events {
     }
 
     /**
-     * @dev Cancels outstanding Tasks
+     * @dev Cancel Tasks
+     * @notice Cancels outstanding Tasks on Gelato
      * @param _taskReceipts List of Task Receipts to cancel
     */
     function multiCancelTasks(TaskReceipt[] calldata _taskReceipts)

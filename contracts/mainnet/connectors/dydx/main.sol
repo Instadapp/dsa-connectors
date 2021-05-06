@@ -9,6 +9,7 @@ abstract contract DyDxResolver is Events, Helpers {
 
     /**
      * @dev Deposit ETH/ERC20_Token.
+     * @notice Deposit a token to dYdX for lending / collaterization.
      * @param token token address to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to deposit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -46,6 +47,7 @@ abstract contract DyDxResolver is Events, Helpers {
 
     /**
      * @dev Withdraw ETH/ERC20_Token.
+     * @notice Withdraw deposited token from dYdX.
      * @param token token address to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -82,6 +84,7 @@ abstract contract DyDxResolver is Events, Helpers {
 
     /**
      * @dev Borrow ETH/ERC20_Token.
+     * @notice Borrow a token using dYdX
      * @param token token address to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to borrow.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -115,6 +118,7 @@ abstract contract DyDxResolver is Events, Helpers {
 
     /**
      * @dev Payback borrowed ETH/ERC20_Token.
+     * @notice Payback debt owed.
      * @param token token address to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount to payback.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.

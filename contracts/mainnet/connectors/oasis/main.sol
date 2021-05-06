@@ -14,6 +14,7 @@ contract OasisResolver is DSMath, Basic, Events {
 
     /**
      * @dev Buy ETH/ERC20_Token.
+     * @notice Buy tokens using Oasis.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr selling token amount.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param buyAmt buying token amount.
@@ -64,6 +65,7 @@ contract OasisResolver is DSMath, Basic, Events {
 
     /**
      * @dev Sell ETH/ERC20_Token.
+     * @notice Sell tokens using Oasis.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr selling token amount.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt selling token amount.
