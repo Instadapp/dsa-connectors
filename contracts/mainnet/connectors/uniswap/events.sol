@@ -6,7 +6,6 @@ contract Events {
         address indexed tokenB,
         uint256 amtA,
         uint256 amtB,
-        uint256 uniAmount,
         uint256 getId,
         uint256 setId
     );
