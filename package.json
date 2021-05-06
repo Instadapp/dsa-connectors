@@ -48,5 +48,4 @@
   "pre-commit": [
     "check"
   ]
-
 }
