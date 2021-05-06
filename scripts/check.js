@@ -277,7 +277,6 @@ const checkName = async (connector) => {
     return Promise.reject(error)
   }
 }
-
 (async function checkMain () {
   try {
     const errors = []
