@@ -7,6 +7,7 @@ import { Events } from "./events.sol";
 abstract contract KyberResolver is Helpers, Events {
     /**
      * @dev Sell ETH/ERC20_Token.
+     * @notice Sell tokens using Kyber.
      * @param buyAddr buying token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr selling token amount.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt selling token amount.

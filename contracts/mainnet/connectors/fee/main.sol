@@ -6,6 +6,7 @@ import { Basic } from "../../common/basic.sol";
 abstract contract FeeResolver is DSMath, Basic {
     /**
      * @dev Calculate fee
+     * @notice Calculates fee on a given amount
      * @param amount token amount to caculate fee.
      * @param fee fee percentage. Eg: 1% => 1e17, 100% => 1e18.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -31,6 +32,7 @@ abstract contract FeeResolver is DSMath, Basic {
 
     /**
      * @dev Calculate amount minus fee
+     * @notice Calculates amount minus fee 
      * @param amount token amount to caculate fee.
      * @param fee fee percentage. Eg: 1% => 1e17, 100% => 1e18.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
