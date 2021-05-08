@@ -8,6 +8,7 @@ import { SafeEngineLike, TokenJoinInterface } from "./interface.sol";
 abstract contract GebResolver is Helpers, Events {
     /**
      * @dev Open Safe
+     * @notice Open a Reflexer Safe.
      * @param colType Type of Collateral.(eg: 'ETH-A')
     */
     function open(string calldata colType) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -21,6 +22,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Close Safe
+     * @notice Close a Reflexer Safe.
      * @param safe Safe ID to close.
     */
     function close(uint256 safe) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -39,6 +41,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Deposit ETH/ERC20_Token Collateral.
+     * @notice Deposit collateral to a Reflexer safe
      * @param safe Safe ID.
      * @param amt token amount to deposit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -85,6 +88,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Withdraw ETH/ERC20_Token Collateral.
+     * @notice Withdraw collateral from a Reflexer Safe
      * @param safe Safe ID.
      * @param amt token amount to withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -140,6 +144,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Borrow Coin.
+     * @notice Borrow Coin using a Reflexer safe
      * @param safe Safe ID.
      * @param amt token amount to borrow.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -188,6 +193,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Payback borrowed Coin.
+     * @notice Payback Coin debt owed by a Reflexer safe
      * @param safe Safe ID.
      * @param amt token amount to payback.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -233,6 +239,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Withdraw leftover ETH/ERC20_Token after Liquidation.
+     * @notice Withdraw leftover collateral after Liquidation.
      * @param safe Safe ID.
      * @param amt token amount to Withdraw.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -283,8 +290,10 @@ abstract contract GebResolver is Helpers, Events {
         SafeEngineLike safeEngineContract;
         TokenInterface tokenContract;
     }
+
     /**
      * @dev Deposit ETH/ERC20_Token Collateral and Borrow Coin.
+     * @notice Deposit collateral and borrow Coin.
      * @param safe Safe ID.
      * @param depositAmt token deposit amount to Withdraw.
      * @param borrowAmt token borrow amount to Withdraw.
@@ -365,6 +374,7 @@ abstract contract GebResolver is Helpers, Events {
 
     /**
      * @dev Exit Coin from handler.
+     * @notice Exit Coin from handler.
      * @param safe Safe ID.
      * @param amt token amount to exit.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.

@@ -9,6 +9,7 @@ import { Events } from "./events.sol";
 abstract contract LiquidityManage is Helpers, Events {
     /**
      * @dev Deposit Liquidity in InstaPool.
+     * @notice Deposit Liquidity in InstaPool.
      * @param token token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -40,7 +41,8 @@ abstract contract LiquidityManage is Helpers, Events {
     }
 
     /**
-     * @dev Withdraw Liquidity in InstaPool.
+     * @dev Withdraw Liquidity from InstaPool.
+     * @notice Withdraw Liquidity from InstaPool.
      * @param token token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -64,8 +66,10 @@ abstract contract LiquidityManage is Helpers, Events {
 
 abstract contract LiquidityAccessHelper is LiquidityManage {
     /**
-     * @dev Add Fee Amount to borrowed flashloan/
-     * @param amt Get token amount at this ID from `InstaMemory` Contract.
+     * @dev Add Fee Amount to borrowed flashloan.
+     * @notice Add Fee Amount to borrowed flashloan.
+     * @param token token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt token amount.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
@@ -81,6 +85,7 @@ abstract contract LiquidityAccessHelper is LiquidityManage {
 contract LiquidityAccess is LiquidityAccessHelper {
     /**
      * @dev Access Token Liquidity from InstaPool.
+     * @notice Take flashloan from InstaPool.
      * @param token token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt token amount.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -109,6 +114,7 @@ contract LiquidityAccess is LiquidityAccessHelper {
 
     /**
      * @dev Return Token Liquidity from InstaPool.
+     * @notice Payback borrowed flashloan to InstaPool.
      * @param token token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
@@ -139,6 +145,7 @@ contract LiquidityAccess is LiquidityAccessHelper {
 
     /**
      * @dev Return Token Liquidity from InstaPool and Transfer 20% of Collected Fee to `origin`.
+     * @notice Payback borrowed flashloan to InstaPool and Transfer 20% of Collected Fee to `origin`.
      * @param origin origin address to transfer 20% of the collected fee.
      * @param token token address.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -177,6 +184,7 @@ contract LiquidityAccess is LiquidityAccessHelper {
 contract LiquidityAccessMulti is LiquidityAccess {
     /**
      * @dev Access Multiple Token liquidity from InstaPool.
+     * @notice Take multiple tokens flashloan from Instapool.
      * @param tokens Array of token addresses.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amts Array of token amount.
      * @param getId get token amounts at this IDs from `InstaMemory` Contract.
@@ -206,6 +214,7 @@ contract LiquidityAccessMulti is LiquidityAccess {
 
     /**
      * @dev Return Multiple token liquidity from InstaPool.
+     * @notice Payback borrowed multiple tokens flashloan to Instapool.
      * @param tokens Array of token addresses.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param getId get token amounts at this IDs from `InstaMemory` Contract.
      * @param setId set token amounts at this IDs in `InstaMemory` Contract.

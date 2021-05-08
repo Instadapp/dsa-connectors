@@ -6,7 +6,9 @@
   "scripts": {
     "test": "hardhat test",
     "coverage": "./node_modules/.bin/solidity-coverage",
-    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
+    "check-husky": "node status-checks/huskyCheck.js",
+    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
     "@tenderly/hardhat-tenderly": "^1.0.6",
     "ethers": "^5.0.32",
     "hardhat": "^2.0.8",
+    "husky": "^6.0.0",
     "sol-merger": "^2.0.1",
     "solidity-coverage": "0.5.11",
     "web3": "^1.3.4"
