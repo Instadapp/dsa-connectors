@@ -39,6 +39,8 @@
     "@openzeppelin/test-helpers": "^0.5.6",
     "@studydefi/money-legos": "^2.3.7",
     "@tenderly/hardhat-tenderly": "^1.0.6",
+    "chai-as-promised": "^7.1.1",
+    "ethereum-waffle": "^3.3.0",
     "ethers": "^5.0.32",
     "hardhat": "^2.0.8",
     "husky": "^6.0.0",
