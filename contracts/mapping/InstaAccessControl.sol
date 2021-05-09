@@ -41,50 +41,29 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * grant and revoke this role. Extra precautions should be taken to secure
  * accounts that have been granted it.
  */
-abstract contract AccessControl is Context {
+interface IndexInterface {
+    function master() external view returns (address);
+}
+
+contract InstaAccessControl is Context {
     using EnumerableSet for EnumerableSet.AddressSet;
     using Address for address;
 
-    struct RoleData {
-        EnumerableSet.AddressSet members;
-        bytes32 adminRole;
-    }
+    mapping(bytes32 => EnumerableSet.AddressSet) private _roles;
 
-    mapping(bytes32 => RoleData) private _roles;
-
-    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-
-    /**
-     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
-     *
-     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite
-     * {RoleAdminChanged} not being emitted signaling this.
-     *
-     * _Available since v3.1._
-     */
-    event RoleAdminChanged(
-        bytes32 indexed role,
-        bytes32 indexed previousAdminRole,
-        bytes32 indexed newAdminRole
-    );
+    IndexInterface public constant instaIndex =
+        IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
 
     /**
      * @dev Emitted when `account` is granted `role`.
-     *
-     * `sender` is the account that originated the contract call, an admin role
-     * bearer except when using {_setupRole}.
      */
-    event RoleGranted(
-        bytes32 indexed role,
-        address indexed account,
-        address indexed sender
-    );
+    event RoleGranted(bytes32 indexed role, address indexed account);
 
     /**
      * @dev Emitted when `account` is revoked `role`.
      *
      * `sender` is the account that originated the contract call:
-     *   - if using `revokeRole`, it is the admin role bearer
+     *   - if using `revokeRole`, it is the insta master
      *   - if using `renounceRole`, it is the role bearer (i.e. `account`)
      */
     event RoleRevoked(
@@ -93,11 +72,19 @@ abstract contract AccessControl is Context {
         address indexed sender
     );
 
+    modifier onlyMaster {
+        require(
+            instaIndex.master() == _msgSender(),
+            "AccessControl: sender must be master"
+        );
+        _;
+    }
+
     /**
      * @dev Returns `true` if `account` has been granted `role`.
      */
     function hasRole(bytes32 role, address account) public view returns (bool) {
-        return _roles[role].members.contains(account);
+        return _roles[role].contains(account);
     }
 
     /**
@@ -105,7 +92,7 @@ abstract contract AccessControl is Context {
      * together with {getRoleMember} to enumerate all bearers of a role.
      */
     function getRoleMemberCount(bytes32 role) public view returns (uint256) {
-        return _roles[role].members.length();
+        return _roles[role].length();
     }
 
     /**
@@ -125,17 +112,7 @@ abstract contract AccessControl is Context {
         view
         returns (address)
     {
-        return _roles[role].members.at(index);
-    }
-
-    /**
-     * @dev Returns the admin role that controls `role`. See {grantRole} and
-     * {revokeRole}.
-     *
-     * To change a role's admin, use {_setRoleAdmin}.
-     */
-    function getRoleAdmin(bytes32 role) public view returns (bytes32) {
-        return _roles[role].adminRole;
+        return _roles[role].at(index);
     }
 
     /**
@@ -146,13 +123,13 @@ abstract contract AccessControl is Context {
      *
      * Requirements:
      *
-     * - the caller must have `DEFAULT_ADMIN_ROLE` role.
+     * - the caller must be the master.
      */
-    function grantRole(bytes32 role, address account) public virtual {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "AccessControl: sender must be the master admin"
-        );
+    function grantRole(bytes32 role, address account)
+        public
+        virtual
+        onlyMaster
+    {
         _grantRole(role, account);
     }
 
@@ -163,13 +140,13 @@ abstract contract AccessControl is Context {
      *
      * Requirements:
      *
-     * - the caller must have `DEFAULT_ADMIN_ROLE` role.
+     * - the caller must be the master.
      */
-    function revokeRole(bytes32 role, address account) public virtual {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
-            "AccessControl: sender must be the master admin"
-        );
+    function revokeRole(bytes32 role, address account)
+        public
+        virtual
+        onlyMaster
+    {
         _revokeRole(role, account);
     }
 
@@ -216,24 +193,14 @@ abstract contract AccessControl is Context {
         _grantRole(role, account);
     }
 
-    /**
-     * @dev Sets `adminRole` as ``role``'s admin role.
-     *
-     * Emits a {RoleAdminChanged} event.
-     */
-    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {
-        emit RoleAdminChanged(role, _roles[role].adminRole, adminRole);
-        _roles[role].adminRole = adminRole;
-    }
-
     function _grantRole(bytes32 role, address account) private {
-        if (_roles[role].members.add(account)) {
-            emit RoleGranted(role, account, _msgSender());
+        if (_roles[role].add(account)) {
+            emit RoleGranted(role, account);
         }
     }
 
     function _revokeRole(bytes32 role, address account) private {
-        if (_roles[role].members.remove(account)) {
+        if (_roles[role].remove(account)) {
             emit RoleRevoked(role, account, _msgSender());
         }
     }
