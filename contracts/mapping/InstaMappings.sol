@@ -23,9 +23,10 @@ contract InstaMappings is AccessControl {
         public
         pure
         returns (bytes32 role)
-    {
+    {   
+        bytes memory encoded = abi.encode(mappingContract);
         assembly {
-            role := mload(add(mappingContract, 32))
+            role := mload(add(encoded, 32))
         }
     }
 
