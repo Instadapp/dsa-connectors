@@ -130,4 +130,44 @@ describe("Test InstaAccessControl contract", () => {
       false
     );
   });
+
+  it("should do role count properly", async () => {
+    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(0);
+
+    await masterAccessControl.grantRole(TEST_ROLE, account.address);
+
+    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(1);
+
+    await masterAccessControl.grantRole(TEST_ROLE, instaMaster.address);
+
+    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(2);
+
+    await masterAccessControl.revokeRole(TEST_ROLE, instaMaster.address);
+
+    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(1);
+  });
+
+  it("should get member correctly by index", async () => {
+    await expect(
+      masterAccessControl.getRoleMember(TEST_ROLE, 0)
+    ).to.rejectedWith(/EnumerableSet: index out of bounds/);
+
+    await masterAccessControl.grantRole(TEST_ROLE, account.address);
+
+    expect(await masterAccessControl.getRoleMember(TEST_ROLE, 0)).to.eq(
+      account.address
+    );
+
+    await masterAccessControl.grantRole(TEST_ROLE, instaMaster.address);
+
+    expect(await masterAccessControl.getRoleMember(TEST_ROLE, 1)).to.eq(
+      instaMaster.address
+    );
+
+    await masterAccessControl.revokeRole(TEST_ROLE, instaMaster.address);
+
+    await expect(
+      masterAccessControl.getRoleMember(TEST_ROLE, 1)
+    ).to.rejectedWith(/EnumerableSet: index out of bounds/);
+  });
 });
