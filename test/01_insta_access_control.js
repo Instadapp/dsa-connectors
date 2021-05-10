@@ -8,22 +8,22 @@ chai.use(solidity);
 
 const { expect } = chai;
 
-const getAccessControl = (address, signer) => {
-  return ethers.getContractAt("InstaAccessControl", address, signer);
+const getMapping = (address, signer) => {
+  return ethers.getContractAt("InstaMappingController", address, signer);
 };
 
-describe("Test InstaAccessControl contract", () => {
+describe("Test InstaMapping contract", () => {
   let account, instaMaster;
-  let accessControlAddress;
-  let masterAccessControl;
+  let mappingAddress;
+  let masterMapping;
   const indexInterfaceAddress = "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723";
-  const TEST_ROLE = ethers.utils.formatBytes32String("test");
+  const testRoleAddress = "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723";
 
   before("get signers", async () => {
     [account] = await ethers.getSigners();
 
     const IndexContract = await ethers.getContractAt(
-      "contracts/mapping/InstaAccessControl.sol:IndexInterface",
+      "contracts/mapping/InstaMappingController.sol:IndexInterface",
       indexInterfaceAddress
     );
     const masterAddress = await IndexContract.master();
@@ -44,130 +44,121 @@ describe("Test InstaAccessControl contract", () => {
   });
 
   beforeEach("deploy contract", async () => {
-    const accessControlFactory = await ethers.getContractFactory(
-      "InstaAccessControl"
+    const mappingFactory = await ethers.getContractFactory(
+      "InstaMappingController"
     );
-    const accessControl = await accessControlFactory.deploy();
+    const mapping = await mappingFactory.deploy();
 
-    await accessControl.deployed();
-    accessControlAddress = accessControl.address;
+    await mapping.deployed();
+    mappingAddress = mapping.address;
 
-    masterAccessControl = await getAccessControl(
-      accessControlAddress,
-      instaMaster
-    );
+    masterMapping = await getMapping(mappingAddress, instaMaster);
   });
 
   it("grant,revoke role should fail with non master signer", async () => {
-    const selfAccessControl = await getAccessControl(
-      accessControlAddress,
-      account
-    );
+    const selfMapping = await getMapping(mappingAddress, account);
 
     await expect(
-      selfAccessControl.grantRole(TEST_ROLE, account.address)
-    ).to.rejectedWith(/AccessControl: sender must be master/);
+      selfMapping.grantRole(testRoleAddress, account.address)
+    ).to.rejectedWith(/MappingController: sender must be master/);
 
     await expect(
-      selfAccessControl.revokeRole(TEST_ROLE, account.address)
-    ).to.rejectedWith(/AccessControl: sender must be master/);
+      selfMapping.revokeRole(testRoleAddress, account.address)
+    ).to.rejectedWith(/MappingController: sender must be master/);
   });
 
   it("hasRole should return false for roles not assigned to users", async () => {
-    expect(await masterAccessControl.hasRole(TEST_ROLE, account.address)).to.eq(
+    expect(await masterMapping.hasRole(testRoleAddress, account.address)).to.eq(
       false
     );
   });
 
   it("should grant roles", async () => {
-    await expect(masterAccessControl.grantRole(TEST_ROLE, account.address))
-      .to.emit(masterAccessControl, "RoleGranted")
-      .withArgs(TEST_ROLE, account.address);
+    await expect(masterMapping.grantRole(testRoleAddress, account.address))
+      .to.emit(masterMapping, "RoleGranted")
+      .withArgs(testRoleAddress, account.address);
 
-    expect(await masterAccessControl.hasRole(TEST_ROLE, account.address)).to.eq(
+    expect(await masterMapping.hasRole(testRoleAddress, account.address)).to.eq(
       true
     );
   });
 
   it("should revoke role", async () => {
     // add a role first
-    await masterAccessControl.grantRole(TEST_ROLE, account.address);
-    expect(await masterAccessControl.hasRole(TEST_ROLE, account.address)).to.eq(
+    await masterMapping.grantRole(testRoleAddress, account.address);
+    expect(await masterMapping.hasRole(testRoleAddress, account.address)).to.eq(
       true
     );
 
     // then remove the role
-    await expect(masterAccessControl.revokeRole(TEST_ROLE, account.address))
-      .to.emit(masterAccessControl, "RoleRevoked")
-      .withArgs(TEST_ROLE, account.address, instaMaster.address);
+    await expect(masterMapping.revokeRole(testRoleAddress, account.address))
+      .to.emit(masterMapping, "RoleRevoked")
+      .withArgs(testRoleAddress, account.address, instaMaster.address);
 
-    expect(await masterAccessControl.hasRole(TEST_ROLE, account.address)).to.eq(
+    expect(await masterMapping.hasRole(testRoleAddress, account.address)).to.eq(
       false
     );
   });
 
   it("should renounce role only with the account not master", async () => {
     // add a role first
-    await masterAccessControl.grantRole(TEST_ROLE, account.address);
-    expect(await masterAccessControl.hasRole(TEST_ROLE, account.address)).to.eq(
+    await masterMapping.grantRole(testRoleAddress, account.address);
+    expect(await masterMapping.hasRole(testRoleAddress, account.address)).to.eq(
       true
     );
 
     // then renounce the the role
     await expect(
-      masterAccessControl.renounceRole(TEST_ROLE, account.address)
-    ).to.rejectedWith(/AccessControl: can only renounce roles for self/);
+      masterMapping.renounceRole(testRoleAddress, account.address)
+    ).to.rejectedWith(/MappingController: can only renounce roles for self/);
 
-    const selfAccessControl = await getAccessControl(
-      accessControlAddress,
-      account
-    );
-    expect(await selfAccessControl.renounceRole(TEST_ROLE, account.address))
-      .to.emit(masterAccessControl, "RoleRevoked")
-      .withArgs(TEST_ROLE, account.address, account.address);
+    const selfMapping = await getMapping(mappingAddress, account);
+    expect(await selfMapping.renounceRole(testRoleAddress, account.address))
+      .to.emit(masterMapping, "RoleRevoked")
+      .withArgs(testRoleAddress, account.address, account.address);
 
-    expect(await masterAccessControl.hasRole(TEST_ROLE, account.address)).to.eq(
+    expect(await masterMapping.hasRole(testRoleAddress, account.address)).to.eq(
       false
     );
   });
 
   it("should do role count properly", async () => {
-    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(0);
+    expect(await masterMapping.getRoleMemberCount(testRoleAddress)).to.eq(0);
 
-    await masterAccessControl.grantRole(TEST_ROLE, account.address);
+    await masterMapping.grantRole(testRoleAddress, account.address);
 
-    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(1);
+    expect(await masterMapping.getRoleMemberCount(testRoleAddress)).to.eq(1);
 
-    await masterAccessControl.grantRole(TEST_ROLE, instaMaster.address);
+    await masterMapping.grantRole(testRoleAddress, instaMaster.address);
 
-    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(2);
+    expect(await masterMapping.getRoleMemberCount(testRoleAddress)).to.eq(2);
 
-    await masterAccessControl.revokeRole(TEST_ROLE, instaMaster.address);
+    await masterMapping.revokeRole(testRoleAddress, instaMaster.address);
 
-    expect(await masterAccessControl.getRoleMemberCount(TEST_ROLE)).to.eq(1);
+    expect(await masterMapping.getRoleMemberCount(testRoleAddress)).to.eq(1);
   });
 
   it("should get member correctly by index", async () => {
     await expect(
-      masterAccessControl.getRoleMember(TEST_ROLE, 0)
+      masterMapping.getRoleMember(testRoleAddress, 0)
     ).to.rejectedWith(/EnumerableSet: index out of bounds/);
 
-    await masterAccessControl.grantRole(TEST_ROLE, account.address);
+    await masterMapping.grantRole(testRoleAddress, account.address);
 
-    expect(await masterAccessControl.getRoleMember(TEST_ROLE, 0)).to.eq(
+    expect(await masterMapping.getRoleMember(testRoleAddress, 0)).to.eq(
       account.address
     );
 
-    await masterAccessControl.grantRole(TEST_ROLE, instaMaster.address);
+    await masterMapping.grantRole(testRoleAddress, instaMaster.address);
 
-    expect(await masterAccessControl.getRoleMember(TEST_ROLE, 1)).to.eq(
+    expect(await masterMapping.getRoleMember(testRoleAddress, 1)).to.eq(
       instaMaster.address
     );
 
-    await masterAccessControl.revokeRole(TEST_ROLE, instaMaster.address);
+    await masterMapping.revokeRole(testRoleAddress, instaMaster.address);
 
     await expect(
-      masterAccessControl.getRoleMember(TEST_ROLE, 1)
+      masterMapping.getRoleMember(testRoleAddress, 1)
     ).to.rejectedWith(/EnumerableSet: index out of bounds/);
   });
 });

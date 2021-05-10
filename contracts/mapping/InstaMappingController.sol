@@ -10,11 +10,11 @@ interface IndexInterface {
     function master() external view returns (address);
 }
 
-contract InstaAccessControl is Context {
+contract InstaMappingController is Context {
     using EnumerableSet for EnumerableSet.AddressSet;
     using Address for address;
 
-    mapping(bytes32 => EnumerableSet.AddressSet) private _roles;
+    mapping(address => EnumerableSet.AddressSet) private _roles;
 
     IndexInterface public constant instaIndex =
         IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
@@ -22,7 +22,7 @@ contract InstaAccessControl is Context {
     /**
      * @dev Emitted when `account` is granted `role`.
      */
-    event RoleGranted(bytes32 indexed role, address indexed account);
+    event RoleGranted(address indexed role, address indexed account);
 
     /**
      * @dev Emitted when `account` is revoked `role`.
@@ -32,7 +32,7 @@ contract InstaAccessControl is Context {
      *   - if using `renounceRole`, it is the role bearer (i.e. `account`)
      */
     event RoleRevoked(
-        bytes32 indexed role,
+        address indexed role,
         address indexed account,
         address indexed sender
     );
@@ -40,7 +40,7 @@ contract InstaAccessControl is Context {
     modifier onlyMaster {
         require(
             instaIndex.master() == _msgSender(),
-            "AccessControl: sender must be master"
+            "MappingController: sender must be master"
         );
         _;
     }
@@ -48,7 +48,7 @@ contract InstaAccessControl is Context {
     /**
      * @dev Returns `true` if `account` has been granted `role`.
      */
-    function hasRole(bytes32 role, address account) public view returns (bool) {
+    function hasRole(address role, address account) public view returns (bool) {
         return _roles[role].contains(account);
     }
 
@@ -56,7 +56,7 @@ contract InstaAccessControl is Context {
      * @dev Returns the number of accounts that have `role`. Can be used
      * together with {getRoleMember} to enumerate all bearers of a role.
      */
-    function getRoleMemberCount(bytes32 role) public view returns (uint256) {
+    function getRoleMemberCount(address role) public view returns (uint256) {
         return _roles[role].length();
     }
 
@@ -72,7 +72,7 @@ contract InstaAccessControl is Context {
      * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
      * for more information.
      */
-    function getRoleMember(bytes32 role, uint256 index)
+    function getRoleMember(address role, uint256 index)
         public
         view
         returns (address)
@@ -90,7 +90,7 @@ contract InstaAccessControl is Context {
      *
      * - the caller must be the master.
      */
-    function grantRole(bytes32 role, address account)
+    function grantRole(address role, address account)
         public
         virtual
         onlyMaster
@@ -107,7 +107,7 @@ contract InstaAccessControl is Context {
      *
      * - the caller must be the master.
      */
-    function revokeRole(bytes32 role, address account)
+    function revokeRole(address role, address account)
         public
         virtual
         onlyMaster
@@ -129,10 +129,10 @@ contract InstaAccessControl is Context {
      *
      * - the caller must be `account`.
      */
-    function renounceRole(bytes32 role, address account) public virtual {
+    function renounceRole(address role, address account) public virtual {
         require(
             account == _msgSender(),
-            "AccessControl: can only renounce roles for self"
+            "MappingController: can only renounce roles for self"
         );
 
         _revokeRole(role, account);
@@ -154,17 +154,17 @@ contract InstaAccessControl is Context {
      * system imposed by {AccessControl}.
      * ====
      */
-    function _setupRole(bytes32 role, address account) internal virtual {
+    function _setupRole(address role, address account) internal virtual {
         _grantRole(role, account);
     }
 
-    function _grantRole(bytes32 role, address account) private {
+    function _grantRole(address role, address account) private {
         if (_roles[role].add(account)) {
             emit RoleGranted(role, account);
         }
     }
 
-    function _revokeRole(bytes32 role, address account) private {
+    function _revokeRole(address role, address account) private {
         if (_roles[role].remove(account)) {
             emit RoleRevoked(role, account, _msgSender());
         }
