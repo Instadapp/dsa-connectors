@@ -13,22 +13,32 @@ interface IndexInterface {
     function master() external view returns (address);
 }
 
-
+interface MappingControllerInterface {
+    function hasRole(address,address) public view returns (bool);
+}
 contract Helpers {
-    ConnectorsInterface public constant connectors = ConnectorsInterface(0x7D53E606308A2E0A1D396F30dc305cc7f8483436);
+    // TODO: thrilok, verify this address
+    ConnectorsInterface public constant connectors = ConnectorsInterface(0xFE2390DAD597594439f218190fC2De40f9Cf1179);
     IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
+    // TODO: add address for MappingController
+    MappingControllerInterface public constant mappingController = MappingControllerInterface(address(0));
     uint public version = 1;
 
     mapping (bytes32 => address) public collateralJoinMapping;
 
     event LogAddCollateralJoinMapping(address[] collateralJoin);
     
-    modifier isChief {
-        require(connectors.chief(msg.sender) || instaIndex.master() == msg.sender, "not-a-chief");
+    modifier hasRoleOrIsChief {
+        require(
+            msg.sender == instaIndex.master() ||
+                connectors.chief(msg.sender) ||
+                mappingController.hasRole(address(this), msg.sender),
+            "not-an-chief"
+        );
         _;
-    }
-
-    function addCollateralJoinMapping(address[] memory collateralJoins) public isChief {
+    }    
+    
+    function addCollateralJoinMapping(address[] memory collateralJoins) public hasRoleOrIsChief {
         _addCollateralJoinMapping(collateralJoins);
     }
 
