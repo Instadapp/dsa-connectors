@@ -1,5 +1,10 @@
 pragma solidity ^0.7.0;
 
+/**
+ * @title OasisDEX.
+ * @dev Decentralised Exchange.
+ */
+
 import { TokenInterface } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";

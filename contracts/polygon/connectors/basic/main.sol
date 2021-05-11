@@ -1,5 +1,6 @@
 pragma solidity ^0.7.0;
 
+
 /**
  * @title Basic.
  * @dev Deposit & Withdraw from DSA.
@@ -18,8 +19,8 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     /**
      * @dev Deposit Assets To Smart Account.
      * @notice Deposit a token to DSA
-     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)` (Not valid for ETH))
+     * @param token The address of the token to deposit. (For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)` (Not valid for MATIC))
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens deposited.
      */
@@ -30,7 +31,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        if (token != ethAddr) {
+        if (token != maticAddr) {
             IERC20 tokenContract = IERC20(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(msg.sender) : _amt;
             tokenContract.safeTransferFrom(msg.sender, address(this), _amt);
@@ -47,7 +48,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     /**
      * @dev Withdraw Assets from Smart  Account
      * @notice Withdraw a token from DSA
-     * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param token The address of the token to withdraw. (For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amt The amount of tokens to withdraw. (For max: `uint256(-1)`)
      * @param to The address to receive the token upon withdrawal
      * @param getId ID to retrieve amt.
@@ -61,7 +62,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         uint setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        if (token == ethAddr) {
+        if (token == maticAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             to.call{value: _amt}("");
         } else {

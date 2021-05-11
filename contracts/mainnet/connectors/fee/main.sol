@@ -1,5 +1,10 @@
 pragma solidity ^0.7.0;
 
+/**
+ * @title Fee.
+ * @dev Calculate Fee.
+ */
+
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 

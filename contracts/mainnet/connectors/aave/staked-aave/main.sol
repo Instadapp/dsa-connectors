@@ -1,5 +1,11 @@
 pragma solidity ^0.7.0;
 
+
+/**
+ * @title stkAave.
+ * @dev Staked Aave.
+ */
+
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 

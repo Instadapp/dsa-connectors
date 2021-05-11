@@ -1,6 +1,11 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+/**
+ * @title dYdX.
+ * @dev Lending & Borrowing.
+ */
+
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";

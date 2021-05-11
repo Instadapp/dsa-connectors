@@ -4,7 +4,7 @@ pragma solidity ^0.7.0;
  * @title Authority.
  * @dev Manage Authorities to DSA.
  */
-
+ 
 import { AccountInterface } from "../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";

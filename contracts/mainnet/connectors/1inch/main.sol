@@ -1,6 +1,11 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+/**
+ * @title 1Inch.
+ * @dev On-chain DEX Aggregator.
+ */
+
 // import files from common directory
 import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
