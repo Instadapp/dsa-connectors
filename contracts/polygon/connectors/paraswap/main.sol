@@ -1,5 +1,10 @@
 pragma solidity ^0.7.0;
 
+/**
+ * @title Paraswap.
+ * @dev DEX Aggregator.
+ */
+
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";

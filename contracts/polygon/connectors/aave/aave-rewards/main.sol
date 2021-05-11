@@ -1,5 +1,11 @@
 pragma solidity ^0.7.0;
 
+
+/**
+ * @title Aave Rewards.
+ * @dev Claim Aave rewards.
+ */
+ 
 import { TokenInterface } from "../../../common/interfaces.sol";
 import { Stores } from "../../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
