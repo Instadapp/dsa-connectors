@@ -1,6 +1,11 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+/**
+ * @title Gelato.
+ * @dev Automation.
+ */
+
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { IGelatoInterface, Task, Provider, TaskSpec, TaskReceipt } from "./interface.sol";
