@@ -20,8 +20,10 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
     /**
      * @dev Borrow Flashloan and Cast spells.
+     * @notice Borrows flashloan and cast the spells.
      * @param token Token Address.
      * @param amt Token Amount.
+     * @param route Route to borrow.
      * @param data targets & data for cast.
      */
     function flashBorrowAndCast(
@@ -47,6 +49,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
     /**
      * @dev Return token to InstaPool.
+     * @notice Payback borrowed flashloan.
      * @param token Token Address.
      * @param amt Token Amount.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -72,6 +75,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
     /**
      * @dev Borrow Flashloan and Cast spells.
+     * @notice Borrows multiple flashloan tokens and cast the spells.
      * @param tokens Array of token Addresses.
      * @param amts Array of token Amounts.
      * @param route Route to borrow.
@@ -95,6 +99,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
     /**
      * @dev Return Multiple token liquidity to InstaPool.
+     * @notice Payback borrowed multiple flashloan tokens.
      * @param tokens Array of token addresses.
      * @param amts Array of token amounts.
      * @param getId get token amounts at this IDs from `InstaMemory` Contract.
