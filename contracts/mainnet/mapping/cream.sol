@@ -14,6 +14,10 @@ interface CTokenInterface {
     function underlying() external view returns (address);
 }
 
+interface MappingControllerInterface {
+    function hasRole(address,address) public view returns (bool);
+}
+
 abstract contract Helpers {
 
     struct TokenMap {
@@ -24,22 +28,27 @@ abstract contract Helpers {
     event LogCTokenAdded(string indexed name, address indexed token, address indexed ctoken);
     event LogCTokenUpdated(string indexed name, address indexed token, address indexed ctoken);
 
-    ConnectorsInterface public immutable connectors;
+    // TODO: thrilok, verify this address
+    ConnectorsInterface public constant connectors = ConnectorsInterface(0xFE2390DAD597594439f218190fC2De40f9Cf1179);
+    
 
     // InstaIndex Address.
     IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
+    // TODO: add address for MappingController
+    MappingControllerInterface public constant mappingController = MappingControllerInterface(address(0));
 
     address public constant ethAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     mapping (string => TokenMap) public cTokenMapping;
 
-    modifier isChief {
-        require(msg.sender == instaIndex.master() || connectors.chief(msg.sender), "not-an-chief");
+    modifier hasRoleOrIsChief {
+        require(
+            msg.sender == instaIndex.master() ||
+                connectors.chief(msg.sender) ||
+                mappingController.hasRole(address(this), msg.sender),
+            "not-an-chief"
+        );
         _;
-    }
-
-    constructor(address _connectors) {
-        connectors = ConnectorsInterface(_connectors);
     }
 
     function _addCtokenMapping(
@@ -112,7 +121,7 @@ abstract contract Helpers {
         string[] memory _names,
         address[] memory _tokens,
         address[] memory _ctokens
-    ) external isChief {
+    ) external hasRoleOrIsChief {
         _addCtokenMapping(_names, _tokens, _ctokens);
     }
 
