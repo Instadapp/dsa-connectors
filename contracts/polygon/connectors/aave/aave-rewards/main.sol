@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
 
-import { TokenInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
+import { Stores } from "../../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
@@ -34,6 +34,6 @@ abstract contract IncentivesResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2AaveIncentives is IncentivesResolver {
+contract ConnectV2AaveIncentivesPolygon is IncentivesResolver {
     string public constant name = "Aave-Incentives-v1";
 }
