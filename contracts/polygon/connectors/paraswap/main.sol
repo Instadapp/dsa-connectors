@@ -12,7 +12,7 @@ abstract contract ParaswapResolver is Helpers {
      * @param sellAddr The address of the token to sell.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
-     * @param callData Data from 1inch API.
+     * @param callData Data from paraswap API.
      * @param setId ID stores the amount of token brought.
     */
     function swap(
