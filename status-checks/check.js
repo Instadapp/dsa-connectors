@@ -279,8 +279,8 @@ const checkName = async (connector) => {
 }
 
 async function checkMain () {
-  const errors = []
   try {
+    const errors = []
     const warnings = []
     const connectors = await getConnectorsList()
     for (let index = 0; index < connectors.length; index++) {
@@ -299,19 +299,19 @@ async function checkMain () {
     }
     if (errors.length) {
       console.log('\x1b[31m%s\x1b[0m', `Total errors: ${errors.length}`)
-      console.log('\x1b[31m%s\x1b[0m', errors.join('\n'))
+      errors.forEach(error => console.log('\x1b[31m%s\x1b[0m', error))
     } else {
       console.log('\x1b[32m%s\x1b[0m', 'No Errors Found')
     }
     if (warnings.length) {
       console.log('\x1b[33m%s\x1b[0m', `Total warnings: ${warnings.length}`)
-      console.log('\x1b[33m%s\x1b[0m', warnings.join('\n'))
+      warnings.forEach(warning => console.log('\x1b[33m%s\x1b[0m', warning))
     } else {
       console.log('\x1b[32m%s\x1b[0m', 'No Warnings Found')
     }
+    if (errors.length) return Promise.reject(errors.join('\n'))
   } catch (error) {
     console.error('check execution error:', error)
   }
-  if (errors.length) throw new Error(errors.join('\n'))
 }
-module.exports = checkMain;
+module.exports = checkMain
