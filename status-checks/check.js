@@ -278,6 +278,28 @@ const checkName = async (connector) => {
   }
 }
 
+const checkHeadComments = async (connector) => {
+  try {
+    const errors = []
+    const strs = connector.code.split('\n')
+    let haveTitle = false
+    let haveDev = false
+    for (let index = 0; index < strs.length; index++) {
+      if (!strs[index].includes('{')) {
+        if (strs[index].includes('@title')) haveTitle = true
+        if (strs[index].includes('@dev')) haveDev = true
+      } else {
+        break
+      }
+    }
+    if (!haveTitle) errors.push(`@title missing in ${connector.path}/main.sol`)
+    if (!haveDev) errors.push(`@dev missing in ${connector.path}/main.sol`)
+    return errors
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
 async function checkMain () {
   try {
     const errors = []
@@ -290,11 +312,13 @@ async function checkMain () {
       const { eventsErrors, eventsWarnings } = await checkEvents(connectors[index])
       const commentsErrors = await checkComments(connectors[index])
       const nameErrors = await checkName(connectors[index])
+      const headCommentsErrors = await checkHeadComments(connectors[index])
 
       errors.push(...forbiddenErrors)
       errors.push(...eventsErrors)
       errors.push(...commentsErrors)
       errors.push(...nameErrors)
+      errors.push(...headCommentsErrors)
       warnings.push(...eventsWarnings)
     }
     if (errors.length) {
