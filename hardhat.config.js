@@ -1,6 +1,11 @@
+
+require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-web3")
+require("hardhat-deploy");
+require("hardhat-deploy-ethers");
 require('dotenv').config();
 
 const { utils } = require("ethers");
@@ -29,7 +34,7 @@ module.exports = {
     ]
   },
   networks: {
-    // default: "hardhat",
+    // defaultNetwork: "hardhat",
     kovan: {
       url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`]
@@ -43,7 +48,7 @@ module.exports = {
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-        blockNumber: 12070498,
+        blockNumber: 12433781,
       },
       blockGasLimit: 12000000,
     },

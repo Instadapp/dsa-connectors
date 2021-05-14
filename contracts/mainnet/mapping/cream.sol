@@ -15,7 +15,7 @@ interface CTokenInterface {
 }
 
 interface MappingControllerInterface {
-    function hasRole(address,address) public view returns (bool);
+    function hasRole(address,address) external view returns (bool);
 }
 
 abstract contract Helpers {
@@ -140,7 +140,7 @@ contract InstaCreamMapping is Helpers {
         string[] memory _ctokenNames,
         address[] memory _tokens,
         address[] memory _ctokens
-    ) Helpers(_connectors) {
+    )  {
         _addCtokenMapping(_ctokenNames, _tokens, _ctokens);
     }
 }
