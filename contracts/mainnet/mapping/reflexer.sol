@@ -14,7 +14,7 @@ interface IndexInterface {
 }
 
 interface MappingControllerInterface {
-    function hasRole(address,address) public view returns (bool);
+    function hasRole(address,address) external view returns (bool);
 }
 contract Helpers {
     // TODO: thrilok, verify this address
