@@ -262,7 +262,8 @@ abstract contract CompoundResolver is Events, Helpers {
 
         {
             uint finalBal = ctokenContract.balanceOf(address(this));
-            finalBal - initialBal;
+            _cAmt = sub(finalBal, initialBal);
+
             setUint(setId, _cAmt);
         }
 
