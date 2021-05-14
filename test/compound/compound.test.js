@@ -76,7 +76,7 @@ describe("Compound", function () {
     });
 
     it("Should borrow and payback DAI from Compound", async function () {
-        const amount = ethers.utils.parseEther("10") // 1 ETH
+        const amount = ethers.utils.parseEther("100") // 100 DAI
         const setId = "83478237"
         const spells = [
             {
@@ -123,6 +123,5 @@ describe("Compound", function () {
         const receipt = await tx.wait()
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
     });
-
   })
 })
