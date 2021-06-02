@@ -13,6 +13,10 @@ const { utils } = require("ethers");
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
 
+if (!process.env.ALCHEMY_ID) {
+  throw new Error("ENV Variable ALCHEMY_ID not set!");
+}
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -43,7 +47,7 @@ module.exports = {
       url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("132", "gwei"))
+      gasPrice: parseInt(utils.parseUnits("34", "gwei"))
     },
     hardhat: {
       forking: {
