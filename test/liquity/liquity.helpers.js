@@ -327,8 +327,8 @@ const getRedemptionHints = async (
   };
 };
 
-const redeem = async (amount, from, to, liquity) => {
-  await sendToken(liquity.lusdToken, amount, from, to);
+const redeem = async (amount, from, wallet, liquity) => {
+  await sendToken(liquity.lusdToken, amount, from, wallet.address);
   const {
     partialRedemptionHintNicr,
     firstRedemptionHint,

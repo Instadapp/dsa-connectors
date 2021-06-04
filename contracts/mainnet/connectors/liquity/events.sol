@@ -31,12 +31,24 @@ contract Events {
     event LogClaimCollateralFromRedemption(address indexed borrower, uint amount, uint setId);
 
     /* Stability Pool */
-    event LogStabilityDeposit(address indexed borrower, uint amount, address frontendTag, uint getId);
-    event LogStabilityWithdraw(address indexed borrower, uint amount, uint setId);
+    event LogStabilityDeposit(
+        address indexed borrower,
+        uint amount,
+        address frontendTag,
+        uint getDepositId,
+        uint setEthGainId,
+        uint setLqtyGainId
+    );
+    event LogStabilityWithdraw(address indexed borrower,
+        uint amount,
+        uint setWithdrawId,
+        uint setEthGainId,
+        uint setLqtyGainId
+    );
     event LogStabilityMoveEthGainToTrove(address indexed borrower, uint amount);
 
     /* Staking */
-    event LogStake(address indexed borrower, uint amount, uint getId);
-    event LogUnstake(address indexed borrower, uint amount, uint setId);
-    event LogClaimStakingGains(address indexed borrower, uint ethAmount, uint lusdAmount);
+    event LogStake(address indexed borrower, uint amount, uint getStakeId, uint setEthGainId, uint setLusdGainId);
+    event LogUnstake(address indexed borrower, uint amount, uint setUnstakeId, uint setEthGainId, uint setLusdGainId);
+    event LogClaimStakingGains(address indexed borrower, uint ethGain, uint lusdGain, uint setEthGainId, uint setLusdGainId);
 }

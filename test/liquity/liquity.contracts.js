@@ -52,6 +52,8 @@ const STAKING_ADDRESS = "0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d";
 const STAKING_ABI = [
   "function stake(uint _LQTYamount) external",
   "function unstake(uint _LQTYamount) external",
+  "function getPendingETHGain(address _user) external view returns (uint)",
+  "function getPendingLUSDGain(address _user) external view returns (uint)",
 ];
 
 const LQTY_TOKEN_ADDRESS = "0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D";

@@ -53,6 +53,7 @@ interface StabilityPoolLike {
     function withdrawFromSP(uint _amount) external;
     function withdrawETHGainToTrove(address _upperHint, address _lowerHint) external;
     function getDepositorETHGain(address _depositor) external view returns (uint);
+    function getDepositorLQTYGain(address _depositor) external view returns (uint);
 }
 
 interface StakingLike {

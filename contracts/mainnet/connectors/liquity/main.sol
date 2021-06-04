@@ -276,36 +276,53 @@ abstract contract LiquityResolver is Events, Helpers {
      * @notice Deposit LUSD into Stability Pool
      * @param amount Amount of LUSD to deposit into Stability Pool
      * @param frontendTag Address of the frontend to make this deposit against (determines the kickback rate of rewards)
-     * @param getId Optional storage slot to retrieve the LUSD from
+     * @param getDepositId Optional storage slot to retrieve the LUSD from
+     * @param setEthGainId Optional storage slot to store any ETH gains in
+     * @param setLqtyGainId Optional storage slot to store any ETH gains in
     */
     function stabilityDeposit(
         uint amount,
         address frontendTag,
-        uint getId
+        uint getDepositId,
+        uint setEthGainId,
+        uint setLqtyGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        amount = getUint(getId, amount);
-
-        stabilityPool.provideToSP(amount, frontendTag);
+        amount = getUint(getDepositId, amount);
+        uint ethGain = stabilityPool.getDepositorETHGain(address(this));
+        uint lqtyGain = stabilityPool.getDepositorLQTYGain(address(this));
         
-        _eventName = "LogStabilityDeposit(address,uint256,address,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, frontendTag, getId);
+        stabilityPool.provideToSP(amount, frontendTag);
+        setUint(setEthGainId, ethGain);
+        setUint(setLqtyGainId, lqtyGain);
+
+        _eventName = "LogStabilityDeposit(address,uint256,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, amount, frontendTag, getDepositId, setEthGainId, setLqtyGainId);
     }
 
     /**
      * @dev Withdraw user deposited LUSD from Stability Pool
      * @notice Withdraw LUSD from Stability Pool
      * @param amount Amount of LUSD to withdraw from Stability Pool
-     * @param setId Optional storage slot to store the withdrawn LUSD
+     * @param setWithdrawId Optional storage slot to store the withdrawn LUSD
+     * @param setEthGainId Optional storage slot to store any ETH gains in
+     * @param setLqtyGainId Optional storage slot to store any ETH gains in
     */
     function stabilityWithdraw(
         uint amount,
-        uint setId
+        uint setWithdrawId,
+        uint setEthGainId,
+        uint setLqtyGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         stabilityPool.withdrawFromSP(amount);
-        setUint(setId, amount);
+        uint ethGain = stabilityPool.getDepositorETHGain(address(this));
+        uint lqtyGain = stabilityPool.getDepositorLQTYGain(address(this));
+        
+        setUint(setWithdrawId, amount);
+        setUint(setEthGainId, ethGain);
+        setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityWithdraw(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setId);
+        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, amount, setWithdrawId, setEthGainId, setLqtyGainId);
     }
 
     /**
@@ -331,32 +348,52 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Sends LQTY tokens from user to Staking Pool
      * @notice Stake LQTY in Staking Pool
      * @param amount Amount of LQTY to stake
-     * @param getId Optional storage slot to retrieve the LQTY from
+     * @param getStakeId Optional storage slot to retrieve the LQTY from
+     * @param setEthGainId Optional storage slot to store any ETH gains
+     * @param setLusdGainId Optional storage slot to store any LUSD gains
     */
     function stake(
         uint amount,
-        uint getId
+        uint getStakeId,
+        uint setEthGainId,
+        uint setLusdGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        amount = getUint(getId, amount);
+        uint ethGain = staking.getPendingETHGain(address(this));
+        uint lusdGain = staking.getPendingLUSDGain(address(this));
+
+        amount = getUint(getStakeId, amount);
         staking.stake(amount);
-        _eventName = "LogStake(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, getId);
+        setUint(setEthGainId, ethGain);
+        setUint(setLusdGainId, lusdGain);
+
+        _eventName = "LogStake(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, amount, getStakeId, setEthGainId, setLusdGainId);
     }
 
     /**
      * @dev Sends LQTY tokens from Staking Pool to user
      * @notice Unstake LQTY in Staking Pool
      * @param amount Amount of LQTY to unstake
-     * @param setId Optional storage slot to store the unstaked LQTY
+     * @param setStakeId Optional storage slot to store the unstaked LQTY
+     * @param setEthGainId Optional storage slot to store any ETH gains
+     * @param setLusdGainId Optional storage slot to store any LUSD gains
     */
     function unstake(
         uint amount,
-        uint setId
+        uint setStakeId,
+        uint setEthGainId,
+        uint setLusdGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        uint ethGain = staking.getPendingETHGain(address(this));
+        uint lusdGain = staking.getPendingLUSDGain(address(this));
+
         staking.unstake(amount);
-        setUint(setId, amount);
-        _eventName = "LogUnstake(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setId);
+        setUint(setStakeId, amount);
+        setUint(setEthGainId, ethGain);
+        setUint(setLusdGainId, lusdGain);
+
+        _eventName = "LogUnstake(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, amount, setStakeId, setEthGainId, setLusdGainId);
     }
 
     /**
@@ -365,17 +402,20 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param setEthGainId Optional storage slot to store the claimed ETH
      * @param setLusdGainId Optional storage slot to store the claimed LUSD
     */
-    function claimStakingGains(uint setEthGainId, uint setLusdGainId) external returns (string memory _eventName, bytes memory _eventParam) {
-        uint ethAmount = staking.getPendingETHGain(address(this));
-        uint lusdAmount = staking.getPendingLUSDGain(address(this));
+    function claimStakingGains(
+        uint setEthGainId,
+        uint setLusdGainId
+    ) external returns (string memory _eventName, bytes memory _eventParam) {
+        uint ethGain = staking.getPendingETHGain(address(this));
+        uint lusdGain = staking.getPendingLUSDGain(address(this));
 
         // Gains are claimed when a user's stake is adjusted, so we unstake 0 to trigger the claim
         staking.unstake(0);
-        setUint(setEthGainId, ethAmount);
-        setUint(setLusdGainId, lusdAmount);
+        setUint(setEthGainId, ethGain);
+        setUint(setLusdGainId, lusdGain);
         
-        _eventName = "LogClaimStakingGains(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, ethAmount, lusdAmount);
+        _eventName = "LogClaimStakingGains(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, ethGain, lusdGain, setEthGainId, setLusdGainId);
     }
     /* End: Staking */
 
