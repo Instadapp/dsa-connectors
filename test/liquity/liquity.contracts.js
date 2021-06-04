@@ -60,6 +60,11 @@ const LQTY_TOKEN_ABI = [
   "function transfer(address _to, uint256 _value) public returns (bool success)",
 ];
 
+const COLL_SURPLUS_ADDRESS = "0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521";
+const COLL_SURPLUS_ABI = [
+  "function getCollateral(address _account) external view returns (uint)",
+];
+
 module.exports = {
   TROVE_MANAGER_ADDRESS,
   TROVE_MANAGER_ABI,
@@ -81,4 +86,6 @@ module.exports = {
   STAKING_ABI,
   LQTY_TOKEN_ADDRESS,
   LQTY_TOKEN_ABI,
+  COLL_SURPLUS_ADDRESS,
+  COLL_SURPLUS_ABI,
 };

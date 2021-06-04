@@ -5,6 +5,7 @@ const hardhatConfig = require("../../hardhat.config");
 const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js");
 const encodeSpells = require("../../scripts/encodeSpells.js");
 const getMasterSigner = require("../../scripts/getMasterSigner");
+const buildDSAv2 = require("../../scripts/buildDSAv2");
 
 // Instadapp instadappAddresses/ABIs
 const instadappAddresses = require("../../scripts/constant/addresses");
@@ -13,12 +14,13 @@ const instadappAbi = require("../../scripts/constant/abis");
 // Instadapp Liquity Connector artifacts
 const connectV2LiquityArtifacts = require("../../artifacts/contracts/mainnet/connectors/liquity/main.sol/ConnectV2Liquity.json");
 const connectV2BasicV1Artifacts = require("../../artifacts/contracts/mainnet/connectors/basic/main.sol/ConnectV2Basic.json");
+const { ethers } = require("hardhat");
 
 const CONNECTOR_NAME = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment
-const BLOCK_NUMBER = 12478159; // Deterministic block number for tests to run against, if you change this, tests will break.
+const LIQUIDATABLE_TROVES_BLOCK_NUMBER = 12478159; // Deterministic block number for tests to run against, if you change this, tests will break.
 const JUSTIN_SUN_ADDRESS = "0x903d12bf2c57a29f32365917c706ce0e1a84cce3"; // LQTY whale address
-const LIQUIDATABLE_TROVE_ADDRESS = "0xafbeb4cb97f3b08ec2fe07ef0dac15d37013a347"; // Trove which is liquidatable at blockNumber: BLOCK_NUMBER
+const LIQUIDATABLE_TROVE_ADDRESS = "0xafbeb4cb97f3b08ec2fe07ef0dac15d37013a347"; // Trove which is liquidatable at blockNumber: LIQUIDATABLE_TROVES_BLOCK_NUMBER
 const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit; // Maximum gas limit (12000000)
 
 const openTroveSpell = async (
@@ -48,12 +50,11 @@ const openTroveSpell = async (
       0,
     ],
   };
-  const openTx = await dsa
+  return await dsa
     .connect(signer)
     .cast(...encodeSpells([openTroveSpell]), address, {
       value: depositAmount,
     });
-  return await openTx.wait();
 };
 
 const createDsaTrove = async (
@@ -92,6 +93,13 @@ const sendToken = async (token, amount, from, to) => {
   return await token.connect(signer).transfer(to, amount);
 };
 
+const resetInitialState = async (walletAddress, contracts, isDebug = false) => {
+  const liquity = await deployAndConnect(contracts, isDebug);
+  const dsa = await buildDSAv2(walletAddress);
+
+  return [liquity, dsa];
+};
+
 const resetHardhatBlockNumber = async (blockNumber) => {
   return await hre.network.provider.request({
     method: "hardhat_reset",
@@ -108,7 +116,7 @@ const resetHardhatBlockNumber = async (blockNumber) => {
 
 const deployAndConnect = async (contracts, isDebug = false) => {
   // Pin Liquity tests to a particular block number to create deterministic state (Ether price etc.)
-  await resetHardhatBlockNumber(BLOCK_NUMBER);
+  await resetHardhatBlockNumber(LIQUIDATABLE_TROVES_BLOCK_NUMBER);
 
   const liquity = {
     troveManager: null,
@@ -121,6 +129,7 @@ const deployAndConnect = async (contracts, isDebug = false) => {
     hintHelpers: null,
     sortedTroves: null,
     staking: null,
+    collSurplus: null,
   };
 
   const masterSigner = await getMasterSigner();
@@ -230,6 +239,14 @@ const deployAndConnect = async (contracts, isDebug = false) => {
   );
   isDebug && console.log("Staking contract address", liquity.staking.address);
 
+  liquity.collSurplus = new ethers.Contract(
+    contracts.COLL_SURPLUS_ADDRESS,
+    contracts.COLL_SURPLUS_ABI,
+    ethers.provider
+  );
+  isDebug &&
+    console.log("CollSurplus contract address", liquity.collSurplus.address);
+
   return liquity;
 };
 
@@ -310,18 +327,48 @@ const getRedemptionHints = async (
   };
 };
 
+const redeem = async (amount, from, to, liquity) => {
+  await sendToken(liquity.lusdToken, amount, from, to);
+  const {
+    partialRedemptionHintNicr,
+    firstRedemptionHint,
+    upperHint,
+    lowerHint,
+  } = await getRedemptionHints(
+    amount,
+    liquity.hintHelpers,
+    liquity.sortedTroves,
+    liquity.priceFeed
+  );
+  const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
+
+  return await liquity.troveManager
+    .connect(wallet)
+    .redeemCollateral(
+      amount,
+      firstRedemptionHint,
+      upperHint,
+      lowerHint,
+      partialRedemptionHintNicr,
+      0,
+      maxFeePercentage,
+      {
+        gasLimit: MAX_GAS, // permit max gas
+      }
+    );
+};
+
 module.exports = {
   deployAndConnect,
+  resetInitialState,
   createDsaTrove,
-  openTroveSpell,
   sendToken,
+  getTroveInsertionHints,
+  getRedemptionHints,
+  redeem,
   CONNECTOR_NAME,
   LUSD_GAS_COMPENSATION,
-  BLOCK_NUMBER,
   JUSTIN_SUN_ADDRESS,
   LIQUIDATABLE_TROVE_ADDRESS,
   MAX_GAS,
-  resetHardhatBlockNumber,
-  getTroveInsertionHints,
-  getRedemptionHints,
 };

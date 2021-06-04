@@ -52,9 +52,16 @@ interface StabilityPoolLike {
     function provideToSP(uint _amount, address _frontEndTag) external;
     function withdrawFromSP(uint _amount) external;
     function withdrawETHGainToTrove(address _upperHint, address _lowerHint) external;
+    function getDepositorETHGain(address _depositor) external view returns (uint);
 }
 
 interface StakingLike {
     function stake(uint _LQTYamount) external;
     function unstake(uint _LQTYamount) external;
+    function getPendingETHGain(address _user) external view returns (uint);
+    function getPendingLUSDGain(address _user) external view returns (uint);
+}
+
+interface CollateralSurplusLike { 
+    function getCollateral(address _account) external view returns (uint);
 }
