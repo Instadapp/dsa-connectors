@@ -68,7 +68,7 @@ abstract contract AuthorityResolver is Events, Helpers {
         }
 
         if (amount1 > 0) {
-            IERC20 _token1 = poolContract.token0();
+            IERC20 _token1 = poolContract.token1();
             convertWethToEth(address(_token1) == wethAddr, TokenInterface(address(_token1)), _amt);
         }
 
