@@ -38,7 +38,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
 
         ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
 
-        (uint256 amount0In, uint256 amount1In, ) = poolContract.getMintAmounts(amt0Max, amt1Max);
+        (uint256 amount0In, uint256 amount1In, uint256 mintAmount) = poolContract.getMintAmounts(amt0Max, amt1Max);
 
         require(
             amount0In >= amt0Min && amount1In >= amt1Min,
@@ -56,7 +56,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
             _token1.safeApprove(address(pool), amount1In);
         }
 
-        (uint amount0, uint amount1, uint mintAmount) = poolContract.mint(amount0In, amount1In, address(this));
+        (uint amount0, uint amount1,) = poolContract.mint(mintAmount, address(this));
 
         require(amount0 == amount0In && amount1 == amount1In, "unexpected amounts deposited");
 

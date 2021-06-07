@@ -10,8 +10,7 @@ interface ERC20WrapperInterface {
     function token1() external view returns (IERC20);
 
     function mint(
-        uint256 amount0Max,
-        uint256 amount1Max,
+        uint256 mintAmount,
         address receiver
     ) external
     returns (
