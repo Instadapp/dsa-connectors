@@ -1,16 +1,31 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Authority.
- * @dev Manage Authorities to DSA.
+ * @title Uniswap V3 ERC20 Wrapper.
+ * @dev Uniswap V3 Wrapper to deposit and withdraw.
  */
 
-import { ERC20WrapperInterface, IERC20, TokenInterface } from "../../common/interfaces.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+
+import { TokenInterface } from "../../common/interfaces.sol";
+import { ERC20WrapperInterface, IERC20 } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-abstract contract AuthorityResolver is Events, Helpers {
+abstract contract UniswapV3Resolver is Events, Helpers {
+    using SafeERC20 for IERC20;
 
+    /**
+     * @dev Deposit Liquidity.
+     * @notice Deposit Liquidity to a Uniswap V3 pool.
+     * @param pool The address of pool.
+     * @param amt0Max Amount0 Max amount
+     * @param amt0Min Amount0 Min amount
+     * @param amt1Max Amount1 Max amount
+     * @param amt1Min Amount1 Min amount
+     * @param getId ID to retrieve amount.
+     * @param setId ID stores the amount of pools tokens received.
+    */
     function deposit(
         address pool,
         uint256 amt0Max,
@@ -26,19 +41,19 @@ abstract contract AuthorityResolver is Events, Helpers {
         (uint256 amount0In, uint256 amount1In, ) = poolContract.getMintAmounts(amt0Max, amt1Max);
 
         require(
-            amount0In >= amount0Min && amount1In >= amount1Min,
+            amount0In >= amt0Min && amount1In >= amt1Min,
             "below min amounts"
         );
 
         if (amount0In > 0) {
-            IERC20 _token0 = pool.token0();
+            IERC20 _token0 = poolContract.token0();
             convertEthToWeth(address(_token0) == wethAddr, TokenInterface(address(_token0)), amount0In);
-            _token0.safeAllowance(address(pool), amount0In);
+            _token0.safeApprove(address(pool), amount0In);
         }
         if (amount1In > 0) {
-            IERC20 _token1 = pool.token1();
+            IERC20 _token1 = poolContract.token1();
             convertEthToWeth(address(_token1) == wethAddr, TokenInterface(address(_token1)), amount1In);
-            _token1.safeAllowance(address(pool), amount1In);
+            _token1.safeApprove(address(pool), amount1In);
         }
 
         (uint amount0, uint amount1, uint mintAmount) = poolContract.mint(amount0In, amount1In, address(this));
@@ -49,6 +64,17 @@ abstract contract AuthorityResolver is Events, Helpers {
         _eventParam = abi.encode(pool, amount0, amount1, mintAmount, getId, setId);
     }
 
+
+    /**
+     * @dev Withdraw Liquidity.
+     * @notice Withdraw Liquidity from a Uniswap V3 pool.
+     * @param pool The address of pool.
+     * @param liqAmt Amount0 Max amount
+     * @param minAmtA Min AmountA amount
+     * @param minAmtB Min AmountB amount
+     * @param getId ID to retrieve liqAmt.
+     * @param setId ID stores the amount of pools tokens received.
+    */
     function withdraw(
         address pool,
         uint256 liqAmt,
@@ -76,13 +102,12 @@ abstract contract AuthorityResolver is Events, Helpers {
 
         _eventName = "LogWithdrawLiquidity(address,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(pool, amount0, amount1, uint256(liquidityBurned), getId, setId);
-
     }
 
 }
 
-contract ConnectV2Auth is AuthorityResolver {
+contract ConnectV2UniswapV3ERC20 is UniswapV3Resolver {
 
-    string public constant name = "Uniswap-v3-erc20";
+    string public constant name = "Uniswap-v3-ERC20";
 
 }
