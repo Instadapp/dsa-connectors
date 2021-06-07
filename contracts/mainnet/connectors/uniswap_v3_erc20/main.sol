@@ -45,7 +45,8 @@ abstract contract AuthorityResolver is Events, Helpers {
 
         require(amount0 == amount0In && amount1 == amount1In, "unexpected amounts deposited");
 
-        // TODO: Add event
+        _eventName = "LogDepositLiquidity(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(pool, amount0, amount1, mintAmount, getId, setId);
     }
 
     function withdraw(
@@ -73,7 +74,8 @@ abstract contract AuthorityResolver is Events, Helpers {
 
         require(amount0 >= minAmtA && amount1 >= minAmtB, "received below minimum");
 
-        // TODO: Add event
+        _eventName = "LogWithdrawLiquidity(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(pool, amount0, amount1, uint256(liquidityBurned), getId, setId);
 
     }
 
