@@ -64,12 +64,12 @@ abstract contract AuthorityResolver is Events, Helpers {
 
         if (amount0 > 0) {
             IERC20 _token0 = poolContract.token0();
-            convertWethToEth(address(_token0) == wethAddr, TokenInterface(address(_token0)), _amt);
+            convertWethToEth(address(_token0) == wethAddr, TokenInterface(address(_token0)), amount0);
         }
 
         if (amount1 > 0) {
             IERC20 _token1 = poolContract.token1();
-            convertWethToEth(address(_token1) == wethAddr, TokenInterface(address(_token1)), _amt);
+            convertWethToEth(address(_token1) == wethAddr, TokenInterface(address(_token1)), amount1);
         }
 
         require(amount0 >= minAmtA && amount1 >= minAmtB, "received below minimum");
