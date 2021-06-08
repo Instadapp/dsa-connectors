@@ -16,12 +16,16 @@ const connectV2LiquityArtifacts = require("../../artifacts/contracts/mainnet/con
 const connectV2BasicV1Artifacts = require("../../artifacts/contracts/mainnet/connectors/basic/main.sol/ConnectV2Basic.json");
 const { ethers } = require("hardhat");
 
-const CONNECTOR_NAME = "LIQUITY-v1-TEST";
+// Instadapp uses a fake address to represent native ETH
+const { eth_addr: ETH_ADDRESS } = require("../../scripts/constant/constant");
+
+const LIQUITY_CONNECTOR = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment
 const LIQUIDATABLE_TROVES_BLOCK_NUMBER = 12478159; // Deterministic block number for tests to run against, if you change this, tests will break.
 const JUSTIN_SUN_ADDRESS = "0x903d12bf2c57a29f32365917c706ce0e1a84cce3"; // LQTY whale address
 const LIQUIDATABLE_TROVE_ADDRESS = "0xafbeb4cb97f3b08ec2fe07ef0dac15d37013a347"; // Trove which is liquidatable at blockNumber: LIQUIDATABLE_TROVES_BLOCK_NUMBER
 const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit; // Maximum gas limit (12000000)
+const INSTADAPP_BASIC_V1_CONNECTOR = "Basic-v1";
 
 const openTroveSpell = async (
   dsa,
@@ -38,7 +42,7 @@ const openTroveSpell = async (
   }
 
   const openTroveSpell = {
-    connector: CONNECTOR_NAME,
+    connector: LIQUITY_CONNECTOR,
     method: "open",
     args: [
       depositAmount,
@@ -60,8 +64,7 @@ const openTroveSpell = async (
 const createDsaTrove = async (
   dsa,
   signer,
-  hintHelpers,
-  sortedTroves,
+  liquity,
   depositAmount = hre.ethers.utils.parseEther("5"),
   borrowAmount = hre.ethers.utils.parseUnits("2000", 18)
 ) => {
@@ -69,8 +72,7 @@ const createDsaTrove = async (
   const { upperHint, lowerHint } = await getTroveInsertionHints(
     depositAmount,
     borrowAmount,
-    hintHelpers,
-    sortedTroves
+    liquity
   );
   return await openTroveSpell(
     dsa,
@@ -90,7 +92,9 @@ const sendToken = async (token, amount, from, to) => {
   });
   const signer = await hre.ethers.provider.getSigner(from);
 
-  return await token.connect(signer).transfer(to, amount);
+  return await token.connect(signer).transfer(to, amount, {
+    gasPrice: 0,
+  });
 };
 
 const resetInitialState = async (walletAddress, contracts, isDebug = false) => {
@@ -138,13 +142,13 @@ const deployAndConnect = async (contracts, isDebug = false) => {
     instadappAddresses.core.connectorsV2
   );
   const connector = await deployAndEnableConnector({
-    connectorName: CONNECTOR_NAME,
+    connectorName: LIQUITY_CONNECTOR,
     contractArtifact: connectV2LiquityArtifacts,
     signer: masterSigner,
     connectors: instaConnectorsV2,
   });
   isDebug &&
-    console.log(`${CONNECTOR_NAME} Connector address`, connector.address);
+    console.log(`${LIQUITY_CONNECTOR} Connector address`, connector.address);
 
   const basicConnector = await deployAndEnableConnector({
     connectorName: "Basic-v1",
@@ -250,28 +254,24 @@ const deployAndConnect = async (contracts, isDebug = false) => {
   return liquity;
 };
 
-const getTroveInsertionHints = async (
-  depositAmount,
-  borrowAmount,
-  hintHelpers,
-  sortedTroves
-) => {
-  const nominalCR = await hintHelpers.computeNominalCR(
+const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity) => {
+  const nominalCR = await liquity.hintHelpers.computeNominalCR(
     depositAmount,
     borrowAmount
   );
 
-  const { hintAddress, latestRandomSeed } = await hintHelpers.getApproxHint(
-    nominalCR,
-    50,
-    1298379,
-    {
-      gasLimit: MAX_GAS,
-    }
-  );
+  const {
+    hintAddress,
+    latestRandomSeed,
+  } = await liquity.hintHelpers.getApproxHint(nominalCR, 50, 1298379, {
+    gasLimit: MAX_GAS,
+  });
   randomSeed = latestRandomSeed;
 
-  const { 0: upperHint, 1: lowerHint } = await sortedTroves.findInsertPosition(
+  const {
+    0: upperHint,
+    1: lowerHint,
+  } = await liquity.sortedTroves.findInsertPosition(
     nominalCR,
     hintAddress,
     hintAddress,
@@ -288,19 +288,17 @@ const getTroveInsertionHints = async (
 
 let randomSeed = 4223;
 
-const getRedemptionHints = async (
-  amount,
-  hintHelpers,
-  sortedTroves,
-  priceFeed
-) => {
-  const ethPrice = await priceFeed.callStatic.fetchPrice();
+const getRedemptionHints = async (amount, liquity) => {
+  const ethPrice = await liquity.priceFeed.callStatic.fetchPrice();
   const [
     firstRedemptionHint,
     partialRedemptionHintNicr,
-  ] = await hintHelpers.getRedemptionHints(amount, ethPrice, 0);
+  ] = await liquity.hintHelpers.getRedemptionHints(amount, ethPrice, 0);
 
-  const { hintAddress, latestRandomSeed } = await hintHelpers.getApproxHint(
+  const {
+    hintAddress,
+    latestRandomSeed,
+  } = await liquity.hintHelpers.getApproxHint(
     partialRedemptionHintNicr,
     50,
     randomSeed,
@@ -310,7 +308,10 @@ const getRedemptionHints = async (
   );
   randomSeed = latestRandomSeed;
 
-  const { 0: upperHint, 1: lowerHint } = await sortedTroves.findInsertPosition(
+  const {
+    0: upperHint,
+    1: lowerHint,
+  } = await liquity.sortedTroves.findInsertPosition(
     partialRedemptionHintNicr,
     hintAddress,
     hintAddress,
@@ -334,12 +335,7 @@ const redeem = async (amount, from, wallet, liquity) => {
     firstRedemptionHint,
     upperHint,
     lowerHint,
-  } = await getRedemptionHints(
-    amount,
-    liquity.hintHelpers,
-    liquity.sortedTroves,
-    liquity.priceFeed
-  );
+  } = await getRedemptionHints(amount, liquity);
   const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
 
   return await liquity.troveManager
@@ -366,9 +362,11 @@ module.exports = {
   getTroveInsertionHints,
   getRedemptionHints,
   redeem,
-  CONNECTOR_NAME,
+  LIQUITY_CONNECTOR,
   LUSD_GAS_COMPENSATION,
   JUSTIN_SUN_ADDRESS,
   LIQUIDATABLE_TROVE_ADDRESS,
   MAX_GAS,
+  INSTADAPP_BASIC_V1_CONNECTOR,
+  ETH_ADDRESS,
 };

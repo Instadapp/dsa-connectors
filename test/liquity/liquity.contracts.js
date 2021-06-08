@@ -60,6 +60,7 @@ const LQTY_TOKEN_ADDRESS = "0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D";
 const LQTY_TOKEN_ABI = [
   "function balanceOf(address account) external view returns (uint256)",
   "function transfer(address _to, uint256 _value) public returns (bool success)",
+  "function approve(address spender, uint256 amount) external returns (bool)",
 ];
 
 const COLL_SURPLUS_ADDRESS = "0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521";

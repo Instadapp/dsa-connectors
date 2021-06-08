@@ -14,7 +14,6 @@ import {
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import "hardhat/console.sol";
 
 abstract contract LiquityResolver is Events, Helpers {
     BorrowerOperationsLike internal constant borrowerOperations =
@@ -48,7 +47,7 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param borrowAmount The amount of LUSD to borrow
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve ETH instead of receiving it from msg.value
+     * @param getId Optional storage slot to retrieve ETH from
      * @param setId Optional storage slot to store the LUSD borrowed against
     */
     function open(
@@ -60,13 +59,6 @@ abstract contract LiquityResolver is Events, Helpers {
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        /*
-          User has three options for depositing ETH collateral to open a Trove:
-            - Send ETH directly with this function call 
-            - Have ETH collected from a previous spell
-            - Have ETH collected from the DSA's existing balance
-        */
-
         if (getId != 0 && depositAmount != 0) {
             revert("open(): Cannot supply a depositAmount if a non-zero getId is supplied");
         }
@@ -225,7 +217,6 @@ abstract contract LiquityResolver is Events, Helpers {
         if (getRepayId != 0 && repayAmount != 0) {
             revert("adjust(): Cannot supply a repayAmount if a non-zero getRepayId is supplied");
         }
-
         AdjustTrove memory adjustTrove;
 
         adjustTrove.maxFeePercentage = maxFeePercentage;
@@ -235,7 +226,7 @@ abstract contract LiquityResolver is Events, Helpers {
         adjustTrove.repayAmount = getUint(getRepayId, repayAmount);
         adjustTrove.isBorrow = borrowAmount > 0;
 
-        borrowerOperations.adjustTrove{value: depositAmount}(
+        borrowerOperations.adjustTrove{value: adjustTrove.depositAmount}(
             adjustTrove.maxFeePercentage,
             adjustTrove.withdrawAmount,
             adjustTrove.borrowAmount,
@@ -288,6 +279,7 @@ abstract contract LiquityResolver is Events, Helpers {
         uint setLqtyGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getDepositId, amount);
+
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
         uint lqtyGain = stabilityPool.getDepositorLQTYGain(address(this));
         

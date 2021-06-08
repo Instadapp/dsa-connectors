@@ -11,15 +11,12 @@ const contracts = require("./liquity.contracts");
 // Liquity helpers
 const helpers = require("./liquity.helpers");
 
-// Instadapp uses a fake address to represent native ETH
-const { eth_addr: ETH_ADDRESS } = require("../../scripts/constant/constant");
-
 describe.only("Liquity", () => {
   const { waffle, ethers } = hre;
   const { provider } = waffle;
 
   // Waffle test account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (holds 1000 ETH)
-  const wallet = provider.getWallets()[0];
+  const userWallet = provider.getWallets()[0];
   let dsa = null;
   let liquity = null;
 
@@ -39,7 +36,7 @@ describe.only("Liquity", () => {
 
   beforeEach(async () => {
     // Build a new DSA before each test so we start each test from the same default state
-    dsa = await buildDSAv2(wallet.address);
+    dsa = await buildDSAv2(userWallet.address);
     expect(dsa.address).to.exist;
   });
 
@@ -53,14 +50,14 @@ describe.only("Liquity", () => {
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const originalUserBalance = await ethers.provider.getBalance(
-            wallet.address
+            userWallet.address
           );
           const originalDsaBalance = await ethers.provider.getBalance(
             dsa.address
           );
 
           const openTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "open",
             args: [
               depositAmount,
@@ -73,15 +70,16 @@ describe.only("Liquity", () => {
             ],
           };
 
-          const tx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([openTroveSpell]), wallet.address, {
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([openTroveSpell]), userWallet.address, {
               value: depositAmount,
+              gasPrice: 0,
             });
 
-          await tx.wait();
-
-          const userBalance = await ethers.provider.getBalance(wallet.address);
+          const userBalance = await ethers.provider.getBalance(
+            userWallet.address
+          );
           const dsaEthBalance = await ethers.provider.getBalance(dsa.address);
           const dsaLusdBalance = await liquity.lusdToken.balanceOf(dsa.address);
           const troveDebt = await liquity.troveManager.getTroveDebt(
@@ -91,9 +89,9 @@ describe.only("Liquity", () => {
             dsa.address
           );
 
-          expect(userBalance).lt(
-            originalUserBalance,
-            "User should have less Ether after opening Trove"
+          expect(userBalance).eq(
+            originalUserBalance.sub(depositAmount),
+            "User's Ether balance should decrease by the amount they deposited"
           );
 
           expect(dsaEthBalance).to.eq(
@@ -103,7 +101,7 @@ describe.only("Liquity", () => {
 
           expect(
             dsaLusdBalance,
-            "DSA account should now hold the amount the user tried to borrow"
+            "DSA account should now hold the amount the user borrowed"
           ).to.eq(borrowAmount);
 
           expect(troveDebt).to.gt(
@@ -124,21 +122,21 @@ describe.only("Liquity", () => {
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const originalUserBalance = await ethers.provider.getBalance(
-            wallet.address
+            userWallet.address
           );
           const originalDsaBalance = await ethers.provider.getBalance(
             dsa.address
           );
-          const depositId = 1; // Choose an ID to store and retrieve the deopsited ETH
+          const depositId = 1; // Choose an ID to store and retrieve the deposited ETH
 
           const depositEthSpell = {
-            connector: "Basic-v1",
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "deposit",
-            args: [ETH_ADDRESS, depositAmount, 0, depositId],
+            args: [helpers.ETH_ADDRESS, depositAmount, 0, depositId],
           };
 
           const openTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "open",
             args: [
               0, // When pulling ETH from a previous spell it doesn't matter what deposit value we put in this param
@@ -152,14 +150,16 @@ describe.only("Liquity", () => {
           };
 
           const spells = [depositEthSpell, openTroveSpell];
-          const tx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells(spells), wallet.address, {
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
               value: depositAmount,
+              gasPrice: 0,
             });
 
-          await tx.wait();
-          const userBalance = await ethers.provider.getBalance(wallet.address);
+          const userBalance = await ethers.provider.getBalance(
+            userWallet.address
+          );
           const dsaEthBalance = await ethers.provider.getBalance(dsa.address);
           const dsaLusdBalance = await liquity.lusdToken.balanceOf(dsa.address);
           const troveDebt = await liquity.troveManager.getTroveDebt(
@@ -169,9 +169,9 @@ describe.only("Liquity", () => {
             dsa.address
           );
 
-          expect(userBalance).lt(
-            originalUserBalance,
-            "User should have less Ether"
+          expect(userBalance).eq(
+            originalUserBalance.sub(depositAmount),
+            "User's Ether balance should decrease by the amount they deposited"
           );
 
           expect(dsaEthBalance).to.eq(
@@ -181,7 +181,7 @@ describe.only("Liquity", () => {
 
           expect(
             dsaLusdBalance,
-            "DSA account should now hold the amount the user tried to borrow"
+            "DSA account should now hold the amount the user borrowed"
           ).to.eq(borrowAmount);
 
           expect(troveDebt).to.gt(
@@ -202,7 +202,7 @@ describe.only("Liquity", () => {
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const originalUserBalance = await ethers.provider.getBalance(
-            wallet.address
+            userWallet.address
           );
           const originalDsaBalance = await ethers.provider.getBalance(
             dsa.address
@@ -210,7 +210,7 @@ describe.only("Liquity", () => {
           const borrowId = 1;
 
           const openTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "open",
             args: [
               depositAmount,
@@ -224,11 +224,11 @@ describe.only("Liquity", () => {
           };
 
           const withdrawLusdSpell = {
-            connector: "Basic-v1",
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "withdraw",
             args: [
               contracts.LUSD_TOKEN_ADDRESS,
-              0, // amount comes from the previous spell's setId
+              0, // Amount comes from the previous spell's setId
               dsa.address,
               borrowId,
               0,
@@ -236,21 +236,16 @@ describe.only("Liquity", () => {
           };
 
           const spells = [openTroveSpell, withdrawLusdSpell];
-          const tx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells(spells), wallet.address, {
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
               value: depositAmount,
+              gasPrice: 0,
             });
 
-          await tx.wait();
-
-          const userBalance = await ethers.provider.getBalance(wallet.address);
-
-          expect(userBalance).lt(
-            originalUserBalance,
-            "User should have less Ether after opening Trove"
+          const userBalance = await ethers.provider.getBalance(
+            userWallet.address
           );
-
           const dsaEthBalance = await ethers.provider.getBalance(dsa.address);
           const dsaLusdBalance = await liquity.lusdToken.balanceOf(dsa.address);
           const troveDebt = await liquity.troveManager.getTroveDebt(
@@ -260,6 +255,11 @@ describe.only("Liquity", () => {
             dsa.address
           );
 
+          expect(userBalance).eq(
+            originalUserBalance.sub(depositAmount),
+            "User's Ether balance should decrease by the amount they deposited"
+          );
+
           expect(dsaEthBalance).to.eq(
             originalDsaBalance,
             "User's DSA account Ether should not change after borrowing"
@@ -267,7 +267,7 @@ describe.only("Liquity", () => {
 
           expect(
             dsaLusdBalance,
-            "DSA account should now hold the amount the user tried to borrow"
+            "DSA account should now hold the amount the user borrowed"
           ).to.eq(borrowAmount);
 
           expect(troveDebt).to.gt(
@@ -289,7 +289,7 @@ describe.only("Liquity", () => {
           const lowerHint = ethers.constants.AddressZero;
 
           const openTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "open",
             args: [
               depositAmount,
@@ -304,7 +304,7 @@ describe.only("Liquity", () => {
 
           const openTx = await dsa.cast(
             ...encodeSpells([openTroveSpell]),
-            wallet.address,
+            userWallet.address,
             {
               value: depositAmount,
             }
@@ -318,7 +318,7 @@ describe.only("Liquity", () => {
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256", "uint256"],
             [
-              wallet.address,
+              userWallet.address,
               maxFeePercentage,
               depositAmount,
               borrowAmount,
@@ -334,25 +334,25 @@ describe.only("Liquity", () => {
         it("closes a Trove", async () => {
           const depositAmount = ethers.utils.parseEther("5");
           const borrowAmount = ethers.utils.parseUnits("2000", 18);
+          // Create a dummy Trove
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
 
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
 
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
 
           // Send DSA account enough LUSD (from Stability Pool) to close their Trove
-          const extraLusdRequiredToCloseTrove = originalTroveDebt.sub(
+          const extraLusdRequiredToCloseTrove = troveDebtBefore.sub(
             borrowAmount
           );
 
@@ -370,19 +370,18 @@ describe.only("Liquity", () => {
           expect(
             originalDsaLusdBalance,
             "DSA account should now hold the LUSD amount required to pay off the Trove debt"
-          ).to.eq(originalTroveDebt);
+          ).to.eq(troveDebtBefore);
 
           const closeTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "close",
             args: [0],
           };
 
-          const closeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([closeTroveSpell]), wallet.address);
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([closeTroveSpell]), userWallet.address);
 
-          await closeTx.wait();
           const dsaEthBalance = await ethers.provider.getBalance(dsa.address);
           const dsaLusdBalance = await liquity.lusdToken.balanceOf(dsa.address);
           const troveDebt = await liquity.troveManager.getTroveDebt(
@@ -402,7 +401,7 @@ describe.only("Liquity", () => {
           expect(
             dsaEthBalance,
             "DSA account should now hold the Trove's ETH collateral"
-          ).to.eq(originalTroveCollateral);
+          ).to.eq(troveCollateralBefore);
 
           expect(
             dsaLusdBalance,
@@ -411,78 +410,48 @@ describe.only("Liquity", () => {
         });
 
         it("closes a Trove using LUSD obtained from a previous spell", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
 
           // Send user enough LUSD to repay the loan, we'll use a deposit and withdraw spell to obtain it
           await helpers.sendToken(
             liquity.lusdToken,
-            originalTroveDebt,
+            troveDebtBefore,
             contracts.STABILITY_POOL_ADDRESS,
-            wallet.address
+            userWallet.address
           );
 
           // Allow DSA to spend user's LUSD
           await liquity.lusdToken
-            .connect(wallet)
-            .approve(dsa.address, originalTroveDebt);
+            .connect(userWallet)
+            .approve(dsa.address, troveDebtBefore);
 
-          const lusdDepositId = 1;
-
-          // Simulate a spell which would have pulled LUSD from somewhere (e.g. AAVE) into InstaMemory
+          // Simulate a spell which would have pulled LUSD from somewhere (e.g. Uniswap) into InstaMemory
           // In this case we're simply running a deposit spell from the user's EOA
           const depositLusdSpell = {
-            connector: "Basic-v1",
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "deposit",
-            args: [
-              contracts.LUSD_TOKEN_ADDRESS,
-              originalTroveDebt,
-              0,
-              lusdDepositId,
-            ],
-          };
-          // Withdraw the obtained LUSD into DSA account
-          const withdrawLusdSpell = {
-            connector: "Basic-v1",
-            method: "withdraw",
-            args: [
-              contracts.LUSD_TOKEN_ADDRESS,
-              0, // amount comes from the previous spell's setId
-              dsa.address,
-              lusdDepositId,
-              0,
-            ],
+            args: [contracts.LUSD_TOKEN_ADDRESS, troveDebtBefore, 0, 0],
           };
 
           const closeTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "close",
             args: [0],
           };
+          const spells = [depositLusdSpell, closeTroveSpell];
 
-          const closeTx = await dsa
-            .connect(wallet)
-            .cast(
-              ...encodeSpells([
-                depositLusdSpell,
-                withdrawLusdSpell,
-                closeTroveSpell,
-              ]),
-              wallet.address
-            );
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
 
-          await closeTx.wait();
           const dsaEthBalance = await ethers.provider.getBalance(dsa.address);
           const troveDebt = await liquity.troveManager.getTroveDebt(
             dsa.address
@@ -501,30 +470,30 @@ describe.only("Liquity", () => {
           expect(
             dsaEthBalance,
             "DSA account should now hold the Trove's ETH collateral"
-          ).to.eq(originalTroveCollateral);
+          ).to.eq(troveCollateralBefore);
         });
 
         it("closes a Trove and stores the released collateral for other spells to use", async () => {
           const depositAmount = ethers.utils.parseEther("5");
           const borrowAmount = ethers.utils.parseUnits("2000", 18);
+          // Create a dummy Trove
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
 
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
 
           // Send DSA account enough LUSD (from Stability Pool) to close their Trove
-          const extraLusdRequiredToCloseTrove = originalTroveDebt.sub(
+          const extraLusdRequiredToCloseTrove = troveDebtBefore.sub(
             borrowAmount
           );
           await helpers.sendToken(
@@ -540,21 +509,21 @@ describe.only("Liquity", () => {
           expect(
             originalDsaLusdBalance,
             "DSA account should now hold the LUSD amount required to pay off the Trove debt"
-          ).to.eq(originalTroveDebt);
+          ).to.eq(troveDebtBefore);
 
           const collateralWithdrawId = 1;
 
           const closeTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "close",
             args: [collateralWithdrawId],
           };
 
           const withdrawEthSpell = {
-            connector: "Basic-v1",
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "withdraw",
             args: [
-              ETH_ADDRESS,
+              helpers.ETH_ADDRESS,
               0, // amount comes from the previous spell's setId
               dsa.address,
               collateralWithdrawId,
@@ -562,14 +531,13 @@ describe.only("Liquity", () => {
             ],
           };
 
-          const closeTx = await dsa
-            .connect(wallet)
+          await dsa
+            .connect(userWallet)
             .cast(
               ...encodeSpells([closeTroveSpell, withdrawEthSpell]),
-              wallet.address
+              userWallet.address
             );
 
-          await closeTx.wait();
           const dsaEthBalance = await ethers.provider.getBalance(dsa.address);
           const dsaLusdBalance = await liquity.lusdToken.balanceOf(dsa.address);
           const troveDebt = await liquity.troveManager.getTroveDebt(
@@ -589,7 +557,7 @@ describe.only("Liquity", () => {
           expect(
             dsaEthBalance,
             "DSA account should now hold the Trove's ETH collateral"
-          ).to.eq(originalTroveCollateral);
+          ).to.eq(troveCollateralBefore);
 
           expect(
             dsaLusdBalance,
@@ -600,11 +568,11 @@ describe.only("Liquity", () => {
         it("returns Instadapp event name and data", async () => {
           const depositAmount = ethers.utils.parseEther("5");
           const borrowAmount = ethers.utils.parseUnits("2000", 18);
+          // Create a dummy Trove
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
@@ -616,21 +584,21 @@ describe.only("Liquity", () => {
           );
 
           const closeTroveSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "close",
             args: [0],
           };
 
           const closeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([closeTroveSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([closeTroveSpell]), userWallet.address);
 
           const receipt = await closeTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256"],
-            [wallet.address, 0]
+            [userWallet.address, 0]
           );
           expect(castLogEvent.eventNames[0]).eq("LogClose(address,uint256)");
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
@@ -639,14 +607,10 @@ describe.only("Liquity", () => {
 
       describe("deposit()", () => {
         it("deposits ETH into a Trove", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
 
@@ -654,24 +618,66 @@ describe.only("Liquity", () => {
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const depositEthSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "deposit",
             args: [topupAmount, upperHint, lowerHint, 0],
           };
 
-          const depositTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([depositEthSpell]), wallet.address, {
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([depositEthSpell]), userWallet.address, {
               value: topupAmount,
             });
-
-          await depositTx.wait();
 
           const troveCollateral = await liquity.troveManager.getTroveColl(
             dsa.address
           );
 
-          const expectedTroveCollateral = originalTroveCollateral.add(
+          const expectedTroveCollateral = troveCollateralBefore.add(
+            topupAmount
+          );
+
+          expect(
+            troveCollateral,
+            `Trove collateral should have increased by ${topupAmount} ETH`
+          ).to.eq(expectedTroveCollateral);
+        });
+
+        it("deposits using ETH gained from a previous spell", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
+            dsa.address
+          );
+
+          const topupAmount = ethers.utils.parseEther("1");
+          const depositId = 1;
+          const depositEthSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "deposit",
+            args: [helpers.ETH_ADDRESS, topupAmount, 0, depositId],
+          };
+
+          const upperHint = ethers.constants.AddressZero;
+          const lowerHint = ethers.constants.AddressZero;
+          const depositEthToTroveSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "deposit",
+            args: [0, upperHint, lowerHint, depositId],
+          };
+          const spells = [depositEthSpell, depositEthToTroveSpell];
+
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
+              value: topupAmount,
+            });
+
+          const troveCollateral = await liquity.troveManager.getTroveColl(
+            dsa.address
+          );
+
+          const expectedTroveCollateral = troveCollateralBefore.add(
             topupAmount
           );
 
@@ -682,25 +688,21 @@ describe.only("Liquity", () => {
         });
 
         it("returns Instadapp event name and data", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           const topupAmount = ethers.utils.parseEther("1");
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const depositEthSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "deposit",
             args: [topupAmount, upperHint, lowerHint, 0],
           };
 
           const depositTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([depositEthSpell]), wallet.address, {
+            .connect(userWallet)
+            .cast(...encodeSpells([depositEthSpell]), userWallet.address, {
               value: topupAmount,
             });
 
@@ -709,7 +711,7 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
-            [wallet.address, topupAmount, 0]
+            [userWallet.address, topupAmount, 0]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogDeposit(address,uint256,uint256)"
@@ -720,34 +722,29 @@ describe.only("Liquity", () => {
 
       describe("withdraw()", () => {
         it("withdraws ETH from a Trove", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
           const withdrawAmount = ethers.utils.parseEther("1");
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const withdrawEthSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "withdraw",
             args: [withdrawAmount, upperHint, lowerHint, 0],
           };
 
-          const withdrawTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([withdrawEthSpell]), wallet.address);
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([withdrawEthSpell]), userWallet.address);
 
-          await withdrawTx.wait();
           const troveCollateral = await liquity.troveManager.getTroveColl(
             dsa.address
           );
-          const expectedTroveCollateral = originalTroveCollateral.sub(
+          const expectedTroveCollateral = troveCollateralBefore.sub(
             withdrawAmount
           );
 
@@ -757,34 +754,84 @@ describe.only("Liquity", () => {
           ).to.eq(expectedTroveCollateral);
         });
 
-        it("returns Instadapp event name and data", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
+        it("withdraws ETH from a Trove and stores the ETH for other spells to use", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
+
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
+            dsa.address
           );
+          const originalUserEthBalance = await ethers.provider.getBalance(
+            userWallet.address
+          );
+
+          const withdrawAmount = ethers.utils.parseEther("1");
+          const upperHint = ethers.constants.AddressZero;
+          const lowerHint = ethers.constants.AddressZero;
+          const withdrawId = 1;
+          const withdrawEthFromTroveSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "withdraw",
+            args: [withdrawAmount, upperHint, lowerHint, withdrawId],
+          };
+
+          const withdrawEthSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [helpers.ETH_ADDRESS, 0, userWallet.address, withdrawId, 0],
+          };
+          const spells = [withdrawEthFromTroveSpell, withdrawEthSpell];
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
+              gasPrice: 0, // Remove gas costs so we can check balances have changed correctly
+            });
+
+          const troveCollateral = await liquity.troveManager.getTroveColl(
+            dsa.address
+          );
+          const expectedTroveCollateral = troveCollateralBefore.sub(
+            withdrawAmount
+          );
+          const userEthBalance = await ethers.provider.getBalance(
+            userWallet.address
+          );
+
+          expect(
+            troveCollateral,
+            `Trove collateral should have decreased by ${withdrawAmount} ETH`
+          ).to.eq(expectedTroveCollateral);
+
+          expect(
+            userEthBalance,
+            `User ETH balance should have increased by ${withdrawAmount} ETH`
+          ).to.eq(originalUserEthBalance.add(withdrawAmount));
+        });
+
+        it("returns Instadapp event name and data", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           const withdrawAmount = ethers.utils.parseEther("1");
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const setId = 0;
           const withdrawEthSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "withdraw",
             args: [withdrawAmount, upperHint, lowerHint, setId],
           };
 
           const withdrawTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([withdrawEthSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([withdrawEthSpell]), userWallet.address);
 
           const receipt = await withdrawTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
-            [wallet.address, withdrawAmount, setId]
+            [userWallet.address, withdrawAmount, setId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogWithdraw(address,uint256,uint256)"
@@ -795,35 +842,32 @@ describe.only("Liquity", () => {
 
       describe("borrow()", () => {
         it("borrows LUSD from a Trove", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
+
           const borrowAmount = ethers.utils.parseUnits("1000", 18); // 1000 LUSD
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
           const borrowSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "borrow",
             args: [maxFeePercentage, borrowAmount, upperHint, lowerHint, 0],
           };
 
-          const borrowTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([borrowSpell]), wallet.address);
+          // Borrow more LUSD from the Trove
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([borrowSpell]), userWallet.address);
 
-          await borrowTx.wait();
           const troveDebt = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
-          const expectedTroveDebt = originalTroveDebt.add(borrowAmount);
+          const expectedTroveDebt = troveDebtBefore.add(borrowAmount);
 
           expect(
             troveDebt,
@@ -831,13 +875,70 @@ describe.only("Liquity", () => {
           ).to.gte(expectedTroveDebt);
         });
 
-        it("returns Instadapp event name and data", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
+        it("borrows LUSD from a Trove and stores the LUSD for other spells to use", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
+
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
+            dsa.address
           );
+
+          const borrowAmount = ethers.utils.parseUnits("1000", 18); // 1000 LUSD
+          const upperHint = ethers.constants.AddressZero;
+          const lowerHint = ethers.constants.AddressZero;
+          const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
+          const borrowId = 1;
+          const borrowSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "borrow",
+            args: [
+              maxFeePercentage,
+              borrowAmount,
+              upperHint,
+              lowerHint,
+              borrowId,
+            ],
+          };
+          const withdrawSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [
+              liquity.lusdToken.address,
+              0,
+              userWallet.address,
+              borrowId,
+              0,
+            ],
+          };
+          const spells = [borrowSpell, withdrawSpell];
+
+          // Borrow more LUSD from the Trove
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
+
+          const troveDebt = await liquity.troveManager.getTroveDebt(
+            dsa.address
+          );
+          const expectedTroveDebt = troveDebtBefore.add(borrowAmount);
+          const userLusdBalance = await liquity.lusdToken.balanceOf(
+            userWallet.address
+          );
+
+          expect(
+            troveDebt,
+            `Trove debt should have increased by at least ${borrowAmount} ETH`
+          ).to.gte(expectedTroveDebt);
+
+          expect(
+            userLusdBalance,
+            `User LUSD balance should equal the borrowed LUSD due to the second withdraw spell`
+          ).eq(borrowAmount);
+        });
+
+        it("returns Instadapp event name and data", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           const borrowAmount = ethers.utils.parseUnits("1000", 18); // 1000 LUSD
           const upperHint = ethers.constants.AddressZero;
@@ -845,21 +946,21 @@ describe.only("Liquity", () => {
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
           const setId = 0;
           const borrowSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "borrow",
             args: [maxFeePercentage, borrowAmount, upperHint, lowerHint, setId],
           };
 
           const borrowTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([borrowSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([borrowSpell]), userWallet.address);
 
           const receipt = await borrowTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
-            [wallet.address, borrowAmount, setId]
+            [userWallet.address, borrowAmount, setId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogBorrow(address,uint256,uint256)"
@@ -873,41 +974,106 @@ describe.only("Liquity", () => {
           const depositAmount = ethers.utils.parseEther("5");
           const borrowAmount = ethers.utils.parseUnits("2500", 18);
 
+          // Create a dummy Trove
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
 
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
+          // DSA account is holding 2500 LUSD from opening a Trove, so we use some of that to repay
           const repayAmount = ethers.utils.parseUnits("100", 18); // 100 LUSD
+
           const { upperHint, lowerHint } = await helpers.getTroveInsertionHints(
             depositAmount,
             borrowAmount,
-            liquity.hintHelpers,
-            liquity.sortedTroves
+            liquity
           );
-          const borrowSpell = {
-            connector: helpers.CONNECTOR_NAME,
+          const repaySpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "repay",
             args: [repayAmount, upperHint, lowerHint, 0],
           };
 
           await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([borrowSpell]), wallet.address, {
-              value: repayAmount,
-            });
+            .connect(userWallet)
+            .cast(...encodeSpells([repaySpell]), userWallet.address);
 
           const troveDebt = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
-          const expectedTroveDebt = originalTroveDebt.sub(repayAmount);
+          const expectedTroveDebt = troveDebtBefore.sub(repayAmount);
+
+          expect(
+            troveDebt,
+            `Trove debt should have decreased by ${repayAmount} ETH`
+          ).to.eq(expectedTroveDebt);
+        });
+
+        it("repays LUSD to a Trove using LUSD collected from a previous spell", async () => {
+          const depositAmount = ethers.utils.parseEther("5");
+          const borrowAmount = ethers.utils.parseUnits("2500", 18);
+
+          // Create a dummy Trove
+          await helpers.createDsaTrove(
+            dsa,
+            userWallet,
+            liquity,
+            depositAmount,
+            borrowAmount
+          );
+
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
+            dsa.address
+          );
+
+          const repayAmount = ethers.utils.parseUnits("100", 18); // 100 LUSD
+          const { upperHint, lowerHint } = await helpers.getTroveInsertionHints(
+            depositAmount,
+            borrowAmount,
+            liquity
+          );
+
+          // Drain the DSA's LUSD balance so that we ensure we are repaying using LUSD from a previous spell
+          await helpers.sendToken(
+            liquity.lusdToken,
+            borrowAmount,
+            dsa.address,
+            userWallet.address
+          );
+
+          // Allow DSA to spend user's LUSD
+          await liquity.lusdToken
+            .connect(userWallet)
+            .approve(dsa.address, repayAmount);
+
+          const lusdDepositId = 1;
+          const depositSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "deposit",
+            args: [liquity.lusdToken.address, repayAmount, 0, lusdDepositId],
+          };
+          const borrowSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "repay",
+            args: [0, upperHint, lowerHint, lusdDepositId],
+          };
+
+          const spells = [depositSpell, borrowSpell];
+
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
+
+          const troveDebt = await liquity.troveManager.getTroveDebt(
+            dsa.address
+          );
+          const expectedTroveDebt = troveDebtBefore.sub(repayAmount);
 
           expect(
             troveDebt,
@@ -916,13 +1082,13 @@ describe.only("Liquity", () => {
         });
 
         it("returns Instadapp event name and data", async () => {
+          // Create a dummy Trove
           const depositAmount = ethers.utils.parseEther("5");
           const borrowAmount = ethers.utils.parseUnits("2500", 18);
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
@@ -931,20 +1097,19 @@ describe.only("Liquity", () => {
           const { upperHint, lowerHint } = await helpers.getTroveInsertionHints(
             depositAmount,
             borrowAmount,
-            liquity.hintHelpers,
-            liquity.sortedTroves
+            liquity
           );
           const getId = 0;
 
           const borrowSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "repay",
             args: [repayAmount, upperHint, lowerHint, getId],
           };
 
           const repayTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([borrowSpell]), wallet.address, {
+            .connect(userWallet)
+            .cast(...encodeSpells([borrowSpell]), userWallet.address, {
               value: repayAmount,
             });
 
@@ -953,7 +1118,7 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
-            [wallet.address, repayAmount, getId]
+            [userWallet.address, repayAmount, getId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogRepay(address,uint256,uint256)"
@@ -964,17 +1129,13 @@ describe.only("Liquity", () => {
 
       describe("adjust()", () => {
         it("adjusts a Trove: deposit ETH and borrow LUSD", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
           const depositAmount = ethers.utils.parseEther("1"); // 1 ETH
@@ -986,7 +1147,7 @@ describe.only("Liquity", () => {
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
 
           const adjustSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "adjust",
             args: [
               maxFeePercentage,
@@ -1003,22 +1164,22 @@ describe.only("Liquity", () => {
             ],
           };
 
-          const adjustTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([adjustSpell]), wallet.address, {
+          // Adjust Trove by depositing ETH and borrowing LUSD
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([adjustSpell]), userWallet.address, {
               value: depositAmount,
               gasLimit: helpers.MAX_GAS,
             });
 
-          await adjustTx.wait();
           const troveCollateral = await liquity.troveManager.getTroveColl(
             dsa.address
           );
           const troveDebt = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
-          const expectedTroveColl = originalTroveCollateral.add(depositAmount);
-          const expectedTroveDebt = originalTroveDebt.add(borrowAmount);
+          const expectedTroveColl = troveCollateralBefore.add(depositAmount);
+          const expectedTroveDebt = troveDebtBefore.add(borrowAmount);
 
           expect(
             troveCollateral,
@@ -1032,17 +1193,13 @@ describe.only("Liquity", () => {
         });
 
         it("adjusts a Trove: withdraw ETH and repay LUSD", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
-          const originalTroveCollateral = await liquity.troveManager.getTroveColl(
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
-          const originalTroveDebt = await liquity.troveManager.getTroveDebt(
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
           const depositAmount = 0;
@@ -1050,15 +1207,14 @@ describe.only("Liquity", () => {
           const withdrawAmount = ethers.utils.parseEther("1"); // 1 ETH;
           const repayAmount = ethers.utils.parseUnits("500", 18); // 500 LUSD;
           const { upperHint, lowerHint } = await helpers.getTroveInsertionHints(
-            originalTroveCollateral.sub(withdrawAmount),
-            originalTroveDebt.sub(repayAmount),
-            liquity.hintHelpers,
-            liquity.sortedTroves
+            troveCollateralBefore.sub(withdrawAmount),
+            troveDebtBefore.sub(repayAmount),
+            liquity
           );
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
 
           const adjustSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "adjust",
             args: [
               maxFeePercentage,
@@ -1075,22 +1231,22 @@ describe.only("Liquity", () => {
             ],
           };
 
-          const adjustTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([adjustSpell]), wallet.address, {
+          // Adjust Trove by withdrawing ETH and repaying LUSD
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([adjustSpell]), userWallet.address, {
               value: depositAmount,
               gasLimit: helpers.MAX_GAS,
             });
 
-          await adjustTx.wait();
           const troveCollateral = await liquity.troveManager.getTroveColl(
             dsa.address
           );
           const troveDebt = await liquity.troveManager.getTroveDebt(
             dsa.address
           );
-          const expectedTroveColl = originalTroveCollateral.sub(withdrawAmount);
-          const expectedTroveDebt = originalTroveDebt.sub(repayAmount);
+          const expectedTroveColl = troveCollateralBefore.sub(withdrawAmount);
+          const expectedTroveDebt = troveDebtBefore.sub(repayAmount);
 
           expect(
             troveCollateral,
@@ -1103,13 +1259,191 @@ describe.only("Liquity", () => {
           ).to.gte(expectedTroveDebt);
         });
 
-        it("returns Instadapp event name and data", async () => {
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
+        it("adjusts a Trove: deposit ETH and repay LUSD using previous spells", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
+
+          const troveCollateralBefore = await liquity.troveManager.getTroveColl(
+            dsa.address
           );
+          const troveDebtBefore = await liquity.troveManager.getTroveDebt(
+            dsa.address
+          );
+          const depositAmount = ethers.utils.parseEther("1"); // 1 ETH
+          const borrowAmount = 0;
+          const withdrawAmount = 0;
+          const repayAmount = ethers.utils.parseUnits("100", 18); // 100 lUSD
+          const upperHint = ethers.constants.AddressZero;
+          const lowerHint = ethers.constants.AddressZero;
+          const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
+
+          const ethDepositId = 1;
+          const lusdRepayId = 2;
+
+          const depositEthSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "deposit",
+            args: [helpers.ETH_ADDRESS, depositAmount, 0, ethDepositId],
+          };
+
+          const depositLusdSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "deposit",
+            args: [liquity.lusdToken.address, repayAmount, 0, lusdRepayId],
+          };
+
+          const adjustSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "adjust",
+            args: [
+              maxFeePercentage,
+              withdrawAmount,
+              0, // Deposit amount comes from a previous spell's storage slot
+              borrowAmount,
+              0, // Repay amount comes from a previous spell's storage slot
+              upperHint,
+              lowerHint,
+              ethDepositId,
+              0,
+              lusdRepayId,
+              0,
+            ],
+          };
+          const spells = [depositEthSpell, depositLusdSpell, adjustSpell];
+
+          // Send user some LUSD so they can repay
+          await helpers.sendToken(
+            liquity.lusdToken,
+            repayAmount,
+            helpers.JUSTIN_SUN_ADDRESS,
+            userWallet.address
+          );
+
+          // Allow DSA to spend user's LUSD
+          await liquity.lusdToken
+            .connect(userWallet)
+            .approve(dsa.address, repayAmount);
+
+          // Adjust Trove by depositing ETH and borrowing LUSD
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
+              value: depositAmount,
+              gasLimit: helpers.MAX_GAS,
+            });
+
+          const troveCollateral = await liquity.troveManager.getTroveColl(
+            dsa.address
+          );
+          const troveDebt = await liquity.troveManager.getTroveDebt(
+            dsa.address
+          );
+          const expectedTroveColl = troveCollateralBefore.add(depositAmount);
+          const expectedTroveDebt = troveDebtBefore.add(borrowAmount);
+
+          expect(
+            troveCollateral,
+            `Trove collateral should have increased by ${depositAmount} ETH`
+          ).to.eq(expectedTroveColl);
+
+          expect(
+            troveDebt,
+            `Trove debt should have increased by at least ${borrowAmount} ETH`
+          ).to.eq(expectedTroveDebt);
+        });
+
+        it("adjusts a Trove: withdraw ETH, borrow LUSD, and store the amounts for other spells", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
+
+          const userEthBalanceBefore = await ethers.provider.getBalance(
+            userWallet.address
+          );
+          const userLusdBalanceBefore = await liquity.lusdToken.balanceOf(
+            userWallet.address
+          );
+
+          const depositAmount = 0;
+          const borrowAmount = ethers.utils.parseUnits("100", 18); // 100 LUSD
+          const withdrawAmount = ethers.utils.parseEther("1"); // 1 ETH
+          const repayAmount = 0;
+          const upperHint = ethers.constants.AddressZero;
+          const lowerHint = ethers.constants.AddressZero;
+          const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
+
+          const ethWithdrawId = 1;
+          const lusdBorrowId = 2;
+
+          const adjustSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "adjust",
+            args: [
+              maxFeePercentage,
+              withdrawAmount,
+              depositAmount,
+              borrowAmount,
+              repayAmount,
+              upperHint,
+              lowerHint,
+              0,
+              ethWithdrawId,
+              0,
+              lusdBorrowId,
+            ],
+          };
+
+          const withdrawEthSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [
+              helpers.ETH_ADDRESS,
+              0,
+              userWallet.address,
+              ethWithdrawId,
+              0,
+            ],
+          };
+
+          const withdrawLusdSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [
+              liquity.lusdToken.address,
+              0,
+              userWallet.address,
+              lusdBorrowId,
+              0,
+            ],
+          };
+
+          const spells = [adjustSpell, withdrawEthSpell, withdrawLusdSpell];
+
+          // Adjust Trove by withdrawing ETH and borrowing LUSD
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
+              gasLimit: helpers.MAX_GAS,
+              gasPrice: 0,
+            });
+
+          const userEthBalanceAfter = await ethers.provider.getBalance(
+            userWallet.address
+          );
+          const userLusdBalanceAfter = await liquity.lusdToken.balanceOf(
+            userWallet.address
+          );
+
+          expect(userEthBalanceAfter).eq(
+            userEthBalanceBefore.add(withdrawAmount)
+          );
+          expect(userLusdBalanceAfter).eq(
+            userLusdBalanceBefore.add(borrowAmount)
+          );
+        });
+
+        it("returns Instadapp event name and data", async () => {
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           const depositAmount = ethers.utils.parseEther("1"); // 1 ETH
           const borrowAmount = ethers.utils.parseUnits("500", 18); // 500 LUSD
@@ -1124,7 +1458,7 @@ describe.only("Liquity", () => {
           const setBorrowId = 0;
 
           const adjustSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "adjust",
             args: [
               maxFeePercentage,
@@ -1142,8 +1476,8 @@ describe.only("Liquity", () => {
           };
 
           const adjustTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([adjustSpell]), wallet.address, {
+            .connect(userWallet)
+            .cast(...encodeSpells([adjustSpell]), userWallet.address, {
               value: depositAmount,
               gasLimit: helpers.MAX_GAS,
             });
@@ -1165,7 +1499,7 @@ describe.only("Liquity", () => {
               "uint256",
             ],
             [
-              wallet.address,
+              userWallet.address,
               maxFeePercentage,
               depositAmount,
               withdrawAmount,
@@ -1192,9 +1526,8 @@ describe.only("Liquity", () => {
 
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
@@ -1205,23 +1538,18 @@ describe.only("Liquity", () => {
             liquity.lusdToken,
             redeemAmount,
             contracts.STABILITY_POOL_ADDRESS,
-            wallet.address
+            userWallet.address
           );
           const {
             partialRedemptionHintNicr,
             firstRedemptionHint,
             upperHint,
             lowerHint,
-          } = await helpers.getRedemptionHints(
-            redeemAmount,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
-            liquity.priceFeed
-          );
+          } = await helpers.getRedemptionHints(redeemAmount, liquity);
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
 
           await liquity.troveManager
-            .connect(wallet)
+            .connect(userWallet)
             .redeemCollateral(
               redeemAmount,
               firstRedemptionHint,
@@ -1235,31 +1563,27 @@ describe.only("Liquity", () => {
               }
             );
 
-          const ethBalanceBefore = await ethers.provider.getBalance(
+          const remainingEthCollateral = await liquity.collSurplus.getCollateral(
             dsa.address
           );
 
           // Claim the remaining collateral from the redeemed Trove
           const claimCollateralFromRedemptionSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "claimCollateralFromRedemption",
             args: [0],
           };
 
-          const claimTx = await dsa
-            .connect(wallet)
+          await dsa
+            .connect(userWallet)
             .cast(
               ...encodeSpells([claimCollateralFromRedemptionSpell]),
-              wallet.address
+              userWallet.address
             );
 
-          await claimTx.wait();
+          const ethBalance = await ethers.provider.getBalance(dsa.address);
 
-          const ethBalanceAfter = await ethers.provider.getBalance(dsa.address);
-
-          const expectedRemainingCollateral = "527014573774047160"; // ~0.52 ETH based on this mainnet fork's blockNumber
-          expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
-          expect(ethBalanceAfter).to.eq(expectedRemainingCollateral);
+          expect(ethBalance).to.eq(remainingEthCollateral);
         });
 
         it("returns Instadapp event name and data", async () => {
@@ -1269,9 +1593,8 @@ describe.only("Liquity", () => {
 
           await helpers.createDsaTrove(
             dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
+            userWallet,
+            liquity,
             depositAmount,
             borrowAmount
           );
@@ -1283,23 +1606,18 @@ describe.only("Liquity", () => {
             liquity.lusdToken,
             redeemAmount,
             contracts.STABILITY_POOL_ADDRESS,
-            wallet.address
+            userWallet.address
           );
           const {
             partialRedemptionHintNicr,
             firstRedemptionHint,
             upperHint,
             lowerHint,
-          } = await helpers.getRedemptionHints(
-            redeemAmount,
-            liquity.hintHelpers,
-            liquity.sortedTroves,
-            liquity.priceFeed
-          );
+          } = await helpers.getRedemptionHints(redeemAmount, liquity);
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
 
           await liquity.troveManager
-            .connect(wallet)
+            .connect(userWallet)
             .redeemCollateral(
               redeemAmount,
               firstRedemptionHint,
@@ -1317,16 +1635,16 @@ describe.only("Liquity", () => {
           );
 
           const claimCollateralFromRedemptionSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "claimCollateralFromRedemption",
             args: [setId],
           };
 
           const claimTx = await dsa
-            .connect(wallet)
+            .connect(userWallet)
             .cast(
               ...encodeSpells([claimCollateralFromRedemptionSpell]),
-              wallet.address
+              userWallet.address
             );
 
           const receipt = await claimTx.wait();
@@ -1334,7 +1652,7 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
-            [wallet.address, claimAmount, setId]
+            [userWallet.address, claimAmount, setId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogClaimCollateralFromRedemption(address,uint256,uint256)"
@@ -1358,16 +1676,54 @@ describe.only("Liquity", () => {
           );
 
           const stabilityDepositSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
             args: [amount, frontendTag, 0, 0, 0],
           };
 
-          const depositTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stabilityDepositSpell]), wallet.address);
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
 
-          await depositTx.wait();
+          const depositedAmount = await liquity.stabilityPool.getCompoundedLUSDDeposit(
+            dsa.address
+          );
+          expect(depositedAmount).to.eq(amount);
+        });
+
+        it("deposits into Stability Pool using LUSD collected from a previous spell", async () => {
+          const amount = ethers.utils.parseUnits("100", 18);
+          const frontendTag = ethers.constants.AddressZero;
+
+          await helpers.sendToken(
+            liquity.lusdToken,
+            amount,
+            contracts.STABILITY_POOL_ADDRESS,
+            userWallet.address
+          );
+          const lusdDepositId = 1;
+
+          const depositLusdSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "deposit",
+            args: [liquity.lusdToken.address, amount, 0, lusdDepositId],
+          };
+          const stabilityDepositSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "stabilityDeposit",
+            args: [0, frontendTag, lusdDepositId, 0, 0],
+          };
+          const spells = [depositLusdSpell, stabilityDepositSpell];
+
+          // Allow DSA to spend user's LUSD
+          await liquity.lusdToken
+            .connect(userWallet)
+            .approve(dsa.address, amount);
+
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
+
           const depositedAmount = await liquity.stabilityPool.getCompoundedLUSDDeposit(
             dsa.address
           );
@@ -1389,14 +1745,14 @@ describe.only("Liquity", () => {
           );
 
           const stabilityDepositSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
             args: [amount, frontendTag, getDepositId, 0, 0],
           };
 
           const depositTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stabilityDepositSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
 
           const receipt = await depositTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
@@ -1404,7 +1760,7 @@ describe.only("Liquity", () => {
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "address", "uint256", "uint256", "uint256"],
             [
-              wallet.address,
+              userWallet.address,
               amount,
               frontendTag,
               getDepositId,
@@ -1423,13 +1779,13 @@ describe.only("Liquity", () => {
         it("withdraws from Stability Pool", async () => {
           // Start this test from scratch since we don't want to rely on test order for this to pass.
           [liquity, dsa] = await helpers.resetInitialState(
-            wallet.address,
+            userWallet.address,
             contracts
           );
 
           // The current block number has liquidatable Troves.
           // Remove them otherwise Stability Pool withdrawals are disabled
-          await liquity.troveManager.connect(wallet).liquidateTroves(90, {
+          await liquity.troveManager.connect(userWallet).liquidateTroves(90, {
             gasLimit: helpers.MAX_GAS,
           });
           const amount = ethers.utils.parseUnits("100", 18);
@@ -1443,24 +1799,22 @@ describe.only("Liquity", () => {
           );
 
           const stabilityDepositSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
             args: [amount, frontendTag, 0, 0, 0],
           };
 
           // Withdraw half of the deposit
           const stabilitWithdrawSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
             args: [amount.div(2), 0, 0, 0],
           };
           const spells = [stabilityDepositSpell, stabilitWithdrawSpell];
 
-          const castTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells(spells), wallet.address);
-
-          await castTx.wait();
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
 
           const depositedAmount = await liquity.stabilityPool.getCompoundedLUSDDeposit(
             dsa.address
@@ -1471,16 +1825,85 @@ describe.only("Liquity", () => {
           expect(dsaLusdBalance).to.eq(amount.div(2));
         });
 
-        it("returns Instadapp event name and data", async () => {
+        it("withdraws from Stability Pool and stores the LUSD for other spells", async () => {
           // Start this test from scratch since we don't want to rely on test order for this to pass.
           [liquity, dsa] = await helpers.resetInitialState(
-            wallet.address,
+            userWallet.address,
             contracts
           );
 
           // The current block number has liquidatable Troves.
           // Remove them otherwise Stability Pool withdrawals are disabled
-          await liquity.troveManager.connect(wallet).liquidateTroves(90, {
+          await liquity.troveManager.connect(userWallet).liquidateTroves(90, {
+            gasLimit: helpers.MAX_GAS,
+          });
+          const amount = ethers.utils.parseUnits("100", 18);
+          const frontendTag = ethers.constants.AddressZero;
+          const withdrawId = 1;
+
+          await helpers.sendToken(
+            liquity.lusdToken,
+            amount,
+            contracts.STABILITY_POOL_ADDRESS,
+            dsa.address
+          );
+
+          const stabilityDepositSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "stabilityDeposit",
+            args: [amount, frontendTag, 0, 0, 0],
+          };
+
+          // Withdraw half of the deposit
+          const stabilitWithdrawSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "stabilityWithdraw",
+            args: [amount.div(2), 0, 0, withdrawId],
+          };
+
+          const withdrawLusdSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [
+              liquity.lusdToken.address,
+              0,
+              userWallet.address,
+              withdrawId,
+              0,
+            ],
+          };
+
+          const spells = [
+            stabilityDepositSpell,
+            stabilitWithdrawSpell,
+            withdrawLusdSpell,
+          ];
+
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
+
+          const depositedAmount = await liquity.stabilityPool.getCompoundedLUSDDeposit(
+            dsa.address
+          );
+          const walletLusdBalance = await liquity.lusdToken.balanceOf(
+            dsa.address
+          );
+
+          expect(depositedAmount).to.eq(amount.div(2));
+          expect(walletLusdBalance).to.eq(amount.div(2));
+        });
+
+        it("returns Instadapp event name and data", async () => {
+          // Start this test from scratch since we don't want to rely on test order for this to pass.
+          [liquity, dsa] = await helpers.resetInitialState(
+            userWallet.address,
+            contracts
+          );
+
+          // The current block number has liquidatable Troves.
+          // Remove them otherwise Stability Pool withdrawals are disabled
+          await liquity.troveManager.connect(userWallet).liquidateTroves(90, {
             gasLimit: helpers.MAX_GAS,
           });
           const amount = ethers.utils.parseUnits("100", 18);
@@ -1494,7 +1917,7 @@ describe.only("Liquity", () => {
           );
 
           const stabilityDepositSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
             args: [amount, frontendTag, 0, 0, 0],
           };
@@ -1506,15 +1929,15 @@ describe.only("Liquity", () => {
           const setLqtyGainId = 0;
 
           const stabilitWithdrawSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
             args: [withdrawAmount, setWithdrawId, setEthGainId, setLqtyGainId],
           };
           const spells = [stabilityDepositSpell, stabilitWithdrawSpell];
 
           const castTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells(spells), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
 
           const receipt = await castTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
@@ -1522,7 +1945,7 @@ describe.only("Liquity", () => {
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256"],
             [
-              wallet.address,
+              userWallet.address,
               withdrawAmount,
               setWithdrawId,
               setEthGainId,
@@ -1540,19 +1963,15 @@ describe.only("Liquity", () => {
         beforeEach(async () => {
           // Start these test from fresh so that we definitely have a liquidatable Trove within this block
           [liquity, dsa] = await helpers.resetInitialState(
-            wallet.address,
+            userWallet.address,
             contracts
           );
         });
 
         it("moves ETH gain from Stability Pool to Trove", async () => {
           // Create a DSA owned Trove to capture ETH liquidation gains
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
           const troveCollateralBefore = await liquity.troveManager.getTroveColl(
             dsa.address
           );
@@ -1561,20 +1980,18 @@ describe.only("Liquity", () => {
           const amount = ethers.utils.parseUnits("100", 18);
           const frontendTag = ethers.constants.AddressZero;
           const stabilityDepositSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
             args: [amount, frontendTag, 0, 0, 0],
           };
 
-          const depositTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stabilityDepositSpell]), wallet.address);
-
-          await depositTx.wait();
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
 
           // Liquidate a Trove to create an ETH gain for the new DSA Trove
           await liquity.troveManager
-            .connect(wallet)
+            .connect(userWallet)
             .liquidate(helpers.LIQUIDATABLE_TROVE_ADDRESS, {
               gasLimit: helpers.MAX_GAS, // permit max gas
             });
@@ -1585,16 +2002,14 @@ describe.only("Liquity", () => {
 
           // Move ETH gain to Trove
           const moveEthGainSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityMoveEthGainToTrove",
             args: [ethers.constants.AddressZero, ethers.constants.AddressZero],
           };
 
-          const moveEthGainTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([moveEthGainSpell]), wallet.address);
-
-          await moveEthGainTx.wait();
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([moveEthGainSpell]), userWallet.address);
 
           const ethGainAfterMove = await liquity.stabilityPool.getDepositorETHGain(
             dsa.address
@@ -1611,31 +2026,25 @@ describe.only("Liquity", () => {
 
         it("returns Instadapp event name and data", async () => {
           // Create a DSA owned Trove to capture ETH liquidation gains
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          // Create a dummy Trove
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           // Create a Stability Deposit using the Trove's borrowed LUSD
           const amount = ethers.utils.parseUnits("100", 18);
           const frontendTag = ethers.constants.AddressZero;
           const stabilityDepositSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
             args: [amount, frontendTag, 0, 0, 0],
           };
 
-          const depositTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stabilityDepositSpell]), wallet.address);
-
-          await depositTx.wait();
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
 
           // Liquidate a Trove to create an ETH gain for the new DSA Trove
           await liquity.troveManager
-            .connect(wallet)
+            .connect(userWallet)
             .liquidate(helpers.LIQUIDATABLE_TROVE_ADDRESS, {
               gasLimit: helpers.MAX_GAS, // permit max gas
             });
@@ -1646,14 +2055,14 @@ describe.only("Liquity", () => {
 
           // Move ETH gain to Trove
           const moveEthGainSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityMoveEthGainToTrove",
             args: [ethers.constants.AddressZero, ethers.constants.AddressZero],
           };
 
           const moveEthGainTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([moveEthGainSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([moveEthGainSpell]), userWallet.address);
 
           const receipt = await moveEthGainTx.wait();
 
@@ -1661,7 +2070,7 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256"],
-            [wallet.address, ethGainFromLiquidation]
+            [userWallet.address, ethGainFromLiquidation]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogStabilityMoveEthGainToTrove(address,uint256)"
@@ -1687,16 +2096,60 @@ describe.only("Liquity", () => {
           );
 
           const stakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
             args: [amount, 0, 0, 0],
           };
 
-          const stakeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stakeSpell]), wallet.address);
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
-          await stakeTx.wait();
+          const lqtyBalance = await liquity.lqtyToken.balanceOf(dsa.address);
+          expect(lqtyBalance).to.eq(0);
+
+          const totalStakingBalance = await liquity.lqtyToken.balanceOf(
+            contracts.STAKING_ADDRESS
+          );
+          expect(totalStakingBalance).to.eq(
+            totalStakingBalanceBefore.add(amount)
+          );
+        });
+
+        it("stakes LQTY using LQTY obtained from a previous spell", async () => {
+          const totalStakingBalanceBefore = await liquity.lqtyToken.balanceOf(
+            contracts.STAKING_ADDRESS
+          );
+
+          const amount = ethers.utils.parseUnits("1", 18);
+          await helpers.sendToken(
+            liquity.lqtyToken,
+            amount,
+            helpers.JUSTIN_SUN_ADDRESS,
+            userWallet.address
+          );
+
+          const lqtyDepositId = 1;
+          const depositSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "deposit",
+            args: [liquity.lqtyToken.address, amount, 0, lqtyDepositId],
+          };
+          const stakeSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "stake",
+            args: [0, lqtyDepositId, lqtyDepositId, 0],
+          };
+          const spells = [depositSpell, stakeSpell];
+
+          // Allow DSA to spend user's LQTY
+          await liquity.lqtyToken
+            .connect(userWallet)
+            .approve(dsa.address, amount);
+
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
 
           const lqtyBalance = await liquity.lqtyToken.balanceOf(dsa.address);
           expect(lqtyBalance).to.eq(0);
@@ -1722,14 +2175,14 @@ describe.only("Liquity", () => {
           const setEthGainId = 0;
           const setLusdGainId = 0;
           const stakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
             args: [amount, getStakeId, setEthGainId, setLusdGainId],
           };
 
           const stakeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stakeSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
           const receipt = await stakeTx.wait();
 
@@ -1737,7 +2190,13 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256"],
-            [wallet.address, amount, getStakeId, setEthGainId, setLusdGainId]
+            [
+              userWallet.address,
+              amount,
+              getStakeId,
+              setEthGainId,
+              setLusdGainId,
+            ]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogStake(address,uint256,uint256,uint256,uint256)"
@@ -1757,31 +2216,27 @@ describe.only("Liquity", () => {
           );
 
           const stakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
             args: [amount, 0, 0, 0],
           };
 
-          const stakeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stakeSpell]), wallet.address);
-
-          await stakeTx.wait();
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
           const totalStakingBalanceBefore = await liquity.lqtyToken.balanceOf(
             contracts.STAKING_ADDRESS
           );
           const unstakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "unstake",
             args: [amount, 0, 0, 0],
           };
 
-          const unstakeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([unstakeSpell]), wallet.address);
-
-          await unstakeTx.wait();
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([unstakeSpell]), userWallet.address);
 
           const lqtyBalance = await liquity.lqtyToken.balanceOf(dsa.address);
           expect(lqtyBalance).to.eq(amount);
@@ -1794,6 +2249,65 @@ describe.only("Liquity", () => {
           );
         });
 
+        it("unstakes LQTY and stores the LQTY for other spells", async () => {
+          const amount = ethers.utils.parseUnits("1", 18);
+          await helpers.sendToken(
+            liquity.lqtyToken,
+            amount,
+            helpers.JUSTIN_SUN_ADDRESS,
+            dsa.address
+          );
+
+          const stakeSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "stake",
+            args: [amount, 0, 0, 0],
+          };
+
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
+
+          const totalStakingBalanceBefore = await liquity.lqtyToken.balanceOf(
+            contracts.STAKING_ADDRESS
+          );
+          const withdrawId = 1;
+          const unstakeSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "unstake",
+            args: [amount, withdrawId, 0, 0],
+          };
+
+          const withdrawLqtySpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [
+              liquity.lqtyToken.address,
+              0,
+              userWallet.address,
+              withdrawId,
+              0,
+            ],
+          };
+          const spells = [unstakeSpell, withdrawLqtySpell];
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address);
+
+          const lqtyBalance = await liquity.lqtyToken.balanceOf(dsa.address);
+          const totalStakingBalance = await liquity.lqtyToken.balanceOf(
+            contracts.STAKING_ADDRESS
+          );
+          const userLqtyBalance = await liquity.lqtyToken.balanceOf(
+            userWallet.address
+          );
+          expect(lqtyBalance).to.eq(0);
+          expect(totalStakingBalance).to.eq(
+            totalStakingBalanceBefore.sub(amount)
+          );
+          expect(userLqtyBalance).to.eq(amount);
+        });
+
         it("returns Instadapp event name and data", async () => {
           const amount = ethers.utils.parseUnits("1", 18);
           await helpers.sendToken(
@@ -1804,27 +2318,27 @@ describe.only("Liquity", () => {
           );
 
           const stakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
             args: [amount, 0, 0, 0],
           };
 
           await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([stakeSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
           const setUnstakeId = 0;
           const setEthGainId = 0;
           const setLusdGainId = 0;
           const unstakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "unstake",
             args: [amount, setUnstakeId, setEthGainId, setLusdGainId],
           };
 
           const unstakeTx = await dsa
-            .connect(wallet)
-            .cast(...encodeSpells([unstakeSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([unstakeSpell]), userWallet.address);
 
           const receipt = await unstakeTx.wait();
 
@@ -1832,7 +2346,13 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256"],
-            [wallet.address, amount, setUnstakeId, setEthGainId, setLusdGainId]
+            [
+              userWallet.address,
+              amount,
+              setUnstakeId,
+              setEthGainId,
+              setLusdGainId,
+            ]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogUnstake(address,uint256,uint256,uint256,uint256)"
@@ -1843,7 +2363,7 @@ describe.only("Liquity", () => {
 
       describe("claimStakingGains()", () => {
         it("Claims gains from staking", async () => {
-          const stakerDsa = await buildDSAv2(wallet.address);
+          const stakerDsa = await buildDSAv2(userWallet.address);
           const amount = ethers.utils.parseUnits("1000", 18); // 1000 LQTY
 
           // Stake lots of LQTY
@@ -1854,27 +2374,22 @@ describe.only("Liquity", () => {
             stakerDsa.address
           );
           const stakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
             args: [amount, 0, 0, 0],
           };
           await stakerDsa
-            .connect(wallet)
-            .cast(...encodeSpells([stakeSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
           // Open a Trove to cause an ETH issuance gain for stakers
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           // Redeem some ETH to cause an LUSD redemption gain for stakers
           await helpers.redeem(
             ethers.utils.parseUnits("1000", 18),
             contracts.STABILITY_POOL_ADDRESS,
-            wallet,
+            userWallet,
             liquity
           );
 
@@ -1888,7 +2403,7 @@ describe.only("Liquity", () => {
           );
 
           const claimStakingGainsSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "claimStakingGains",
             args: [setEthGainId, setLusdGainId],
           };
@@ -1899,8 +2414,11 @@ describe.only("Liquity", () => {
 
           // Claim gains
           await stakerDsa
-            .connect(wallet)
-            .cast(...encodeSpells([claimStakingGainsSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(
+              ...encodeSpells([claimStakingGainsSpell]),
+              userWallet.address
+            );
 
           const ethBalanceAfter = await ethers.provider.getBalance(
             stakerDsa.address
@@ -1912,8 +2430,8 @@ describe.only("Liquity", () => {
           expect(lusdBalanceAfter).to.eq(lusdGain);
         });
 
-        it("returns Instadapp event name and data", async () => {
-          const stakerDsa = await buildDSAv2(wallet.address);
+        it("Claims gains from staking and stores them for other spells", async () => {
+          const stakerDsa = await buildDSAv2(userWallet.address);
           const amount = ethers.utils.parseUnits("1000", 18); // 1000 LQTY
 
           // Stake lots of LQTY
@@ -1924,27 +2442,122 @@ describe.only("Liquity", () => {
             stakerDsa.address
           );
           const stakeSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
             args: [amount, 0, 0, 0],
           };
           await stakerDsa
-            .connect(wallet)
-            .cast(...encodeSpells([stakeSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
           // Open a Trove to cause an ETH issuance gain for stakers
-          await helpers.createDsaTrove(
-            dsa,
-            wallet,
-            liquity.hintHelpers,
-            liquity.sortedTroves
-          );
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
 
           // Redeem some ETH to cause an LUSD redemption gain for stakers
           await helpers.redeem(
             ethers.utils.parseUnits("1000", 18),
             contracts.STABILITY_POOL_ADDRESS,
-            wallet,
+            userWallet,
+            liquity
+          );
+
+          const ethGain = await liquity.staking.getPendingETHGain(
+            stakerDsa.address
+          );
+          const lusdGain = await liquity.staking.getPendingLUSDGain(
+            stakerDsa.address
+          );
+          const lusdBalanceBefore = await liquity.lusdToken.balanceOf(
+            userWallet.address
+          );
+          const ethBalanceBefore = await ethers.provider.getBalance(
+            userWallet.address
+          );
+          const ethGainId = 111;
+          const lusdGainId = 222;
+
+          const claimStakingGainsSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "claimStakingGains",
+            args: [ethGainId, lusdGainId],
+          };
+
+          const withdrawEthSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [helpers.ETH_ADDRESS, 0, userWallet.address, ethGainId, 0],
+          };
+
+          const withdrawLusdSpell = {
+            connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
+            method: "withdraw",
+            args: [
+              liquity.lusdToken.address,
+              0,
+              userWallet.address,
+              lusdGainId,
+              0,
+            ],
+          };
+
+          const spells = [
+            claimStakingGainsSpell,
+            withdrawEthSpell,
+            withdrawLusdSpell,
+          ];
+
+          // Claim gains
+          await stakerDsa
+            .connect(userWallet)
+            .cast(...encodeSpells(spells), userWallet.address, {
+              gasPrice: 0,
+            });
+
+          const ethBalanceAfter = await ethers.provider.getBalance(
+            userWallet.address
+          );
+          const lusdBalanceAfter = await liquity.lusdToken.balanceOf(
+            userWallet.address
+          );
+
+          expect(
+            ethBalanceAfter,
+            "User's ETH balance should have increased by the issuance gain from staking"
+          ).to.eq(ethBalanceBefore.add(ethGain));
+          expect(
+            lusdBalanceAfter,
+            "User's LUSD balance should have increased by the redemption gain from staking"
+          ).to.eq(lusdBalanceBefore.add(lusdGain));
+        });
+
+        it("returns Instadapp event name and data", async () => {
+          const stakerDsa = await buildDSAv2(userWallet.address);
+          const amount = ethers.utils.parseUnits("1000", 18); // 1000 LQTY
+
+          // Stake lots of LQTY
+          await helpers.sendToken(
+            liquity.lqtyToken,
+            amount,
+            helpers.JUSTIN_SUN_ADDRESS,
+            stakerDsa.address
+          );
+          const stakeSpell = {
+            connector: helpers.LIQUITY_CONNECTOR,
+            method: "stake",
+            args: [amount, 0, 0, 0],
+          };
+          await stakerDsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stakeSpell]), userWallet.address);
+
+          // Open a Trove to cause an ETH issuance gain for stakers
+          await helpers.createDsaTrove(dsa, userWallet, liquity);
+
+          // Redeem some ETH to cause an LUSD redemption gain for stakers
+          await helpers.redeem(
+            ethers.utils.parseUnits("1000", 18),
+            contracts.STABILITY_POOL_ADDRESS,
+            userWallet,
             liquity
           );
 
@@ -1958,15 +2571,18 @@ describe.only("Liquity", () => {
           );
 
           const claimStakingGainsSpell = {
-            connector: helpers.CONNECTOR_NAME,
+            connector: helpers.LIQUITY_CONNECTOR,
             method: "claimStakingGains",
             args: [setEthGainId, setLusdGainId],
           };
 
           // Claim gains
           const claimGainsTx = await stakerDsa
-            .connect(wallet)
-            .cast(...encodeSpells([claimStakingGainsSpell]), wallet.address);
+            .connect(userWallet)
+            .cast(
+              ...encodeSpells([claimStakingGainsSpell]),
+              userWallet.address
+            );
 
           const receipt = await claimGainsTx.wait();
 
@@ -1974,7 +2590,7 @@ describe.only("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256"],
-            [wallet.address, ethGain, lusdGain, setEthGainId, setLusdGainId]
+            [userWallet.address, ethGain, lusdGain, setEthGainId, setLusdGainId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogClaimStakingGains(address,uint256,uint256,uint256,uint256)"
