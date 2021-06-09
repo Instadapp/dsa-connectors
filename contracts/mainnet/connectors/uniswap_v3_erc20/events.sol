@@ -6,7 +6,7 @@ contract Events {
         address indexed pool,
         uint256 amtA,
         uint256 amtB,
-        uint256 uniAmount,
+        uint256 mintAmount,
         uint256 getId,
         uint256 setId
     );
@@ -15,7 +15,18 @@ contract Events {
         address indexed pool,
         uint256 amountA,
         uint256 amountB,
-        uint256 uniAmount,
+        uint256 burnAmount,
+        uint256 getId,
+        uint256 setId
+    );
+
+    event LogSwapAndDepositLiquidity(
+        address indexed pool,
+        uint256 amtA,
+        uint256 amtB,
+        uint256 mintAmount,
+        bool zeroForOne,
+        uint swapAmount,
         uint256 getId,
         uint256 setId
     );

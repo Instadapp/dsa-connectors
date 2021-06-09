@@ -41,6 +41,74 @@ interface ERC20WrapperInterface {
 
 }
 
+
+interface IGUniRouter {
+    function rebalanceAndAddLiquidity(
+        IGUniPool pool,
+        uint256 amount0In,
+        uint256 amount1In,
+        bool zeroForOne,
+        uint256 swapAmount,
+        uint160 swapThreshold,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        address receiver
+    )
+        external
+        returns (
+            uint256 amount0,
+            uint256 amount1,
+            uint256 mintAmount
+        );
+
+    function rebalanceAndAddLiquidityETH(
+        IGUniPool pool,
+        uint256 amount0In,
+        uint256 amount1In,
+        bool zeroForOne,
+        uint256 swapAmount,
+        uint160 swapThreshold,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        address receiver
+    )
+        external
+        payable
+        returns (
+            uint256 amount0,
+            uint256 amount1,
+            uint256 mintAmount
+        );
+
+    function removeLiquidity(
+        IGUniPool pool,
+        uint256 burnAmount,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        address receiver
+    )
+        external
+        returns (
+            uint256 amount0,
+            uint256 amount1,
+            uint128 liquidityBurned
+        );
+
+    function removeLiquidityETH(
+        IGUniPool pool,
+        uint256 burnAmount,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        address payable receiver
+    )
+        external
+        returns (
+            uint256 amount0,
+            uint256 amount1,
+            uint128 liquidityBurned
+        );
+}
+
 interface TokenInterface {
     function approve(address, uint256) external;
     function transfer(address, uint) external;

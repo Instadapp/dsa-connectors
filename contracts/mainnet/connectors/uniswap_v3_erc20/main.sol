@@ -104,6 +104,70 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         _eventParam = abi.encode(pool, amount0, amount1, uint256(liquidityBurned), getId, setId);
     }
 
+    function swapAndDeposit(
+        address pool,
+        uint256 amount0In,
+        uint256 amount1In,
+        bool zeroForOne,
+        uint256 swapAmount,
+        uint160 swapThreshold
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+
+        ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
+        IERC20 _token0 = poolContract.token0();
+        IERC20 _token1 = poolContract.token1();
+
+        uint amount0;
+        uint amount1;
+        uint mintAmount;
+
+        if (address(_token0) == wethAddr) {
+            _token1.approve(address(gUniRouter), amount1In);
+            (amount0, amount1, mintAmount) = gUniRouter.rebalanceAndAddLiquidityETH{value: amount0In}(
+                poolContract,
+                amount0In,
+                amount1In,
+                zeroForOne,
+                swapAmount,
+                swapThreshold,
+                0,
+                0,
+                address(this)
+            );
+        } else if (address(_token1) == wethAddr) {
+            _token0.approve(address(gUniRouter), amount0In);
+            (amount0, amount1, mintAmount) = gUniRouter.rebalanceAndAddLiquidityETH{value: amount1In}(
+                poolContract,
+                amount0In,
+                amount1In,
+                zeroForOne,
+                swapAmount,
+                swapThreshold,
+                0,
+                0,
+                address(this)
+            );
+        } else {
+            _token0.approve(address(gUniRouter), amount0In);
+            _token1.approve(address(gUniRouter), amount1In);
+            (amount0, amount1, mintAmount) = gUniRouter.rebalanceAndAddLiquidity(
+                poolContract,
+                amount0In,
+                amount1In,
+                zeroForOne,
+                swapAmount,
+                swapThreshold,
+                0,
+                0,
+                address(this)
+            );
+        }
+
+        _eventName = "LogSwapAndDepositLiquidity(address,uint256,uint256,uint256,bool,uint256,uint256,uint256)";
+        _eventParam = abi.encode(pool, amount0, amount1, mintAmount, zeroForOne, swapAmount, getId, setId);
+
+    }
+
 }
 
 contract ConnectV2UniswapV3ERC20 is UniswapV3Resolver {
