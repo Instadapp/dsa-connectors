@@ -46,6 +46,7 @@ const STABILITY_POOL_ADDRESS = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb";
 const STABILITY_POOL_ABI = [
   "function getCompoundedLUSDDeposit(address _depositor) external view returns (uint)",
   "function getDepositorETHGain(address _depositor) external view returns (uint)",
+  "function getDepositorLQTYGain(address _depositor) external view returns (uint)",
 ];
 
 const STAKING_ADDRESS = "0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d";

@@ -34,6 +34,8 @@ contract Events {
     event LogStabilityDeposit(
         address indexed borrower,
         uint amount,
+        uint ethGain,
+        uint lqtyGain,
         address frontendTag,
         uint getDepositId,
         uint setEthGainId,
@@ -41,6 +43,8 @@ contract Events {
     );
     event LogStabilityWithdraw(address indexed borrower,
         uint amount,
+        uint ethGain,
+        uint lqtyGain,
         uint setWithdrawId,
         uint setEthGainId,
         uint setLqtyGainId

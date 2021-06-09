@@ -11,7 +11,7 @@ const contracts = require("./liquity.contracts");
 // Liquity helpers
 const helpers = require("./liquity.helpers");
 
-describe.only("Liquity", () => {
+describe("Liquity", () => {
   const { waffle, ethers } = hre;
   const { provider } = waffle;
 
@@ -1732,6 +1732,7 @@ describe.only("Liquity", () => {
 
         it("returns Instadapp event name and data", async () => {
           const amount = ethers.utils.parseUnits("100", 18);
+          const halfAmount = amount.div(2);
           const frontendTag = ethers.constants.AddressZero;
           const getDepositId = 0;
           const setEthGainId = 0;
@@ -1747,21 +1748,67 @@ describe.only("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, getDepositId, 0, 0],
+            args: [halfAmount, frontendTag, getDepositId, 0, 0],
           };
 
-          const depositTx = await dsa
+          // Create a Stability deposit for this DSA
+          await dsa
             .connect(userWallet)
             .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
 
-          const receipt = await depositTx.wait();
+          // Liquidate a Trove to cause an ETH gain
+          await liquity.troveManager.connect(userWallet).liquidateTroves(1, {
+            gasLimit: helpers.MAX_GAS,
+          });
+
+          // Fast forward in time so we have an LQTY gain
+          await provider.send("evm_increaseTime", [600]);
+          await provider.send("evm_mine");
+
+          // Create a Stability Pool deposit with a differen DSA so that LQTY gains can be calculated
+          // See: https://github.com/liquity/dev/#lqty-reward-events-and-payouts
+          const tempDsa = await buildDSAv2(userWallet.address);
+          await helpers.sendToken(
+            liquity.lusdToken,
+            amount,
+            contracts.STABILITY_POOL_ADDRESS,
+            tempDsa.address
+          );
+          await tempDsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
+
+          const ethGain = await liquity.stabilityPool.getDepositorETHGain(
+            dsa.address
+          );
+          const lqtyGain = await liquity.stabilityPool.getDepositorLQTYGain(
+            dsa.address
+          );
+
+          // Top up the user's deposit so that we can track their ETH and LQTY gain
+          const depositAgainTx = await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
+
+          const receipt = await depositAgainTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "address", "uint256", "uint256", "uint256"],
+            [
+              "address",
+              "uint256",
+              "uint256",
+              "uint256",
+              "address",
+              "uint256",
+              "uint256",
+              "uint256",
+            ],
             [
               userWallet.address,
-              amount,
+              halfAmount,
+              ethGain,
+              lqtyGain,
               frontendTag,
               getDepositId,
               setEthGainId,
@@ -1769,7 +1816,7 @@ describe.only("Liquity", () => {
             ]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogStabilityDeposit(address,uint256,address,uint256,uint256,uint256)"
+            "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -1777,7 +1824,7 @@ describe.only("Liquity", () => {
 
       describe("stabilityWithdraw()", () => {
         it("withdraws from Stability Pool", async () => {
-          // Start this test from scratch since we don't want to rely on test order for this to pass.
+          // Start this test from scratch since we need to remove any liquidatable Troves withdrawing from Stability Pool
           [liquity, dsa] = await helpers.resetInitialState(
             userWallet.address,
             contracts
@@ -1788,6 +1835,7 @@ describe.only("Liquity", () => {
           await liquity.troveManager.connect(userWallet).liquidateTroves(90, {
             gasLimit: helpers.MAX_GAS,
           });
+
           const amount = ethers.utils.parseUnits("100", 18);
           const frontendTag = ethers.constants.AddressZero;
 
@@ -1805,12 +1853,12 @@ describe.only("Liquity", () => {
           };
 
           // Withdraw half of the deposit
-          const stabilitWithdrawSpell = {
+          const stabilityWithdrawSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
             args: [amount.div(2), 0, 0, 0],
           };
-          const spells = [stabilityDepositSpell, stabilitWithdrawSpell];
+          const spells = [stabilityDepositSpell, stabilityWithdrawSpell];
 
           await dsa
             .connect(userWallet)
@@ -1826,7 +1874,7 @@ describe.only("Liquity", () => {
         });
 
         it("withdraws from Stability Pool and stores the LUSD for other spells", async () => {
-          // Start this test from scratch since we don't want to rely on test order for this to pass.
+          // Start this test from scratch since we need to remove any liquidatable Troves withdrawing from Stability Pool
           [liquity, dsa] = await helpers.resetInitialState(
             userWallet.address,
             contracts
@@ -1855,7 +1903,7 @@ describe.only("Liquity", () => {
           };
 
           // Withdraw half of the deposit
-          const stabilitWithdrawSpell = {
+          const stabilityWithdrawSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
             args: [amount.div(2), 0, 0, withdrawId],
@@ -1875,7 +1923,7 @@ describe.only("Liquity", () => {
 
           const spells = [
             stabilityDepositSpell,
-            stabilitWithdrawSpell,
+            stabilityWithdrawSpell,
             withdrawLusdSpell,
           ];
 
@@ -1895,17 +1943,12 @@ describe.only("Liquity", () => {
         });
 
         it("returns Instadapp event name and data", async () => {
-          // Start this test from scratch since we don't want to rely on test order for this to pass.
+          // Start this test from scratch since we need to remove any liquidatable Troves withdrawing from Stability Pool
           [liquity, dsa] = await helpers.resetInitialState(
             userWallet.address,
             contracts
           );
 
-          // The current block number has liquidatable Troves.
-          // Remove them otherwise Stability Pool withdrawals are disabled
-          await liquity.troveManager.connect(userWallet).liquidateTroves(90, {
-            gasLimit: helpers.MAX_GAS,
-          });
           const amount = ethers.utils.parseUnits("100", 18);
           const frontendTag = ethers.constants.AddressZero;
 
@@ -1928,34 +1971,81 @@ describe.only("Liquity", () => {
           const setEthGainId = 0;
           const setLqtyGainId = 0;
 
-          const stabilitWithdrawSpell = {
+          // Create a Stability Pool deposit
+          await dsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
+
+          // The current block number has liquidatable Troves.
+          // Remove them otherwise Stability Pool withdrawals are disabled
+          await liquity.troveManager.connect(userWallet).liquidateTroves(90, {
+            gasLimit: helpers.MAX_GAS,
+          });
+
+          // Fast forward in time so we have an LQTY gain
+          await provider.send("evm_increaseTime", [600]);
+          await provider.send("evm_mine");
+
+          // Create another Stability Pool deposit so that LQTY gains are realized
+          // See: https://github.com/liquity/dev/#lqty-reward-events-and-payouts
+          const tempDsa = await buildDSAv2(userWallet.address);
+          await helpers.sendToken(
+            liquity.lusdToken,
+            amount,
+            contracts.STABILITY_POOL_ADDRESS,
+            tempDsa.address
+          );
+          await tempDsa
+            .connect(userWallet)
+            .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
+
+          const ethGain = await liquity.stabilityPool.getDepositorETHGain(
+            dsa.address
+          );
+          const lqtyGain = await liquity.stabilityPool.getDepositorLQTYGain(
+            dsa.address
+          );
+
+          const stabilityWithdrawSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
             args: [withdrawAmount, setWithdrawId, setEthGainId, setLqtyGainId],
           };
-          const spells = [stabilityDepositSpell, stabilitWithdrawSpell];
 
-          const castTx = await dsa
+          const withdrawTx = await dsa
             .connect(userWallet)
-            .cast(...encodeSpells(spells), userWallet.address);
+            .cast(
+              ...encodeSpells([stabilityWithdrawSpell]),
+              userWallet.address
+            );
 
-          const receipt = await castTx.wait();
+          const receipt = await withdrawTx.wait();
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256", "uint256", "uint256"],
+            [
+              "address",
+              "uint256",
+              "uint256",
+              "uint256",
+              "uint256",
+              "uint256",
+              "uint256",
+            ],
             [
               userWallet.address,
               withdrawAmount,
+              ethGain,
+              lqtyGain,
               setWithdrawId,
               setEthGainId,
               setLqtyGainId,
             ]
           );
-          expect(castLogEvent.eventNames[1]).eq(
-            "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256)"
+          expect(castLogEvent.eventNames[0]).eq(
+            "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256)"
           );
-          expect(castLogEvent.eventParams[1]).eq(expectedEventParams);
+          expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
       });
 

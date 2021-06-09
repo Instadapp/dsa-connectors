@@ -9,7 +9,8 @@ import {
     TroveManagerLike,
     StabilityPoolLike,
     StakingLike,
-    CollateralSurplusLike
+    CollateralSurplusLike,
+    LqtyTokenLike
 } from "./interface.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
@@ -26,6 +27,8 @@ abstract contract LiquityResolver is Events, Helpers {
         StakingLike(0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d);
     CollateralSurplusLike internal constant collateralSurplus =
         CollateralSurplusLike(0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521);
+    LqtyTokenLike internal constant lqtyToken =
+        LqtyTokenLike(0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D);
     
     // Prevents stack-too-deep error
     struct AdjustTrove {
@@ -45,8 +48,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param depositAmount The amount of ETH to deposit
      * @param maxFeePercentage The maximum borrow fee that this transaction should permit 
      * @param borrowAmount The amount of LUSD to borrow
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getId Optional storage slot to retrieve ETH from
      * @param setId Optional storage slot to store the LUSD borrowed against
     */
@@ -97,8 +100,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Deposit ETH to Trove
      * @notice Increase Trove collateral (collateral Top up)
      * @param amount Amount of ETH to deposit into Trove
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getId Optional storage slot to retrieve the ETH from
     */
     function deposit(
@@ -120,8 +123,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Withdraw ETH from Trove
      * @notice Move Trove collateral from Trove to DSA
      * @param amount Amount of ETH to move from Trove to DSA
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param setId Optional storage slot to store the withdrawn ETH in
     */
    function withdraw(
@@ -142,8 +145,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @notice Borrow LUSD via an existing Trove
      * @param maxFeePercentage The maximum borrow fee that this transaction should permit 
      * @param amount Amount of LUSD to borrow
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param setId Optional storage slot to store the borrowed LUSD in
     */
     function borrow(
@@ -155,7 +158,7 @@ abstract contract LiquityResolver is Events, Helpers {
     ) external payable returns (string memory _eventName, bytes memory _eventParam)  {
         borrowerOperations.withdrawLUSD(maxFeePercentage, amount, upperHint, lowerHint);
 
-        setUint(setId, amount); // TODO: apply fee / get exact amount borrowed (with the fee applied)
+        setUint(setId, amount);
         _eventName = "LogBorrow(address,uint256,uint256)";
         _eventParam = abi.encode(msg.sender, amount, setId);
     }
@@ -164,8 +167,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Send LUSD to repay debt
      * @notice Repay LUSD Trove debt
      * @param amount Amount of LUSD to repay
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getId Optional storage slot to retrieve the LUSD from
     */
     function repay(
@@ -191,8 +194,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param depositAmount Amount of ETH to deposit
      * @param borrowAmount Amount of LUSD to borrow
      * @param repayAmount Amount of LUSD to repay
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getDepositId Optional storage slot to retrieve the ETH to deposit
      * @param setWithdrawId Optional storage slot to store the withdrawn ETH to
      * @param getRepayId Optional storage slot to retrieve the LUSD to repay
@@ -269,7 +272,7 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param frontendTag Address of the frontend to make this deposit against (determines the kickback rate of rewards)
      * @param getDepositId Optional storage slot to retrieve the LUSD from
      * @param setEthGainId Optional storage slot to store any ETH gains in
-     * @param setLqtyGainId Optional storage slot to store any ETH gains in
+     * @param setLqtyGainId Optional storage slot to store any LQTY gains in
     */
     function stabilityDeposit(
         uint amount,
@@ -281,14 +284,18 @@ abstract contract LiquityResolver is Events, Helpers {
         amount = getUint(getDepositId, amount);
 
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
-        uint lqtyGain = stabilityPool.getDepositorLQTYGain(address(this));
+        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
         
         stabilityPool.provideToSP(amount, frontendTag);
+        
+        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
+        uint lqtyGain = sub(lqtyBalanceAfter, lqtyBalanceBefore);
+
         setUint(setEthGainId, ethGain);
         setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityDeposit(address,uint256,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, frontendTag, getDepositId, setEthGainId, setLqtyGainId);
+        _eventName = "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, amount, ethGain, lqtyGain, frontendTag, getDepositId, setEthGainId, setLqtyGainId);
     }
 
     /**
@@ -297,7 +304,7 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param amount Amount of LUSD to withdraw from Stability Pool
      * @param setWithdrawId Optional storage slot to store the withdrawn LUSD
      * @param setEthGainId Optional storage slot to store any ETH gains in
-     * @param setLqtyGainId Optional storage slot to store any ETH gains in
+     * @param setLqtyGainId Optional storage slot to store any LQTY gains in
     */
     function stabilityWithdraw(
         uint amount,
@@ -305,23 +312,27 @@ abstract contract LiquityResolver is Events, Helpers {
         uint setEthGainId,
         uint setLqtyGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        stabilityPool.withdrawFromSP(amount);
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
-        uint lqtyGain = stabilityPool.getDepositorLQTYGain(address(this));
+        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
         
+        stabilityPool.withdrawFromSP(amount);
+        
+        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
+        uint lqtyGain = sub(lqtyBalanceAfter, lqtyBalanceBefore);
+
         setUint(setWithdrawId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setWithdrawId, setEthGainId, setLqtyGainId);
+        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(msg.sender, amount, ethGain, lqtyGain, setWithdrawId, setEthGainId, setLqtyGainId);
     }
 
     /**
      * @dev Increase Trove collateral by sending Stability Pool ETH gain to user's Trove
      * @notice Moves user's ETH gain from the Stability Pool into their Trove
-     * @param upperHint Address of the Trove near the upper bound of where the user's Trove will now sit in the ordered Trove list
-     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove will now sit in the ordered Trove list
+     * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
+     * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
     */
     function stabilityMoveEthGainToTrove(
         address upperHint,

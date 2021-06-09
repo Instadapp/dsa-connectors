@@ -66,3 +66,7 @@ interface StakingLike {
 interface CollateralSurplusLike { 
     function getCollateral(address _account) external view returns (uint);
 }
+
+interface LqtyTokenLike {
+    function balanceOf(address account) external view returns (uint256);
+}

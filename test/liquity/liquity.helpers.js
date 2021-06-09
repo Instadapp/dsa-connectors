@@ -121,7 +121,6 @@ const resetHardhatBlockNumber = async (blockNumber) => {
 const deployAndConnect = async (contracts, isDebug = false) => {
   // Pin Liquity tests to a particular block number to create deterministic state (Ether price etc.)
   await resetHardhatBlockNumber(LIQUIDATABLE_TROVES_BLOCK_NUMBER);
-
   const liquity = {
     troveManager: null,
     borrowerOperations: null,
@@ -163,93 +162,65 @@ const deployAndConnect = async (contracts, isDebug = false) => {
     contracts.TROVE_MANAGER_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("TroveManager contract address", liquity.troveManager.address);
 
   liquity.borrowerOperations = new ethers.Contract(
     contracts.BORROWER_OPERATIONS_ADDRESS,
     contracts.BORROWER_OPERATIONS_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log(
-      "BorrowerOperations contract address",
-      liquity.borrowerOperations.address
-    );
 
   liquity.stabilityPool = new ethers.Contract(
     contracts.STABILITY_POOL_ADDRESS,
     contracts.STABILITY_POOL_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log(
-      "StabilityPool contract address",
-      liquity.stabilityPool.address
-    );
 
   liquity.lusdToken = new ethers.Contract(
     contracts.LUSD_TOKEN_ADDRESS,
     contracts.LUSD_TOKEN_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("LusdToken contract address", liquity.lusdToken.address);
 
   liquity.lqtyToken = new ethers.Contract(
     contracts.LQTY_TOKEN_ADDRESS,
     contracts.LQTY_TOKEN_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("LqtyToken contract address", liquity.lqtyToken.address);
 
   liquity.activePool = new ethers.Contract(
     contracts.ACTIVE_POOL_ADDRESS,
     contracts.ACTIVE_POOL_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("ActivePool contract address", liquity.activePool.address);
 
   liquity.priceFeed = new ethers.Contract(
     contracts.PRICE_FEED_ADDRESS,
     contracts.PRICE_FEED_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("PriceFeed contract address", liquity.priceFeed.address);
 
   liquity.hintHelpers = new ethers.Contract(
     contracts.HINT_HELPERS_ADDRESS,
     contracts.HINT_HELPERS_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("HintHelpers contract address", liquity.hintHelpers.address);
 
   liquity.sortedTroves = new ethers.Contract(
     contracts.SORTED_TROVES_ADDRESS,
     contracts.SORTED_TROVES_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("SortedTroves contract address", liquity.sortedTroves.address);
 
   liquity.staking = new ethers.Contract(
     contracts.STAKING_ADDRESS,
     contracts.STAKING_ABI,
     ethers.provider
   );
-  isDebug && console.log("Staking contract address", liquity.staking.address);
-
   liquity.collSurplus = new ethers.Contract(
     contracts.COLL_SURPLUS_ADDRESS,
     contracts.COLL_SURPLUS_ABI,
     ethers.provider
   );
-  isDebug &&
-    console.log("CollSurplus contract address", liquity.collSurplus.address);
 
   return liquity;
 };
