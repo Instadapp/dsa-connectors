@@ -10,12 +10,14 @@ contract Events {
     uint setId
   );
 
-  event LogWithdraw(
+  event LogWithdrawAndClaimedReward(
     address indexed stakingToken,
     bytes32 indexed stakingType,
     uint256 amount,
+    uint256 rewardAmt,
     uint getId,
-    uint setId
+    uint setIdAmount,
+    uint setIdReward
   );
 
   event LogClaimedReward(

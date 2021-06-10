@@ -1,8 +1,8 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Uniswap V3 ERC20 Wrapper.
- * @dev Uniswap V3 Wrapper to deposit and withdraw.
+ * @title G-Uniswap V3 ERC20 Wrapper.
+ * @dev G-Uniswap V3 Wrapper to deposit and withdraw.
  */
 
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
@@ -22,7 +22,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
      * @param amt0Max Amount0 Max amount
      * @param amt1Max Amount1 Max amount
      * @param slippage use to calculate minimum deposit. 100% = 1e18
-     * @param getId ID to retrieve amount.
+     * @param getIds Array of IDs to retrieve amounts.
      * @param setId ID stores the amount of pools tokens received.
     */
     function deposit(
@@ -79,7 +79,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
      * @param minAmtA Min AmountA amount
      * @param minAmtB Min AmountB amount
      * @param getId ID to retrieve liqAmt.
-     * @param setId ID stores the amount of pools tokens received.
+     * @param setIds Array of IDs tp stores the amounts of pools tokens received.
     */
     function withdraw(
         address pool,
@@ -197,8 +197,6 @@ abstract contract UniswapV3Resolver is Events, Helpers {
 
 }
 
-contract ConnectV2UniswapV3ERC20 is UniswapV3Resolver {
-
-    string public constant name = "Uniswap-v3-ERC20";
-
+contract ConnectV2GUniswapV3ERC20 is UniswapV3Resolver {
+    string public constant name = "GUniswap-v3-ERC20-v1.0";
 }

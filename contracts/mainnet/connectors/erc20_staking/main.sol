@@ -1,6 +1,11 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+/**
+ * @title Token Staking.
+ * @dev Stake ERC20 for earning rewards.
+ */
+
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
@@ -11,18 +16,19 @@ import { IStakingRewards, SynthetixMapping } from "./interface.sol";
 contract Main {
 
   /**
-    * @dev Deposit Token.
-    * @param stakingPoolName staking token address.
+    * @dev Deposit ERC20.
+    * @notice Deposit Tokens to staking pool.
+    * @param stakingPoolName staking pool name.
     * @param amt staking token amount.
-    * @param getId Get token amount at this ID from `InstaMemory` Contract.
-    * @param setId Set token amount at this ID in `InstaMemory` Contract.
+    * @param getId ID to retrieve amount.
+    * @param setId ID stores the amount of staked tokens.
   */
   function deposit(
     string calldata stakingPoolName,
     uint amt,
     uint getId,
     uint setId
-  ) external payable {
+  ) external payable returns (string memory _eventName, bytes memory _eventParam) {
     uint _amt = getUint(getId, amt);
     (
       IStakingRewards stakingContract,
@@ -37,16 +43,18 @@ contract Main {
     stakingContract.stake(_amt);
 
     setUint(setId, _amt);
-    emit LogDeposit(address(stakingToken), stakingType, _amt, getId, setId);
+    _eventName = "LogDeposit(address,bytes32,uint256,uint256,uint256)";
+    _eventParam = abi.encode(address(stakingToken), stakingType, _amt, getId, setId);
   }
 
   /**
-    * @dev Withdraw Token.
-    * @param stakingPoolName staking token address.
+    * @dev Withdraw ERC20.
+    * @notice Withdraw Tokens from the staking pool.
+    * @param stakingPoolName staking pool name.
     * @param amt staking token amount.
-    * @param getId Get token amount at this ID from `InstaMemory` Contract.
-    * @param setIdAmount Set token amount at this ID in `InstaMemory` Contract.
-    * @param setIdReward Set reward amount at this ID in `InstaMemory` Contract.
+    * @param getId ID to retrieve amount.
+    * @param setIdAmount ID stores the amount of stake tokens withdrawn.
+    * @param setIdReward ID stores the amount of reward tokens claimed.
   */
   function withdraw(
     string calldata stakingPoolName,
@@ -54,7 +62,7 @@ contract Main {
     uint getId,
     uint setIdAmount,
     uint setIdReward
-  ) external payable {
+  ) external payable returns (string memory _eventName, bytes memory _eventParam) {
     uint _amt = getUint(getId, amt);
     (
       IStakingRewards stakingContract,
@@ -74,20 +82,20 @@ contract Main {
     setUint(setIdAmount, _amt);
     setUint(setIdReward, rewardAmt);
 
-    emit LogWithdraw(address(stakingToken), stakingType, _amt, getId, setIdAmount);
-
-    emit LogClaimedReward(address(rewardToken), stakingType, rewardAmt, setIdReward);
+    _eventName = "LogWithdrawAndClaimedReward(address,bytes32,uint256,uint256,uint256,uint256,uint256)";
+    _eventParam = abi.encode(address(stakingToken), stakingType, _amt, rewardAmt, getId, setIdAmount, setIdReward);
   }
 
   /**
     * @dev Claim Reward.
-    * @param stakingPoolName staking token address.
-    * @param setId Set reward amount at this ID in `InstaMemory` Contract.
+    * @notice Claim Pending Rewards of tokens staked.
+    * @param stakingPoolName staking pool name.
+    * @param setId ID stores the amount of reward tokens claimed.
   */
   function claimReward(
     string calldata stakingPoolName,
     uint setId
-  ) external payable {
+  ) external payable returns (string memory _eventName, bytes memory _eventParam) {
      (
       IStakingRewards stakingContract,
       ,
@@ -102,7 +110,12 @@ contract Main {
     uint rewardAmt = sub(finalBal, intialBal);
 
     setUint(setId, rewardAmt);
-    emit LogClaimedReward(address(rewardToken), stakingType, rewardAmt, setId);
+    _eventName = "LogClaimedReward(address,bytes32,uint256,uint256)";
+    _eventParam = abi.encode(address(rewardToken), stakingType, rewardAmt, setId);
   }
 
+}
+
+contract connectV2StakeERC20 is main {
+    string public constant name = "Stake-ERC20-v1.0";
 }
