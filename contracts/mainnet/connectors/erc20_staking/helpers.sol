@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
+import { TokenInterface } from "../../common/interfaces.sol";
 import { IStakingRewards, SynthetixMapping } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {

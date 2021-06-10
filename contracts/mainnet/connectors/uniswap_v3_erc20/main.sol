@@ -8,7 +8,7 @@ pragma solidity ^0.7.0;
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
-import { ERC20WrapperInterface, IERC20 } from "./interface.sol";
+import { IGUniPool, IERC20 } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
@@ -30,44 +30,48 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         uint256 amt0Max,
         uint256 amt1Max,
         uint slippage,
-        uint256[] getIds,
+        uint256[] calldata getIds,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
 
         amt0Max = getUint(getIds[0], amt0Max);
         amt1Max = getUint(getIds[1], amt1Max);
 
-        ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
+        Deposit memory depositData;
+        depositData.poolContract = IGUniPool(pool);
 
-        (uint256 amount0In, uint256 amount1In, uint256 mintAmount) = poolContract.getMintAmounts(amt0Max, amt1Max);
+        (depositData.amount0In, depositData.amount1In, depositData.mintAmount) =
+            depositData.poolContract.getMintAmounts(amt0Max, amt1Max);
 
         uint amt0Min = wmul(amt0Max, slippage);
         uint amt1Min = wmul(amt1Max, slippage);
 
         require(
-            amount0In >= amt0Min && amount1In >= amt1Min,
+            depositData.amount0In >= amt0Min && depositData.amount1In >= amt1Min,
             "below min amounts"
         );
 
-        if (amount0In > 0) {
-            IERC20 _token0 = poolContract.token0();
-            convertEthToWeth(address(_token0) == wethAddr, TokenInterface(address(_token0)), amount0In);
-            _token0.safeApprove(address(pool), amount0In);
+        if (depositData.amount0In > 0) {
+            IERC20 _token0 = depositData.poolContract.token0();
+            convertEthToWeth(address(_token0) == wethAddr, TokenInterface(address(_token0)), depositData.amount0In);
+            _token0.safeApprove(address(pool), depositData.amount0In);
         }
-        if (amount1In > 0) {
-            IERC20 _token1 = poolContract.token1();
-            convertEthToWeth(address(_token1) == wethAddr, TokenInterface(address(_token1)), amount1In);
-            _token1.safeApprove(address(pool), amount1In);
+        if (depositData.amount1In > 0) {
+            IERC20 _token1 = depositData.poolContract.token1();
+            convertEthToWeth(address(_token1) == wethAddr, TokenInterface(address(_token1)), depositData.amount1In);
+            _token1.safeApprove(address(pool), depositData.amount1In);
         }
 
-        (uint amount0, uint amount1,) = poolContract.mint(mintAmount, address(this));
+        (uint amount0, uint amount1,) = depositData.poolContract.mint(depositData.mintAmount, address(this));
 
-        require(amount0 == amount0In && amount1 == amount1In, "unexpected amounts deposited");
+        require(
+            amount0 == depositData.amount0In &&
+            amount1 == depositData.amount1In, "unexpected amounts deposited");
 
-        setUint(setId, mintAmount);
+        setUint(setId, depositData.mintAmount);
 
         _eventName = "LogDepositLiquidity(address,uint256,uint256,uint256,uint256[],uint256)";
-        _eventParam = abi.encode(pool, amount0, amount1, mintAmount, getIds, setId);
+        _eventParam = abi.encode(pool, amount0, amount1, depositData.mintAmount, getIds, setId);
     }
 
 
@@ -87,12 +91,12 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         uint256 minAmtA,
         uint256 minAmtB,
         uint256 getId,
-        uint256[] setIds
+        uint256[] calldata setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
 
         liqAmt = getUint(getId, liqAmt);
 
-        ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
+        IGUniPool poolContract = IGUniPool(pool);
 
         (uint amount0, uint amount1, uint128 liquidityBurned) = poolContract.burn(liqAmt, address(this));
 
@@ -137,66 +141,80 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        DepositAndSwap memory depositAndSwap;
+        depositAndSwap.poolContract = IGUniPool(pool);
+        depositAndSwap._token0 = depositAndSwap.poolContract.token0();
+        depositAndSwap._token1 = depositAndSwap.poolContract.token1();
 
-        ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
-        IERC20 _token0 = poolContract.token0();
-        IERC20 _token1 = poolContract.token1();
+        depositAndSwap.amount0;
+        depositAndSwap.amount1;
+        depositAndSwap.mintAmount;
 
-        uint amount0;
-        uint amount1;
-        uint mintAmount;
+        if (address(depositAndSwap._token0) == wethAddr) {
+            depositAndSwap._token1.approve(address(gUniRouter), amount1In);
+    
+            (depositAndSwap.amount0, depositAndSwap.amount1, depositAndSwap.mintAmount) = 
+                gUniRouter.rebalanceAndAddLiquidityETH{value: amount0In}(
+                    depositAndSwap.poolContract,
+                    amount0In,
+                    amount1In,
+                    zeroForOne,
+                    swapAmount,
+                    swapThreshold,
+                    0,
+                    0,
+                    address(this)
+                );
+        } else if (address(depositAndSwap._token1) == wethAddr) {
+            depositAndSwap._token0.approve(address(gUniRouter), amount0In);
 
-        if (address(_token0) == wethAddr) {
-            _token1.approve(address(gUniRouter), amount1In);
-            (amount0, amount1, mintAmount) = gUniRouter.rebalanceAndAddLiquidityETH{value: amount0In}(
-                poolContract,
-                amount0In,
-                amount1In,
-                zeroForOne,
-                swapAmount,
-                swapThreshold,
-                0,
-                0,
-                address(this)
-            );
-        } else if (address(_token1) == wethAddr) {
-            _token0.approve(address(gUniRouter), amount0In);
-            (amount0, amount1, mintAmount) = gUniRouter.rebalanceAndAddLiquidityETH{value: amount1In}(
-                poolContract,
-                amount0In,
-                amount1In,
-                zeroForOne,
-                swapAmount,
-                swapThreshold,
-                0,
-                0,
-                address(this)
-            );
+            (depositAndSwap.amount0, depositAndSwap.amount1,depositAndSwap. mintAmount) = 
+                gUniRouter.rebalanceAndAddLiquidityETH{value: amount1In}(
+                    depositAndSwap.poolContract,
+                    amount0In,
+                    amount1In,
+                    zeroForOne,
+                    swapAmount,
+                    swapThreshold,
+                    0,
+                    0,
+                    address(this)
+                );
         } else {
-            _token0.approve(address(gUniRouter), amount0In);
-            _token1.approve(address(gUniRouter), amount1In);
-            (amount0, amount1, mintAmount) = gUniRouter.rebalanceAndAddLiquidity(
-                poolContract,
-                amount0In,
-                amount1In,
-                zeroForOne,
-                swapAmount,
-                swapThreshold,
-                0,
-                0,
-                address(this)
-            );
+            depositAndSwap._token0.approve(address(gUniRouter), amount0In);
+            depositAndSwap._token1.approve(address(gUniRouter), amount1In);
+            (depositAndSwap.amount0, depositAndSwap.amount1, depositAndSwap.mintAmount) = 
+                gUniRouter.rebalanceAndAddLiquidity(
+                    depositAndSwap.poolContract,
+                    amount0In,
+                    amount1In,
+                    zeroForOne,
+                    swapAmount,
+                    swapThreshold,
+                    0,
+                    0,
+                    address(this)
+                );
         }
 
-        setUint(setId, mintAmount);
+        setUint(setId, depositAndSwap.mintAmount);
 
         _eventName = "LogSwapAndDepositLiquidity(address,uint256,uint256,uint256,bool,uint256,uint256,uint256)";
-        _eventParam = abi.encode(pool, amount0, amount1, mintAmount, zeroForOne, swapAmount, getId, setId);
+        _eventParam = abi.encode(
+            pool,
+            depositAndSwap.amount0,
+            depositAndSwap.amount1,
+            depositAndSwap.mintAmount,
+            zeroForOne,
+            swapAmount,
+            getId,
+            setId
+        );
 
     }
 
 }
 
 contract ConnectV2GUniswapV3ERC20 is UniswapV3Resolver {
-    string public constant name = "GUniswap-v3-ERC20-v1.0";
+    string public constant name = "G-Uniswap-v3-ERC20-v1.0";
 }

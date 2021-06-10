@@ -6,14 +6,13 @@ pragma experimental ABIEncoderV2;
  * @dev Stake ERC20 for earning rewards.
  */
 
-
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { IStakingRewards, SynthetixMapping } from "./interface.sol";
 
-contract Main {
+contract Main is Helpers, Events {
 
   /**
     * @dev Deposit ERC20.
@@ -75,15 +74,15 @@ contract Main {
     uint intialBal = rewardToken.balanceOf(address(this));
     stakingContract.withdraw(_amt);
     stakingContract.getReward();
-    uint finalBal = rewardToken.balanceOf(address(this));
 
-    uint rewardAmt = sub(finalBal, intialBal);
+    uint rewardAmt = sub(rewardToken.balanceOf(address(this)), intialBal);
 
     setUint(setIdAmount, _amt);
     setUint(setIdReward, rewardAmt);
-
+    {
     _eventName = "LogWithdrawAndClaimedReward(address,bytes32,uint256,uint256,uint256,uint256,uint256)";
     _eventParam = abi.encode(address(stakingToken), stakingType, _amt, rewardAmt, getId, setIdAmount, setIdReward);
+    }
   }
 
   /**
@@ -116,6 +115,6 @@ contract Main {
 
 }
 
-contract connectV2StakeERC20 is main {
+contract connectV2StakeERC20 is Main {
     string public constant name = "Stake-ERC20-v1.0";
 }

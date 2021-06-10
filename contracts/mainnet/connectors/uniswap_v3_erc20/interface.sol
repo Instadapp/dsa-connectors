@@ -3,14 +3,14 @@ pragma experimental ABIEncoderV2;
 
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-interface ERC20WrapperInterface {
+interface IGUniPool {
 
     function token0() external view returns (IERC20);
 
     function token1() external view returns (IERC20);
 
     function mint(
-        uint256 mintAmount,
+        uint256 amount,
         address receiver
     ) external
     returns (
