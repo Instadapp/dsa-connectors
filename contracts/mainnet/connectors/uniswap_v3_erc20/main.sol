@@ -17,7 +17,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
 
     /**
      * @dev Deposit Liquidity.
-     * @notice Deposit Liquidity to a Uniswap V3 pool.
+     * @notice Deposit Liquidity to Gelato Uniswap V3 pool.
      * @param pool The address of pool.
      * @param amt0Max Amount0 Max amount
      * @param amt1Max Amount1 Max amount
@@ -73,7 +73,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
 
     /**
      * @dev Withdraw Liquidity.
-     * @notice Withdraw Liquidity from a Uniswap V3 pool.
+     * @notice Withdraw Liquidity from Gelato Uniswap V3 pool.
      * @param pool The address of pool.
      * @param liqAmt Amount0 Max amount
      * @param minAmtA Min AmountA amount
@@ -115,6 +115,18 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         _eventParam = abi.encode(pool, amount0, amount1, uint256(liquidityBurned), getId, setIds);
     }
 
+    /**
+     * @dev Swap & Deposit Liquidity.
+     * @notice Withdraw Liquidity to Gelato Uniswap V3 pool.
+     * @param pool The address of pool.
+     * @param amount0In amount of token0 to deposit.
+     * @param amount1In amount of token1 to deposit.
+     * @param zeroForOne Swap excess of one token to deposit in equal ratio.
+     * @param swapAmount Amount of tokens to swap
+     * @param swapThreshold Slippage that the swap could take.
+     * @param getId Not used anywhere here.
+     * @param setId Set the amount of tokens minted.
+    */
     function swapAndDeposit(
         address pool,
         uint256 amount0In,
