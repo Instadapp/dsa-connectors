@@ -41,7 +41,7 @@ abstract contract Helpers is DSMath, Basic {
   }
 
   function getMappingAddr() internal virtual view returns (address) {
-    return 0x772590F33eD05b0E83553650BF9e75A04b337526; // InstaMapping Address
+    return 0x4a56E4209F0757CE630a2ebCF45DCe5BAfcb9782; // InstaMapping Address
   }
 
 }
