@@ -30,9 +30,12 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         uint256 amt0Max,
         uint256 amt1Max,
         uint slippage,
-        uint256 getId,
+        uint256[] getIds,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+
+        amt0Max = getUint(getIds[0], amt0Max);
+        amt1Max = getUint(getIds[1], amt1Max);
 
         ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
 
@@ -61,8 +64,10 @@ abstract contract UniswapV3Resolver is Events, Helpers {
 
         require(amount0 == amount0In && amount1 == amount1In, "unexpected amounts deposited");
 
-        _eventName = "LogDepositLiquidity(address,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(pool, amount0, amount1, mintAmount, getId, setId);
+        setUint(setId, mintAmount);
+
+        _eventName = "LogDepositLiquidity(address,uint256,uint256,uint256,uint256[],uint256)";
+        _eventParam = abi.encode(pool, amount0, amount1, mintAmount, getIds, setId);
     }
 
 
@@ -82,8 +87,10 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         uint256 minAmtA,
         uint256 minAmtB,
         uint256 getId,
-        uint256 setId
+        uint256[] setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+
+        liqAmt = getUint(getId, liqAmt);
 
         ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
 
@@ -101,8 +108,11 @@ abstract contract UniswapV3Resolver is Events, Helpers {
 
         require(amount0 >= minAmtA && amount1 >= minAmtB, "received below minimum");
 
-        _eventName = "LogWithdrawLiquidity(address,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(pool, amount0, amount1, uint256(liquidityBurned), getId, setId);
+        setUint(setIds[0], amount0);
+        setUint(setIds[1], amount1);
+
+        _eventName = "LogWithdrawLiquidity(address,uint256,uint256,uint256,uint256,uint256[])";
+        _eventParam = abi.encode(pool, amount0, amount1, uint256(liquidityBurned), getId, setIds);
     }
 
     function swapAndDeposit(
@@ -111,7 +121,9 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         uint256 amount1In,
         bool zeroForOne,
         uint256 swapAmount,
-        uint160 swapThreshold
+        uint160 swapThreshold,
+        uint256 getId,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
 
         ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
@@ -163,6 +175,8 @@ abstract contract UniswapV3Resolver is Events, Helpers {
                 address(this)
             );
         }
+
+        setUint(setId, mintAmount);
 
         _eventName = "LogSwapAndDepositLiquidity(address,uint256,uint256,uint256,bool,uint256,uint256,uint256)";
         _eventParam = abi.encode(pool, amount0, amount1, mintAmount, zeroForOne, swapAmount, getId, setId);

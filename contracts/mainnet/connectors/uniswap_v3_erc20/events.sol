@@ -7,7 +7,7 @@ contract Events {
         uint256 amtA,
         uint256 amtB,
         uint256 mintAmount,
-        uint256 getId,
+        uint256[] getIds,
         uint256 setId
     );
 
@@ -17,7 +17,7 @@ contract Events {
         uint256 amountB,
         uint256 burnAmount,
         uint256 getId,
-        uint256 setId
+        uint256[] setIds
     );
 
     event LogSwapAndDepositLiquidity(
