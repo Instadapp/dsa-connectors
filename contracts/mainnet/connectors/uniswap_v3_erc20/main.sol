@@ -20,18 +20,16 @@ abstract contract UniswapV3Resolver is Events, Helpers {
      * @notice Deposit Liquidity to a Uniswap V3 pool.
      * @param pool The address of pool.
      * @param amt0Max Amount0 Max amount
-     * @param amt0Min Amount0 Min amount
      * @param amt1Max Amount1 Max amount
-     * @param amt1Min Amount1 Min amount
+     * @param slippage use to calculate minimum deposit. 100% = 1e18
      * @param getId ID to retrieve amount.
      * @param setId ID stores the amount of pools tokens received.
     */
     function deposit(
         address pool,
         uint256 amt0Max,
-        uint256 amt0Min,
         uint256 amt1Max,
-        uint256 amt1Min,
+        uint slippage,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -39,6 +37,9 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         ERC20WrapperInterface poolContract = ERC20WrapperInterface(pool);
 
         (uint256 amount0In, uint256 amount1In, uint256 mintAmount) = poolContract.getMintAmounts(amt0Max, amt1Max);
+
+        uint amt0Min = wmul(amt0Max, slippage);
+        uint amt1Min = wmul(amt1Max, slippage);
 
         require(
             amount0In >= amt0Min && amount1In >= amt1Min,
