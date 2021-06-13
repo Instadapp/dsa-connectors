@@ -14,4 +14,11 @@ abstract contract Helpers is DSMath, Basic {
 
   TokenInterface constant internal rewardToken = TokenInterface(address(0)); // TODO
 
+  function getStakingContract(address stakingToken) internal view returns (address) {
+    IStakingRewardsFactory.StakingRewardsInfo memory stakingRewardsInfo =
+      stakingRewardsFactory.stakingRewardsInfoByStakingToken(stakingToken);
+
+    return IStakingRewards(stakingRewardsInfo.stakingRewards);
+  }
+
 }

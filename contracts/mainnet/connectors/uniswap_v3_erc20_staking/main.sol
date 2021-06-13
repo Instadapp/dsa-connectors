@@ -30,10 +30,7 @@ contract Main is Helpers, Events {
   ) external payable returns (string memory _eventName, bytes memory _eventParam) {
     uint _amt = getUint(getId, amt);
     
-    IStakingRewardsFactory.StakingRewardsInfo memory stakingRewardsInfo =
-      stakingRewardsFactory.stakingRewardsInfoByStakingToken(stakingToken);
-
-    IStakingRewards stakingContract = IStakingRewards(stakingRewardsInfo.stakingRewards);
+    IStakingRewards stakingContract = IStakingRewards(getStakingContract(stakingToken));
     TokenInterface stakingTokenContract = TokenInterface(stakingToken);
 
     _amt = _amt == uint(-1) ? stakingTokenContract.balanceOf(address(this)) : _amt;
@@ -64,10 +61,7 @@ contract Main is Helpers, Events {
   ) external payable returns (string memory _eventName, bytes memory _eventParam) {
     uint _amt = getUint(getId, amt);
 
-    IStakingRewardsFactory.StakingRewardsInfo memory stakingRewardsInfo =
-      stakingRewardsFactory.stakingRewardsInfoByStakingToken(stakingToken);
-
-    IStakingRewards stakingContract = IStakingRewards(stakingRewardsInfo.stakingRewards);
+    IStakingRewards stakingContract = IStakingRewards(getStakingContract(stakingToken));
 
     _amt = _amt == uint(-1) ? stakingContract.balanceOf(address(this)) : _amt;
     uint intialBal = rewardToken.balanceOf(address(this));
@@ -94,10 +88,7 @@ contract Main is Helpers, Events {
     address stakingToken,
     uint setId
   ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-    IStakingRewardsFactory.StakingRewardsInfo memory stakingRewardsInfo =
-      stakingRewardsFactory.stakingRewardsInfoByStakingToken(stakingToken);
-
-    IStakingRewards stakingContract = IStakingRewards(stakingRewardsInfo.stakingRewards);
+    IStakingRewards stakingContract = IStakingRewards(getStakingContract(stakingToken));
 
     uint intialBal = rewardToken.balanceOf(address(this));
     stakingContract.getReward();
