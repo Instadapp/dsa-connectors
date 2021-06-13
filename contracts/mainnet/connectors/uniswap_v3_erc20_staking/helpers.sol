@@ -18,7 +18,7 @@ abstract contract Helpers is DSMath, Basic {
     IStakingRewardsFactory.StakingRewardsInfo memory stakingRewardsInfo =
       stakingRewardsFactory.stakingRewardsInfoByStakingToken(stakingToken);
 
-    return IStakingRewards(stakingRewardsInfo.stakingRewards);
+    return stakingRewardsInfo.stakingRewards;
   }
 
 }
