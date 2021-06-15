@@ -10,7 +10,7 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { IStakingRewards, SynthetixMapping } from "./interface.sol";
+import { IStakingRewards, StakingERC20Mapping } from "./interface.sol";
 
 contract Main is Helpers, Events {
 

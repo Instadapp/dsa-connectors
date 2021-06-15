@@ -8,7 +8,7 @@ interface IStakingRewards {
   function balanceOf(address) external view returns(uint);
 }
 
-interface SynthetixMapping {
+interface StakingERC20Mapping {
 
   struct StakingData {
     address stakingPool;

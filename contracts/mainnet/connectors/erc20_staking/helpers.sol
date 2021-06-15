@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
-import { IStakingRewards, SynthetixMapping } from "./interface.sol";
+import { IStakingRewards, StakingERC20Mapping } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
 
@@ -34,7 +34,7 @@ abstract contract Helpers is DSMath, Basic {
   )
   {
     stakingType = stringToBytes32(stakingName);
-    SynthetixMapping.StakingData memory stakingData = SynthetixMapping(getMappingAddr()).stakingMapping(stakingType);
+    StakingERC20Mapping.StakingData memory stakingData = StakingERC20Mapping(getMappingAddr()).stakingMapping(stakingType);
     require(stakingData.stakingPool != address(0) && stakingData.stakingToken != address(0), "Wrong Staking Name");
     stakingContract = IStakingRewards(stakingData.stakingPool);
     stakingToken = TokenInterface(stakingData.stakingToken);
@@ -42,7 +42,7 @@ abstract contract Helpers is DSMath, Basic {
   }
 
   function getMappingAddr() internal virtual view returns (address) {
-    return 0x4a56E4209F0757CE630a2ebCF45DCe5BAfcb9782; // InstaMapping Address
+    return 0xbE658233bA9990d86155b3902fd05a7AfC7eBdB5; // InstaMapping Address
   }
 
 }
