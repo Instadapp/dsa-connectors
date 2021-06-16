@@ -18,3 +18,9 @@ interface IStakingRewardsFactory {
   function stakingRewardsInfoByStakingToken(address) external view returns(StakingRewardsInfo memory);
 
 }
+
+interface IGUniPoolResolver {
+
+  function getStakingFactory() external view returns(IStakingRewardsFactory);
+
+}
