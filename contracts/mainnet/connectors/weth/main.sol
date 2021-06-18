@@ -28,7 +28,7 @@ abstract contract Resolver is Events, DSMath, Basic {
         uint _amt = getUint(getId, amt);
 
         TokenInterface tokenContract = TokenInterface(wethAddr);
-        _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
+        _amt = _amt == uint(-1) ? address(this).balance : _amt;
         tokenContract.deposit{value: _amt}();
         
         setUint(setId, _amt);
@@ -51,8 +51,8 @@ abstract contract Resolver is Events, DSMath, Basic {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        _amt = _amt == uint(-1) ? address(this).balance : _amt;
         TokenInterface tokenContract = TokenInterface(wethAddr);
+        _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
         tokenContract.approve(wethAddr, _amt);
         tokenContract.withdraw(_amt);
 
@@ -64,5 +64,5 @@ abstract contract Resolver is Events, DSMath, Basic {
 }
 
 contract ConnectV2WETH is Resolver {
-    string constant public name = "WETH-v1";
+    string constant public name = "WETH-v1.0";
 }
