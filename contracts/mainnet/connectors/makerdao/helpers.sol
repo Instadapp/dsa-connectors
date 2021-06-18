@@ -43,7 +43,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Gem Join address is ETH type collateral.
     */
     function isEth(address tknAddr) internal pure returns (bool) {
-        return tknAddr == ethAddr ? true : false;
+        return tknAddr == wethAddr ? true : false;
     }
 
     /**

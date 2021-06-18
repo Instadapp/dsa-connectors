@@ -5,7 +5,7 @@ pragma solidity ^0.7.0;
  * @dev Collateralized Borrowing.
  */
 
-import { TokenInterface } from "../../common/interfaces.sol";
+import { TokenInterface, AccountInterface } from "../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { VatLike, TokenJoinInterface } from "./interface.sol";
@@ -42,6 +42,29 @@ abstract contract MakerResolver is Helpers, Events {
 
         _eventName = "LogClose(uint256,bytes32)";
         _eventParam = abi.encode(_vault, ilk);
+    }
+
+    /**
+     * @dev Transfer Vault
+     * @notice Transfer a MakerDAO Vault to "nextOwner"
+     * @param vault Vault ID to close.
+     * @param nextOwner Address of the next owner of the vault.
+    */
+    function transfer(
+        uint vault,
+        address nextOwner
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        require(AccountInterface(address(this)).isAuth(nextOwner), "nextOwner-is-not-auth");
+
+        uint256 _vault = getVault(vault);
+        (bytes32 ilk,) = getVaultData(_vault);
+
+        require(managerContract.owns(_vault) == address(this), "not-owner");
+
+        managerContract.give(_vault, nextOwner);
+
+        _eventName = "LogTransfer(uint256,bytes32,address)";
+        _eventParam = abi.encode(_vault, ilk, nextOwner);
     }
 
     /**
@@ -495,6 +518,6 @@ abstract contract MakerResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2Maker is MakerResolver {
-    string public constant name = "MakerDao-v1";
+contract ConnectV2MakerDAO is MakerResolver {
+    string public constant name = "MakerDAO-v1.1";
 }
