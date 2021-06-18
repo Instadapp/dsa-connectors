@@ -5,13 +5,12 @@ pragma solidity ^0.7.0;
  * @dev Deposit & Withdraw from DSA.
  */
 
-import { TokenInterface } from "../../common/interfaces.sol";
-
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
+import { Helpers } from "./helpers.sol";
 
-abstract contract Resolver is Events, DSMath, Basic {
+abstract contract Resolver is Events, DSMath, Basic, Helpers {
 
     /**
      * @dev Deposit ETH into WETH.
@@ -27,9 +26,8 @@ abstract contract Resolver is Events, DSMath, Basic {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        TokenInterface tokenContract = TokenInterface(wethAddr);
         _amt = _amt == uint(-1) ? address(this).balance : _amt;
-        tokenContract.deposit{value: _amt}();
+        wethContract.deposit{value: _amt}();
         
         setUint(setId, _amt);
 
@@ -51,10 +49,9 @@ abstract contract Resolver is Events, DSMath, Basic {
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        TokenInterface tokenContract = TokenInterface(wethAddr);
-        _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
-        tokenContract.approve(wethAddr, _amt);
-        tokenContract.withdraw(_amt);
+        _amt = _amt == uint(-1) ? wethContract.balanceOf(address(this)) : _amt;
+        wethContract.approve(wethAddr, _amt);
+        wethContract.withdraw(_amt);
 
         setUint(setId, _amt);
 
