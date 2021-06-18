@@ -28,7 +28,7 @@ abstract contract Resolver is Events, DSMath, Basic {
         uint _amt = getUint(getId, amt);
 
         TokenInterface tokenContract = TokenInterface(wethAddr);
-        _amt = _amt == uint(-1) ? tokenContract.balanceOf(msg.sender) : _amt;
+        _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
         tokenContract.deposit{value: _amt}();
         
         setUint(setId, _amt);
