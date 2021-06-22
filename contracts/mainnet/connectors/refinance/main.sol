@@ -46,7 +46,9 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
      * @notice Refinancing between AaveV1, AaveV2 and Compound
      * @param data refinance data.
     */
-    function refinance(RefinanceData calldata data) external payable {
+    function refinance(RefinanceData calldata data) 
+        external payable returns (string memory _eventName, bytes memory _eventParam)
+    {
 
         require(data.source != data.target, "source-and-target-unequal");
 
