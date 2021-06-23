@@ -9,10 +9,10 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev InstaGovernorBravo
      */
-    InstaGovernorInterface internal constant instaGovernor = InstaGovernorInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
+    InstaGovernorInterface internal constant instaGovernor = InstaGovernorInterface(0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B);
 
     /**
      * @dev INST Token
      */
-    InstaTokenInterface internal constant instToken = InstaTokenInterface(0xc00e94Cb662C3520282E6f5717214004A7f26888);
+    InstaTokenInterface internal constant instToken = InstaTokenInterface(0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb);
 }
