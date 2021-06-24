@@ -1,8 +1,8 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Basic.
- * @dev Deposit & Withdraw from DSA.
+ * @title WETH.
+ * @dev Wrap and Unwrap WETH.
  */
 
 import { DSMath } from "../../common/math.sol";
