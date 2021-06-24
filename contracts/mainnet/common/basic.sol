@@ -27,6 +27,15 @@ abstract contract Basic is DSMath, Stores {
         return abi.encode(eventName, eventParam);
     }
 
+    function approve(TokenInterface token, address spender, uint256 amount) internal {
+        try token.approve(spender, amount) {
+
+        } catch {
+            token.approve(spender, 0);
+            token.approve(spender, amount);
+        }
+    }
+
     function changeEthAddress(address buy, address sell) internal pure returns(TokenInterface _buy, TokenInterface _sell){
         _buy = buy == ethAddr ? TokenInterface(wethAddr) : TokenInterface(buy);
         _sell = sell == ethAddr ? TokenInterface(wethAddr) : TokenInterface(sell);
@@ -38,7 +47,7 @@ abstract contract Basic is DSMath, Stores {
 
     function convertWethToEth(bool isEth, TokenInterface token, uint amount) internal {
        if(isEth) {
-            token.approve(address(token), amount);
+            approve(token, address(token), amount);
             token.withdraw(amount);
         }
     }

@@ -30,7 +30,7 @@ abstract contract OneProtoResolver is Helpers, Events {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            _sellAddr.approve(address(oneProto), _sellAmt);
+            approve(_sellAddr, address(oneProto), _sellAmt);
         }
 
 
@@ -64,7 +64,7 @@ abstract contract OneProtoResolver is Helpers, Events {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            _sellAddr.approve(address(oneProto), _sellAmt);
+            approve(_sellAddr, address(oneProto), _sellAmt);
         }
 
         uint initalBal = getTokenBal(_buyAddr);

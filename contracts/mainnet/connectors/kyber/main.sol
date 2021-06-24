@@ -37,7 +37,7 @@ abstract contract KyberResolver is Helpers, Events {
         } else {
             TokenInterface sellContract = TokenInterface(sellAddr);
             _sellAmt = _sellAmt == uint(-1) ? sellContract.balanceOf(address(this)) : _sellAmt;
-            sellContract.approve(address(kyber), _sellAmt);
+            approve(sellContract, address(kyber), _sellAmt);
         }
 
         uint _buyAmt = kyber.trade{value: ethAmt}(

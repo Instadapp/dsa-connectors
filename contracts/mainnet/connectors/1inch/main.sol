@@ -74,7 +74,7 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
-            TokenInterface(_sellAddr).approve(oneInchAddr, oneInchData._sellAmt);
+            approve(TokenInterface(_sellAddr), oneInchAddr, oneInchData._sellAmt);
         }
 
         require(checkOneInchSig(oneInchData.callData), "Not-swap-function");
