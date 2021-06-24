@@ -155,7 +155,7 @@ abstract contract OneProtoResolver is OneHelpers {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            approve(_sellAddr, address(oneProtoContract), _sellAmt);
+            _sellAddr.approve(address(oneProtoContract), _sellAmt);
         }
 
 
@@ -197,7 +197,7 @@ abstract contract OneProtoResolver is OneHelpers {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            approve(_sellAddr, address(oneSplitContract), _sellAmt);
+            _sellAddr.approve(address(oneSplitContract), _sellAmt);
         }
 
         uint initalBal = getTokenBal(_buyAddr);
@@ -442,7 +442,7 @@ abstract contract OneInchResolverHelpers is OneProtoResolverHelpers {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
-            approve(TokenInterface(_sellAddr), getOneInchAddress(), oneInchData._sellAmt);
+            TokenInterface(_sellAddr).approve(getOneInchAddress(), oneInchData._sellAmt);
         }
 
         require(checkOneInchSig(oneInchData.callData), "Not-swap-function");
