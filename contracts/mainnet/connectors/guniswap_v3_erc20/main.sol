@@ -151,7 +151,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         depositAndSwap.mintAmount;
 
         if (address(depositAndSwap._token0) == wethAddr) {
-            approve(depositAndSwap._token1, address(gUniRouter), amount1In);
+            approve(TokenInterface(address(depositAndSwap._token1)), address(gUniRouter), amount1In);
     
             (depositAndSwap.amount0, depositAndSwap.amount1, depositAndSwap.mintAmount) = 
                 gUniRouter.rebalanceAndAddLiquidityETH{value: amount0In}(
@@ -166,7 +166,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
                     address(this)
                 );
         } else if (address(depositAndSwap._token1) == wethAddr) {
-            approve(depositAndSwap._token0, address(gUniRouter), amount0In);
+            approve(TokenInterface(address(depositAndSwap._token0)), address(gUniRouter), amount0In);
 
             (depositAndSwap.amount0, depositAndSwap.amount1,depositAndSwap. mintAmount) = 
                 gUniRouter.rebalanceAndAddLiquidityETH{value: amount1In}(
@@ -181,8 +181,8 @@ abstract contract UniswapV3Resolver is Events, Helpers {
                     address(this)
                 );
         } else {
-            approve(depositAndSwap._token0, address(gUniRouter), amount0In);
-            approve(depositAndSwap._token1, address(gUniRouter), amount1In);
+            approve(TokenInterface(address(depositAndSwap._token0)), address(gUniRouter), amount0In);
+            approve(TokenInterface(address(depositAndSwap._token1)), address(gUniRouter), amount1In);
             (depositAndSwap.amount0, depositAndSwap.amount1, depositAndSwap.mintAmount) = 
                 gUniRouter.rebalanceAndAddLiquidity(
                     depositAndSwap.poolContract,
