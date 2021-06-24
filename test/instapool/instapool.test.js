@@ -61,7 +61,7 @@ describe("Instapool", function () {
 
   describe("Main", function () {
 
-    it("Should deposit ETH in Compound", async function () {
+    it("Should take 100 ETH flashloan from Instapool", async function () {
         const amount = ethers.utils.parseEther("1") // 1 ETH
         const flashloanAmount = ethers.utils.parseEther("100") // 100 ETH
         const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
