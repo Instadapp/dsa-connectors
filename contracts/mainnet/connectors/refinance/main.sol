@@ -41,13 +41,19 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
         uint[] paybackRateModes;
     }
 
-    /**
-     * @dev Refinance
-     * @notice Refinancing between AaveV1, AaveV2 and Compound
-     * @param data refinance data.
-    */
-    function refinance(RefinanceData calldata data) 
-        external payable returns (string memory _eventName, bytes memory _eventParam)
+    struct RefinanceInternalData {
+        AaveV2Interface aaveV2;
+        AaveV1Interface aaveV1;
+        AaveV1CoreInterface aaveCore;
+        AaveV2DataProviderInterface aaveData;
+        uint[] depositAmts;
+        uint[] paybackAmts;
+        TokenInterface[] tokens;
+        CTokenInterface[] _ctokens;
+    }
+
+    function _refinance(RefinanceData calldata data) 
+        internal returns (string memory _eventName, bytes memory _eventParam)
     {
 
         require(data.source != data.target, "source-and-target-unequal");
@@ -60,51 +66,91 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
         require(data.paybackRateModes.length == length, "length-mismatch");
         require(data.ctokenIds.length == length, "length-mismatch");
 
-        AaveV2Interface aaveV2 = AaveV2Interface(getAaveV2Provider.getLendingPool());
-        AaveV1Interface aaveV1 = AaveV1Interface(getAaveProvider.getLendingPool());
-        AaveV1CoreInterface aaveCore = AaveV1CoreInterface(getAaveProvider.getLendingPoolCore());
-        AaveV2DataProviderInterface aaveData = getAaveV2DataProvider;
+        RefinanceInternalData memory refinanceInternalData;
 
-        uint[] memory depositAmts;
-        uint[] memory paybackAmts;
+        refinanceInternalData.aaveV2 = AaveV2Interface(getAaveV2Provider.getLendingPool());
+        refinanceInternalData.aaveV1 = AaveV1Interface(getAaveProvider.getLendingPool());
+        refinanceInternalData.aaveCore = AaveV1CoreInterface(getAaveProvider.getLendingPoolCore());
+        refinanceInternalData.aaveData = getAaveV2DataProvider;
 
-        TokenInterface[] memory tokens = getTokenInterfaces(length, data.tokens);
-        CTokenInterface[] memory _ctokens = getCtokenInterfaces(length, data.ctokenIds);
+        refinanceInternalData.depositAmts;
+        refinanceInternalData.paybackAmts;
+
+        refinanceInternalData.tokens = getTokenInterfaces(length, data.tokens);
+        refinanceInternalData._ctokens = getCtokenInterfaces(length, data.ctokenIds);
 
         if (data.source == Protocol.Aave && data.target == Protocol.AaveV2) {
             AaveV2BorrowData memory _aaveV2BorrowData;
 
-            _aaveV2BorrowData.aave = aaveV2;
+            _aaveV2BorrowData.aave = refinanceInternalData.aaveV2;
             _aaveV2BorrowData.length = length;
             _aaveV2BorrowData.fee = data.debtFee;
             _aaveV2BorrowData.target = data.source;
-            _aaveV2BorrowData.tokens = tokens;
-            _aaveV2BorrowData.ctokens = _ctokens;
+            _aaveV2BorrowData.tokens = refinanceInternalData.tokens;
+            _aaveV2BorrowData.ctokens = refinanceInternalData._ctokens;
             _aaveV2BorrowData.amts = data.borrowAmts;
             _aaveV2BorrowData.rateModes = data.borrowRateModes;
-
-            paybackAmts = _aaveV2Borrow(_aaveV2BorrowData);
-            _aaveV1Payback(aaveV1, aaveCore, length, tokens, paybackAmts);
-            depositAmts = _aaveV1Withdraw(aaveV1, aaveCore, length, tokens, data.withdrawAmts);
-            _aaveV2Deposit(aaveV2, aaveData, length, data.collateralFee, tokens, depositAmts);
+            {
+            refinanceInternalData.paybackAmts = _aaveV2Borrow(_aaveV2BorrowData);
+            _aaveV1Payback(
+                refinanceInternalData.aaveV1,
+                refinanceInternalData.aaveCore,
+                length,
+                refinanceInternalData.tokens,
+                refinanceInternalData.paybackAmts
+            );
+            refinanceInternalData.depositAmts = _aaveV1Withdraw(
+                refinanceInternalData.aaveV1,
+                refinanceInternalData.aaveCore,
+                length,
+                refinanceInternalData.tokens,
+                data.withdrawAmts
+            );
+            _aaveV2Deposit(
+                refinanceInternalData.aaveV2,
+                refinanceInternalData.aaveData,
+                length,
+                data.collateralFee,
+                refinanceInternalData.tokens,
+                refinanceInternalData.depositAmts
+            );
+            }
         } else if (data.source == Protocol.Aave && data.target == Protocol.Compound) {
-            _compEnterMarkets(length, _ctokens);
+            _compEnterMarkets(length, refinanceInternalData._ctokens);
 
             CompoundBorrowData memory _compoundBorrowData;
 
             _compoundBorrowData.length = length;
             _compoundBorrowData.fee = data.debtFee;
             _compoundBorrowData.target = data.source;
-            _compoundBorrowData.ctokens = _ctokens;
-            _compoundBorrowData.tokens = tokens;
+            _compoundBorrowData.ctokens = refinanceInternalData._ctokens;
+            _compoundBorrowData.tokens = refinanceInternalData.tokens;
             _compoundBorrowData.amts = data.borrowAmts;
             _compoundBorrowData.rateModes = data.borrowRateModes;
 
-            paybackAmts = _compBorrow(_compoundBorrowData);
+            refinanceInternalData.paybackAmts = _compBorrow(_compoundBorrowData);
             
-            _aaveV1Payback(aaveV1, aaveCore, length, tokens, paybackAmts);
-            depositAmts = _aaveV1Withdraw(aaveV1, aaveCore, length, tokens, data.withdrawAmts);
-            _compDeposit(length, data.collateralFee, _ctokens, tokens, depositAmts);
+            _aaveV1Payback(
+                refinanceInternalData.aaveV1,
+                refinanceInternalData.aaveCore,
+                length,
+                refinanceInternalData.tokens,
+                refinanceInternalData.paybackAmts
+            );
+            refinanceInternalData.depositAmts = _aaveV1Withdraw(
+                refinanceInternalData.aaveV1,
+                refinanceInternalData.aaveCore,
+                length,
+                refinanceInternalData.tokens, 
+                data.withdrawAmts
+            );
+            _compDeposit(
+                length,
+                data.collateralFee,
+                refinanceInternalData._ctokens,
+                refinanceInternalData.tokens,
+                refinanceInternalData.depositAmts
+            );
         } else if (data.source == Protocol.AaveV2 && data.target == Protocol.Aave) {
 
             AaveV1BorrowData memory _aaveV1BorrowData;
@@ -112,51 +158,51 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
             AaveV2WithdrawData memory _aaveV2WithdrawData;
 
             {
-                _aaveV1BorrowData.aave = aaveV1;
+                _aaveV1BorrowData.aave = refinanceInternalData.aaveV1;
                 _aaveV1BorrowData.length = length;
                 _aaveV1BorrowData.fee = data.debtFee;
                 _aaveV1BorrowData.target = data.source;
-                _aaveV1BorrowData.tokens = tokens;
-                _aaveV1BorrowData.ctokens = _ctokens;
+                _aaveV1BorrowData.tokens = refinanceInternalData.tokens;
+                _aaveV1BorrowData.ctokens = refinanceInternalData._ctokens;
                 _aaveV1BorrowData.amts = data.borrowAmts;
                 _aaveV1BorrowData.borrowRateModes = data.borrowRateModes;
                 _aaveV1BorrowData.paybackRateModes = data.paybackRateModes;
 
-                paybackAmts = _aaveV1Borrow(_aaveV1BorrowData);
+                refinanceInternalData.paybackAmts = _aaveV1Borrow(_aaveV1BorrowData);
             }
             
             {
-                _aaveV2PaybackData.aave = aaveV2;
-                _aaveV2PaybackData.aaveData = aaveData;
+                _aaveV2PaybackData.aave = refinanceInternalData.aaveV2;
+                _aaveV2PaybackData.aaveData = refinanceInternalData.aaveData;
                 _aaveV2PaybackData.length = length;
-                _aaveV2PaybackData.tokens = tokens;
-                _aaveV2PaybackData.amts = paybackAmts;
+                _aaveV2PaybackData.tokens = refinanceInternalData.tokens;
+                _aaveV2PaybackData.amts = refinanceInternalData.paybackAmts;
                 _aaveV2PaybackData.rateModes = data.paybackRateModes;
                 _aaveV2Payback(_aaveV2PaybackData);
             }
 
             {
-                _aaveV2WithdrawData.aave = aaveV2;
-                _aaveV2WithdrawData.aaveData = aaveData;
+                _aaveV2WithdrawData.aave = refinanceInternalData.aaveV2;
+                _aaveV2WithdrawData.aaveData = refinanceInternalData.aaveData;
                 _aaveV2WithdrawData.length = length;
-                _aaveV2WithdrawData.tokens = tokens;
+                _aaveV2WithdrawData.tokens = refinanceInternalData.tokens;
                 _aaveV2WithdrawData.amts = data.withdrawAmts;
-                depositAmts = _aaveV2Withdraw(_aaveV2WithdrawData);
+                refinanceInternalData.depositAmts = _aaveV2Withdraw(_aaveV2WithdrawData);
             }
             {
                 AaveV1DepositData memory _aaveV1DepositData;
                 
-                _aaveV1DepositData.aave = aaveV1;
-                _aaveV1DepositData.aaveCore = aaveCore;
+                _aaveV1DepositData.aave = refinanceInternalData.aaveV1;
+                _aaveV1DepositData.aaveCore = refinanceInternalData.aaveCore;
                 _aaveV1DepositData.length = length;
                 _aaveV1DepositData.fee = data.collateralFee;
-                _aaveV1DepositData.tokens = tokens;
-                _aaveV1DepositData.amts = depositAmts;
+                _aaveV1DepositData.tokens = refinanceInternalData.tokens;
+                _aaveV1DepositData.amts = refinanceInternalData.depositAmts;
 
                 _aaveV1Deposit(_aaveV1DepositData);
             }
         } else if (data.source == Protocol.AaveV2 && data.target == Protocol.Compound) {
-            _compEnterMarkets(length, _ctokens);
+            _compEnterMarkets(length, refinanceInternalData._ctokens);
 
             {
                 CompoundBorrowData memory _compoundBorrowData;
@@ -164,21 +210,21 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
                 _compoundBorrowData.length = length;
                 _compoundBorrowData.fee = data.debtFee;
                 _compoundBorrowData.target = data.source;
-                _compoundBorrowData.ctokens = _ctokens;
-                _compoundBorrowData.tokens = tokens;
+                _compoundBorrowData.ctokens = refinanceInternalData._ctokens;
+                _compoundBorrowData.tokens = refinanceInternalData.tokens;
                 _compoundBorrowData.amts = data.borrowAmts;
                 _compoundBorrowData.rateModes = data.borrowRateModes;
 
-                paybackAmts = _compBorrow(_compoundBorrowData);
+                refinanceInternalData.paybackAmts = _compBorrow(_compoundBorrowData);
             }
 
             AaveV2PaybackData memory _aaveV2PaybackData;
 
-            _aaveV2PaybackData.aave = aaveV2;
-            _aaveV2PaybackData.aaveData = aaveData;
+            _aaveV2PaybackData.aave = refinanceInternalData.aaveV2;
+            _aaveV2PaybackData.aaveData = refinanceInternalData.aaveData;
             _aaveV2PaybackData.length = length;
-            _aaveV2PaybackData.tokens = tokens;
-            _aaveV2PaybackData.amts = paybackAmts;
+            _aaveV2PaybackData.tokens = refinanceInternalData.tokens;
+            _aaveV2PaybackData.amts = refinanceInternalData.paybackAmts;
             _aaveV2PaybackData.rateModes = data.paybackRateModes;
             
             _aaveV2Payback(_aaveV2PaybackData);
@@ -186,65 +232,105 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
             {
                 AaveV2WithdrawData memory _aaveV2WithdrawData;
 
-                _aaveV2WithdrawData.aave = aaveV2;
-                _aaveV2WithdrawData.aaveData = aaveData;
+                _aaveV2WithdrawData.aave = refinanceInternalData.aaveV2;
+                _aaveV2WithdrawData.aaveData = refinanceInternalData.aaveData;
                 _aaveV2WithdrawData.length = length;
-                _aaveV2WithdrawData.tokens = tokens;
+                _aaveV2WithdrawData.tokens = refinanceInternalData.tokens;
                 _aaveV2WithdrawData.amts = data.withdrawAmts;
-                depositAmts = _aaveV2Withdraw(_aaveV2WithdrawData);
+                refinanceInternalData.depositAmts = _aaveV2Withdraw(_aaveV2WithdrawData);
             }
-            _compDeposit(length, data.collateralFee, _ctokens, tokens, depositAmts);
+            _compDeposit(
+                length,
+                data.collateralFee,
+                refinanceInternalData._ctokens,
+                refinanceInternalData.tokens,
+                refinanceInternalData.depositAmts
+            );
         } else if (data.source == Protocol.Compound && data.target == Protocol.Aave) {
 
             AaveV1BorrowData memory _aaveV1BorrowData;
 
-            _aaveV1BorrowData.aave = aaveV1;
+            _aaveV1BorrowData.aave = refinanceInternalData.aaveV1;
             _aaveV1BorrowData.length = length;
             _aaveV1BorrowData.fee = data.debtFee;
             _aaveV1BorrowData.target = data.source;
-            _aaveV1BorrowData.tokens = tokens;
-            _aaveV1BorrowData.ctokens = _ctokens;
+            _aaveV1BorrowData.tokens = refinanceInternalData.tokens;
+            _aaveV1BorrowData.ctokens = refinanceInternalData._ctokens;
             _aaveV1BorrowData.amts = data.borrowAmts;
             _aaveV1BorrowData.borrowRateModes = data.borrowRateModes;
             _aaveV1BorrowData.paybackRateModes = data.paybackRateModes;
             
-            paybackAmts = _aaveV1Borrow(_aaveV1BorrowData);
+            refinanceInternalData.paybackAmts = _aaveV1Borrow(_aaveV1BorrowData);
             {
-            _compPayback(length, _ctokens, tokens, paybackAmts);
-            depositAmts = _compWithdraw(length, _ctokens, tokens, data.withdrawAmts);
+            _compPayback(
+                length,
+                refinanceInternalData._ctokens,
+                refinanceInternalData.tokens,
+                refinanceInternalData.paybackAmts
+            );
+            refinanceInternalData.depositAmts = _compWithdraw(
+                length,
+                refinanceInternalData._ctokens,
+                refinanceInternalData.tokens,
+                data.withdrawAmts
+            );
             }
 
             {
                 AaveV1DepositData memory _aaveV1DepositData;
                 
-                _aaveV1DepositData.aave = aaveV1;
-                _aaveV1DepositData.aaveCore = aaveCore;
+                _aaveV1DepositData.aave = refinanceInternalData.aaveV1;
+                _aaveV1DepositData.aaveCore = refinanceInternalData.aaveCore;
                 _aaveV1DepositData.length = length;
                 _aaveV1DepositData.fee = data.collateralFee;
-                _aaveV1DepositData.tokens = tokens;
-                _aaveV1DepositData.amts = depositAmts;
+                _aaveV1DepositData.tokens = refinanceInternalData.tokens;
+                _aaveV1DepositData.amts = refinanceInternalData.depositAmts;
 
                 _aaveV1Deposit(_aaveV1DepositData);
             }
         } else if (data.source == Protocol.Compound && data.target == Protocol.AaveV2) {
             AaveV2BorrowData memory _aaveV2BorrowData;
 
-            _aaveV2BorrowData.aave = aaveV2;
+            _aaveV2BorrowData.aave = refinanceInternalData.aaveV2;
             _aaveV2BorrowData.length = length;
             _aaveV2BorrowData.fee = data.debtFee;
             _aaveV2BorrowData.target = data.source;
-            _aaveV2BorrowData.tokens = tokens;
-            _aaveV2BorrowData.ctokens = _ctokens;
+            _aaveV2BorrowData.tokens = refinanceInternalData.tokens;
+            _aaveV2BorrowData.ctokens = refinanceInternalData._ctokens;
             _aaveV2BorrowData.amts = data.borrowAmts;
             _aaveV2BorrowData.rateModes = data.borrowRateModes;
             
-            paybackAmts = _aaveV2Borrow(_aaveV2BorrowData);
-            _compPayback(length, _ctokens, tokens, paybackAmts);
-            depositAmts = _compWithdraw(length, _ctokens, tokens, data.withdrawAmts);
-            _aaveV2Deposit(aaveV2, aaveData, length, data.collateralFee, tokens, depositAmts);
+            refinanceInternalData.paybackAmts = _aaveV2Borrow(_aaveV2BorrowData);
+            _compPayback(length, refinanceInternalData._ctokens, refinanceInternalData.tokens, refinanceInternalData.paybackAmts);
+            refinanceInternalData.depositAmts = _compWithdraw(
+                length,
+                refinanceInternalData._ctokens,
+                refinanceInternalData.tokens,
+                data.withdrawAmts
+            );
+            _aaveV2Deposit(
+                refinanceInternalData.aaveV2,
+                refinanceInternalData.aaveData,
+                length,
+                data.collateralFee,
+                refinanceInternalData.tokens,
+                refinanceInternalData.depositAmts
+            );
         } else {
             revert("invalid-options");
         }
+    }
+
+
+
+    /**
+     * @dev Refinance
+     * @notice Refinancing between AaveV1, AaveV2 and Compound
+     * @param data refinance data.
+    */
+    function refinance(RefinanceData calldata data) 
+        external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (_eventName, _eventParam) = _refinance(data);
     }
 }
 
