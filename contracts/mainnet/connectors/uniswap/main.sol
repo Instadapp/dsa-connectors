@@ -114,7 +114,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
         bool isEth = address(_sellAddr) == wethAddr;
         convertEthToWeth(isEth, _sellAddr, _expectedAmt);
-        _sellAddr.approve(address(router), _expectedAmt);
+        approve(_sellAddr, address(router), _expectedAmt);
 
         uint _sellAmt = router.swapTokensForExactTokens(
             _buyAmt,
@@ -171,7 +171,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
         bool isEth = address(_sellAddr) == wethAddr;
         convertEthToWeth(isEth, _sellAddr, _sellAmt);
-        _sellAddr.approve(address(router), _sellAmt);
+        approve(_sellAddr, address(router), _sellAmt);
 
         uint _buyAmt = router.swapExactTokensForTokens(
             _sellAmt,
@@ -192,5 +192,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV2 is UniswapResolver {
-    string public constant name = "UniswapV2-v1";
+    string public constant name = "UniswapV2-v1.1";
 }

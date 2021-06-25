@@ -9,6 +9,7 @@ async function main() {
     
     const connectMapping = {
         '1INCH-A': 'ConnectV2OneInch',
+        '1INCH-B': 'ConnectV2OneProto',
         'AAVE-V1-A': 'ConnectV2AaveV1',
         'AAVE-V2-A': 'ConnectV2AaveV2',
         'AUTHORITY-A': 'ConnectV2Auth',
@@ -27,15 +28,6 @@ async function main() {
     for (const key in connectMapping) {
         addressMapping[key] = await deployConnector(connectMapping[key])
     }
-    
-    const connectorsAbi = [
-        "function addConnectors(string[] _connectorNames, address[] _connectors)"
-    ]
-    
-    // Replace the address with correct v2 connectors registry address
-    const connectorsContract = new ethers.Contract("0x84b457c6D31025d56449D5A01F0c34bF78636f67", connectorsAbi, wallet)
-    
-    await connectorsContract.addConnectors(Object.keys(addressMapping), Object.values(addressMapping))
 }
 
 main()

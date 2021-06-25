@@ -43,7 +43,7 @@ abstract contract AaveResolver is Events, Helpers {
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
         }
 
-        tokenContract.approve(address(aave), _amt);
+        approve(tokenContract, address(aave), _amt);
 
         aave.deposit(_token, _amt, address(this), referralCode);
 
@@ -154,7 +154,7 @@ abstract contract AaveResolver is Events, Helpers {
 
         if (isEth) convertMaticToWmatic(isEth, tokenContract, _amt);
 
-        tokenContract.approve(address(aave), _amt);
+        approve(tokenContract, address(aave), _amt);
 
         aave.repay(_token, _amt, rateMode, address(this));
 
@@ -211,6 +211,6 @@ abstract contract AaveResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2AaveV2 is AaveResolver {
+contract ConnectV2AaveV2Polygon is AaveResolver {
     string constant public name = "AaveV2-v1";
 }

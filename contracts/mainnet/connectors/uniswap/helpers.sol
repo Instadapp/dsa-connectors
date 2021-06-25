@@ -78,8 +78,8 @@ abstract contract Helpers is DSMath, Basic {
         isEth = address(_tokenB) == wethAddr;
         convertEthToWeth(isEth, _tokenB, _amtB);
 
-        _tokenA.approve(address(router), _amtA);
-        _tokenB.approve(address(router), _amtB);
+        approve(_tokenA, address(router), _amtA);
+        approve(_tokenB, address(router), _amtB);
 
        uint minAmtA = getMinAmount(_tokenA, _amtA, slippage);
         uint minAmtB = getMinAmount(_tokenB, _amtB, slippage);
@@ -141,6 +141,6 @@ abstract contract Helpers is DSMath, Basic {
 
         TokenInterface uniToken = TokenInterface(exchangeAddr);
         _uniAmt = _amt == uint(-1) ? uniToken.balanceOf(address(this)) : _amt;
-        uniToken.approve(address(router), _uniAmt);
+        approve(uniToken, address(router), _uniAmt);
     }
 }

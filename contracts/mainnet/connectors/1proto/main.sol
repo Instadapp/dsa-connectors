@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title 1Proto.
+ * @title 1Inch(On-chain).
  * @dev On-chain and off-chian DEX Aggregator.
  */
 
@@ -30,7 +30,7 @@ abstract contract OneProtoResolver is Helpers, Events {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            _sellAddr.approve(address(oneProto), _sellAmt);
+            approve(_sellAddr, address(oneProto), _sellAmt);
         }
 
 
@@ -64,7 +64,7 @@ abstract contract OneProtoResolver is Helpers, Events {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = _sellAmt;
         } else {
-            _sellAddr.approve(address(oneProto), _sellAmt);
+            approve(_sellAddr, address(oneProto), _sellAmt);
         }
 
         uint initalBal = getTokenBal(_buyAddr);
@@ -221,5 +221,5 @@ abstract contract OneProto is OneProtoResolverHelpers {
 }
 
 contract ConnectV2OneProto is OneProto {
-    string public name = "1proto-v1";
+    string public name = "1Proto-v1.1";
 }

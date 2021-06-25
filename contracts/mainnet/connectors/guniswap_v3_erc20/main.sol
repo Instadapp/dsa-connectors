@@ -54,12 +54,12 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         if (depositData.amount0In > 0) {
             IERC20 _token0 = depositData.poolContract.token0();
             convertEthToWeth(address(_token0) == wethAddr, TokenInterface(address(_token0)), depositData.amount0In);
-            _token0.safeApprove(address(pool), depositData.amount0In);
+            approve(TokenInterface(address(_token0)), address(pool), depositData.amount0In);
         }
         if (depositData.amount1In > 0) {
             IERC20 _token1 = depositData.poolContract.token1();
             convertEthToWeth(address(_token1) == wethAddr, TokenInterface(address(_token1)), depositData.amount1In);
-            _token1.safeApprove(address(pool), depositData.amount1In);
+            approve(TokenInterface(address(_token1)), address(pool), depositData.amount1In);
         }
 
         (uint amount0, uint amount1,) = depositData.poolContract.mint(depositData.mintAmount, address(this));
@@ -151,7 +151,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
         depositAndSwap.mintAmount;
 
         if (address(depositAndSwap._token0) == wethAddr) {
-            depositAndSwap._token1.approve(address(gUniRouter), amount1In);
+            approve(TokenInterface(address(depositAndSwap._token1)), address(gUniRouter), amount1In);
     
             (depositAndSwap.amount0, depositAndSwap.amount1, depositAndSwap.mintAmount) = 
                 gUniRouter.rebalanceAndAddLiquidityETH{value: amount0In}(
@@ -166,7 +166,7 @@ abstract contract UniswapV3Resolver is Events, Helpers {
                     address(this)
                 );
         } else if (address(depositAndSwap._token1) == wethAddr) {
-            depositAndSwap._token0.approve(address(gUniRouter), amount0In);
+            approve(TokenInterface(address(depositAndSwap._token0)), address(gUniRouter), amount0In);
 
             (depositAndSwap.amount0, depositAndSwap.amount1,depositAndSwap. mintAmount) = 
                 gUniRouter.rebalanceAndAddLiquidityETH{value: amount1In}(
@@ -181,8 +181,8 @@ abstract contract UniswapV3Resolver is Events, Helpers {
                     address(this)
                 );
         } else {
-            depositAndSwap._token0.approve(address(gUniRouter), amount0In);
-            depositAndSwap._token1.approve(address(gUniRouter), amount1In);
+            approve(TokenInterface(address(depositAndSwap._token0)), address(gUniRouter), amount0In);
+            approve(TokenInterface(address(depositAndSwap._token1)), address(gUniRouter), amount1In);
             (depositAndSwap.amount0, depositAndSwap.amount1, depositAndSwap.mintAmount) = 
                 gUniRouter.rebalanceAndAddLiquidity(
                     depositAndSwap.poolContract,

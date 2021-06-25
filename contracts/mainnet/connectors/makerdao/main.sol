@@ -96,7 +96,7 @@ abstract contract MakerResolver is Helpers, Events {
             _amt = _amt == uint(-1) ?  tokenContract.balanceOf(address(this)) : _amt;
         }
 
-        tokenContract.approve(address(colAddr), _amt);
+        approve(tokenContract, address(colAddr), _amt);
         tokenJoinContract.join(address(this), _amt);
 
         VatLike(managerContract.vat()).frob(
@@ -245,7 +245,7 @@ abstract contract MakerResolver is Helpers, Events {
 
         require(_maxDebt >= _amt, "paying-excess-debt");
 
-        daiJoinContract.dai().approve(address(daiJoinContract), _amt);
+        approve(daiJoinContract.dai(), address(daiJoinContract), _amt);
         daiJoinContract.join(urn, _amt);
 
         managerContract.frob(
@@ -357,7 +357,7 @@ abstract contract MakerResolver is Helpers, Events {
             _amtDeposit = _amtDeposit == uint(-1) ?  makerData.tokenContract.balanceOf(address(this)) : _amtDeposit;
         }
 
-        makerData.tokenContract.approve(address(makerData.colAddr), _amtDeposit);
+        approve(makerData.tokenContract, address(makerData.colAddr), _amtDeposit);
         makerData.tokenJoinContract.join(urn, _amtDeposit);
 
         managerContract.frob(
@@ -462,7 +462,7 @@ abstract contract MakerResolver is Helpers, Events {
         VatLike vat = daiJoinContract.vat();
         uint chi = potContract.drip();
 
-        daiJoinContract.dai().approve(address(daiJoinContract), _amt);
+        approve(daiJoinContract.dai(), address(daiJoinContract), _amt);
         daiJoinContract.join(address(this), _amt);
         if (vat.can(address(this), address(potContract)) == 0) {
             vat.hope(address(potContract));
@@ -519,5 +519,5 @@ abstract contract MakerResolver is Helpers, Events {
 }
 
 contract ConnectV2MakerDAO is MakerResolver {
-    string public constant name = "MakerDAO-v1.1";
+    string public constant name = "MakerDAO-v1.2";
 }

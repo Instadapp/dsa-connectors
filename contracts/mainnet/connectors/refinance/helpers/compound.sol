@@ -83,7 +83,7 @@ contract CompoundHelpers is protocolHelpers {
             (uint feeAmt, uint _amt) = calculateFee(amt, fee, false);
 
             if (_token != ethAddr) {
-                token.approve(address(ctoken), _amt);
+                approve(token, address(ctoken), _amt);
                 require(ctoken.mint(_amt) == 0, "deposit-failed");
             } else {
                 CETHInterface(address(ctoken)).mint{value:_amt}();
@@ -138,7 +138,7 @@ contract CompoundHelpers is protocolHelpers {
                 amt = ctoken.borrowBalanceCurrent(address(this));
             }
             if (address(token) != wethAddr) {
-                token.approve(address(ctoken), amt);
+                approve(token, address(ctoken), amt);
                 require(ctoken.repayBorrow(amt) == 0, "repay-failed.");
             } else {
                 CETHInterface(address(ctoken)).repayBorrow{value:amt}();

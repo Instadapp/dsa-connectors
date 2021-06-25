@@ -73,7 +73,7 @@ abstract contract GebResolver is Helpers, Events {
             _amt = _amt == uint(-1) ?  tokenContract.balanceOf(address(this)) : _amt;
         }
 
-        tokenContract.approve(address(colAddr), _amt);
+        approve(tokenContract, address(colAddr), _amt);
         tokenJoinContract.join(address(this), _amt);
 
         SafeEngineLike(managerContract.safeEngine()).modifySAFECollateralization(
@@ -222,7 +222,7 @@ abstract contract GebResolver is Helpers, Events {
 
         require(_maxDebt >= _amt, "paying-excess-debt");
 
-        coinJoinContract.systemCoin().approve(address(coinJoinContract), _amt);
+        approve(coinJoinContract.systemCoin(), address(coinJoinContract), _amt);
         coinJoinContract.join(handler, _amt);
 
         managerContract.modifySAFECollateralization(
@@ -335,7 +335,7 @@ abstract contract GebResolver is Helpers, Events {
             _amtDeposit = _amtDeposit == uint(-1) ?  gebData.tokenContract.balanceOf(address(this)) : _amtDeposit;
         }
 
-        gebData.tokenContract.approve(address(gebData.colAddr), _amtDeposit);
+        approve(gebData.tokenContract, address(gebData.colAddr), _amtDeposit);
         gebData.tokenJoinContract.join(handler, _amtDeposit);
 
         managerContract.modifySAFECollateralization(
