@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title 1Proto.
+ * @title 1Inch(On-chain).
  * @dev On-chain and off-chian DEX Aggregator.
  */
 

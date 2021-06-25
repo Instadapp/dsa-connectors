@@ -9,6 +9,7 @@ async function main() {
     
     const connectMapping = {
         '1INCH-A': 'ConnectV2OneInch',
+        '1INCH-B': 'ConnectV2OneProto',
         'AAVE-V1-A': 'ConnectV2AaveV1',
         'AAVE-V2-A': 'ConnectV2AaveV2',
         'AUTHORITY-A': 'ConnectV2Auth',
