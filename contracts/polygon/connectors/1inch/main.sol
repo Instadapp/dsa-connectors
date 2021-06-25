@@ -25,7 +25,7 @@ abstract contract OneInchResolver is Helpers, Events {
         assembly {
             sig := mload(add(_data, 32))
         }
-        isOk = isOk = sig == oneInchSwapSig || sig == oneInchUnoswapSig;
+        isOk = sig == oneInchSwapSig || sig == oneInchUnoswapSig;
     }
 
     /**
