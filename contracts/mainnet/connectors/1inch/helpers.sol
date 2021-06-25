@@ -9,10 +9,15 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev 1Inch Address
      */
-    address internal constant oneInchAddr = 0x111111125434b319222CdBf8C261674aDB56F3ae;
+    address internal constant oneInchAddr = 0x11111112542D85B3EF69AE05771c2dCCff4fAa26;
 
     /**
      * @dev 1inch swap function sig
      */
-    bytes4 internal constant oneInchSig = 0x90411a32;
+    bytes4 internal constant oneInchSwapSig = 0x7c025200;
+
+     /**
+     * @dev 1inch swap function sig
+     */
+    bytes4 internal constant oneInchUnoswapSig = 0x2e95b6c8;
 }
