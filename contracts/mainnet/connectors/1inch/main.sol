@@ -25,7 +25,7 @@ abstract contract OneInchResolver is Helpers, Events {
         assembly {
             sig := mload(add(_data, 32))
         }
-        isOk = sig == oneInchSig;
+        isOk = isOk = sig == oneInchSwapSig || sig == oneInchUnoswapSig;
     }
 
     /**
@@ -124,5 +124,5 @@ abstract contract OneInch is OneInchResolverHelpers {
 }
 
 contract ConnectV2OneInch is OneInch {
-    string public name = "1Inch-v1";
+    string public name = "1Inch-v1.1";
 }
