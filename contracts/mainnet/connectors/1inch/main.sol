@@ -124,5 +124,5 @@ abstract contract OneInch is OneInchResolverHelpers {
 }
 
 contract ConnectV2OneInch is OneInch {
-    string public name = "1Inch-v1.1";
+    string public name = "1Inch-v1.2";
 }

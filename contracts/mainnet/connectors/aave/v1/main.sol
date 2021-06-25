@@ -166,5 +166,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV1 is AaveResolver {
-    string constant public name = "AaveV1-v1";
+    string constant public name = "AaveV1-v1.1";
 }

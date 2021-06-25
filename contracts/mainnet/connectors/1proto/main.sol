@@ -221,5 +221,5 @@ abstract contract OneProto is OneProtoResolverHelpers {
 }
 
 contract ConnectV2OneProto is OneProto {
-    string public name = "1proto-v1";
+    string public name = "1Proto-v1.1";
 }

@@ -192,5 +192,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV2 is UniswapResolver {
-    string public constant name = "UniswapV2-v1";
+    string public constant name = "UniswapV2-v1.1";
 }
