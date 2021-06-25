@@ -7,6 +7,7 @@ module.exports = {
     "Basic-v1": require("./abi/connectors/basic.json"),
     basic: require("./abi/connectors/basic.json"),
     auth: require("./abi/connectors/auth.json"),
+    "INSTAPOOL-A": require("./abi/connectors/instapool.json"),
   },
   basic: {
     erc20: require("./abi/basics/erc20.json"),

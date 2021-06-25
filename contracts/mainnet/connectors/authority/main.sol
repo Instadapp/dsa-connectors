@@ -18,7 +18,13 @@ abstract contract AuthorityResolver is Events, Helpers {
     function add(
         address authority
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        AccountInterface(address(this)).enable(authority);
+        require(authority != address(0), "Not-valid-authority");
+        AccountInterface _dsa = AccountInterface(address(this));
+        if (_dsa.isAuth(authority)) {
+            authority = address(0);
+        } else {
+            _dsa.enable(authority);
+        }
 
         _eventName = "LogAddAuth(address,address)";
         _eventParam = abi.encode(msg.sender, authority);
@@ -33,7 +39,13 @@ abstract contract AuthorityResolver is Events, Helpers {
         address authority
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         require(checkAuthCount() > 1, "Removing-all-authorities");
-        AccountInterface(address(this)).disable(authority);
+        require(authority != address(0), "Not-valid-authority");
+        AccountInterface _dsa = AccountInterface(address(this));
+        if (_dsa.isAuth(authority)) {
+            _dsa.disable(authority);
+        } else {
+            authority = address(0);
+        }
 
         _eventName = "LogRemoveAuth(address,address)";
         _eventParam = abi.encode(msg.sender, authority);
@@ -41,5 +53,5 @@ abstract contract AuthorityResolver is Events, Helpers {
 }
 
 contract ConnectV2Auth is AuthorityResolver {
-    string public constant name = "Auth-v1";
+    string public constant name = "Auth-v1.1";
 }

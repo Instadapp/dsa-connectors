@@ -6,6 +6,7 @@ const { provider, deployContract } = waffle
 const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
 const buildDSAv2 = require("../../scripts/buildDSAv2")
 const encodeSpells = require("../../scripts/encodeSpells.js")
+const encodeFlashcastData = require("../../scripts/encodeFlashcastData.js")
 const getMasterSigner = require("../../scripts/getMasterSigner")
 
 const addresses = require("../../scripts/constant/addresses");
@@ -15,7 +16,7 @@ const tokens = require("../../scripts/constant/tokens");
 
 const connectV2CompoundArtifacts = require("../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json")
 
-describe("Compound", function () {
+describe("Instapool", function () {
     const connectorName = "COMPOUND-TEST-A"
     
     let dsaWallet0
@@ -60,68 +61,49 @@ describe("Compound", function () {
 
   describe("Main", function () {
 
-    it("Should deposit ETH in Compound", async function () {
+    it("Should take 100 ETH flashloan from Instapool", async function () {
         const amount = ethers.utils.parseEther("1") // 1 ETH
+        const flashloanAmount = ethers.utils.parseEther("100") // 100 ETH
+        const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+
+        const IdOne = "2878734423"
+        const IdTwo = "783243246"
+
         const spells = [
             {
                 connector: connectorName,
                 method: "deposit",
-                args: ["ETH-A", amount, 0, 0]
-            }
-        ]
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
-    });
-
-    it("Should borrow and payback DAI from Compound", async function () {
-        const amount = ethers.utils.parseEther("100") // 100 DAI
-        const setId = "83478237"
-        const spells = [
-            {
-                connector: connectorName,
-                method: "borrow",
-                args: ["DAI-A", amount, 0, setId]
+                args: ["ETH-A", flashloanAmount, 0, IdOne]
             },
             {
                 connector: connectorName,
-                method: "payback",
-                args: ["DAI-A", 0, setId, 0]
-            }
-        ]
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
-    });
-
-    it("Should deposit all ETH in Compound", async function () {
-        const spells = [
-            {
-                connector: connectorName,
-                method: "deposit",
-                args: ["ETH-A", constants.max_value, 0, 0]
-            }
-        ]
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("0"));
-    });
-
-    it("Should withdraw all ETH from Compound", async function () {
-        const spells = [
-            {
-                connector: connectorName,
                 method: "withdraw",
-                args: ["ETH-A", constants.max_value, 0, 0]
+                args: ["ETH-A", amount, IdOne, IdTwo]
+            },
+            {
+                connector: "INSTAPOOL-A",
+                method: "flashPayback",
+                args: [ethAddress, flashloanAmount, IdTwo, 0],
             }
         ]
 
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const calldata = encodeFlashcastData(spells);
+
+        const spells2 = [
+            {
+              connector: "INSTAPOOL-A",
+              method: "flashBorrowAndCast",
+              args: [
+                "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                flashloanAmount,
+                0, // route
+                calldata,
+              ],
+            }
+        ]
+
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells2), wallet1.address)
         const receipt = await tx.wait()
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
     });
   })
 })

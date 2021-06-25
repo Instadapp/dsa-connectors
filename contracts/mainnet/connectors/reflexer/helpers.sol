@@ -57,7 +57,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Collateral Join address is ETH type collateral.
     */
     function isEth(address tknAddr) internal pure returns (bool) {
-        return tknAddr == ethAddr ? true : false;
+        return tknAddr == wethAddr ? true : false;
     }
 
     /**

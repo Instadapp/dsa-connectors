@@ -33,6 +33,11 @@ abstract contract IncentivesResolver is Helpers, Events {
 
         _amt = incentives.claimRewards(assets, _amt, address(this));
 
+
+        TokenInterface wmatic =  TokenInterface(wmaticAddr);
+        uint256 wmaticAmount = wmatic.balanceOf(address(this));
+        convertWmaticToMatic(wmaticAmount > 0, wmatic, wmaticAmount);
+
         setUint(setId, _amt);
 
         _eventName = "LogClaimed(address[],uint256,uint256,uint256)";

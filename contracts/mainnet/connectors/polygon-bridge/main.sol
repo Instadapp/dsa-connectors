@@ -35,8 +35,13 @@ abstract contract PolygonBridgeResolver is Events, Helpers {
         } else {
             TokenInterface _token = TokenInterface(token);
             _amt = _amt == uint(-1) ? _token.balanceOf(address(this)) : _amt;
-            _token.approve(erc20Predicate, _amt);
-            migrator.depositFor(targetDsa, token, abi.encode(_amt));
+            if (migrator.rootToChildToken(token) != address(0)) {
+                _token.approve(erc20Predicate, _amt);
+                migrator.depositFor(targetDsa, token, abi.encode(_amt));
+            } else {
+                _token.approve(address(migratorPlasma), _amt);
+                migratorPlasma.depositERC20ForUser(token, targetDsa, _amt);
+            }
         }
 
         setUint(setId, _amt);
@@ -47,5 +52,5 @@ abstract contract PolygonBridgeResolver is Events, Helpers {
 }
 
 contract ConnectV2PolygonBridge is PolygonBridgeResolver {
-    string public constant name = "Polygon-Bridge-v1";
+    string public constant name = "Polygon-Bridge-v1.1";
 }
