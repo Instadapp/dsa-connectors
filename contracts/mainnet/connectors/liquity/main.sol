@@ -282,10 +282,13 @@ abstract contract LiquityResolver is Events, Helpers {
         uint amount,
         address frontendTag,
         uint getDepositId,
+        uint setDepositId,
         uint setEthGainId,
         uint setLqtyGainId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getDepositId, amount);
+
+        amount = amount == uint(-1) ? lusdToken.balanceOf(address(this)) : amount;
 
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
@@ -295,11 +298,12 @@ abstract contract LiquityResolver is Events, Helpers {
         uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
         uint lqtyGain = sub(lqtyBalanceAfter, lqtyBalanceBefore);
 
+        setUint(setDepositId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, frontendTag, getDepositId, setEthGainId, setLqtyGainId);
+        _eventName = "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, frontendTag, getDepositId, setDepositId, setEthGainId, setLqtyGainId);
     }
 
     /**
@@ -312,10 +316,15 @@ abstract contract LiquityResolver is Events, Helpers {
     */
     function stabilityWithdraw(
         uint amount,
+        uint getWithdrawId,
         uint setWithdrawId,
         uint setEthGainId,
         uint setLqtyGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        amount = getUint(getWithdrawId, amount);
+
+        amount = amount == uint(-1) ? StabilityPoolLike.getCompoundedLUSDDeposit(address(this)) : amount;
+
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
         
@@ -328,8 +337,8 @@ abstract contract LiquityResolver is Events, Helpers {
         setUint(setEthGainId, ethGain);
         setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, setWithdrawId, setEthGainId, setLqtyGainId);
+        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, getWithdrawId, setWithdrawId, setEthGainId, setLqtyGainId);
     }
 
     /**
@@ -362,19 +371,23 @@ abstract contract LiquityResolver is Events, Helpers {
     function stake(
         uint amount,
         uint getStakeId,
+        uint setStakeId,
         uint setEthGainId,
         uint setLusdGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        amount = getUint(getStakeId, amount);
+        amount = amount == uint(-1) ? lqtyToken.balanceOf(address(this)) : amount;
+
         uint ethGain = staking.getPendingETHGain(address(this));
         uint lusdGain = staking.getPendingLUSDGain(address(this));
 
-        amount = getUint(getStakeId, amount);
         staking.stake(amount);
+        setUint(setStakeId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLusdGainId, lusdGain);
 
-        _eventName = "LogStake(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, getStakeId, setEthGainId, setLusdGainId);
+        _eventName = "LogStake(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, getStakeId, setStakeId, setEthGainId, setLusdGainId);
     }
 
     /**
@@ -387,20 +400,24 @@ abstract contract LiquityResolver is Events, Helpers {
     */
     function unstake(
         uint amount,
-        uint setStakeId,
+        uint getUnstakeId,
+        uint setUnstakeId,
         uint setEthGainId,
         uint setLusdGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        amount = getUint(getUnstakeId, amount);
+        amount = amount == uint(-1) ? staking.stakes(address(this)) : amount;
+
         uint ethGain = staking.getPendingETHGain(address(this));
         uint lusdGain = staking.getPendingLUSDGain(address(this));
 
         staking.unstake(amount);
-        setUint(setStakeId, amount);
+        setUint(setUnstakeId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLusdGainId, lusdGain);
 
-        _eventName = "LogUnstake(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, setStakeId, setEthGainId, setLusdGainId);
+        _eventName = "LogUnstake(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, getUnstakeId, setUnstakeId, setEthGainId, setLusdGainId);
     }
 
     /**
