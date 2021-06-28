@@ -245,10 +245,10 @@ abstract contract LiquityResolver is Events, Helpers {
             lowerHint
         );
         
-        setUint(setIds[0], depositAmount);
-        setUint(setIds[1], withdrawAmount);
-        setUint(setIds[2], borrowAmount);
-        setUint(setIds[3], repayAmount);
+        setUint(setIds[0], adjustTrove.depositAmount);
+        setUint(setIds[1], adjustTrove.withdrawAmount);
+        setUint(setIds[2], adjustTrove.borrowAmount);
+        setUint(setIds[3], adjustTrove.repayAmount);
 
         _eventName = "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])";
         _eventParam = abi.encode(address(this), maxFeePercentage, depositAmount, withdrawAmount, borrowAmount, repayAmount, getIds, setIds);
