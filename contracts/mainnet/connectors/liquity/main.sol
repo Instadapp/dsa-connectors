@@ -42,23 +42,23 @@ abstract contract LiquityResolver is Events, Helpers {
         uint[] setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
 
-        uint _depositAmount = getUint(getIds[0], depositAmount);
-        uint _borrowAmount = getUint(getIds[1], borrowAmount);
+        depositAmount = getUint(getIds[0], depositAmount);
+        borrowAmount = getUint(getIds[1], borrowAmount);
 
-        _depositAmount = _depositAmount == uint(-1) ? address(this).balance : _depositAmount;
+        depositAmount = depositAmount == uint(-1) ? address(this).balance : depositAmount;
 
-        borrowerOperations.openTrove{value: _depositAmount}(
+        borrowerOperations.openTrove{value: depositAmount}(
             maxFeePercentage,
-            _borrowAmount,
+            borrowAmount,
             upperHint,
             lowerHint
         );
 
-        setUint(setIds[0], _depositAmount);
-        setUint(setIds[1], _borrowAmount);
+        setUint(setIds[0], depositAmount);
+        setUint(setIds[1], borrowAmount);
 
         _eventName = "LogOpen(address,uint256,uint256,uint256,uint256[],uint256[])";
-        _eventParam = abi.encode(address(this), maxFeePercentage, _depositAmount, _borrowAmount, getIds, setIds);
+        _eventParam = abi.encode(address(this), maxFeePercentage, depositAmount, borrowAmount, getIds, setIds);
     }
 
     /**
@@ -200,37 +200,40 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param repayAmount Amount of LUSD to repay
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getDepositId Optional storage slot to retrieve the ETH to deposit
-     * @param setWithdrawId Optional storage slot to store the withdrawn ETH to
-     * @param getRepayId Optional storage slot to retrieve the LUSD to repay
-     * @param setBorrowId Optional storage slot to store the LUSD borrowed
+     * @param getIds Optional Get Ids for deposit, withdraw, borrow & repay
+     * @param setIds Optional Set Ids for deposit, withdraw, borrow & repay
     */
     function adjust(
         uint maxFeePercentage,
-        uint withdrawAmount,
         uint depositAmount,
+        uint withdrawAmount,
         uint borrowAmount,
         uint repayAmount,
         address upperHint,
         address lowerHint,
-        uint getDepositId,
-        uint setWithdrawId,
-        uint getRepayId,
-        uint setBorrowId
+        uint[] getIds,
+        uint[] setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        if (getDepositId != 0 && depositAmount != 0) {
-            revert("adjust(): Cannot supply a depositAmount if a non-zero getDepositId is supplied");
-        }
-        if (getRepayId != 0 && repayAmount != 0) {
-            revert("adjust(): Cannot supply a repayAmount if a non-zero getRepayId is supplied");
-        }
         AdjustTrove memory adjustTrove;
 
         adjustTrove.maxFeePercentage = maxFeePercentage;
-        adjustTrove.withdrawAmount = withdrawAmount;
-        adjustTrove.depositAmount = getUint(getDepositId, depositAmount);
-        adjustTrove.borrowAmount = borrowAmount;
-        adjustTrove.repayAmount = getUint(getRepayId, repayAmount);
+
+        depositAmount = getUint(getIds[0], depositAmount);
+        adjustTrove.depositAmount = depositAmount == uint(-1) ? address(this).balance : depositAmount;
+
+        withdrawAmount = getUint(getIds[1], withdrawAmount);
+        adjustTrove.withdrawAmount = withdrawAmount == uint(-1) ? troveManager.getTroveColl(address(this)) : withdrawAmount;
+
+        adjustTrove.borrowAmount = getUint(getIds[2], borrowAmount);
+
+        repayAmount = getUint(getIds[3], repayAmount);
+        if (repayAmount == uint(-1)) {
+            uint _lusdBal = lusdToken.balanceOf(address(this));
+            uint _totalDebt = troveManager.getTroveDebt(address(this));
+            repayAmount = _lusdBal > _totalDebt ? _totalDebt : _lusdBal;
+        }
+        adjustTrove.repayAmount = repayAmount;
+
         adjustTrove.isBorrow = borrowAmount > 0;
 
         borrowerOperations.adjustTrove{value: adjustTrove.depositAmount}(
@@ -242,14 +245,13 @@ abstract contract LiquityResolver is Events, Helpers {
             lowerHint
         );
         
-        // Allow other spells to use the withdrawn collateral
-        setUint(setWithdrawId, withdrawAmount);
+        setUint(setIds[0], depositAmount);
+        setUint(setIds[1], withdrawAmount);
+        setUint(setIds[2], borrowAmount);
+        setUint(setIds[3], repayAmount);
 
-        // Allow other spells to use the borrowed amount
-        setUint(setBorrowId, borrowAmount);
-
-        _eventName = "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), maxFeePercentage, depositAmount, withdrawAmount, borrowAmount, repayAmount, getDepositId, setWithdrawId, getRepayId, setBorrowId);
+        _eventName = "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])";
+        _eventParam = abi.encode(address(this), maxFeePercentage, depositAmount, withdrawAmount, borrowAmount, repayAmount, getIds, setIds);
     }
 
     /**

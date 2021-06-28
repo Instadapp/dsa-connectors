@@ -23,10 +23,8 @@ contract Events {
         uint withdrawAmount,
         uint borrowAmount,
         uint repayAmount,
-        uint getDepositId,
-        uint setWithdrawId,
-        uint getRepayId,
-        uint setBorrowId
+        uint[] getIds,
+        uint[] setIds
     );
     event LogClaimCollateralFromRedemption(address indexed borrower, uint amount, uint setId);
 
