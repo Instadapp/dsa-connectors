@@ -65,8 +65,8 @@ describe("Liquity", () => {
               borrowAmount,
               upperHint,
               lowerHint,
-              0,
-              0,
+              [0, 0],
+              [0, 0],
             ],
           };
 
@@ -144,8 +144,8 @@ describe("Liquity", () => {
               borrowAmount,
               upperHint,
               lowerHint,
-              depositId,
-              0,
+              [depositId, 0],
+              [0, 0],
             ],
           };
 
@@ -218,8 +218,8 @@ describe("Liquity", () => {
               borrowAmount,
               upperHint,
               lowerHint,
-              0,
-              borrowId,
+              [0, 0],
+              [borrowId, 0],
             ],
           };
 
@@ -297,8 +297,8 @@ describe("Liquity", () => {
               borrowAmount,
               upperHint,
               lowerHint,
-              0,
-              0,
+              [0, 0],
+              [0, 0],
             ],
           };
 
@@ -313,17 +313,24 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           expect(castLogEvent.eventNames[0]).eq(
-            "LogOpen(address,uint256,uint256,uint256,uint256,uint256)"
+            "LogOpen(address,uint256,uint256,uint256,uint256[],uint256[])"
           );
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256", "uint256", "uint256", "uint256"],
             [
-              userWallet.address,
+              "address",
+              "uint256",
+              "uint256",
+              "uint256",
+              "uint256[]",
+              "uint256[]",
+            ],
+            [
+              dsa.address,
               maxFeePercentage,
               depositAmount,
               borrowAmount,
-              0,
-              0,
+              [0, 0],
+              [0, 0],
             ]
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
@@ -598,7 +605,7 @@ describe("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256"],
-            [userWallet.address, 0]
+            [dsa.address, 0]
           );
           expect(castLogEvent.eventNames[0]).eq("LogClose(address,uint256)");
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
@@ -620,7 +627,7 @@ describe("Liquity", () => {
           const depositEthSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "deposit",
-            args: [topupAmount, upperHint, lowerHint, 0],
+            args: [topupAmount, upperHint, lowerHint, 0, 0],
           };
 
           await dsa
@@ -663,7 +670,7 @@ describe("Liquity", () => {
           const depositEthToTroveSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "deposit",
-            args: [0, upperHint, lowerHint, depositId],
+            args: [0, upperHint, lowerHint, depositId, 0],
           };
           const spells = [depositEthSpell, depositEthToTroveSpell];
 
@@ -697,7 +704,7 @@ describe("Liquity", () => {
           const depositEthSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "deposit",
-            args: [topupAmount, upperHint, lowerHint, 0],
+            args: [topupAmount, upperHint, lowerHint, 0, 0],
           };
 
           const depositTx = await dsa
@@ -710,11 +717,11 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256"],
-            [userWallet.address, topupAmount, 0]
+            ["address", "uint256", "uint256", "uint256"],
+            [dsa.address, topupAmount, 0, 0]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogDeposit(address,uint256,uint256)"
+            "LogDeposit(address,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -734,7 +741,7 @@ describe("Liquity", () => {
           const withdrawEthSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "withdraw",
-            args: [withdrawAmount, upperHint, lowerHint, 0],
+            args: [withdrawAmount, upperHint, lowerHint, 0, 0],
           };
 
           await dsa
@@ -772,7 +779,7 @@ describe("Liquity", () => {
           const withdrawEthFromTroveSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "withdraw",
-            args: [withdrawAmount, upperHint, lowerHint, withdrawId],
+            args: [withdrawAmount, upperHint, lowerHint, 0, withdrawId],
           };
 
           const withdrawEthSpell = {
@@ -815,11 +822,10 @@ describe("Liquity", () => {
           const withdrawAmount = ethers.utils.parseEther("1");
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
-          const setId = 0;
           const withdrawEthSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "withdraw",
-            args: [withdrawAmount, upperHint, lowerHint, setId],
+            args: [withdrawAmount, upperHint, lowerHint, 0, 0],
           };
 
           const withdrawTx = await dsa
@@ -830,11 +836,11 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256"],
-            [userWallet.address, withdrawAmount, setId]
+            ["address", "uint256", "uint256", "uint256"],
+            [dsa.address, withdrawAmount, 0, 0]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogWithdraw(address,uint256,uint256)"
+            "LogWithdraw(address,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -856,7 +862,7 @@ describe("Liquity", () => {
           const borrowSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "borrow",
-            args: [maxFeePercentage, borrowAmount, upperHint, lowerHint, 0],
+            args: [maxFeePercentage, borrowAmount, upperHint, lowerHint, 0, 0],
           };
 
           // Borrow more LUSD from the Trove
@@ -896,6 +902,7 @@ describe("Liquity", () => {
               borrowAmount,
               upperHint,
               lowerHint,
+              0,
               borrowId,
             ],
           };
@@ -944,11 +951,10 @@ describe("Liquity", () => {
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
-          const setId = 0;
           const borrowSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "borrow",
-            args: [maxFeePercentage, borrowAmount, upperHint, lowerHint, setId],
+            args: [maxFeePercentage, borrowAmount, upperHint, lowerHint, 0, 0],
           };
 
           const borrowTx = await dsa
@@ -959,11 +965,11 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256"],
-            [userWallet.address, borrowAmount, setId]
+            ["address", "uint256", "uint256", "uint256"],
+            [dsa.address, borrowAmount, 0, 0]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogBorrow(address,uint256,uint256)"
+            "LogBorrow(address,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -997,7 +1003,7 @@ describe("Liquity", () => {
           const repaySpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "repay",
-            args: [repayAmount, upperHint, lowerHint, 0],
+            args: [repayAmount, upperHint, lowerHint, 0, 0],
           };
 
           await dsa
@@ -1061,7 +1067,7 @@ describe("Liquity", () => {
           const borrowSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "repay",
-            args: [0, upperHint, lowerHint, lusdDepositId],
+            args: [0, upperHint, lowerHint, lusdDepositId, 0],
           };
 
           const spells = [depositSpell, borrowSpell];
@@ -1099,12 +1105,11 @@ describe("Liquity", () => {
             borrowAmount,
             liquity
           );
-          const getId = 0;
 
           const borrowSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "repay",
-            args: [repayAmount, upperHint, lowerHint, getId],
+            args: [repayAmount, upperHint, lowerHint, 0, 0],
           };
 
           const repayTx = await dsa
@@ -1117,11 +1122,11 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256"],
-            [userWallet.address, repayAmount, getId]
+            ["address", "uint256", "uint256", "uint256"],
+            [dsa.address, repayAmount, 0, 0]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogRepay(address,uint256,uint256)"
+            "LogRepay(address,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -1151,16 +1156,14 @@ describe("Liquity", () => {
             method: "adjust",
             args: [
               maxFeePercentage,
-              withdrawAmount,
               depositAmount,
+              withdrawAmount,
               borrowAmount,
               repayAmount,
               upperHint,
               lowerHint,
-              0,
-              0,
-              0,
-              0,
+              [0, 0, 0, 0],
+              [0, 0, 0, 0],
             ],
           };
 
@@ -1218,16 +1221,14 @@ describe("Liquity", () => {
             method: "adjust",
             args: [
               maxFeePercentage,
-              withdrawAmount,
               depositAmount,
+              withdrawAmount,
               borrowAmount,
               repayAmount,
               upperHint,
               lowerHint,
-              0,
-              0,
-              0,
-              0,
+              [0, 0, 0, 0],
+              [0, 0, 0, 0],
             ],
           };
 
@@ -1297,16 +1298,14 @@ describe("Liquity", () => {
             method: "adjust",
             args: [
               maxFeePercentage,
-              withdrawAmount,
               0, // Deposit amount comes from a previous spell's storage slot
+              withdrawAmount,
               borrowAmount,
               0, // Repay amount comes from a previous spell's storage slot
               upperHint,
               lowerHint,
-              ethDepositId,
-              0,
-              lusdRepayId,
-              0,
+              [ethDepositId, 0, 0, 0],
+              [0, 0, 0, 0],
             ],
           };
           const spells = [depositEthSpell, depositLusdSpell, adjustSpell];
@@ -1379,16 +1378,14 @@ describe("Liquity", () => {
             method: "adjust",
             args: [
               maxFeePercentage,
-              withdrawAmount,
               depositAmount,
+              withdrawAmount,
               borrowAmount,
               repayAmount,
               upperHint,
               lowerHint,
-              0,
-              ethWithdrawId,
-              0,
-              lusdBorrowId,
+              [0, 0, 0, 0],
+              [0, ethWithdrawId, lusdBorrowId, 0],
             ],
           };
 
@@ -1432,7 +1429,6 @@ describe("Liquity", () => {
           const userLusdBalanceAfter = await liquity.lusdToken.balanceOf(
             userWallet.address
           );
-
           expect(userEthBalanceAfter).eq(
             userEthBalanceBefore.add(withdrawAmount)
           );
@@ -1452,26 +1448,20 @@ describe("Liquity", () => {
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
-          const getDepositId = 0;
-          const setWithdrawId = 0;
-          const getRepayId = 0;
-          const setBorrowId = 0;
 
           const adjustSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "adjust",
             args: [
               maxFeePercentage,
-              withdrawAmount,
               depositAmount,
+              withdrawAmount,
               borrowAmount,
               repayAmount,
               upperHint,
               lowerHint,
-              getDepositId,
-              setWithdrawId,
-              getRepayId,
-              setBorrowId,
+              [0, 0, 0, 0],
+              [0, 0, 0, 0],
             ],
           };
 
@@ -1493,26 +1483,22 @@ describe("Liquity", () => {
               "uint256",
               "uint256",
               "uint256",
-              "uint256",
-              "uint256",
-              "uint256",
-              "uint256",
+              "uint256[]",
+              "uint256[]",
             ],
             [
-              userWallet.address,
+              dsa.address,
               maxFeePercentage,
               depositAmount,
               withdrawAmount,
               borrowAmount,
               repayAmount,
-              getDepositId,
-              setWithdrawId,
-              getRepayId,
-              setBorrowId,
+              [0, 0, 0, 0],
+              [0, 0, 0, 0],
             ]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"
+            "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -1652,7 +1638,7 @@ describe("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
-            [userWallet.address, claimAmount, setId]
+            [dsa.address, claimAmount, setId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogClaimCollateralFromRedemption(address,uint256,uint256)"
@@ -1678,7 +1664,7 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, 0, 0, 0],
+            args: [amount, frontendTag, 0, 0, 0, 0],
           };
 
           await dsa
@@ -1711,7 +1697,7 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [0, frontendTag, lusdDepositId, 0, 0],
+            args: [0, frontendTag, lusdDepositId, 0, 0, 0],
           };
           const spells = [depositLusdSpell, stabilityDepositSpell];
 
@@ -1735,6 +1721,7 @@ describe("Liquity", () => {
           const halfAmount = amount.div(2);
           const frontendTag = ethers.constants.AddressZero;
           const getDepositId = 0;
+          const setDepositId = 0;
           const setEthGainId = 0;
           const setLqtyGainId = 0;
 
@@ -1748,7 +1735,14 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [halfAmount, frontendTag, getDepositId, 0, 0],
+            args: [
+              halfAmount,
+              frontendTag,
+              getDepositId,
+              setDepositId,
+              setEthGainId,
+              setLqtyGainId,
+            ],
           };
 
           // Create a Stability deposit for this DSA
@@ -1803,20 +1797,22 @@ describe("Liquity", () => {
               "uint256",
               "uint256",
               "uint256",
+              "uint256",
             ],
             [
-              userWallet.address,
+              dsa.address,
               halfAmount,
               ethGain,
               lqtyGain,
               frontendTag,
               getDepositId,
+              setDepositId,
               setEthGainId,
               setLqtyGainId,
             ]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256)"
+            "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -1849,14 +1845,14 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, 0, 0, 0],
+            args: [amount, frontendTag, 0, 0, 0, 0],
           };
 
           // Withdraw half of the deposit
           const stabilityWithdrawSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
-            args: [amount.div(2), 0, 0, 0],
+            args: [amount.div(2), 0, 0, 0, 0],
           };
           const spells = [stabilityDepositSpell, stabilityWithdrawSpell];
 
@@ -1899,14 +1895,14 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, 0, 0, 0],
+            args: [amount, frontendTag, 0, 0, 0, 0],
           };
 
           // Withdraw half of the deposit
           const stabilityWithdrawSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
-            args: [amount.div(2), 0, 0, withdrawId],
+            args: [amount.div(2), 0, 0, 0, withdrawId],
           };
 
           const withdrawLusdSpell = {
@@ -1962,11 +1958,12 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, 0, 0, 0],
+            args: [amount, frontendTag, 0, 0, 0, 0],
           };
 
           // Withdraw half of the deposit
           const withdrawAmount = amount.div(2);
+          const getWithdrawId = 0;
           const setWithdrawId = 0;
           const setEthGainId = 0;
           const setLqtyGainId = 0;
@@ -2009,7 +2006,13 @@ describe("Liquity", () => {
           const stabilityWithdrawSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityWithdraw",
-            args: [withdrawAmount, setWithdrawId, setEthGainId, setLqtyGainId],
+            args: [
+              withdrawAmount,
+              getWithdrawId,
+              setWithdrawId,
+              setEthGainId,
+              setLqtyGainId,
+            ],
           };
 
           const withdrawTx = await dsa
@@ -2031,19 +2034,21 @@ describe("Liquity", () => {
               "uint256",
               "uint256",
               "uint256",
+              "uint256",
             ],
             [
-              userWallet.address,
+              dsa.address,
               withdrawAmount,
               ethGain,
               lqtyGain,
+              getWithdrawId,
               setWithdrawId,
               setEthGainId,
               setLqtyGainId,
             ]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256)"
+            "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -2072,7 +2077,7 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, 0, 0, 0],
+            args: [amount, frontendTag, 0, 0, 0, 0],
           };
 
           await dsa
@@ -2125,7 +2130,7 @@ describe("Liquity", () => {
           const stabilityDepositSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stabilityDeposit",
-            args: [amount, frontendTag, 0, 0, 0],
+            args: [amount, frontendTag, 0, 0, 0, 0],
           };
 
           await dsa
@@ -2160,7 +2165,7 @@ describe("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256"],
-            [userWallet.address, ethGainFromLiquidation]
+            [dsa.address, ethGainFromLiquidation]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogStabilityMoveEthGainToTrove(address,uint256)"
@@ -2188,7 +2193,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
 
           await dsa
@@ -2228,7 +2233,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [0, lqtyDepositId, lqtyDepositId, 0],
+            args: [0, lqtyDepositId, 0, 0, 0],
           };
           const spells = [depositSpell, stakeSpell];
 
@@ -2262,12 +2267,13 @@ describe("Liquity", () => {
           );
 
           const getStakeId = 0;
+          const setStakeId = 0;
           const setEthGainId = 0;
           const setLusdGainId = 0;
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, getStakeId, setEthGainId, setLusdGainId],
+            args: [amount, getStakeId, setStakeId, setEthGainId, setLusdGainId],
           };
 
           const stakeTx = await dsa
@@ -2279,17 +2285,18 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256", "uint256", "uint256"],
+            ["address", "uint256", "uint256", "uint256", "uint256", "uint256"],
             [
-              userWallet.address,
+              dsa.address,
               amount,
               getStakeId,
+              setStakeId,
               setEthGainId,
               setLusdGainId,
             ]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogStake(address,uint256,uint256,uint256,uint256)"
+            "LogStake(address,uint256,uint256,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
@@ -2308,7 +2315,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
 
           await dsa
@@ -2321,7 +2328,7 @@ describe("Liquity", () => {
           const unstakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "unstake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
 
           await dsa
@@ -2351,7 +2358,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
 
           await dsa
@@ -2365,7 +2372,7 @@ describe("Liquity", () => {
           const unstakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "unstake",
-            args: [amount, withdrawId, 0, 0],
+            args: [amount, 0, withdrawId, 0, 0],
           };
 
           const withdrawLqtySpell = {
@@ -2410,20 +2417,27 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
 
           await dsa
             .connect(userWallet)
             .cast(...encodeSpells([stakeSpell]), userWallet.address);
 
+          const getUnstakeId = 0;
           const setUnstakeId = 0;
           const setEthGainId = 0;
           const setLusdGainId = 0;
           const unstakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "unstake",
-            args: [amount, setUnstakeId, setEthGainId, setLusdGainId],
+            args: [
+              amount,
+              getUnstakeId,
+              setUnstakeId,
+              setEthGainId,
+              setLusdGainId,
+            ],
           };
 
           const unstakeTx = await dsa
@@ -2435,24 +2449,25 @@ describe("Liquity", () => {
           const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
-            ["address", "uint256", "uint256", "uint256", "uint256"],
+            ["address", "uint256", "uint256", "uint256", "uint256", "uint256"],
             [
-              userWallet.address,
+              dsa.address,
               amount,
+              getUnstakeId,
               setUnstakeId,
               setEthGainId,
               setLusdGainId,
             ]
           );
           expect(castLogEvent.eventNames[0]).eq(
-            "LogUnstake(address,uint256,uint256,uint256,uint256)"
+            "LogUnstake(address,uint256,uint256,uint256,uint256,uint256)"
           );
           expect(castLogEvent.eventParams[0]).eq(expectedEventParams);
         });
       });
 
       describe("claimStakingGains()", () => {
-        it("Claims gains from staking", async () => {
+        it("claims gains from staking", async () => {
           const stakerDsa = await buildDSAv2(userWallet.address);
           const amount = ethers.utils.parseUnits("1000", 18); // 1000 LQTY
 
@@ -2466,7 +2481,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
           await stakerDsa
             .connect(userWallet)
@@ -2520,7 +2535,7 @@ describe("Liquity", () => {
           expect(lusdBalanceAfter).to.eq(lusdGain);
         });
 
-        it("Claims gains from staking and stores them for other spells", async () => {
+        it("claims gains from staking and stores them for other spells", async () => {
           const stakerDsa = await buildDSAv2(userWallet.address);
           const amount = ethers.utils.parseUnits("1000", 18); // 1000 LQTY
 
@@ -2534,7 +2549,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
           await stakerDsa
             .connect(userWallet)
@@ -2634,7 +2649,7 @@ describe("Liquity", () => {
           const stakeSpell = {
             connector: helpers.LIQUITY_CONNECTOR,
             method: "stake",
-            args: [amount, 0, 0, 0],
+            args: [amount, 0, 0, 0, 0],
           };
           await stakerDsa
             .connect(userWallet)
@@ -2680,7 +2695,7 @@ describe("Liquity", () => {
             .args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256"],
-            [userWallet.address, ethGain, lusdGain, setEthGainId, setLusdGainId]
+            [stakerDsa.address, ethGain, lusdGain, setEthGainId, setLusdGainId]
           );
           expect(castLogEvent.eventNames[0]).eq(
             "LogClaimStakingGains(address,uint256,uint256,uint256,uint256)"

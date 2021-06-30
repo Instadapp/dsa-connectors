@@ -17,28 +17,7 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
 abstract contract LiquityResolver is Events, Helpers {
-    BorrowerOperationsLike internal constant borrowerOperations =
-        BorrowerOperationsLike(0x24179CD81c9e782A4096035f7eC97fB8B783e007);
-    TroveManagerLike internal constant troveManager =
-        TroveManagerLike(0xA39739EF8b0231DbFA0DcdA07d7e29faAbCf4bb2);
-    StabilityPoolLike internal constant stabilityPool =
-        StabilityPoolLike(0x66017D22b0f8556afDd19FC67041899Eb65a21bb);
-    StakingLike internal constant staking =
-        StakingLike(0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d);
-    CollateralSurplusLike internal constant collateralSurplus =
-        CollateralSurplusLike(0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521);
-    LqtyTokenLike internal constant lqtyToken =
-        LqtyTokenLike(0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D);
-    
-    // Prevents stack-too-deep error
-    struct AdjustTrove {
-        uint maxFeePercentage;
-        uint withdrawAmount;
-        uint depositAmount;
-        uint borrowAmount;
-        uint repayAmount;
-        bool isBorrow;
-    }
+
 
     /* Begin: Trove */
 
@@ -50,8 +29,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param borrowAmount The amount of LUSD to borrow
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve ETH from
-     * @param setId Optional storage slot to store the LUSD borrowed against
+     * @param getIds Optional (default: 0) Optional storage slot to get deposit & borrow amounts stored using other spells
+     * @param setIds Optional (default: 0) Optional storage slot to set deposit & borrow amounts to be used in future spells
     */
     function open(
         uint depositAmount,
@@ -59,14 +38,14 @@ abstract contract LiquityResolver is Events, Helpers {
         uint borrowAmount,
         address upperHint,
         address lowerHint,
-        uint getId,
-        uint setId
+        uint[] memory getIds,
+        uint[] memory setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        if (getId != 0 && depositAmount != 0) {
-            revert("open(): Cannot supply a depositAmount if a non-zero getId is supplied");
-        }
 
-        depositAmount = getUint(getId, depositAmount);
+        depositAmount = getUint(getIds[0], depositAmount);
+        borrowAmount = getUint(getIds[1], borrowAmount);
+
+        depositAmount = depositAmount == uint(-1) ? address(this).balance : depositAmount;
 
         borrowerOperations.openTrove{value: depositAmount}(
             maxFeePercentage,
@@ -75,10 +54,11 @@ abstract contract LiquityResolver is Events, Helpers {
             lowerHint
         );
 
-        // Allow other spells to use the borrowed amount
-        setUint(setId, borrowAmount);
-        _eventName = "LogOpen(address,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, maxFeePercentage, depositAmount, borrowAmount, getId, setId);
+        setUint(setIds[0], depositAmount);
+        setUint(setIds[1], borrowAmount);
+
+        _eventName = "LogOpen(address,uint256,uint256,uint256,uint256[],uint256[])";
+        _eventParam = abi.encode(address(this), maxFeePercentage, depositAmount, borrowAmount, getIds, setIds);
     }
 
     /**
@@ -86,14 +66,14 @@ abstract contract LiquityResolver is Events, Helpers {
      * @notice Closes a Trove by repaying LUSD debt
      * @param setId Optional storage slot to store the ETH withdrawn from the Trove
     */
-    function close(uint setId) external returns (string memory _eventName, bytes memory _eventParam) {
+    function close(uint setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint collateral = troveManager.getTroveColl(address(this));
         borrowerOperations.closeTrove();
 
         // Allow other spells to use the collateral released from the Trove
         setUint(setId, collateral);
          _eventName = "LogClose(address,uint256)";
-        _eventParam = abi.encode(msg.sender, setId);
+        _eventParam = abi.encode(address(this), setId);
     }
 
     /**
@@ -103,20 +83,26 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getId Optional storage slot to retrieve the ETH from
+     * @param setId Optional storage slot to set the ETH deposited
     */
     function deposit(
         uint amount,
         address upperHint,
         address lowerHint,
-        uint getId
+        uint getId,
+        uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam)  {
-        if (getId != 0 && amount != 0) {
-            revert("deposit(): Cannot supply an amount if a non-zero getId is supplied");
-        }
-        amount = getUint(getId, amount);
-        borrowerOperations.addColl{value: amount}(upperHint, lowerHint);
-        _eventName = "LogDeposit(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, getId);
+
+        uint _amount = getUint(getId, amount);
+
+        _amount = _amount == uint(-1) ? address(this).balance : _amount;
+
+        borrowerOperations.addColl{value: _amount}(upperHint, lowerHint);
+
+        setUint(setId, _amount);
+
+        _eventName = "LogDeposit(address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), _amount, getId, setId);
     }
 
     /**
@@ -125,19 +111,25 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param amount Amount of ETH to move from Trove to DSA
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
+     * @param getId Optional storage slot to get the amount of ETH to withdraw
      * @param setId Optional storage slot to store the withdrawn ETH in
     */
    function withdraw(
         uint amount,
         address upperHint,
         address lowerHint,
+        uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam)  {
-        borrowerOperations.withdrawColl(amount, upperHint, lowerHint);
+        uint _amount = getUint(getId, amount);
 
-        setUint(setId, amount);
-        _eventName = "LogWithdraw(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setId);
+        _amount = _amount == uint(-1) ? troveManager.getTroveColl(address(this)) : _amount;
+
+        borrowerOperations.withdrawColl(_amount, upperHint, lowerHint);
+
+        setUint(setId, _amount);
+        _eventName = "LogWithdraw(address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), _amount, getId, setId);
     }
     
     /**
@@ -147,20 +139,25 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param amount Amount of LUSD to borrow
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param setId Optional storage slot to store the borrowed LUSD in
+     * @param getId Optional storage slot to retrieve the amount of LUSD to borrow
+     * @param setId Optional storage slot to store the final amount of LUSD borrowed
     */
     function borrow(
         uint maxFeePercentage,
         uint amount,
         address upperHint,
         address lowerHint,
+        uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam)  {
-        borrowerOperations.withdrawLUSD(maxFeePercentage, amount, upperHint, lowerHint);
+        uint _amount = getUint(getId, amount);
 
-        setUint(setId, amount);
-        _eventName = "LogBorrow(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setId);
+        borrowerOperations.withdrawLUSD(maxFeePercentage, _amount, upperHint, lowerHint);
+
+        setUint(setId, _amount);
+
+        _eventName = "LogBorrow(address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), _amount, getId, setId);
     }
 
     /**
@@ -169,21 +166,30 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param amount Amount of LUSD to repay
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve the LUSD from
+     * @param getId Optional storage slot to retrieve the amount of LUSD from
+     * @param setId Optional storage slot to store the final amount of LUSD repaid
     */
     function repay(
         uint amount,
         address upperHint,
         address lowerHint,
-        uint getId
+        uint getId,
+        uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam)  {
-        if (getId != 0 && amount != 0) {
-            revert("repay(): Cannot supply an amount if a non-zero getId is supplied");
+        uint _amount = getUint(getId, amount);
+
+        if (_amount == uint(-1)) {
+            uint _lusdBal = lusdToken.balanceOf(address(this));
+            uint _totalDebt = troveManager.getTroveDebt(address(this));
+            _amount = _lusdBal > _totalDebt ? _totalDebt : _lusdBal;
         }
-        amount = getUint(getId, amount);
-        borrowerOperations.repayLUSD(amount, upperHint, lowerHint);
-        _eventName = "LogRepay(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, getId);
+
+        borrowerOperations.repayLUSD(_amount, upperHint, lowerHint);
+
+        setUint(setId, _amount);
+
+        _eventName = "LogRepay(address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), _amount, getId, setId);
     }
 
     /**
@@ -196,37 +202,40 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param repayAmount Amount of LUSD to repay
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getDepositId Optional storage slot to retrieve the ETH to deposit
-     * @param setWithdrawId Optional storage slot to store the withdrawn ETH to
-     * @param getRepayId Optional storage slot to retrieve the LUSD to repay
-     * @param setBorrowId Optional storage slot to store the LUSD borrowed
+     * @param getIds Optional Get Ids for deposit, withdraw, borrow & repay
+     * @param setIds Optional Set Ids for deposit, withdraw, borrow & repay
     */
     function adjust(
         uint maxFeePercentage,
-        uint withdrawAmount,
         uint depositAmount,
+        uint withdrawAmount,
         uint borrowAmount,
         uint repayAmount,
         address upperHint,
         address lowerHint,
-        uint getDepositId,
-        uint setWithdrawId,
-        uint getRepayId,
-        uint setBorrowId
+        uint[] memory getIds,
+        uint[] memory setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        if (getDepositId != 0 && depositAmount != 0) {
-            revert("adjust(): Cannot supply a depositAmount if a non-zero getDepositId is supplied");
-        }
-        if (getRepayId != 0 && repayAmount != 0) {
-            revert("adjust(): Cannot supply a repayAmount if a non-zero getRepayId is supplied");
-        }
         AdjustTrove memory adjustTrove;
 
         adjustTrove.maxFeePercentage = maxFeePercentage;
-        adjustTrove.withdrawAmount = withdrawAmount;
-        adjustTrove.depositAmount = getUint(getDepositId, depositAmount);
-        adjustTrove.borrowAmount = borrowAmount;
-        adjustTrove.repayAmount = getUint(getRepayId, repayAmount);
+
+        depositAmount = getUint(getIds[0], depositAmount);
+        adjustTrove.depositAmount = depositAmount == uint(-1) ? address(this).balance : depositAmount;
+
+        withdrawAmount = getUint(getIds[1], withdrawAmount);
+        adjustTrove.withdrawAmount = withdrawAmount == uint(-1) ? troveManager.getTroveColl(address(this)) : withdrawAmount;
+
+        adjustTrove.borrowAmount = getUint(getIds[2], borrowAmount);
+
+        repayAmount = getUint(getIds[3], repayAmount);
+        if (repayAmount == uint(-1)) {
+            uint _lusdBal = lusdToken.balanceOf(address(this));
+            uint _totalDebt = troveManager.getTroveDebt(address(this));
+            repayAmount = _lusdBal > _totalDebt ? _totalDebt : _lusdBal;
+        }
+        adjustTrove.repayAmount = repayAmount;
+
         adjustTrove.isBorrow = borrowAmount > 0;
 
         borrowerOperations.adjustTrove{value: adjustTrove.depositAmount}(
@@ -238,14 +247,13 @@ abstract contract LiquityResolver is Events, Helpers {
             lowerHint
         );
         
-        // Allow other spells to use the withdrawn collateral
-        setUint(setWithdrawId, withdrawAmount);
+        setUint(setIds[0], adjustTrove.depositAmount);
+        setUint(setIds[1], adjustTrove.withdrawAmount);
+        setUint(setIds[2], adjustTrove.borrowAmount);
+        setUint(setIds[3], adjustTrove.repayAmount);
 
-        // Allow other spells to use the borrowed amount
-        setUint(setBorrowId, borrowAmount);
-
-        _eventName = "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, maxFeePercentage, depositAmount, withdrawAmount, borrowAmount, repayAmount, getDepositId, setWithdrawId, getRepayId, setBorrowId);
+        _eventName = "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])";
+        _eventParam = abi.encode(address(this), maxFeePercentage, adjustTrove.depositAmount, adjustTrove.withdrawAmount, adjustTrove.borrowAmount, adjustTrove.repayAmount, getIds, setIds);
     }
 
     /**
@@ -253,13 +261,13 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param setId Optional storage slot to store the ETH claimed
      * @notice Claim remaining collateral from Trove
     */
-    function claimCollateralFromRedemption(uint setId) external returns(string memory _eventName, bytes memory _eventParam) {
+    function claimCollateralFromRedemption(uint setId) external payable returns(string memory _eventName, bytes memory _eventParam) {
         uint amount = collateralSurplus.getCollateral(address(this));
         borrowerOperations.claimCollateral();
         setUint(setId, amount);
 
         _eventName = "LogClaimCollateralFromRedemption(address,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setId);
+        _eventParam = abi.encode(address(this), amount, setId);
     }
     /* End: Trove */
 
@@ -270,7 +278,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @notice Deposit LUSD into Stability Pool
      * @param amount Amount of LUSD to deposit into Stability Pool
      * @param frontendTag Address of the frontend to make this deposit against (determines the kickback rate of rewards)
-     * @param getDepositId Optional storage slot to retrieve the LUSD from
+     * @param getDepositId Optional storage slot to retrieve the amount of LUSD from
+     * @param setDepositId Optional storage slot to store the final amount of LUSD deposited
      * @param setEthGainId Optional storage slot to store any ETH gains in
      * @param setLqtyGainId Optional storage slot to store any LQTY gains in
     */
@@ -278,10 +287,13 @@ abstract contract LiquityResolver is Events, Helpers {
         uint amount,
         address frontendTag,
         uint getDepositId,
+        uint setDepositId,
         uint setEthGainId,
         uint setLqtyGainId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getDepositId, amount);
+
+        amount = amount == uint(-1) ? lusdToken.balanceOf(address(this)) : amount;
 
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
@@ -291,27 +303,34 @@ abstract contract LiquityResolver is Events, Helpers {
         uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
         uint lqtyGain = sub(lqtyBalanceAfter, lqtyBalanceBefore);
 
+        setUint(setDepositId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, ethGain, lqtyGain, frontendTag, getDepositId, setEthGainId, setLqtyGainId);
+        _eventName = "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, frontendTag, getDepositId, setDepositId, setEthGainId, setLqtyGainId);
     }
 
     /**
      * @dev Withdraw user deposited LUSD from Stability Pool
      * @notice Withdraw LUSD from Stability Pool
      * @param amount Amount of LUSD to withdraw from Stability Pool
+     * @param getWithdrawId Optional storage slot to retrieve the amount of LUSD to withdraw from
      * @param setWithdrawId Optional storage slot to store the withdrawn LUSD
      * @param setEthGainId Optional storage slot to store any ETH gains in
      * @param setLqtyGainId Optional storage slot to store any LQTY gains in
     */
     function stabilityWithdraw(
         uint amount,
+        uint getWithdrawId,
         uint setWithdrawId,
         uint setEthGainId,
         uint setLqtyGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        amount = getUint(getWithdrawId, amount);
+
+        amount = amount == uint(-1) ? stabilityPool.getCompoundedLUSDDeposit(address(this)) : amount;
+
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
         
@@ -324,8 +343,8 @@ abstract contract LiquityResolver is Events, Helpers {
         setUint(setEthGainId, ethGain);
         setUint(setLqtyGainId, lqtyGain);
 
-        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, ethGain, lqtyGain, setWithdrawId, setEthGainId, setLqtyGainId);
+        _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, getWithdrawId, setWithdrawId, setEthGainId, setLqtyGainId);
     }
 
     /**
@@ -341,7 +360,7 @@ abstract contract LiquityResolver is Events, Helpers {
         uint amount = stabilityPool.getDepositorETHGain(address(this));
         stabilityPool.withdrawETHGainToTrove(upperHint, lowerHint);
         _eventName = "LogStabilityMoveEthGainToTrove(address,uint256)";
-        _eventParam = abi.encode(msg.sender, amount);
+        _eventParam = abi.encode(address(this), amount);
     }
     /* End: Stability Pool */
 
@@ -351,52 +370,62 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Sends LQTY tokens from user to Staking Pool
      * @notice Stake LQTY in Staking Pool
      * @param amount Amount of LQTY to stake
-     * @param getStakeId Optional storage slot to retrieve the LQTY from
+     * @param getStakeId Optional storage slot to retrieve the amount of LQTY to stake
+     * @param setStakeId Optional storage slot to store the final staked amount (can differ if requested with max balance: uint(-1))
      * @param setEthGainId Optional storage slot to store any ETH gains
      * @param setLusdGainId Optional storage slot to store any LUSD gains
     */
     function stake(
         uint amount,
         uint getStakeId,
+        uint setStakeId,
         uint setEthGainId,
         uint setLusdGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        amount = getUint(getStakeId, amount);
+        amount = amount == uint(-1) ? lqtyToken.balanceOf(address(this)) : amount;
+
         uint ethGain = staking.getPendingETHGain(address(this));
         uint lusdGain = staking.getPendingLUSDGain(address(this));
 
-        amount = getUint(getStakeId, amount);
         staking.stake(amount);
+        setUint(setStakeId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLusdGainId, lusdGain);
 
-        _eventName = "LogStake(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, getStakeId, setEthGainId, setLusdGainId);
+        _eventName = "LogStake(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, getStakeId, setStakeId, setEthGainId, setLusdGainId);
     }
 
     /**
      * @dev Sends LQTY tokens from Staking Pool to user
      * @notice Unstake LQTY in Staking Pool
      * @param amount Amount of LQTY to unstake
-     * @param setStakeId Optional storage slot to store the unstaked LQTY
+     * @param getUnstakeId Optional storage slot to retrieve the amount of LQTY to unstake
+     * @param setUnstakeId Optional storage slot to store the unstaked LQTY
      * @param setEthGainId Optional storage slot to store any ETH gains
      * @param setLusdGainId Optional storage slot to store any LUSD gains
     */
     function unstake(
         uint amount,
-        uint setStakeId,
+        uint getUnstakeId,
+        uint setUnstakeId,
         uint setEthGainId,
         uint setLusdGainId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        amount = getUint(getUnstakeId, amount);
+        amount = amount == uint(-1) ? staking.stakes(address(this)) : amount;
+
         uint ethGain = staking.getPendingETHGain(address(this));
         uint lusdGain = staking.getPendingLUSDGain(address(this));
 
         staking.unstake(amount);
-        setUint(setStakeId, amount);
+        setUint(setUnstakeId, amount);
         setUint(setEthGainId, ethGain);
         setUint(setLusdGainId, lusdGain);
 
-        _eventName = "LogUnstake(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, amount, setStakeId, setEthGainId, setLusdGainId);
+        _eventName = "LogUnstake(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(this), amount, getUnstakeId, setUnstakeId, setEthGainId, setLusdGainId);
     }
 
     /**
@@ -418,7 +447,7 @@ abstract contract LiquityResolver is Events, Helpers {
         setUint(setLusdGainId, lusdGain);
         
         _eventName = "LogClaimStakingGains(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(msg.sender, ethGain, lusdGain, setEthGainId, setLusdGainId);
+        _eventParam = abi.encode(address(this), ethGain, lusdGain, setEthGainId, setLusdGainId);
     }
     /* End: Staking */
 
