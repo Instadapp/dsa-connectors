@@ -8,8 +8,8 @@ contract Events {
         uint maxFeePercentage,
         uint depositAmount,
         uint borrowAmount,
-        uint[] getIds,
-        uint[] setIds
+        uint256[] getIds,
+        uint256[] setIds
     );
     event LogClose(address indexed borrower, uint setId);
     event LogDeposit(address indexed borrower, uint amount, uint getId, uint setId);
@@ -23,8 +23,8 @@ contract Events {
         uint withdrawAmount,
         uint borrowAmount,
         uint repayAmount,
-        uint[] getIds,
-        uint[] setIds
+        uint256[] getIds,
+        uint256[] setIds
     );
     event LogClaimCollateralFromRedemption(address indexed borrower, uint amount, uint setId);
 
@@ -52,7 +52,7 @@ contract Events {
     event LogStabilityMoveEthGainToTrove(address indexed borrower, uint amount);
 
     /* Staking */
-    event LogStake(address indexed borrower, uint amount, uint setStakeId, uint getStakeId, uint setEthGainId, uint setLusdGainId);
+    event LogStake(address indexed borrower, uint amount, uint getStakeId, uint setStakeId, uint setEthGainId, uint setLusdGainId);
     event LogUnstake(address indexed borrower, uint amount, uint getUnstakeId, uint setUnstakeId, uint setEthGainId, uint setLusdGainId);
     event LogClaimStakingGains(address indexed borrower, uint ethGain, uint lusdGain, uint setEthGainId, uint setLusdGainId);
 }

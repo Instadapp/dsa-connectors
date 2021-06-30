@@ -38,8 +38,8 @@ abstract contract LiquityResolver is Events, Helpers {
         uint borrowAmount,
         address upperHint,
         address lowerHint,
-        uint[] getIds,
-        uint[] setIds
+        uint[] memory getIds,
+        uint[] memory setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
 
         depositAmount = getUint(getIds[0], depositAmount);
@@ -139,7 +139,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param amount Amount of LUSD to borrow
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param setId Optional storage slot to store the borrowed LUSD in
+     * @param getId Optional storage slot to retrieve the amount of LUSD to borrow
+     * @param setId Optional storage slot to store the final amount of LUSD borrowed
     */
     function borrow(
         uint maxFeePercentage,
@@ -165,7 +166,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @param amount Amount of LUSD to repay
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve the LUSD from
+     * @param getId Optional storage slot to retrieve the amount of LUSD from
+     * @param setId Optional storage slot to store the final amount of LUSD repaid
     */
     function repay(
         uint amount,
@@ -211,8 +213,8 @@ abstract contract LiquityResolver is Events, Helpers {
         uint repayAmount,
         address upperHint,
         address lowerHint,
-        uint[] getIds,
-        uint[] setIds
+        uint[] memory getIds,
+        uint[] memory setIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         AdjustTrove memory adjustTrove;
 
@@ -276,7 +278,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @notice Deposit LUSD into Stability Pool
      * @param amount Amount of LUSD to deposit into Stability Pool
      * @param frontendTag Address of the frontend to make this deposit against (determines the kickback rate of rewards)
-     * @param getDepositId Optional storage slot to retrieve the LUSD from
+     * @param getDepositId Optional storage slot to retrieve the amount of LUSD from
+     * @param setDepositId Optional storage slot to store the final amount of LUSD deposited
      * @param setEthGainId Optional storage slot to store any ETH gains in
      * @param setLqtyGainId Optional storage slot to store any LQTY gains in
     */
@@ -312,6 +315,7 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Withdraw user deposited LUSD from Stability Pool
      * @notice Withdraw LUSD from Stability Pool
      * @param amount Amount of LUSD to withdraw from Stability Pool
+     * @param getWithdrawId Optional storage slot to retrieve the amount of LUSD to withdraw from
      * @param setWithdrawId Optional storage slot to store the withdrawn LUSD
      * @param setEthGainId Optional storage slot to store any ETH gains in
      * @param setLqtyGainId Optional storage slot to store any LQTY gains in
@@ -325,7 +329,7 @@ abstract contract LiquityResolver is Events, Helpers {
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getWithdrawId, amount);
 
-        amount = amount == uint(-1) ? StabilityPoolLike.getCompoundedLUSDDeposit(address(this)) : amount;
+        amount = amount == uint(-1) ? stabilityPool.getCompoundedLUSDDeposit(address(this)) : amount;
 
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
         uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
@@ -366,7 +370,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Sends LQTY tokens from user to Staking Pool
      * @notice Stake LQTY in Staking Pool
      * @param amount Amount of LQTY to stake
-     * @param getStakeId Optional storage slot to retrieve the LQTY from
+     * @param getStakeId Optional storage slot to retrieve the amount of LQTY to stake
+     * @param setStakeId Optional storage slot to store the final staked amount (can differ if requested with max balance: uint(-1))
      * @param setEthGainId Optional storage slot to store any ETH gains
      * @param setLusdGainId Optional storage slot to store any LUSD gains
     */
@@ -396,7 +401,8 @@ abstract contract LiquityResolver is Events, Helpers {
      * @dev Sends LQTY tokens from Staking Pool to user
      * @notice Unstake LQTY in Staking Pool
      * @param amount Amount of LQTY to unstake
-     * @param setStakeId Optional storage slot to store the unstaked LQTY
+     * @param getUnstakeId Optional storage slot to retrieve the amount of LQTY to unstake
+     * @param setUnstakeId Optional storage slot to store the unstaked LQTY
      * @param setEthGainId Optional storage slot to store any ETH gains
      * @param setLusdGainId Optional storage slot to store any LUSD gains
     */
