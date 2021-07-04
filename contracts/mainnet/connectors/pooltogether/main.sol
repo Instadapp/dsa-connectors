@@ -10,7 +10,7 @@ pragma solidity ^0.7.0;
  import { PrizePoolInterface } from "./interface.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
-import ( Events ) from "./events.sol";
+import { Events } from "./events.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 
@@ -21,6 +21,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
      * @dev Deposit into Prize Pool
      * @notice Deposit a token into a prize pool
      * @param prizePool PrizePool address to deposit to
+     * @param token Token to deposit
      * @param to Address to whom the controlled tokens should be minted
      * @param amount The amount of the underlying asset the user wishes to deposit. The Prize Pool contract should have been pre-approved by the caller to transfer the underlying ERC20 tokens.
      * @param controlledToken The address of the token that they wish to mint. For our default Prize Strategy this will either be the Ticket address or the Sponsorship address.  Those addresses can be looked up on the Prize Strategy.
@@ -31,7 +32,8 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
     function depositTo(
         address prizePool,
-        address: to,
+        address token,
+        address to,
         uint256 amount,
         address controlledToken,
         address referrer,
@@ -43,6 +45,8 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
 
         // Approve prizePool
+        TokenInterface tokenContract = TokenInterface(token);
+        tokenContract.approve(prizePool, _amount);
 
         prizePoolContract.depositTo(to, amount, controlledToken, referrer);
 
@@ -74,7 +78,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
 
         _eventName = "LogWithdrawInstantlyFrom(address,uint256,address,uint256,uint256,uint256)";
-        _eventParams = abi.encode(address(from), amount, address(controlledToken), maximumExitFee, getId, setId);
+        _eventParam = abi.encode(address(from), amount, address(controlledToken), maximumExitFee, getId, setId);
     }
 
 
