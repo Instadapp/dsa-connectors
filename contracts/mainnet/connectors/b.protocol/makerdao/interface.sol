@@ -18,7 +18,8 @@ interface ManagerLike {
 }
 
 interface BManagerLike is ManagerLike {
-    function cushion(uint) external view returns(uint);
+    function cushion(uint) external view returns (uint);
+    function cdpi() external view returns (uint);
 }
 
 interface VatLike {
