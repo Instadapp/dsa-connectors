@@ -24,4 +24,6 @@ interface AccountInterface {
     function enable(address) external;
     function disable(address) external;
     function isAuth(address) external view returns (bool);
+    function isBeta() external view returns (bool);
+    function toggleBeta() external;
 }
