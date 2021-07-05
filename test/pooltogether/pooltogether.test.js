@@ -36,6 +36,7 @@ describe("PoolTogether", function () {
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
 
+        // Deploy and enable Compound Connector
         connector = await deployAndEnableConnector({
             connectorName,
             contractArtifact: connectV2CompoundArtifacts,
@@ -43,6 +44,7 @@ describe("PoolTogether", function () {
             connectors: instaConnectorsV2
         })
 
+        // Deploy and enable Pool Together Connector
         ptConnector = await deployAndEnableConnector({
             connectorName: ptConnectorName,
             contractArtifact: connectV2PoolTogetherArtifacts,
@@ -105,26 +107,33 @@ describe("PoolTogether", function () {
                 args: [prizePool, dsaWallet0.address, amount, controlledToken, constants.address_zero, setId, 0]
             }
         ]
+        // Before Spell
+        // DAI balance 0
         let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
         let daiBalance = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance before: ", daiBalance.toString());
+        console.log("Before spell:");
+        console.log("\tDAI balance before: ", daiBalance.toString());
 
+        // PT DAI Ticket balance is 0
         let cToken = await ethers.getContractAt(abis.basic.erc20, controlledToken)
         const balance = await cToken.balanceOf(dsaWallet0.address)
         const tokenName = await cToken.name()
-        console.log("PTDAI balance before: ", balance.toString(), tokenName)
+        console.log("\tPTDAI balance before: ", balance.toString(), tokenName)
 
+        // Run spell transaction
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
         const receipt = await tx.wait()
 
+        // After spell
         // Expect DAI balance to equal 0
         daiBalance = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance after: ", daiBalance.toString());
+        console.log("After spell:");
+        console.log("\tDAI balance after: ", daiBalance.toString());
         expect(daiBalance).to.be.eq(ethers.utils.parseEther("0"));
 
         // Expect PT DAI Ticket to equal 100
         const balanceAfter = await cToken.balanceOf(dsaWallet0.address)
-        console.log("PTDAI balance after: ", balanceAfter.toString(), tokenName)
+        console.log("\tPTDAI balance after: ", balanceAfter.toString(), tokenName)
         expect(balanceAfter.toString()).to.be.eq(ethers.utils.parseEther("100"));
 
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
@@ -139,26 +148,34 @@ describe("PoolTogether", function () {
                 args: [prizePool, dsaWallet0.address, amount, controlledToken, amount, 0, 0]
             }
         ]
+        
+        // Before spell
+        // DAI balance is 0
         let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
         let daiBalance = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance before: ", daiBalance.toString());
+        console.log("Before Spell:")
+        console.log("\tDAI balance before: ", daiBalance.toString());
 
+        // PT Dai Ticket is 100
         let cToken = await ethers.getContractAt(abis.basic.erc20, controlledToken)
         const balance = await cToken.balanceOf(dsaWallet0.address)
         const tokenName = await cToken.name()
-        console.log("PTDAI balance before: ", balance.toString(), tokenName)
+        console.log("\tPTDAI balance before: ", balance.toString(), tokenName)
 
+        // Run spell transaction
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
         const receipt = await tx.wait()
 
-        // Expect DAI balance to be greater than 90
+        // After spell
+        // Expect DAI balance to be greater than 90, because of early withdrawal fee
         daiBalance = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance after: ", daiBalance.toString());
+        console.log("After spell: ");
+        console.log("\tDAI balance after: ", daiBalance.toString());
         expect(daiBalance).to.be.gt(ethers.utils.parseEther("90"));
 
         // Expect PT Dai Ticket to equal 0
         const balanceAfter = await cToken.balanceOf(dsaWallet0.address)
-        console.log("PTDAI balance after: ", balanceAfter.toString(), tokenName)
+        console.log("\tPTDAI balance after: ", balanceAfter.toString(), tokenName)
         expect(balanceAfter.toNumber()).to.be.eq(0);
     });
   })
