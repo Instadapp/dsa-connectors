@@ -21,7 +21,6 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
      * @dev Deposit into Prize Pool
      * @notice Deposit a token into a prize pool
      * @param prizePool PrizePool address to deposit to
-     * @param token Token to deposit
      * @param to Address to whom the controlled tokens should be minted
      * @param amount The amount of the underlying asset the user wishes to deposit. The Prize Pool contract should have been pre-approved by the caller to transfer the underlying ERC20 tokens.
      * @param controlledToken The address of the token that they wish to mint. For our default Prize Strategy this will either be the Ticket address or the Sponsorship address.  Those addresses can be looked up on the Prize Strategy.
@@ -32,7 +31,6 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
     function depositTo(
         address prizePool,
-        address token,
         address to,
         uint256 amount,
         address controlledToken,
@@ -43,22 +41,24 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         uint _amount = getUint(getId, amount);
 
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
+        address prizePoolToken = prizePoolContract.token();
 
         // Approve prizePool
-        TokenInterface tokenContract = TokenInterface(token);
+        TokenInterface tokenContract = TokenInterface(prizePoolToken);
         tokenContract.approve(prizePool, _amount);
 
-        prizePoolContract.depositTo(to, amount, controlledToken, referrer);
+        prizePoolContract.depositTo(to, _amount, controlledToken, referrer);
 
         setUint(setId, _amount);
 
-        _eventName = "LogDepositTo(address,uint256,address,address,uint256, uint256)";
-        _eventParam = abi.encode(address(to), amount, address(controlledToken), address(referrer), getId, setId);
+        _eventName = "LogDepositTo(address,address,uint256,address,address,uint256, uint256)";
+        _eventParam = abi.encode(address(prizePool), address(to), _amount, address(controlledToken), address(referrer), getId, setId);
     }
 
     /**
      * @dev Withdraw from Prize Pool
      * @notice Withdraw a token from a prize pool
+     * @param prizePool PrizePool address to deposit to
      * @param from The address to withdraw from. This means you can withdraw on another user's behalf if you have an allowance for the controlled token.
      * @param amount THe amount to withdraw
      * @param controlledToken The controlled token to withdraw from.
@@ -68,6 +68,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
     */
 
     function withdrawInstantlyFrom (
+        address prizePool,
         address from,
         uint256 amount,
         address controlledToken,
@@ -75,13 +76,17 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         uint256 getId,
         uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
+        uint _amount = getUint(getId, amount);
 
+        PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
 
-        _eventName = "LogWithdrawInstantlyFrom(address,uint256,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(from), amount, address(controlledToken), maximumExitFee, getId, setId);
+        prizePoolContract.withdrawInstantlyFrom(from, _amount, controlledToken, maximumExitFee);
+
+        setUint(setId, _amount);
+
+        _eventName = "LogWithdrawInstantlyFrom(address,address,uint256,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(prizePool), address(from), _amount, address(controlledToken), maximumExitFee, getId, setId);
     }
-
-
 }
 
 contract ConnectV2PoolTogether is PoolTogetherResolver {
