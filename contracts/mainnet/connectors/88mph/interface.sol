@@ -5,6 +5,8 @@ interface IDInterest {
     function deposit(uint256 amount, uint256 maturationTimestamp) external;
 
     function withdraw(uint256 depositID, uint256 fundingID) external;
+
+    function earlyWithdraw(uint256 depositID, uint256 fundingID) external;
 }
 
 interface IVesting {
