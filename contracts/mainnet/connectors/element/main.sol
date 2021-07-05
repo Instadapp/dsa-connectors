@@ -1,12 +1,11 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Authority.
- * @dev Manage Authorities to DSA.
+ * @title Element.
+ * @dev Manage Element to DSA.
  */
 
 import {TokenInterface} from "../../common/interfaces.sol";
-import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
 import {ITranche} from "./interface.sol";
 
