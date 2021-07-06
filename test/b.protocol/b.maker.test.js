@@ -48,6 +48,13 @@ describe("B.Maker", function () {
         console.log("Connector address", connector.address)
   })
 
+  it("test veryClose.", async function () {
+    expect(veryClose(1000001, 1000000)).to.be.true
+    expect(veryClose(1000000, 1000001)).to.be.true    
+    expect(veryClose(1003000, 1000001)).to.be.false
+    expect(veryClose(1000001, 1000300)).to.be.false        
+  });
+
   it("Should have contracts deployed.", async function () {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
@@ -183,6 +190,32 @@ describe("B.Maker", function () {
         expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
         expect(urnData[1]).to.be.equal(await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("5500"))) // art        
         expect(await daiWeb3Contract.methods.balanceOf(dsaWallet0.address).call()).to.be.equal(ethers.utils.parseEther("5500"))
+    });
+
+    it("Should depositAndBorrow", async function () {
+        const borrowAmount = ethers.utils.parseEther("1000") // 500 dai
+        const depositAmount = ethers.utils.parseEther("1") // 1 dai
+        
+        const setId = "83478237"
+
+        const spells = [
+            {
+                connector: connectorName,
+                method: "depositAndBorrow",
+                args: [vault, depositAmount, borrowAmount, 0, 0, 0, 0]
+            }
+        ]
+
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        const urnData = await vatWeb3Contract.methods.urns(ilk, urn).call()
+        expect(urnData[0]).to.be.equal(ethers.utils.parseEther("7")) // ink
+        expect(await daiWeb3Contract.methods.balanceOf(dsaWallet0.address).call()).to.be.equal(ethers.utils.parseEther("6500"))
+        // calculation is not precise as the jug was dripped
+        expect(veryClose(urnData[1], await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("6500")))).to.be.true    
+        //expect(urnData[1]).to.be.equal(await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("6500"))) // art        
+        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1"))        
     });    
   })
 })
@@ -196,3 +229,15 @@ async function daiToArt(vatWeb3Contract, ilk, dai) {
     return art.add(1)
 }
 
+function veryClose(n1, n2) {
+    n1 = web3.utils.toBN(n1)
+    n2 = web3.utils.toBN(n2)
+
+    _10000 = web3.utils.toBN(10000)
+    _9999 = web3.utils.toBN(9999)    
+
+    if(n1.mul(_10000).lt(n2.mul(_9999))) return false
+    if(n2.mul(_10000).lt(n1.mul(_9999))) return false
+
+    return true
+}
