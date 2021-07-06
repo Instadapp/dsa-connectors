@@ -18,14 +18,14 @@ const connectorMakerArtifacts = require("../../artifacts/contracts/mainnet/conne
 describe("B.Maker", function () {
     const connectorName = "B.MAKER-TEST-A"
     
-    let dsaWallet0
-    let dsaWallet1    
+    let dsaWallet0;
+    let dsaWallet1;   
     let masterSigner;
     let instaConnectorsV2;
     let connector;
-    let managerWeb3Contract;
-    let vatWeb3Contract;
-    let daiWeb3Contract;
+    let manager;
+    let vat;
+    let dai;
     
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -39,12 +39,9 @@ describe("B.Maker", function () {
             connectors: instaConnectorsV2
         })
 
-        const cdpManagerArtifact = await hre.artifacts.readArtifact("BManagerLike");
-        const vatArtifact = await hre.artifacts.readArtifact("../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/interface.sol:VatLike");
-
-        managerWeb3Contract = new web3.eth.Contract(cdpManagerArtifact.abi, "0x3f30c2381CD8B917Dd96EB2f1A4F96D91324BBed")
-        vatWeb3Contract = new web3.eth.Contract(vatArtifact.abi, await managerWeb3Contract.methods.vat().call())
-        daiWeb3Contract = new web3.eth.Contract(abis.basic.erc20, tokens.dai.address)
+        manager = await ethers.getContractAt("BManagerLike", "0x3f30c2381CD8B917Dd96EB2f1A4F96D91324BBed")
+        vat = await ethers.getContractAt("../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/interface.sol:VatLike", await manager.vat())
+        dai = await ethers.getContractAt("../artifacts/contracts/mainnet/common/interfaces.sol:TokenInterface", tokens.dai.address)
 
         console.log("Connector address", connector.address)
   })
@@ -93,7 +90,7 @@ describe("B.Maker", function () {
     let urn
 
     it("Should open ETH-A vault Maker", async function () {
-        vault = Number(await managerWeb3Contract.methods.cdpi().call()) + 1
+        vault = Number(await manager.cdpi()) + 1
         const spells = [
             {
                 connector: connectorName,
@@ -105,12 +102,12 @@ describe("B.Maker", function () {
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
         const receipt = await tx.wait()
         
-        expect(await managerWeb3Contract.methods.owns(vault).call()).to.be.equal(dsaWallet0.address)
+        expect(await manager.owns(vault)).to.be.equal(dsaWallet0.address)
 
-        ilk = await managerWeb3Contract.methods.ilks(vault).call()
+        ilk = await manager.ilks(vault)
         expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
 
-        urn = await managerWeb3Contract.methods.urns(vault).call()        
+        urn = await manager.urns(vault)        
     });
 
     it("Should deposit", async function () {
@@ -130,7 +127,7 @@ describe("B.Maker", function () {
 
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("3"))
 
-        const urnData = await vatWeb3Contract.methods.urns(ilk, urn).call()
+        const urnData = await vat.urns(ilk, urn)
         expect(urnData[0]).to.be.equal(amount) // ink
         expect(urnData[1]).to.be.equal("0") // art        
 
@@ -153,7 +150,7 @@ describe("B.Maker", function () {
 
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("4"))
 
-        const urnData = await vatWeb3Contract.methods.urns(ilk, urn).call()
+        const urnData = await vat.urns(ilk, urn)
         expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
         expect(urnData[1]).to.be.equal("0") // art        
 
@@ -174,11 +171,11 @@ describe("B.Maker", function () {
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
         const receipt = await tx.wait()
 
-        const urnData = await vatWeb3Contract.methods.urns(ilk, urn).call()
+        const urnData = await vat.urns(ilk, urn)
         expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
-        expect(urnData[1]).to.be.equal(await daiToArt(vatWeb3Contract, ilk, amount)) // art
+        expect(urnData[1]).to.be.equal(await daiToArt(vat, ilk, amount)) // art
         
-        expect(await daiWeb3Contract.methods.balanceOf(dsaWallet0.address).call()).to.be.equal(amount)
+        expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(amount)
     });
 
     it("Should repay", async function () {
@@ -196,10 +193,10 @@ describe("B.Maker", function () {
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
         const receipt = await tx.wait()
 
-        const urnData = await vatWeb3Contract.methods.urns(ilk, urn).call()
+        const urnData = await vat.urns(ilk, urn)
         expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
-        expect(urnData[1]).to.be.equal(await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("5500"))) // art        
-        expect(await daiWeb3Contract.methods.balanceOf(dsaWallet0.address).call()).to.be.equal(ethers.utils.parseEther("5500"))
+        expect(urnData[1]).to.be.equal(await daiToArt(vat, ilk, ethers.utils.parseEther("5500"))) // art        
+        expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("5500"))
     });
 
     it("Should depositAndBorrow", async function () {
@@ -219,12 +216,11 @@ describe("B.Maker", function () {
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
         const receipt = await tx.wait()
 
-        const urnData = await vatWeb3Contract.methods.urns(ilk, urn).call()
+        const urnData = await vat.urns(ilk, urn)
         expect(urnData[0]).to.be.equal(ethers.utils.parseEther("7")) // ink
-        expect(await daiWeb3Contract.methods.balanceOf(dsaWallet0.address).call()).to.be.equal(ethers.utils.parseEther("6500"))
+        expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("6500"))
         // calculation is not precise as the jug was dripped
-        expect(veryClose(urnData[1], await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("6500")))).to.be.true    
-        //expect(urnData[1]).to.be.equal(await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("6500"))) // art        
+        expect(veryClose(urnData[1], await daiToArt(vat, ilk, ethers.utils.parseEther("6500")))).to.be.true    
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1"))        
     });
 
@@ -242,12 +238,12 @@ describe("B.Maker", function () {
         let tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
         let receipt = await tx.wait()
         
-        expect(await managerWeb3Contract.methods.owns(newVault).call()).to.be.equal(dsaWallet1.address)
+        expect(await manager.owns(newVault)).to.be.equal(dsaWallet1.address)
 
-        ilk = await managerWeb3Contract.methods.ilks(newVault).call()
+        ilk = await manager.ilks(newVault)
         expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
 
-        urn = await managerWeb3Contract.methods.urns(newVault).call() 
+        urn = await manager.urns(newVault) 
 
         // deposit and borrow
         const borrowAmount = ethers.utils.parseEther("6000") // 6000 dai
@@ -302,13 +298,13 @@ describe("B.Maker", function () {
         tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
         receipt = await tx.wait()
 
-        expect(await managerWeb3Contract.methods.owns(newVault).call()).not.to.be.equal(dsaWallet1.address)        
+        expect(await manager.owns(newVault)).not.to.be.equal(dsaWallet1.address)        
     });    
   })
 })
 
-async function daiToArt(vatWeb3Contract, ilk, dai) {
-    const ilks = await vatWeb3Contract.methods.ilks(ilk).call()
+async function daiToArt(vat, ilk, dai) {
+    const ilks = await vat.ilks(ilk)
     const rate = ilks[1] // second parameter
     const _1e27 = ethers.utils.parseEther("1000000000") // 1e9 * 1e18
     const art = dai.mul(_1e27).div(rate)
