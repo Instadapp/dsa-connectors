@@ -19,6 +19,7 @@ describe("B.Maker", function () {
     const connectorName = "B.MAKER-TEST-A"
     
     let dsaWallet0
+    let dsaWallet1    
     let masterSigner;
     let instaConnectorsV2;
     let connector;
@@ -66,6 +67,9 @@ describe("B.Maker", function () {
     it("Should build DSA v2", async function () {
         dsaWallet0 = await buildDSAv2(wallet0.address)
         expect(!!dsaWallet0.address).to.be.true;
+
+        dsaWallet1 = await buildDSAv2(wallet1.address)
+        expect(!!dsaWallet1.address).to.be.true;        
     });
 
     it("Deposit ETH into DSA wallet", async function () {
@@ -74,6 +78,12 @@ describe("B.Maker", function () {
             value: ethers.utils.parseEther("10")
         });
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+
+        await wallet1.sendTransaction({
+            to: dsaWallet1.address,
+            value: ethers.utils.parseEther("10")
+        });
+        expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("10"));        
     });
   });
 
@@ -193,7 +203,7 @@ describe("B.Maker", function () {
     });
 
     it("Should depositAndBorrow", async function () {
-        const borrowAmount = ethers.utils.parseEther("1000") // 500 dai
+        const borrowAmount = ethers.utils.parseEther("1000") // 1000 dai
         const depositAmount = ethers.utils.parseEther("1") // 1 dai
         
         const setId = "83478237"
@@ -216,6 +226,83 @@ describe("B.Maker", function () {
         expect(veryClose(urnData[1], await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("6500")))).to.be.true    
         //expect(urnData[1]).to.be.equal(await daiToArt(vatWeb3Contract, ilk, ethers.utils.parseEther("6500"))) // art        
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1"))        
+    });
+
+    it("Should close", async function () {
+        // open a new vault
+        const newVault = vault + 1
+        let spells = [
+            {
+                connector: connectorName,
+                method: "open",
+                args: ["ETH-A"]
+            }
+        ]
+
+        let tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+        let receipt = await tx.wait()
+        
+        expect(await managerWeb3Contract.methods.owns(newVault).call()).to.be.equal(dsaWallet1.address)
+
+        ilk = await managerWeb3Contract.methods.ilks(newVault).call()
+        expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
+
+        urn = await managerWeb3Contract.methods.urns(newVault).call() 
+
+        // deposit and borrow
+        const borrowAmount = ethers.utils.parseEther("6000") // 6000 dai
+        const depositAmount = ethers.utils.parseEther("5") // 5 ETH
+        
+        spells = [
+            {
+                connector: connectorName,
+                method: "depositAndBorrow",
+                args: [newVault, depositAmount, borrowAmount, 0, 0, 0, 0]
+            }
+        ]
+
+        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+        receipt = await tx.wait()
+
+        const setId = 0
+
+        // repay borrow
+        spells = [
+            {
+                connector: connectorName,
+                method: "payback",
+                args: [newVault, borrowAmount, 0, setId]
+            }
+        ]
+
+        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+        receipt = await tx.wait()
+
+        // withdraw deposit
+        spells = [
+            {
+                connector: connectorName,
+                method: "withdraw",
+                args: [newVault, depositAmount, 0, setId]
+            }
+        ]
+
+        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+        receipt = await tx.wait()
+
+        // close
+        spells = [
+            {
+                connector: connectorName,
+                method: "close",
+                args: [newVault]
+            }
+        ]
+
+        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+        receipt = await tx.wait()
+
+        expect(await managerWeb3Contract.methods.owns(newVault).call()).not.to.be.equal(dsaWallet1.address)        
     });    
   })
 })
