@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Authority.
+ * @title Beta Mode.
  * @dev Manage Authorities to DSA.
  */
 
