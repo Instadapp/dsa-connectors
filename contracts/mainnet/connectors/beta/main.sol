@@ -8,7 +8,7 @@ pragma solidity ^0.7.0;
 import { AccountInterface } from "../../common/interfaces.sol";
 import { Events } from "./events.sol";
 
-abstract contract AuthorityResolver is Events {
+abstract contract Resolver is Events {
     /**
      * @dev Enable beta mode
      * @notice enabling beta mode gives early access to new/risky features
