@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 
 /**
  * @title Beta Mode.
- * @dev Manage Authorities to DSA.
+ * @dev Toggle Beta mode for DSA.
  */
 
 import { AccountInterface } from "../../common/interfaces.sol";
