@@ -54,6 +54,7 @@ interface StabilityPoolLike {
     function withdrawETHGainToTrove(address _upperHint, address _lowerHint) external;
     function getDepositorETHGain(address _depositor) external view returns (uint);
     function getDepositorLQTYGain(address _depositor) external view returns (uint);
+    function getCompoundedLUSDDeposit(address _depositor) external view returns (uint);
 }
 
 interface StakingLike {
@@ -61,6 +62,7 @@ interface StakingLike {
     function unstake(uint _LQTYamount) external;
     function getPendingETHGain(address _user) external view returns (uint);
     function getPendingLUSDGain(address _user) external view returns (uint);
+    function stakes(address owner) external view returns (uint);
 }
 
 interface CollateralSurplusLike { 

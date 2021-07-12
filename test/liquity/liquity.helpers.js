@@ -50,10 +50,11 @@ const openTroveSpell = async (
       borrowAmount,
       upperHint,
       lowerHint,
-      0,
-      0,
+      [0, 0],
+      [0, 0],
     ],
   };
+
   return await dsa
     .connect(signer)
     .cast(...encodeSpells([openTroveSpell]), address, {
