@@ -37,7 +37,7 @@ abstract contract AaveResolver is Events, Helpers {
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
-            tokenContract.approve(aaveProvider.getLendingPoolCore(), _amt);
+            approve(tokenContract, aaveProvider.getLendingPoolCore(), _amt);
         }
 
         aave.deposit{value: ethAmt}(token, _amt, referralCode);
@@ -129,7 +129,7 @@ abstract contract AaveResolver is Events, Helpers {
         if (token == ethAddr) {
             ethAmt = _amt;
         } else {
-            TokenInterface(token).approve(aaveProvider.getLendingPoolCore(), _amt);
+            approve(TokenInterface(token), aaveProvider.getLendingPoolCore(), _amt);
         }
 
         aave.repay{value: ethAmt}(token, _amt, payable(address(this)));
@@ -166,5 +166,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV1 is AaveResolver {
-    string constant public name = "AaveV1-v1";
+    string constant public name = "AaveV1-v1.1";
 }

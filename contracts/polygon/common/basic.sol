@@ -32,13 +32,22 @@ abstract contract Basic is DSMath, Stores {
         _sell = sell == maticAddr ? TokenInterface(wmaticAddr) : TokenInterface(sell);
     }
 
+    function approve(TokenInterface token, address spender, uint256 amount) internal {
+        try token.approve(spender, amount) {
+
+        } catch {
+            token.approve(spender, 0);
+            token.approve(spender, amount);
+        }
+    }
+
     function convertMaticToWmatic(bool isMatic, TokenInterface token, uint amount) internal {
         if(isMatic) token.deposit{value: amount}();
     }
 
     function convertWmaticToMatic(bool isMatic, TokenInterface token, uint amount) internal {
         if(isMatic) {
-            token.approve(address(token), amount);
+            approve(token, address(token), amount);
             token.withdraw(amount);
         }
     }

@@ -40,7 +40,7 @@ abstract contract CompoundResolver is Events, Helpers {
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
-            tokenContract.approve(cToken, _amt);
+            approve(tokenContract, cToken, _amt);
             require(CTokenInterface(cToken).mint(_amt) == 0, "deposit-failed");
         }
         setUint(setId, _amt);
@@ -196,7 +196,7 @@ abstract contract CompoundResolver is Events, Helpers {
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
-            tokenContract.approve(cToken, _amt);
+            approve(tokenContract, cToken, _amt);
             require(cTokenContract.repayBorrow(_amt) == 0, "repay-failed.");
         }
         setUint(setId, _amt);
@@ -254,7 +254,7 @@ abstract contract CompoundResolver is Events, Helpers {
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
-            tokenContract.approve(cToken, _amt);
+            approve(tokenContract, cToken, _amt);
             require(ctokenContract.mint(_amt) == 0, "deposit-ctoken-failed.");
         }
 
@@ -385,7 +385,7 @@ abstract contract CompoundResolver is Events, Helpers {
         } else {
             TokenInterface tokenContract = TokenInterface(tokenToPay);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
-            tokenContract.approve(cTokenPay, _amt);
+            approve(tokenContract, cTokenPay, _amt);
             require(cTokenContract.liquidateBorrow(borrower, _amt, cTokenColl) == 0, "liquidate-failed");
         }
         
@@ -437,5 +437,5 @@ abstract contract CompoundResolver is Events, Helpers {
 }
 
 contract ConnectV2Compound is CompoundResolver {
-    string public name = "Compound-v1";
+    string public name = "Compound-v1.1";
 }

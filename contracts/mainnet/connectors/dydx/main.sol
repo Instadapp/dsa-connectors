@@ -36,11 +36,11 @@ abstract contract DyDxResolver is Events, Helpers {
             TokenInterface tokenContract = TokenInterface(wethAddr);
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             tokenContract.deposit{value: _amt}();
-            tokenContract.approve(address(solo), _amt);
+            approve(tokenContract, address(solo), _amt);
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
-            tokenContract.approve(address(solo), _amt);
+            approve(tokenContract, address(solo), _amt);
         }
 
         solo.operate(getAccountArgs(), getActionsArgs(_marketId, _amt, true));
@@ -77,7 +77,7 @@ abstract contract DyDxResolver is Events, Helpers {
 
         if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(wethAddr);
-            tokenContract.approve(address(tokenContract), _amt);
+            approve(tokenContract, address(tokenContract), _amt);
             tokenContract.withdraw(_amt);
         }
 
@@ -111,7 +111,7 @@ abstract contract DyDxResolver is Events, Helpers {
 
         if (token == ethAddr) {
             TokenInterface tokenContract = TokenInterface(wethAddr);
-            tokenContract.approve(address(tokenContract), _amt);
+            approve(tokenContract, address(tokenContract), _amt);
             tokenContract.withdraw(_amt);
         }
 
@@ -148,11 +148,11 @@ abstract contract DyDxResolver is Events, Helpers {
             TokenInterface tokenContract = TokenInterface(wethAddr);
             require(address(this).balance >= _amt, "not-enough-eth");
             tokenContract.deposit{value: _amt}();
-            tokenContract.approve(address(solo), _amt);
+            approve(tokenContract, address(solo), _amt);
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
-            tokenContract.approve(address(solo), _amt);
+            approve(tokenContract, address(solo), _amt);
         }
 
         solo.operate(getAccountArgs(), getActionsArgs(_marketId, _amt, true));

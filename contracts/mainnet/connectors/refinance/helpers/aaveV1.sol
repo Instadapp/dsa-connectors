@@ -102,7 +102,7 @@ contract AaveV1Helpers is protocolHelpers {
             if (isEth) {
                 ethAmt = _amt;
             } else {
-                token.approve(address(aaveCore), _amt);
+                approve(token, address(aaveCore), _amt);
             }
 
             transferFees(_token, feeAmt);
@@ -180,7 +180,7 @@ contract AaveV1Helpers is protocolHelpers {
             if (isEth) {
                 ethAmt = amt;
             } else {
-                token.approve(address(aaveCore), amt);
+                approve(token, address(aaveCore), amt);
             }
 
             aave.repay{value:ethAmt}(_token, amt, payable(address(this)));

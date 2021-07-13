@@ -3,10 +3,11 @@ pragma experimental ABIEncoderV2;
 
 /**
  * @title Instapool.
- * @dev Flash Loan in DSA.
+ * @dev Inbuilt Flash Loan in DSA
  */
 
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import { AccountInterface } from "./interfaces.sol";
@@ -20,10 +21,8 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
     /**
      * @dev Borrow Flashloan and Cast spells.
-     * @notice Borrows flashloan and cast the spells.
      * @param token Token Address.
      * @param amt Token Amount.
-     * @param route Route to borrow.
      * @param data targets & data for cast.
      */
     function flashBorrowAndCast(
@@ -31,25 +30,20 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         uint amt,
         uint route,
         bytes memory data
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable {
         AccountInterface(address(this)).enable(address(instaPool));
+        (string[] memory _targets, bytes[] memory callDatas) = abi.decode(data, (string[], bytes[]));
 
-        address[] memory tokens = new address[](1);
-        uint[] memory amts = new uint[](1);
-        tokens[0] = token;
-        amts[0] = amt;
+        bytes memory callData = abi.encodeWithSignature("cast(string[],bytes[],address)", _targets, callDatas, address(instaPool));
 
-        instaPool.initiateFlashLoan(tokens, amts, route, data);
+        instaPool.initiateFlashLoan(token, amt, route, callData);
 
+        emit LogFlashBorrow(token, amt);
         AccountInterface(address(this)).disable(address(instaPool));
-
-        _eventName = "LogFlashBorrow(address,uint256)";
-        _eventParam = abi.encode(token, amt);
     }
 
     /**
      * @dev Return token to InstaPool.
-     * @notice Payback borrowed flashloan.
      * @param token Token Address.
      * @param amt Token Amount.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
@@ -60,78 +54,24 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         uint amt,
         uint getId,
         uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable {
         uint _amt = getUint(getId, amt);
         
         IERC20 tokenContract = IERC20(token);
 
-        tokenContract.safeTransfer(address(instaPool), _amt);
+        if (token == ethAddr) {
+            Address.sendValue(payable(address(instaPool)), _amt);
+        } else {
+            tokenContract.safeTransfer(address(instaPool), _amt);
+        }
+
 
         setUint(setId, _amt);
 
-        _eventName = "LogFlashPayback(address,uint256)";
-        _eventParam = abi.encode(token, _amt);
-    }
-
-    /**
-     * @dev Borrow Flashloan and Cast spells.
-     * @notice Borrows multiple flashloan tokens and cast the spells.
-     * @param tokens Array of token Addresses.
-     * @param amts Array of token Amounts.
-     * @param route Route to borrow.
-     * @param data targets & data for cast.
-     */
-    function flashMultiBorrowAndCast(
-        address[] calldata tokens,
-        uint[] calldata amts,
-        uint route,
-        bytes calldata data
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        AccountInterface(address(this)).enable(address(instaPool));
-
-        instaPool.initiateFlashLoan(tokens, amts, route, data);
-
-        AccountInterface(address(this)).disable(address(instaPool));
-
-        _eventName = "LogFlashMultiBorrow(address[],uint256[])";
-        _eventParam = abi.encode(tokens, amts);
-    }
-
-    /**
-     * @dev Return Multiple token liquidity to InstaPool.
-     * @notice Payback borrowed multiple flashloan tokens.
-     * @param tokens Array of token addresses.
-     * @param amts Array of token amounts.
-     * @param getId get token amounts at this IDs from `InstaMemory` Contract.
-     * @param setId set token amounts at this IDs in `InstaMemory` Contract.
-    */
-    function flashMultiPayback(
-        address[] calldata tokens,
-        uint[] calldata amts,
-        uint[] calldata getId,
-        uint[] calldata setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _length = tokens.length;
-
-        uint[] memory _amts = new uint[](_length);
-
-        for (uint i = 0; i < _length; i++) {
-            uint _amt = getUint(getId[i], amts[i]);
-
-            _amts[i] = _amt;
-
-            IERC20 tokenContract = IERC20(tokens[i]);
-
-            tokenContract.safeTransfer(address(instaPool), _amt);
-
-            setUint(setId[i], _amt);
-        }
-
-        _eventName = "LogFlashMultiPayback(address[],uint256[])";
-        _eventParam = abi.encode(tokens, _amts);
+        emit LogFlashPayback(token, _amt);
     }
 }
 
 contract ConnectV2InstaPool is LiquidityResolver {
-    string public name = "Instapool-v1";
+    string public name = "Instapool-v1.1";
 }

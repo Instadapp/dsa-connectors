@@ -109,7 +109,7 @@ contract AaveV2Helpers is protocolHelpers {
 
             convertEthToWeth(isEth, token, _amt);
 
-            token.approve(address(aave), _amt);
+            approve(token, address(aave), _amt);
 
             aave.deposit(address(token), _amt, address(this), getReferralCode);
 
@@ -178,7 +178,7 @@ contract AaveV2Helpers is protocolHelpers {
 
             convertEthToWeth(isEth, token, _amt);
 
-            token.approve(address(aave), _amt);
+            approve(token, address(aave), _amt);
 
             aave.repay(address(token), _amt, rateMode, address(this));
         }

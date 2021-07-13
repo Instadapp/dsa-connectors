@@ -24,6 +24,12 @@ module.exports = {
     compilers: [
       {
         version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: false,
+            runs: 200,
+          },
+        },
       },
       {
         version: "0.6.0",
@@ -46,7 +52,7 @@ module.exports = {
       url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("34", "gwei")),
+      gasPrice: parseInt(utils.parseUnits("30", "gwei")),
     },
     hardhat: {
       forking: {

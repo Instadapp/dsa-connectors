@@ -71,7 +71,7 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
-        if (address(_sellAddr) == ethAddr) {
+        if (address(_sellAddr) == maticAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
             approve(TokenInterface(_sellAddr), oneInchAddr, oneInchData._sellAmt);
@@ -123,6 +123,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInch is OneInch {
-    string public name = "1Inch-v1.2";
+contract ConnectV2OneInchPolygon is OneInch {
+    string public name = "1Inch-v1";
 }
