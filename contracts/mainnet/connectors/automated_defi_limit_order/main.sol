@@ -60,20 +60,17 @@ abstract contract CompResolver is Events, Helpers {
         _eventParam = abi.encode(_tokenFrom, _tokenTo, _orderId);
     }
 
-    function _sellSlippageCheck(
+    function _calSlippageCheck(
         TokenInterface buyToken,
         TokenInterface sellToken,
         uint sellAmt,
-        uint buyAmt,
         uint unitAmt
-    ) internal {
+    ) internal view returns (uint _slippageAmt) {
         TokenInterface buyToken = TokenInterface(buyAddr);
         TokenInterface sellToken = TokenInterface(sellAddr);
         (uint _buyDec, uint _sellDec) = getTokensDec(buyToken, sellToken);
         uint _sellAmt18 = convertTo18(_sellDec, sellAmt);
-        uint _slippageAmt = convert18ToDec(_buyDec, wmul(unitAmt, _sellAmt18));
-
-        require(_slippageAmt <= buyAmt, "Too much slippage");
+        _slippageAmt = convert18ToDec(_buyDec, wmul(unitAmt, _sellAmt18));
     }
 
     function sell(
@@ -88,9 +85,9 @@ abstract contract CompResolver is Events, Helpers {
         string memory _eventName,
         bytes memory _eventParam
     ) {
-        uint buyAmt = limitOrderContract.sell(sellAddr, buyAddr, sellAmt, _orderId, address(this));
+        uint _slippageAmt = _calSlippageCheck(TokenInterface(buyAddr), TokenInterface(sellAddr), sellAmt, unitAmt);
 
-        _sellSlippageCheck(TokenInterface(buyAddr), TokenInterface(sellAddr), sellAmt, buyAmt, unitAmt);
+        uint buyAmt = limitOrderContract.sell(sellAddr, buyAddr, sellAmt, _slippageAmt, _orderId, address(this));
 
         _eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(buyAddr, sellAddr, buyAmt, sellAmt, 0, setId);
@@ -109,9 +106,9 @@ abstract contract CompResolver is Events, Helpers {
         string memory _eventName,
         bytes memory _eventParam
     ) {
-        uint buyAmt = limitOrderContract.sell(sellAddr, buyAddr, sellAmt, orderIds, distributions, units, address(this));
+        uint _slippageAmt = _calSlippageCheck(TokenInterface(buyAddr), TokenInterface(sellAddr), sellAmt, unitAmt);
 
-        _sellSlippageCheck(TokenInterface(buyAddr), TokenInterface(sellAddr), sellAmt, buyAmt, unitAmt);
+        uint buyAmt = limitOrderContract.sell(sellAddr, buyAddr, sellAmt, _slippageAmt, orderIds, distributions, units, address(this));
 
         _eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(buyAddr, sellAddr, buyAmt, sellAmt, 0, setId);
