@@ -412,7 +412,7 @@ abstract contract LiquityResolver is Events, Helpers {
         uint setUnstakeId,
         uint setEthGainId,
         uint setLusdGainId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getUnstakeId, amount);
         amount = amount == uint(-1) ? staking.stakes(address(this)) : amount;
 
