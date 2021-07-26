@@ -356,7 +356,7 @@ abstract contract LiquityResolver is Events, Helpers {
     function stabilityMoveEthGainToTrove(
         address upperHint,
         address lowerHint
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint amount = stabilityPool.getDepositorETHGain(address(this));
         stabilityPool.withdrawETHGainToTrove(upperHint, lowerHint);
         _eventName = "LogStabilityMoveEthGainToTrove(address,uint256)";
