@@ -437,7 +437,7 @@ abstract contract LiquityResolver is Events, Helpers {
     function claimStakingGains(
         uint setEthGainId,
         uint setLusdGainId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint ethGain = staking.getPendingETHGain(address(this));
         uint lusdGain = staking.getPendingLUSDGain(address(this));
 
