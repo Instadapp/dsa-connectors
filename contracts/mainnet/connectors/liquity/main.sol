@@ -326,7 +326,7 @@ abstract contract LiquityResolver is Events, Helpers {
         uint setWithdrawId,
         uint setEthGainId,
         uint setLqtyGainId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getWithdrawId, amount);
 
         amount = amount == uint(-1) ? stabilityPool.getCompoundedLUSDDeposit(address(this)) : amount;
