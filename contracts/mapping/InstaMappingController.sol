@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity ^0.7.0;
 
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -8,6 +7,10 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 interface IndexInterface {
     function master() external view returns (address);
+}
+
+interface ConnectorsInterface {
+    function chief(address) external view returns (bool);
 }
 
 contract InstaMappingController is Context {
@@ -18,6 +21,9 @@ contract InstaMappingController is Context {
 
     IndexInterface public constant instaIndex =
         IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
+    ConnectorsInterface public constant connectors =
+        ConnectorsInterface(0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11); // InstaConnectorsV2
+
 
     /**
      * @dev Emitted when `account` is granted `role`.
@@ -39,8 +45,8 @@ contract InstaMappingController is Context {
 
     modifier onlyMaster {
         require(
-            instaIndex.master() == _msgSender(),
-            "MappingController: sender must be master"
+            instaIndex.master() == _msgSender() || connectors.chief(_msgSender()),
+            "MappingController: sender must be master or chief"
         );
         _;
     }
