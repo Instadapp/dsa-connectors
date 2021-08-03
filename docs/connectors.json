@@ -36,6 +36,7 @@
     }
   },
   "mappings": {
-    "InstaMappingController": "0xDdd075D5e1024901E4038461e1e4BbC3A48a08d4"
+    "InstaMappingController": "0xDdd075D5e1024901E4038461e1e4BbC3A48a08d4",
+    "InstaReflexerGebMapping": "0x573e5132693C046D1A9F75Bac683889164bA41b4"
   }
 }
