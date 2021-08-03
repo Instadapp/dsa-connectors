@@ -97,13 +97,10 @@ abstract contract BMakerResolver is Helpers, Events {
         }
 
         approve(tokenContract, address(colAddr), _amt);
-        tokenJoinContract.join(address(this), _amt);
+        tokenJoinContract.join(urn, _amt);
 
-        VatLike(managerContract.vat()).frob( // TODO zelda - make manager.frob
-            ilk,
-            urn,
-            address(this),
-            address(this),
+        managerContract.frob(
+            _vault,
             toInt(convertTo18(tokenJoinContract.dec(), _amt)),
             0
         );
