@@ -17,9 +17,9 @@ interface MappingControllerInterface {
     function hasRole(address,address) external view returns (bool);
 }
 contract Helpers {
-    // TODO: thrilok, verify this address
-    ConnectorsInterface public constant connectors = ConnectorsInterface(0xFE2390DAD597594439f218190fC2De40f9Cf1179);
+    ConnectorsInterface public constant connectors = ConnectorsInterface(0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11); // InstaConnectorsV2
     IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
+    
     // TODO: add address for MappingController
     MappingControllerInterface public constant mappingController = MappingControllerInterface(address(0));
     uint public version = 1;
