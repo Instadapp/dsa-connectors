@@ -7,7 +7,7 @@ pragma solidity ^0.7.0;
 
  import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
  import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
- import { PrizePoolInterface } from "./interface.sol";
+ import { PrizePoolInterface, TokenFaucetInterface} from "./interface.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Events } from "./events.sol";
@@ -87,6 +87,25 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         _eventName = "LogWithdrawInstantlyFrom(address,address,uint256,address,uint256,uint256,uint256)";
         _eventParam = abi.encode(address(prizePool), address(from), _amount, address(controlledToken), maximumExitFee, getId, setId);
     }
+
+    /**
+     * @dev Claim token from a Token Faucet
+     * @notice Claim token from a Token Faucet
+     * @param tokenFaucet TokenFaucet address
+     * @param user The user to claim tokens for
+    */
+    function claim (
+        address tokenFaucet,
+        address user
+    ) external returns (string memory _eventName, bytes memory _eventParam) {
+        TokenFaucetInterface tokenFaucetContract = TokenFaucetInterface(tokenFaucet);
+
+        tokenFaucetContract.claim(user);
+
+        _eventName = "LogClaim(address,address)";
+        _eventParam = abi.encode(address(tokenFaucet), address(user));
+    }
+
 }
 
 contract ConnectV2PoolTogether is PoolTogetherResolver {
