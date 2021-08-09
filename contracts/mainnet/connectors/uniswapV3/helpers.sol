@@ -15,9 +15,9 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev uniswap v3 NFT Position Manager & Swap Router
      */
-    INonfungiblePositionManager nftManager =
+    INonfungiblePositionManager constant nftManager =
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
-    ISwapRouter swapRouter =
+    ISwapRouter constant swapRouter =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     struct MintParams {
@@ -88,7 +88,9 @@ abstract contract Helpers is DSMath, Basic {
     function _addLiquidity(
         uint256 _tokenId,
         uint256 _amount0Desired,
-        uint256 _amount1Desired
+        uint256 _amount1Desired,
+        uint256 _amount0Min,
+        uint256 _amount1Min,
     )
         internal
         returns (
@@ -102,8 +104,8 @@ abstract contract Helpers is DSMath, Basic {
                 _tokenId,
                 _amount0Desired,
                 _amount1Desired,
-                0,
-                0,
+                _amount0Min,
+                _amount1Min,
                 block.timestamp
             );
         (liquidity, amount0, amount1) = nftManager.increaseLiquidity(params);
@@ -114,14 +116,16 @@ abstract contract Helpers is DSMath, Basic {
      */
     function _decreaseLiquidity(
         uint256 _tokenId,
-        uint128 _liquidity
+        uint128 _liquidity,
+        uint256 _amount0Min,
+        uint256 _amount1Min,
     ) internal returns (uint256 amount0, uint256 amount1) {
         INonfungiblePositionManager.DecreaseLiquidityParams
             memory params = INonfungiblePositionManager.DecreaseLiquidityParams(
                 _tokenId,
                 _liquidity,
-                0,
-                0,
+                _amount0Min,
+                _amount0Min,
                 block.timestamp
             );
         (amount0, amount1) = nftManager.decreaseLiquidity(params);
