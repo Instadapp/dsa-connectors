@@ -21,13 +21,24 @@ abstract contract Helpers is DSMath, Basic {
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     struct MintParams {
-        address tokenA;
-        address tokenB;
+        address token0;
+        address token1;
         uint24 fee;
         int24 tickLower;
         int24 tickUpper;
-        uint256 amtA;
+        uint256 amt1;
         uint256 unitAmt;
+        uint slippage;
+    }
+
+    function getMinAmount(
+        TokenInterface token,
+        uint amt,
+        uint slippage
+    ) internal view returns(uint minAmt) {
+        uint _amt18 = convertTo18(token.decimals(), amt);
+        minAmt = wmul(_amt18, sub(WAD, slippage));
+        minAmt = convert18ToDec(token.decimals(), minAmt);
     }
 
     /**
@@ -42,29 +53,25 @@ abstract contract Helpers is DSMath, Basic {
             uint256 amount1
         )
     {
-        (TokenInterface _tokenA, TokenInterface _tokenB) = changeEthAddress(
-            params.tokenA,
-            params.tokenB
+        (TokenInterface _token0, TokenInterface _token1) = changeEthAddress(
+            params.token0,
+            params.token1
         );
 
-        uint256 _amount0 = params.amtA == uint256(-1)
-            ? getTokenBal(TokenInterface(params.tokenA))
-            : params.amtA;
-        uint256 _amount1 = convert18ToDec(
-            _tokenB.decimals(),
-            wmul(params.unitAmt, convertTo18(_tokenA.decimals(), _amount0))
+        uint256 _amount1 = params.amt1 == uint256(-1)
+            ? getTokenBal(TokenInterface(params.token1))
+            : params.amt1;
+        uint256 _amount0 = convert18ToDec(
+            _token1.decimals(),
+            wmul(params.unitAmt, convertTo18(_token1.decimals(), _amount1))
         );
 
-        TransferHelper.safeApprove(
-            params.tokenA,
-            address(nftManager),
-            _amount0
-        );
-        TransferHelper.safeApprove(
-            params.tokenB,
-            address(nftManager),
-            _amount1
-        );
+        _token0.approve(address(nftManager), _amount0);
+        _token1.approve(address(nftManager), _amount1);
+
+        uint _minAmt0 = getMinAmount(_token0, _amount0, params.slippage);
+        uint _minAmt1 = getMinAmount(_token1, _amount1, params.slippage);
+
         INonfungiblePositionManager.MintParams
             memory params = INonfungiblePositionManager.MintParams(
                 params.tokenA,
@@ -74,8 +81,8 @@ abstract contract Helpers is DSMath, Basic {
                 params.tickUpper,
                 _amount0,
                 _amount1,
-                0,
-                0,
+                _minAmt0,
+                _minAmt1,
                 address(this),
                 block.timestamp
             );
