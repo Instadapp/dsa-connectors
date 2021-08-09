@@ -20,8 +20,7 @@ contract Helpers {
     ConnectorsInterface public constant connectors = ConnectorsInterface(0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11); // InstaConnectorsV2
     IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
     
-    // TODO: add address for MappingController
-    MappingControllerInterface public constant mappingController = MappingControllerInterface(address(0));
+    MappingControllerInterface public constant mappingController = MappingControllerInterface(0xDdd075D5e1024901E4038461e1e4BbC3A48a08d4);
     uint public version = 1;
 
     mapping (bytes32 => address) public collateralJoinMapping;
@@ -55,8 +54,8 @@ contract Helpers {
 
 }
 
-contract GebMapping is Helpers {
-    string constant public name = "Reflexer-Mapping-v1";
+contract InstaReflexerGebMapping is Helpers {
+    string constant public name = "Reflexer-Geb-Mapping-v1";
     
     constructor() public {
         address[] memory collateralJoins = new address[](1);
