@@ -21,24 +21,52 @@ abstract contract Helpers is DSMath, Basic {
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     struct MintParams {
-        address token0;
-        address token1;
+        address tokenA;
+        address tokenB;
         uint24 fee;
         int24 tickLower;
         int24 tickUpper;
-        uint256 amt1;
+        uint256 amtA;
         uint256 unitAmt;
-        uint slippage;
+        uint256 slippage;
     }
 
     function getMinAmount(
         TokenInterface token,
-        uint amt,
-        uint slippage
-    ) internal view returns(uint minAmt) {
-        uint _amt18 = convertTo18(token.decimals(), amt);
+        uint256 amt,
+        uint256 slippage
+    ) internal view returns (uint256 minAmt) {
+        uint256 _amt18 = convertTo18(token.decimals(), amt);
         minAmt = wmul(_amt18, sub(WAD, slippage));
         minAmt = convert18ToDec(token.decimals(), minAmt);
+    }
+
+    function sortTokens(
+        address tokenA,
+        address tokenB,
+        uint256 amtA,
+        uint256 amtB
+    )
+        internal
+        pure
+        returns (
+            TokenInterface token0,
+            TokenInterface token1,
+            uint256 amt0,
+            uint256 amt1
+        )
+    {
+        if (tokenA > tokenB) {
+            token1 = TokenInterface(tokenA);
+            token0 = TokenInterface(tokenB);
+            amt1 = amtA;
+            amt0 = amtB;
+        } else {
+            token0 = TokenInterface(tokenA);
+            token1 = TokenInterface(tokenB);
+            amt0 = amtA;
+            amt1 = amtB;
+        }
     }
 
     /**
@@ -54,28 +82,35 @@ abstract contract Helpers is DSMath, Basic {
         )
     {
         (TokenInterface _token0, TokenInterface _token1) = changeEthAddress(
-            params.token0,
-            params.token1
+            params.tokenA,
+            params.tokenB
         );
 
-        uint256 _amount1 = params.amt1 == uint256(-1)
-            ? getTokenBal(TokenInterface(params.token1))
-            : params.amt1;
-        uint256 _amount0 = convert18ToDec(
+        uint256 _amount0 = params.amtA == uint256(-1)
+            ? getTokenBal(TokenInterface(params.tokenA))
+            : params.amtA;
+        uint256 _amount1 = convert18ToDec(
             _token1.decimals(),
-            wmul(params.unitAmt, convertTo18(_token1.decimals(), _amount1))
+            wmul(params.unitAmt, convertTo18(_token1.decimals(), _amount0))
         );
 
-        _token0.approve(address(nftManager), _amount0);
-        _token1.approve(address(nftManager), _amount1);
+        (_token0, _token1, _amount0, _amount1) = sortTokens(
+            params.tokenA,
+            params.tokenB,
+            _amount0,
+            _amount1
+        );
 
-        uint _minAmt0 = getMinAmount(_token0, _amount0, params.slippage);
-        uint _minAmt1 = getMinAmount(_token1, _amount1, params.slippage);
+        approve(_token0, address(nftManager), _amount0);
+        approve(_token1, address(nftManager), _amount1);
+
+        uint256 _minAmt0 = getMinAmount(_token0, _amount0, params.slippage);
+        uint256 _minAmt1 = getMinAmount(_token1, _amount1, params.slippage);
 
         INonfungiblePositionManager.MintParams
             memory params = INonfungiblePositionManager.MintParams(
-                params.tokenA,
-                params.tokenB,
+                address(_token0),
+                address(_token1),
                 params.fee,
                 params.tickLower,
                 params.tickUpper,
@@ -97,7 +132,7 @@ abstract contract Helpers is DSMath, Basic {
         uint256 _amount0Desired,
         uint256 _amount1Desired,
         uint256 _amount0Min,
-        uint256 _amount1Min,
+        uint256 _amount1Min
     )
         internal
         returns (
@@ -125,14 +160,14 @@ abstract contract Helpers is DSMath, Basic {
         uint256 _tokenId,
         uint128 _liquidity,
         uint256 _amount0Min,
-        uint256 _amount1Min,
+        uint256 _amount1Min
     ) internal returns (uint256 amount0, uint256 amount1) {
         INonfungiblePositionManager.DecreaseLiquidityParams
             memory params = INonfungiblePositionManager.DecreaseLiquidityParams(
                 _tokenId,
                 _liquidity,
                 _amount0Min,
-                _amount0Min,
+                _amount1Min,
                 block.timestamp
             );
         (amount0, amount1) = nftManager.decreaseLiquidity(params);

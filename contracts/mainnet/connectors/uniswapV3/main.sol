@@ -26,8 +26,8 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        uint256 _amt = getUint(getId, params.amtA);
-        params.amtA = _amt;
+        params.amtA = getUint(getId, params.amtA);
+        
         (
             uint256 _tokenID,
             uint256 _amtA,
@@ -170,8 +170,8 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        uint128 _amount0Max = getUint(getIds[0], amount0Max);
-        uint128 _amount1Max = getUint(getIds[1], amount1Max);
+        uint128 _amount0Max = uint128(getUint(getIds[0], amount0Max));
+        uint128 _amount1Max = uint128(getUint(getIds[1], amount1Max));
         (uint256 amount0, uint256 amount1) = _collect(
             tokenId,
             _amount0Max,
