@@ -40,34 +40,6 @@ abstract contract Helpers is DSMath, Basic {
         minAmt = convert18ToDec(token.decimals(), minAmt);
     }
 
-    function sortTokens(
-        address tokenA,
-        address tokenB,
-        uint256 amtA,
-        uint256 amtB
-    )
-        internal
-        pure
-        returns (
-            TokenInterface token0,
-            TokenInterface token1,
-            uint256 amt0,
-            uint256 amt1
-        )
-    {
-        if (tokenA > tokenB) {
-            token1 = TokenInterface(tokenA);
-            token0 = TokenInterface(tokenB);
-            amt1 = amtA;
-            amt0 = amtB;
-        } else {
-            token0 = TokenInterface(tokenA);
-            token1 = TokenInterface(tokenB);
-            amt0 = amtA;
-            amt1 = amtB;
-        }
-    }
-
     /**
      * @dev Mint function which interact with Uniswap v3
      */
@@ -88,16 +60,9 @@ abstract contract Helpers is DSMath, Basic {
         uint256 _amount0 = params.amtA == uint256(-1)
             ? getTokenBal(TokenInterface(params.tokenA))
             : params.amtA;
-        uint256 _amount1 = params.amtA == uint256(-1)
-            ? getTokenBal(TokenInterface(params.tokenA))
+        uint256 _amount1 = params.amtB == uint256(-1)
+            ? getTokenBal(TokenInterface(params.tokenB))
             : params.amtB;
-
-        (_token0, _token1, _amount0, _amount1) = sortTokens(
-            params.tokenA,
-            params.tokenB,
-            _amount0,
-            _amount1
-        );
 
         uint256 isEth = address(_token0) == wethAddr ? 0 : 2;
         isEth = address(_token1) == wethAddr ? 1 : 2;
@@ -138,7 +103,7 @@ abstract contract Helpers is DSMath, Basic {
         (, , address token0, address token1, , , , , , , , ) = nftManager
             .positions(_tokenId);
         uint256 isEth = token0 == wethAddr ? 0 : 2;
-        isEth = token0 == wethAddr ? 1 : 2;
+        isEth = token1 == wethAddr ? 1 : 2;
         convertEthToWeth(isEth == 0, TokenInterface(token0), _amount0);
         convertEthToWeth(isEth == 1, TokenInterface(token1), _amount1);
         approve(TokenInterface(token0), address(nftManager), _amount0);
@@ -200,15 +165,15 @@ abstract contract Helpers is DSMath, Basic {
      */
     function _collect(
         uint256 _tokenId,
-        uint128 _amount0Max,
-        uint128 _amount1Max
+        uint256 _amount0Max,
+        uint256 _amount1Max
     ) internal returns (uint256 amount0, uint256 amount1) {
         INonfungiblePositionManager.CollectParams
             memory params = INonfungiblePositionManager.CollectParams(
                 _tokenId,
                 address(this),
-                _amount0Max,
-                _amount1Max
+                uint128(_amount0Max),
+                uint128(_amount1Max)
             );
         (amount0, amount1) = nftManager.collect(params);
     }

@@ -88,7 +88,7 @@ abstract contract UniswapResolver is Helpers, Events {
      * @param getId: ID to retrieve LP token amounts
      * @param  setIds: stores the amount of output tokens
      */
-    function decreateLiquidity(
+    function decreaseLiquidity(
         uint256 tokenId,
         uint128 liquidity,
         uint256 amountAMin,
@@ -199,5 +199,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV3 is UniswapResolver {
-    string public constant name = "UniswapV3-v1.1";
+    string public constant name = "UniswapV3-v1";
 }
