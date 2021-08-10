@@ -103,7 +103,6 @@ abstract contract Helpers is DSMath, Basic {
 
         uint256 isEth = address(_token0) == wethAddr ? 0 : 2;
         isEth = address(_token1) == wethAddr ? 1 : 2;
-        require(isEth != 2, "no-ETH");
         convertEthToWeth(isEth == 0, _token0, _amount0);
         convertEthToWeth(isEth == 1, _token1, _amount1);
 
