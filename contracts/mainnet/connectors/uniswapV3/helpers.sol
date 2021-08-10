@@ -101,20 +101,22 @@ abstract contract Helpers is DSMath, Basic {
             _amount1
         );
 
-        approve(_token0, address(nftManager), _amount0);
-        approve(_token1, address(nftManager), _amount1);
-
-        uint256 isEth = address(_token0) == wethAddr ? 0 : 1;
+        uint256 isEth = address(_token0) == wethAddr ? 0 : 2;
+        isEth = address(_token1) == wethAddr ? 1 : 2;
+        require(isEth != 2, "no-ETH");
         convertEthToWeth(isEth == 0, _token0, _amount0);
         convertEthToWeth(isEth == 1, _token1, _amount1);
+
+        approve(_token0, address(nftManager), _amount0);
+        approve(_token1, address(nftManager), _amount1);
 
         uint256 _minAmt0 = getMinAmount(_token0, _amount0, params.slippage);
         uint256 _minAmt1 = getMinAmount(_token1, _amount1, params.slippage);
 
         INonfungiblePositionManager.MintParams
             memory params = INonfungiblePositionManager.MintParams(
-                isEth == 0 ? ethAddr : address(_token0),
-                isEth == 1 ? ethAddr : address(_token1),
+                address(_token0),
+                address(_token1),
                 params.fee,
                 params.tickLower,
                 params.tickUpper,
