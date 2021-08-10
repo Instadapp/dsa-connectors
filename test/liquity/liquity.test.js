@@ -1208,7 +1208,7 @@ describe("Liquity", () => {
           const depositAmount = 0;
           const borrowAmount = 0;
           const withdrawAmount = ethers.utils.parseEther("1"); // 1 ETH;
-          const repayAmount = ethers.utils.parseUnits("500", 18); // 500 LUSD;
+          const repayAmount = ethers.utils.parseUnits("10", 18); // 10 LUSD;
           const { upperHint, lowerHint } = await helpers.getTroveInsertionHints(
             troveCollateralBefore.sub(withdrawAmount),
             troveDebtBefore.sub(repayAmount),
@@ -1256,7 +1256,7 @@ describe("Liquity", () => {
 
           expect(
             troveDebt,
-            `Trove debt should have increased by at least ${borrowAmount} ETH`
+            `Trove debt should have decreased by at least ${repayAmount} LUSD`
           ).to.gte(expectedTroveDebt);
         });
 
@@ -1273,7 +1273,7 @@ describe("Liquity", () => {
           const depositAmount = ethers.utils.parseEther("1"); // 1 ETH
           const borrowAmount = 0;
           const withdrawAmount = 0;
-          const repayAmount = ethers.utils.parseUnits("100", 18); // 100 lUSD
+          const repayAmount = ethers.utils.parseUnits("10", 18); // 10 lUSD
           const upperHint = ethers.constants.AddressZero;
           const lowerHint = ethers.constants.AddressZero;
           const maxFeePercentage = ethers.utils.parseUnits("0.5", 18); // 0.5% max fee
@@ -1304,7 +1304,7 @@ describe("Liquity", () => {
               0, // Repay amount comes from a previous spell's storage slot
               upperHint,
               lowerHint,
-              [ethDepositId, 0, 0, 0],
+              [ethDepositId, 0, 0, lusdRepayId],
               [0, 0, 0, 0],
             ],
           };
@@ -1323,7 +1323,7 @@ describe("Liquity", () => {
             .connect(userWallet)
             .approve(dsa.address, repayAmount);
 
-          // Adjust Trove by depositing ETH and borrowing LUSD
+          // Adjust Trove by depositing ETH and repaying LUSD
           await dsa
             .connect(userWallet)
             .cast(...encodeSpells(spells), userWallet.address, {
@@ -1338,7 +1338,7 @@ describe("Liquity", () => {
             dsa.address
           );
           const expectedTroveColl = troveCollateralBefore.add(depositAmount);
-          const expectedTroveDebt = troveDebtBefore.add(borrowAmount);
+          const expectedTroveDebt = troveDebtBefore.sub(repayAmount);
 
           expect(
             troveCollateral,
@@ -1347,7 +1347,7 @@ describe("Liquity", () => {
 
           expect(
             troveDebt,
-            `Trove debt should have increased by at least ${borrowAmount} ETH`
+            `Trove debt (${troveDebtBefore}) should have decreased by at least ${repayAmount} LUSD`
           ).to.eq(expectedTroveDebt);
         });
 

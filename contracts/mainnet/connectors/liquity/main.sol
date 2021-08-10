@@ -226,7 +226,7 @@ abstract contract LiquityResolver is Events, Helpers {
         withdrawAmount = getUint(getIds[1], withdrawAmount);
         adjustTrove.withdrawAmount = withdrawAmount == uint(-1) ? troveManager.getTroveColl(address(this)) : withdrawAmount;
 
-        adjustTrove.borrowAmount = getUint(getIds[2], borrowAmount);
+        borrowAmount = getUint(getIds[2], borrowAmount);
 
         repayAmount = getUint(getIds[3], repayAmount);
         if (repayAmount == uint(-1)) {
@@ -234,14 +234,14 @@ abstract contract LiquityResolver is Events, Helpers {
             uint _totalDebt = troveManager.getTroveDebt(address(this));
             repayAmount = _lusdBal > _totalDebt ? _totalDebt : _lusdBal;
         }
-        adjustTrove.repayAmount = repayAmount;
 
         adjustTrove.isBorrow = borrowAmount > 0;
-
+        adjustTrove.lusdChange = adjustTrove.isBorrow ? borrowAmount : repayAmount;
+        
         borrowerOperations.adjustTrove{value: adjustTrove.depositAmount}(
             adjustTrove.maxFeePercentage,
             adjustTrove.withdrawAmount,
-            adjustTrove.borrowAmount,
+            adjustTrove.lusdChange,
             adjustTrove.isBorrow,
             upperHint,
             lowerHint
@@ -249,11 +249,11 @@ abstract contract LiquityResolver is Events, Helpers {
         
         setUint(setIds[0], adjustTrove.depositAmount);
         setUint(setIds[1], adjustTrove.withdrawAmount);
-        setUint(setIds[2], adjustTrove.borrowAmount);
-        setUint(setIds[3], adjustTrove.repayAmount);
+        setUint(setIds[2], borrowAmount);
+        setUint(setIds[3], repayAmount);
 
         _eventName = "LogAdjust(address,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])";
-        _eventParam = abi.encode(address(this), maxFeePercentage, adjustTrove.depositAmount, adjustTrove.withdrawAmount, adjustTrove.borrowAmount, adjustTrove.repayAmount, getIds, setIds);
+        _eventParam = abi.encode(address(this), maxFeePercentage, adjustTrove.depositAmount, adjustTrove.withdrawAmount, borrowAmount, repayAmount, getIds, setIds);
     }
 
     /**
