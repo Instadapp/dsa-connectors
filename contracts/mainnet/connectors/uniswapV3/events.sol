@@ -28,4 +28,6 @@ contract Events {
         uint256 amtIn,
         uint256 amtOut
     );
+
+    event burn(uint256 tokenId);
 }

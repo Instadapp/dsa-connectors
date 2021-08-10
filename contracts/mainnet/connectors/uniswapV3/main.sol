@@ -183,6 +183,19 @@ abstract contract UniswapResolver is Helpers, Events {
         _eventName = "collect(uint256,uint256,uint256)";
         _eventParam = abi.encode(tokenId, amount0, amount1);
     }
+
+    /**
+     * @dev Burn Function
+     */
+    function burnNFT(uint256 tokenId)
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        _burn(tokenId);
+        _eventName = "burnPosition(uint256)";
+        _eventParam = abi.encode(tokenId);
+    }
 }
 
 contract ConnectV2UniswapV3 is UniswapResolver {

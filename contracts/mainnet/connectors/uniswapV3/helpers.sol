@@ -127,6 +127,9 @@ abstract contract Helpers is DSMath, Basic {
         (tokenId, liquidity, amount0, amount1) = nftManager.mint(params);
     }
 
+    /**
+     * @dev Check if token address is etherAddr and convert it to weth
+     */
     function _checkETH(
         uint256 _tokenId,
         uint256 _amount0,
@@ -232,5 +235,12 @@ abstract contract Helpers is DSMath, Basic {
                 0
             );
         amountOut = swapRouter.exactInputSingle(params);
+    }
+
+    /**
+     * @dev Burn Function
+     */
+    function _burn(uint256 _tokenId) internal {
+        nftManager.burn(_tokenId);
     }
 }
