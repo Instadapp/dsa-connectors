@@ -1,15 +1,14 @@
-pragma solidity ^0.7.5;
+pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 import {TokenInterface} from "../../common/interfaces.sol";
 import {DSMath} from "../../common/math.sol";
 import {Basic} from "../../common/basic.sol";
-import {INonfungiblePositionManager, ISwapRouter} from "./interface.sol";
+import "./interface.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "@uniswap/v3-periphery/contracts/base/LiquidityManagement.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
@@ -27,7 +26,7 @@ abstract contract Helpers is DSMath, Basic {
         int24 tickLower;
         int24 tickUpper;
         uint256 amtA;
-        uint256 unitAmt;
+        uint256 amtB;
         uint256 slippage;
     }
 
@@ -89,10 +88,9 @@ abstract contract Helpers is DSMath, Basic {
         uint256 _amount0 = params.amtA == uint256(-1)
             ? getTokenBal(TokenInterface(params.tokenA))
             : params.amtA;
-        uint256 _amount1 = convert18ToDec(
-            _token1.decimals(),
-            wmul(params.unitAmt, convertTo18(_token1.decimals(), _amount0))
-        );
+        uint256 _amount1 = params.amtA == uint256(-1)
+            ? getTokenBal(TokenInterface(params.tokenA))
+            : params.amtB;
 
         (_token0, _token1, _amount0, _amount1) = sortTokens(
             params.tokenA,
@@ -129,13 +127,28 @@ abstract contract Helpers is DSMath, Basic {
         (tokenId, liquidity, amount0, amount1) = nftManager.mint(params);
     }
 
+    function _checkETH(
+        uint256 _tokenId,
+        uint256 _amount0,
+        uint256 _amount1
+    ) internal {
+        (, , address token0, address token1, , , , , , , , ) = nftManager
+            .positions(_tokenId);
+        uint256 isEth = token0 == wethAddr ? 0 : 2;
+        isEth = token0 == wethAddr ? 1 : 2;
+        convertEthToWeth(isEth == 0, TokenInterface(token0), _amount0);
+        convertEthToWeth(isEth == 1, TokenInterface(token1), _amount1);
+        approve(TokenInterface(token0), address(nftManager), _amount0);
+        approve(TokenInterface(token1), address(nftManager), _amount1);
+    }
+
     /**
      * @dev addLiquidity function which interact with Uniswap v3
      */
     function _addLiquidity(
         uint256 _tokenId,
-        uint256 _amount0Desired,
-        uint256 _amount1Desired,
+        uint256 _amount0,
+        uint256 _amount1,
         uint256 _amount0Min,
         uint256 _amount1Min
     )
@@ -146,11 +159,12 @@ abstract contract Helpers is DSMath, Basic {
             uint256 amount1
         )
     {
+        _checkETH(_tokenId, _amount0, _amount1);
         INonfungiblePositionManager.IncreaseLiquidityParams
             memory params = INonfungiblePositionManager.IncreaseLiquidityParams(
                 _tokenId,
-                _amount0Desired,
-                _amount1Desired,
+                _amount0,
+                _amount1,
                 _amount0Min,
                 _amount1Min,
                 block.timestamp

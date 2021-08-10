@@ -1,4 +1,4 @@
-pragma solidity =0.7.6;
+pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 /**
@@ -27,7 +27,7 @@ abstract contract UniswapResolver is Helpers, Events {
         returns (string memory _eventName, bytes memory _eventParam)
     {
         params.amtA = getUint(getId, params.amtA);
-        
+
         (
             uint256 _tokenID,
             uint256 _amtA,
