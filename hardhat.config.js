@@ -60,6 +60,7 @@ module.exports = {
         blockNumber: 12696000,
       },
       blockGasLimit: 12000000,
+      gasPrice: parseInt(utils.parseUnits("300", "gwei"))
     },
     matic: {
       url: "https://rpc-mainnet.maticvigil.com/",
