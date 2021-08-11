@@ -8,6 +8,7 @@ const buildDSAv2 = require("../../scripts/buildDSAv2")
 const encodeSpells = require("../../scripts/encodeSpells.js")
 const encodeFlashcastData = require("../../scripts/encodeFlashcastData.js")
 const getMasterSigner = require("../../scripts/getMasterSigner")
+const addLiquidity = require("../../scripts/addLiquidity");
 
 const addresses = require("../../scripts/constant/addresses");
 const abis = require("../../scripts/constant/abis");
@@ -50,30 +51,45 @@ describe("UniswapV3", function () {
             expect(!!dsaWallet0.address).to.be.true;
         });
 
-        it("Deposit ETH into DSA wallet", async function () {
+        it("Deposit ETH & DAI into DSA wallet", async function () {
             await wallet0.sendTransaction({
                 to: dsaWallet0.address,
                 value: ethers.utils.parseEther("10")
             });
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+
+            await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("100000"));
+
         });
     });
 
     describe("Main", function () {
 
         it("Should mint successfully", async function () {
-            const amount = ethers.utils.parseEther("1") // 1 ETH
+            const ethAmount = ethers.utils.parseEther("0.1") // 1 ETH
+            const daiAmount = ethers.utils.parseEther("400") // 1 ETH
             const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 
-            const IdOne = "2878734423"
-            const IdTwo = "783243246"
+            const getId = "0"
+            const setId = "0"
 
             const spells2 = [
                 {
                     connector: connectorName,
                     method: "mint",
                     args: [
-                        { tokenA: ethAddress, tokenB: "0x6b175474e89094c44da98b954eedeac495271d0f", fee: "3000", tickUpper: "887220", tickLower: "-887220", amtA: "15", amtB: "15", slippage: "0" }, IdOne, IdTwo
+                        { 
+                            tokenB: ethAddress,
+                            tokenA: "0x6b175474e89094c44da98b954eedeac495271d0f",
+                            fee: "3000",
+                            tickUpper: "887220",
+                            tickLower: "-887220",
+                            amtA: daiAmount,
+                            amtB: ethAmount,
+                            slippage: "0"
+                        },
+                        getId,
+                        setId
                     ],
                 }
             ]
