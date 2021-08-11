@@ -9,3 +9,7 @@ interface PrizePoolInterface {
 interface TokenFaucetInterface {
     function claim( address user) external returns (uint256);
 }
+
+interface TokenFaucetProxyFactoryInterface {
+    function claimAll(address user, TokenFaucetInterface[] calldata tokenFaucets) external;
+}

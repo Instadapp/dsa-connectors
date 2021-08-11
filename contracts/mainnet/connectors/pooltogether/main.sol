@@ -7,7 +7,7 @@ pragma solidity ^0.7.0;
 
  import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
  import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
- import { PrizePoolInterface, TokenFaucetInterface} from "./interface.sol";
+ import { PrizePoolInterface, TokenFaucetInterface, TokenFaucetProxyFactoryInterface } from "./interface.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Events } from "./events.sol";
@@ -106,6 +106,25 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         _eventParam = abi.encode(address(tokenFaucet), address(user));
     }
 
+    /**
+     * @dev Runs claim on all passed comptrollers for a user.
+     * @notice Runs claim on all passed comptrollers for a user.
+     * @param tokenFaucetProxyFactory The TokenFaucetProxyFactory address
+     * @param user The user to claim tokens for
+     * @param tokenFaucets The tokenFaucets to call claim on.
+    */
+    function claimAll (
+        address tokenFaucetProxyFactory,
+        address user,
+        TokenFaucetInterface[] calldata tokenFaucets
+    ) external returns (string memory _eventName, bytes memory _eventParam) {
+        TokenFaucetProxyFactoryInterface tokenFaucetProxyFactoryContract = TokenFaucetProxyFactoryInterface(tokenFaucetProxyFactory);
+
+        tokenFaucetProxyFactoryContract.claimAll(user, tokenFaucets);
+
+        _eventName = "LogClaimAll(address,address,TokenFaucetInterface[])";
+        _eventParam = abi.encode(address(tokenFaucetProxyFactory), address(user), tokenFaucets);
+    }
 }
 
 contract ConnectV2PoolTogether is PoolTogetherResolver {
