@@ -22,12 +22,12 @@ contract Events {
         uint256 amtB
     );
 
-    event swap(
+    event Swap(
         address indexed tokenIn,
         address indexed tokenOut,
         uint256 amtIn,
         uint256 amtOut
     );
 
-    event burn(uint256 tokenId);
+    event BurnPosition(uint256 tokenId);
 }

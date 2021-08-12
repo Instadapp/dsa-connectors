@@ -11,33 +11,37 @@ import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
+    uint256 private _lastMintIndex = 1;
     /**
      * @dev Mint New Position
      * @param params: parameter for mint.
-     * @param getId: ID to retrieve amtA.
+     * @param getIds: ID to retrieve amtA.
      * @param setId: ID stores the amount of LP token.
      */
     function mint(
         MintParams memory params,
-        uint256 getId,
+        uint256[] calldata getIds,
         uint256 setId
     )
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        params.amtA = getUint(getId, params.amtA);
+        params.amtA = getUint(getIds[0], params.amtA);
+        params.amtB = getUint(getIds[1], params.amtB);
 
         (
-            uint256 _tokenID,
+            uint256 _tokenId,
+            uint256 liquidity,
             uint256 _amtA,
-            uint256 _amtB,
-            uint256 liquidity
+            uint256 _amtB
         ) = _mint(params);
         setUint(setId, liquidity);
 
-        _eventName = "LogMintNewPosition(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_tokenID, _amtA, _amtB, liquidity);
+        _lastMintIndex = _tokenId;
+
+        _eventName = "LogNewPositionMint(uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(_tokenId, _amtA, _amtB, liquidity);
     }
 
     /**
@@ -63,13 +67,14 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        uint256 amtA = getUint(getIds[0], amountA);
-        uint256 amtB = getUint(getIds[1], amountB);
+        if (tokenId == 0) tokenId = _lastMintIndex;
+        amountA = getUint(getIds[0], amountA);
+        amountB = getUint(getIds[1], amountB);
 
         (uint256 _liquidity, uint256 _amtA, uint256 _amtB) = _addLiquidity(
             tokenId,
-            amtA,
-            amtB,
+            amountA,
+            amountB,
             amountAMin,
             amountBMin
         );
@@ -100,6 +105,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        if (tokenId == 0) tokenId = _lastMintIndex;
         uint128 _liquidity = uint128(getUint(getId, liquidity));
 
         (uint256 _amtA, uint256 _amtB) = _decreaseLiquidity(
@@ -147,7 +153,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
         setUint(setId, amountOut);
 
-        _eventName = "swap(address,address,uint256,uint256)";
+        _eventName = "Swap(address,address,uint256,uint256)";
         _eventParam = abi.encode(tokenIn, tokenOut, _amountIn, amountOut);
     }
 
@@ -170,6 +176,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        if (tokenId == 0) tokenId = _lastMintIndex;
         uint128 _amount0Max = uint128(getUint(getIds[0], amount0Max));
         uint128 _amount1Max = uint128(getUint(getIds[1], amount1Max));
         (uint256 amount0, uint256 amount1) = _collect(
@@ -180,7 +187,7 @@ abstract contract UniswapResolver is Helpers, Events {
 
         setUint(setIds[0], amount0);
         setUint(setIds[1], amount1);
-        _eventName = "collect(uint256,uint256,uint256)";
+        _eventName = "Collect(uint256,uint256,uint256)";
         _eventParam = abi.encode(tokenId, amount0, amount1);
     }
 
@@ -192,8 +199,9 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        if (tokenId == 0) tokenId = _lastMintIndex;
         _burn(tokenId);
-        _eventName = "burnPosition(uint256)";
+        _eventName = "BurnPosition(uint256)";
         _eventParam = abi.encode(tokenId);
     }
 }

@@ -89,6 +89,7 @@ abstract contract Helpers is DSMath, Basic {
                 address(this),
                 block.timestamp
             );
+
         (tokenId, liquidity, amount0, amount1) = nftManager.mint(params);
     }
 
@@ -137,6 +138,7 @@ abstract contract Helpers is DSMath, Basic {
                 _amount1Min,
                 block.timestamp
             );
+
         (liquidity, amount0, amount1) = nftManager.increaseLiquidity(params);
     }
 
