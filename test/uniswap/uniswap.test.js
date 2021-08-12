@@ -131,12 +131,30 @@ describe("UniswapV3", function () {
                     method: "mint",
                     args: [
                         {
-                            tokenB: USDT_ADDR,
                             tokenA: DAI_ADDR,
+                            tokenB: USDT_ADDR,
                             fee: FeeAmount.MEDIUM,
                             tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
                             tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
                             amtA: daiAmount,
+                            amtB: usdtAmount,
+                            slippage: "300000000000000000"
+                        },
+                        getIds,
+                        setId
+                    ],
+                },
+                {
+                    connector: connectorName,
+                    method: "mint",
+                    args: [
+                        {
+                            tokenA: ethAddress,
+                            tokenB: USDT_ADDR,
+                            fee: FeeAmount.MEDIUM,
+                            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                            amtA: ethAmount,
                             amtB: usdtAmount,
                             slippage: "300000000000000000"
                         },
@@ -150,11 +168,11 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
             let castEvent = new Promise((resolve, reject) => {
                 dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
-                    const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[0]);
-                    const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[1]);
+                    const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[0]);
+                    const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[2]);
                     tokenIds.push(params[0]);
                     tokenIds.push(params1[0]);
-                    liquidities.push(params[3]);
+                    liquidities.push(params[1]);
                     event.removeListener();
 
                     resolve({
@@ -174,7 +192,7 @@ describe("UniswapV3", function () {
             expect(data.liquidity).to.be.equals(liquidities[0]);
         })
 
-        it("Should increaseLiquidity successfully", async function () {
+        it("Should deposit successfully", async function () {
             const daiAmount = ethers.utils.parseEther("400") // 1 ETH
             const ethAmount = ethers.utils.parseEther("0.1") // 1 ETH
             const usdtAmount = ethers.utils.parseEther("400") / Math.pow(10, 12) // 1 ETH
@@ -186,13 +204,12 @@ describe("UniswapV3", function () {
             const spells = [
                 {
                     connector: connectorName,
-                    method: "addLiquidity",
+                    method: "deposit",
                     args: [
                         tokenIds[0],
                         daiAmount,
                         ethAmount,
-                        0,
-                        0,
+                        "500000000000000000",
                         getIds,
                         setId
                     ],
@@ -205,7 +222,7 @@ describe("UniswapV3", function () {
             let castEvent = new Promise((resolve, reject) => {
                 dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
                     const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[0]);
-                    liquidities[0] = liquidities[0].add(params[3]);
+                    liquidities[0] = liquidities[0].add(params[1]);
                     event.removeListener();
 
                     resolve({
@@ -224,7 +241,7 @@ describe("UniswapV3", function () {
             expect(data.liquidity).to.be.equals(liquidities[0]);
         })
 
-        it("Should decreaseLiquidity successfully", async function () {
+        it("Should withdraw successfully", async function () {
 
             const getId = "0"
             const setIds = ["0", "0"]
@@ -235,7 +252,7 @@ describe("UniswapV3", function () {
             const spells = [
                 {
                     connector: connectorName,
-                    method: "decreaseLiquidity",
+                    method: "withdraw",
                     args: [
                         tokenIds[0],
                         data.liquidity,
@@ -247,7 +264,7 @@ describe("UniswapV3", function () {
                 },
                 {
                     connector: connectorName,
-                    method: "decreaseLiquidity",
+                    method: "withdraw",
                     args: [
                         0,
                         data1.liquidity,
@@ -296,7 +313,7 @@ describe("UniswapV3", function () {
             const spells = [
                 {
                     connector: connectorName,
-                    method: "burnNFT",
+                    method: "burn",
                     args: [
                         tokenIds[0]
                     ],

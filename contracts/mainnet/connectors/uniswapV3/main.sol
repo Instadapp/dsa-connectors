@@ -11,7 +11,6 @@ import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
-    uint256 private _lastMintIndex = 1;
     /**
      * @dev Mint New Position
      * @param params: parameter for mint.
@@ -33,15 +32,21 @@ abstract contract UniswapResolver is Helpers, Events {
         (
             uint256 _tokenId,
             uint256 liquidity,
-            uint256 _amtA,
-            uint256 _amtB
+            uint256 amountA,
+            uint256 amountB
         ) = _mint(params);
+
         setUint(setId, liquidity);
 
-        _lastMintIndex = _tokenId;
-
-        _eventName = "LogNewPositionMint(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_tokenId, _amtA, _amtB, liquidity);
+        _eventName = "LogMint(uint256,uint256,uint256,uint256,int24,int24)";
+        _eventParam = abi.encode(
+            _tokenId,
+            liquidity,
+            amountA,
+            amountB,
+            params.tickLower,
+            params.tickUpper
+        );
     }
 
     /**
@@ -49,17 +54,15 @@ abstract contract UniswapResolver is Helpers, Events {
      * @param tokenId: NFT LP Token ID.
      * @param amountA: tokenA amounts.
      * @param amountB: tokenB amounts.
-     * @param amountAMin: Min amount of tokenA.
-     * @param amountBMin: Min amount of tokenB.
+     * @param slippage: slippage.
      * @param getIds: IDs to retrieve token amounts
-     * @param  setId: stores the amount of LP token
+     * @param  setId: stores the liquidity amount
      */
-    function addLiquidity(
+    function deposit(
         uint256 tokenId,
         uint256 amountA,
         uint256 amountB,
-        uint256 amountAMin,
-        uint256 amountBMin,
+        uint256 slippage,
         uint256[] calldata getIds,
         uint256 setId
     )
@@ -67,7 +70,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (tokenId == 0) tokenId = _lastMintIndex;
+        if (tokenId == 0) tokenId = _getLastNftId(address(this));
         amountA = getUint(getIds[0], amountA);
         amountB = getUint(getIds[1], amountB);
 
@@ -75,13 +78,12 @@ abstract contract UniswapResolver is Helpers, Events {
             tokenId,
             amountA,
             amountB,
-            amountAMin,
-            amountBMin
+            slippage
         );
         setUint(setId, _liquidity);
 
-        _eventName = "LogAddLiquidity(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(tokenId, _amtA, _amtB, _liquidity);
+        _eventName = "LogDeposit(uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(tokenId, _liquidity, _amtA, _amtB);
     }
 
     /**
@@ -93,9 +95,9 @@ abstract contract UniswapResolver is Helpers, Events {
      * @param getId: ID to retrieve LP token amounts
      * @param  setIds: stores the amount of output tokens
      */
-    function decreaseLiquidity(
+    function withdraw(
         uint256 tokenId,
-        uint128 liquidity,
+        uint256 liquidity,
         uint256 amountAMin,
         uint256 amountBMin,
         uint256 getId,
@@ -105,7 +107,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (tokenId == 0) tokenId = _lastMintIndex;
+        if (tokenId == 0) tokenId = _getLastNftId(address(this));
         uint128 _liquidity = uint128(getUint(getId, liquidity));
 
         (uint256 _amtA, uint256 _amtB) = _decreaseLiquidity(
@@ -118,43 +120,8 @@ abstract contract UniswapResolver is Helpers, Events {
         setUint(setIds[0], _amtA);
         setUint(setIds[1], _amtB);
 
-        _eventName = "LogDecreaseLiquidity(uint256,uint256,uint256,uint256)";
+        _eventName = "LogWithdraw(uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(tokenId, _liquidity, _amtA, _amtB);
-    }
-
-    /**
-     * @dev Swap Function
-     * @param tokenIn: Token Address for input
-     * @param tokenOut: Token Address for output
-     * @param fee: Fee amount
-     * @param amountIn: Amount for input
-     * @param getId: ID to retrieve amountIn
-     * @param setId: stores the amount of Out token
-     */
-    function swapToken(
-        address tokenIn,
-        address tokenOut,
-        uint24 fee,
-        uint256 amountIn,
-        uint256 getId,
-        uint256 setId
-    )
-        external
-        payable
-        returns (string memory _eventName, bytes memory _eventParam)
-    {
-        uint256 _amountIn = getUint(getId, amountIn);
-        uint256 amountOut = _exactInputSingle(
-            tokenIn,
-            tokenOut,
-            fee,
-            _amountIn
-        );
-
-        setUint(setId, amountOut);
-
-        _eventName = "Swap(address,address,uint256,uint256)";
-        _eventParam = abi.encode(tokenIn, tokenOut, _amountIn, amountOut);
     }
 
     /**
@@ -167,8 +134,8 @@ abstract contract UniswapResolver is Helpers, Events {
      */
     function collect(
         uint256 tokenId,
-        uint128 amount0Max,
-        uint128 amount1Max,
+        uint256 amount0Max,
+        uint256 amount1Max,
         uint256[] calldata getIds,
         uint256[] calldata setIds
     )
@@ -176,7 +143,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (tokenId == 0) tokenId = _lastMintIndex;
+        if (tokenId == 0) tokenId = _getLastNftId(address(this));
         uint128 _amount0Max = uint128(getUint(getIds[0], amount0Max));
         uint128 _amount1Max = uint128(getUint(getIds[1], amount1Max));
         (uint256 amount0, uint256 amount1) = _collect(
@@ -187,21 +154,21 @@ abstract contract UniswapResolver is Helpers, Events {
 
         setUint(setIds[0], amount0);
         setUint(setIds[1], amount1);
-        _eventName = "Collect(uint256,uint256,uint256)";
+        _eventName = "LogCollect(uint256,uint256,uint256)";
         _eventParam = abi.encode(tokenId, amount0, amount1);
     }
 
     /**
      * @dev Burn Function
      */
-    function burnNFT(uint256 tokenId)
+    function burn(uint256 tokenId)
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (tokenId == 0) tokenId = _lastMintIndex;
+        if (tokenId == 0) tokenId = _getLastNftId(address(this));
         _burn(tokenId);
-        _eventName = "BurnPosition(uint256)";
+        _eventName = "LogBurnPosition(uint256)";
         _eventParam = abi.encode(tokenId);
     }
 }

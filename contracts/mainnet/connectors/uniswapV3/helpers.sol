@@ -30,6 +30,19 @@ abstract contract Helpers is DSMath, Basic {
         uint256 slippage;
     }
 
+    /**
+     * @dev Get Last NFT Index
+     * @param user: User address
+     */
+    function _getLastNftId(address user)
+        internal
+        view
+        returns (uint256 tokenId)
+    {
+        uint256 len = nftManager.balanceOf(user);
+        tokenId = nftManager.tokenOfOwnerByIndex(user, len - 1);
+    }
+
     function getMinAmount(
         TokenInterface token,
         uint256 amt,
@@ -48,8 +61,8 @@ abstract contract Helpers is DSMath, Basic {
         returns (
             uint256 tokenId,
             uint128 liquidity,
-            uint256 amount0,
-            uint256 amount1
+            uint256 amountA,
+            uint256 amountB
         )
     {
         (TokenInterface _token0, TokenInterface _token1) = changeEthAddress(
@@ -64,10 +77,8 @@ abstract contract Helpers is DSMath, Basic {
             ? getTokenBal(TokenInterface(params.tokenB))
             : params.amtB;
 
-        uint256 isEth = address(_token0) == wethAddr ? 0 : 2;
-        isEth = address(_token1) == wethAddr ? 1 : 2;
-        convertEthToWeth(isEth == 0, _token0, _amount0);
-        convertEthToWeth(isEth == 1, _token1, _amount1);
+        convertEthToWeth(address(_token0) == wethAddr, _token0, _amount0);
+        convertEthToWeth(address(_token1) == wethAddr, _token1, _amount1);
 
         approve(_token0, address(nftManager), _amount0);
         approve(_token1, address(nftManager), _amount1);
@@ -90,7 +101,7 @@ abstract contract Helpers is DSMath, Basic {
                 block.timestamp
             );
 
-        (tokenId, liquidity, amount0, amount1) = nftManager.mint(params);
+        (tokenId, liquidity, amountA, amountB) = nftManager.mint(params);
     }
 
     /**
@@ -103,10 +114,10 @@ abstract contract Helpers is DSMath, Basic {
     ) internal {
         (, , address token0, address token1, , , , , , , , ) = nftManager
             .positions(_tokenId);
-        uint256 isEth = token0 == wethAddr ? 0 : 2;
-        isEth = token1 == wethAddr ? 1 : 2;
-        convertEthToWeth(isEth == 0, TokenInterface(token0), _amount0);
-        convertEthToWeth(isEth == 1, TokenInterface(token1), _amount1);
+        bool isEth0 = token0 == wethAddr;
+        bool isEth1 = token1 == wethAddr;
+        convertEthToWeth(isEth0, TokenInterface(token0), _amount0);
+        convertEthToWeth(isEth1, TokenInterface(token1), _amount1);
         approve(TokenInterface(token0), address(nftManager), _amount0);
         approve(TokenInterface(token1), address(nftManager), _amount1);
     }
@@ -118,8 +129,7 @@ abstract contract Helpers is DSMath, Basic {
         uint256 _tokenId,
         uint256 _amount0,
         uint256 _amount1,
-        uint256 _amount0Min,
-        uint256 _amount1Min
+        uint256 _slippage
     )
         internal
         returns (
@@ -129,6 +139,20 @@ abstract contract Helpers is DSMath, Basic {
         )
     {
         _checkETH(_tokenId, _amount0, _amount1);
+
+        (, , address _token0, address _token1, , , , , , , , ) = nftManager
+            .positions(_tokenId);
+
+        uint256 _amount0Min = getMinAmount(
+            TokenInterface(_token0),
+            _amount0,
+            _slippage
+        );
+        uint256 _amount1Min = getMinAmount(
+            TokenInterface(_token1),
+            _amount1,
+            _slippage
+        );
         INonfungiblePositionManager.IncreaseLiquidityParams
             memory params = INonfungiblePositionManager.IncreaseLiquidityParams(
                 _tokenId,
@@ -167,15 +191,15 @@ abstract contract Helpers is DSMath, Basic {
      */
     function _collect(
         uint256 _tokenId,
-        uint256 _amount0Max,
-        uint256 _amount1Max
+        uint128 _amount0Max,
+        uint128 _amount1Max
     ) internal returns (uint256 amount0, uint256 amount1) {
         INonfungiblePositionManager.CollectParams
             memory params = INonfungiblePositionManager.CollectParams(
                 _tokenId,
                 address(this),
-                uint128(_amount0Max),
-                uint128(_amount1Max)
+                _amount0Max,
+                _amount1Max
             );
         (amount0, amount1) = nftManager.collect(params);
     }

@@ -1,25 +1,25 @@
 pragma solidity ^0.7.0;
 
 contract Events {
-    event LogNewPositionMint(
-        uint256 indexed tokenId,
-        uint256 amtA,
-        uint256 amtB,
-        uint256 liquidity
-    );
-
-    event LogAddLiquidity(
-        uint256 indexed tokenId,
-        uint256 amtA,
-        uint256 amtB,
-        uint256 liquidity
-    );
-
-    event LogDecreaseLiquidity(
+    event LogMint(
         uint256 indexed tokenId,
         uint256 liquidity,
         uint256 amtA,
         uint256 amtB
+    );
+
+    event LogDeposit(
+        uint256 indexed tokenId,
+        uint256 liquidity,
+        uint256 amountA,
+        uint256 amountB
+    );
+
+    event LogWithdraw(
+        uint256 indexed tokenId,
+        uint256 liquidity,
+        uint256 amountA,
+        uint256 amountB
     );
 
     event Swap(
@@ -29,5 +29,5 @@ contract Events {
         uint256 amtOut
     );
 
-    event BurnPosition(uint256 tokenId);
+    event LogBurn(uint256 tokenId);
 }
