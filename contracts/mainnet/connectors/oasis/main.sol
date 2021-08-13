@@ -49,7 +49,7 @@ contract OasisResolver is DSMath, Basic, Events {
         bool isEth = address(_sellAddr) == wethAddr;
 
         convertEthToWeth(isEth, _sellAddr, _expectedAmt);
-        _sellAddr.approve(address(oasis), _expectedAmt);
+        approve(_sellAddr, address(oasis), _expectedAmt);
 
         uint _sellAmt = oasis.buyAllAmount(
             address(_buyAddr),
@@ -104,7 +104,7 @@ contract OasisResolver is DSMath, Basic, Events {
         bool isEth = address(_sellAddr) == wethAddr;
 
         convertEthToWeth(isEth, _sellAddr, _sellAmt);
-        _sellAddr.approve(address(oasis), _sellAmt);
+        approve(_sellAddr, address(oasis), _sellAmt);
 
         uint _buyAmt = oasis.sellAllAmount(
             address(_sellAddr),

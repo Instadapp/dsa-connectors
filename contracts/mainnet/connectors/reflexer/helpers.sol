@@ -37,8 +37,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev Return Reflexer mapping Address.
      */
     function getGebMappingAddress() internal pure returns (address) {
-        // TODO: Set the real deployed Reflexer mapping address
-        return 0x0000000000000000000000000000000000000000;
+        return 0x573e5132693C046D1A9F75Bac683889164bA41b4;
     }
 
     function getCollateralJoinAddress(bytes32 collateralType) internal view returns (address) {

@@ -38,7 +38,7 @@ contract Main is Helpers, Events {
 
     _amt = _amt == uint(-1) ? stakingToken.balanceOf(address(this)) : _amt;
 
-    stakingToken.approve(address(stakingContract), _amt);
+    approve(stakingToken, address(stakingContract), _amt);
     stakingContract.stake(_amt);
 
     setUint(setId, _amt);

@@ -82,14 +82,21 @@ abstract contract OneHelpers is Stores, DSMath {
      * @dev Return  1Inch Address
      */
     function getOneInchAddress() internal pure returns (address) {
-        return 0x111111125434b319222CdBf8C261674aDB56F3ae;
+        return 0x11111112542D85B3EF69AE05771c2dCCff4fAa26;
     }
 
     /**
      * @dev Return 1inch swap function sig
      */
-    function getOneInchSig() internal pure returns (bytes4) {
-        return 0x90411a32;
+    function getOneInchSwapSig() internal pure returns (bytes4) {
+        return 0x7c025200;
+    }
+
+     /**
+     * @dev Return 1inch swap function sig
+     */
+    function getOneInchUnoswapSig() internal pure returns (bytes4) {
+        return 0x2e95b6c8;
     }
 
     function convert18ToDec(uint _dec, uint256 _amt) internal pure returns (uint256 amt) {
@@ -224,7 +231,7 @@ abstract contract OneInchResolver is OneProtoResolver {
         assembly {
             sig := mload(add(_data, 32))
         }
-        isOk = sig == getOneInchSig();
+        isOk = sig == getOneInchSwapSig() || sig == getOneInchUnoswapSig();
     }
 
     struct OneInchData {
@@ -585,5 +592,12 @@ abstract contract OneInch is OneProto {
 }
 
 contract ConnectOne is OneInch {
-    string public name = "1inch-1proto-v1";
+    string public name = "1inch-1proto-v1.2";
+
+        /**
+     * @dev Connector Details
+    */
+    function connectorID() public pure returns(uint _type, uint _id) {
+        (_type, _id) = (1, 98);
+    }
 }

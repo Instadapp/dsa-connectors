@@ -45,7 +45,7 @@ abstract contract Helpers is DSMath, Basic {
             maticAmt = swapData._sellAmt;
         } else {
             address tokenProxy = AugustusSwapperInterface(paraswap).getTokenTransferProxy();
-            TokenInterface(_sellAddr).approve(tokenProxy, swapData._sellAmt);
+            approve(TokenInterface(_sellAddr), tokenProxy, swapData._sellAmt);
         }
 
         swapData._buyAmt = _swapHelper(swapData, maticAmt);

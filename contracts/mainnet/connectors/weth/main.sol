@@ -1,8 +1,8 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Basic.
- * @dev Deposit & Withdraw from DSA.
+ * @title WETH.
+ * @dev Wrap and Unwrap WETH.
  */
 
 import { DSMath } from "../../common/math.sol";
@@ -50,7 +50,7 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
         uint _amt = getUint(getId, amt);
 
         _amt = _amt == uint(-1) ? wethContract.balanceOf(address(this)) : _amt;
-        wethContract.approve(wethAddr, _amt);
+        approve(wethContract, wethAddr, _amt);
         wethContract.withdraw(_amt);
 
         setUint(setId, _amt);

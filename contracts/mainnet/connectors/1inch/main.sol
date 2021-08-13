@@ -25,7 +25,7 @@ abstract contract OneInchResolver is Helpers, Events {
         assembly {
             sig := mload(add(_data, 32))
         }
-        isOk = sig == oneInchSig;
+        isOk = sig == oneInchSwapSig || sig == oneInchUnoswapSig;
     }
 
     /**
@@ -74,7 +74,7 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
-            TokenInterface(_sellAddr).approve(oneInchAddr, oneInchData._sellAmt);
+            approve(TokenInterface(_sellAddr), oneInchAddr, oneInchData._sellAmt);
         }
 
         require(checkOneInchSig(oneInchData.callData), "Not-swap-function");
@@ -124,5 +124,5 @@ abstract contract OneInch is OneInchResolverHelpers {
 }
 
 contract ConnectV2OneInch is OneInch {
-    string public name = "1Inch-v1";
+    string public name = "1Inch-v1.2";
 }

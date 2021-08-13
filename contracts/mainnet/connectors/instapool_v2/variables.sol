@@ -6,7 +6,7 @@ import { InstaFlashV2Interface } from "./interfaces.sol";
 contract Variables {
 
     /**
-    * @dev Instapool / Receiver contract proxy
+    * @dev Instapool contract proxy
     */
-    InstaFlashV2Interface public constant instaPool = InstaFlashV2Interface(0x691d4172331a11912c6D0e6D1A002E3d7CED6a66);
+    InstaFlashV2Interface public constant instaPool = InstaFlashV2Interface(0x2a1739D7F07d40e76852Ca8f0D82275Aa087992F);
 }

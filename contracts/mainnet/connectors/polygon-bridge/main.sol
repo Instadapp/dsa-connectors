@@ -36,10 +36,10 @@ abstract contract PolygonBridgeResolver is Events, Helpers {
             TokenInterface _token = TokenInterface(token);
             _amt = _amt == uint(-1) ? _token.balanceOf(address(this)) : _amt;
             if (migrator.rootToChildToken(token) != address(0)) {
-                _token.approve(erc20Predicate, _amt);
+                approve(_token, erc20Predicate, _amt);
                 migrator.depositFor(targetDsa, token, abi.encode(_amt));
             } else {
-                _token.approve(address(migratorPlasma), _amt);
+                approve(_token, address(migratorPlasma), _amt);
                 migratorPlasma.depositERC20ForUser(token, targetDsa, _amt);
             }
         }
