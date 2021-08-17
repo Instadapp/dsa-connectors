@@ -3,9 +3,11 @@ pragma experimental ABIEncoderV2;
 
 import { Basic } from "../../common/basic.sol";
 
+import { LimitOrderInterface } from "./interface.sol";
+
 abstract contract Helpers is Basic {
     /**
-     * @dev Compound Comptroller
+     * @dev Limit Order Address
      */
     LimitOrderInterface internal constant limitOrderContract = LimitOrderInterface(address(0)); // TODO: add Limit Order contract's address
 
