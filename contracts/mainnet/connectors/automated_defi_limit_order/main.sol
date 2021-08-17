@@ -83,9 +83,12 @@ abstract contract CompResolver is Events, Helpers {
         string memory _eventName,
         bytes memory _eventParam
     ) {
+        sellAmt = getUint(getId, sellAmt);
         uint _slippageAmt = _calSlippageCheck(TokenInterface(buyAddr), TokenInterface(sellAddr), sellAmt, unitAmt);
 
         uint buyAmt = limitOrderContract.sell(sellAddr, buyAddr, sellAmt, _slippageAmt, _orderId, address(this));
+
+        setUint(setId, buyAmt);
 
         _eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(buyAddr, sellAddr, buyAmt, sellAmt, 0, setId);
