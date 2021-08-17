@@ -9,6 +9,10 @@ abstract contract Helpers is Basic {
     /**
      * @dev Limit Order Address
      */
-    LimitOrderInterface internal constant limitOrderContract = LimitOrderInterface(address(0)); // TODO: add Limit Order contract's address
+    LimitOrderInterface internal immutable limitOrderContract;
+
+    constructor (address _limitOrderContract) {
+        limitOrderContract = LimitOrderInterface(_limitOrderContract);
+    }
 
 }

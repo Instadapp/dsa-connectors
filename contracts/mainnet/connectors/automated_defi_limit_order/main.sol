@@ -12,6 +12,8 @@ import { Events } from "./events.sol";
 
 abstract contract CompResolver is Events, Helpers {
 
+    constructor(address _limitOrderContract) Helpers(_limitOrderContract) {}
+
     function create(
         address _tokenFrom,
         address _tokenTo,
@@ -124,4 +126,6 @@ abstract contract CompResolver is Events, Helpers {
 
 contract ConnectV2DefiLimitOrders is CompResolver {
     string public constant name = "DeFi-Limit-Order-v1";
+
+    constructor(address _limitOrderContract) CompResolver(_limitOrderContract) {}
 }
