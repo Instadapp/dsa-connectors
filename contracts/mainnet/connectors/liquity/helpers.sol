@@ -29,8 +29,7 @@ abstract contract Helpers is DSMath, Basic {
         uint maxFeePercentage;
         uint withdrawAmount;
         uint depositAmount;
-        uint borrowAmount;
-        uint repayAmount;
+        uint lusdChange;
         bool isBorrow;
     }
 
