@@ -6,8 +6,8 @@ contract Events {
         uint256 liquidity,
         uint256 amtA,
         uint256 amtB,
-        int24 lowerTick,
-        int24 upperTick
+        int24 tickLower,
+        int24 tickUpper
     );
 
     event LogDeposit(
@@ -24,12 +24,11 @@ contract Events {
         uint256 amountB
     );
 
-    event Swap(
-        address indexed tokenIn,
-        address indexed tokenOut,
-        uint256 amtIn,
-        uint256 amtOut
+    event LogCollect(
+        uint256 tokenId,
+        uint256 amountA,
+        uint256 amountB
     );
 
-    event LogBurn(uint256 tokenId);
+    event LogBurnPosition(uint256 tokenId);
 }

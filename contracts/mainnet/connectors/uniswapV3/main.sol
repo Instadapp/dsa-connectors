@@ -13,9 +13,10 @@ import {Events} from "./events.sol";
 abstract contract UniswapResolver is Helpers, Events {
     /**
      * @dev Mint New Position
-     * @param params: parameter for mint.
-     * @param getIds: ID to retrieve amtA.
-     * @param setId: ID stores the amount of LP token.
+     * @notice Mint New NFT LP Position
+     * @param params parameter for mint
+     * @param getIds ID to retrieve amtA
+     * @param setId ID stores the amount of LP token
      */
     function mint(
         MintParams memory params,
@@ -51,12 +52,13 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Increase Liquidity
-     * @param tokenId: NFT LP Token ID.
-     * @param amountA: tokenA amounts.
-     * @param amountB: tokenB amounts.
-     * @param slippage: slippage.
-     * @param getIds: IDs to retrieve token amounts
-     * @param  setId: stores the liquidity amount
+     * @notice Increase Liquidity of NFT Position
+     * @param tokenId NFT LP Token ID.
+     * @param amountA tokenA amounts.
+     * @param amountB tokenB amounts.
+     * @param slippage slippage.
+     * @param getIds IDs to retrieve token amounts
+     * @param setId stores the liquidity amount
      */
     function deposit(
         uint256 tokenId,
@@ -88,12 +90,13 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Decrease Liquidity
-     * @param tokenId: NFT LP Token ID.
-     * @param liquidity: LP Token amount.
-     * @param amountAMin: Min amount of tokenA.
-     * @param amountBMin: Min amount of tokenB.
-     * @param getId: ID to retrieve LP token amounts
-     * @param  setIds: stores the amount of output tokens
+     * @notice Decrease Liquidity of NFT Position
+     * @param tokenId NFT LP Token ID.
+     * @param liquidity LP Token amount.
+     * @param amountAMin Min amount of tokenA.
+     * @param amountBMin Min amount of tokenB.
+     * @param getId ID to retrieve LP token amounts
+     * @param setIds stores the amount of output tokens
      */
     function withdraw(
         uint256 tokenId,
@@ -126,11 +129,12 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Collect function
-     * @param tokenId: NFT LP Token ID.
-     * @param amount0Max: Max amount of token0.
-     * @param amount1Max: Max amount of token1.
-     * @param  getIds: IDs to retrieve amounts
-     * @param  setIds: stores the amount of output tokens
+     * @notice Collect from NFT Position
+     * @param tokenId NFT LP Token ID.
+     * @param amount0Max Max amount of token0.
+     * @param amount1Max Max amount of token1.
+     * @param getIds IDs to retrieve amounts
+     * @param setIds stores the amount of output tokens
      */
     function collect(
         uint256 tokenId,
@@ -160,6 +164,8 @@ abstract contract UniswapResolver is Helpers, Events {
 
     /**
      * @dev Burn Function
+     * @notice Burn NFT LP Position
+     * @param tokenId NFT LP Token ID
      */
     function burn(uint256 tokenId)
         external
