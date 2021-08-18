@@ -2,15 +2,15 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title COMP.
- * @dev Claim COMP.
+ * @title DeFi Limit Order.
+ * @dev Automated DeFi Limit Order to create stable coin swaps.
  */
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-abstract contract CompResolver is Events, Helpers {
+abstract contract LimitOrderResolver is Events, Helpers {
 
     constructor(address _limitOrderContract) Helpers(_limitOrderContract) {}
 
@@ -124,8 +124,8 @@ abstract contract CompResolver is Events, Helpers {
 
 }
 
-contract ConnectV2DefiLimitOrders is CompResolver {
+contract ConnectV2DefiLimitOrders is LimitOrderResolver {
     string public constant name = "DeFi-Limit-Order-v1";
 
-    constructor(address _limitOrderContract) CompResolver(_limitOrderContract) {}
+    constructor(address _limitOrderContract) LimitOrderResolver(_limitOrderContract) {}
 }
