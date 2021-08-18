@@ -99,5 +99,5 @@ abstract contract CompResolver is Events, Helpers {
 }
 
 contract ConnectV2COMP is CompResolver {
-    string public constant name = "COMP-v1";
+    string public constant name = "COMP-v1.1";
 }
