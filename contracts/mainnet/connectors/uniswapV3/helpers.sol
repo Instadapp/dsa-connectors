@@ -204,29 +204,6 @@ abstract contract Helpers is DSMath, Basic {
         (amount0, amount1) = nftManager.collect(params);
     }
 
-    /**
-     * @dev exactInputSingle function which interact with Uniswap v3
-     */
-    function _exactInputSingle(
-        address _tokenIn,
-        address _tokenOut,
-        uint24 _fee,
-        uint256 _amountIn
-    ) internal returns (uint256 amountOut) {
-        TransferHelper.safeApprove(_tokenIn, address(swapRouter), _amountIn);
-        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
-            .ExactInputSingleParams(
-                _tokenIn,
-                _tokenOut,
-                _fee,
-                address(this),
-                block.timestamp,
-                _amountIn,
-                0,
-                0
-            );
-        amountOut = swapRouter.exactInputSingle(params);
-    }
 
     /**
      * @dev Burn Function
