@@ -5,7 +5,9 @@ contract Events {
         uint256 indexed tokenId,
         uint256 liquidity,
         uint256 amtA,
-        uint256 amtB
+        uint256 amtB,
+        int24 lowerTick,
+        int24 upperTick
     );
 
     event LogDeposit(
