@@ -14,19 +14,12 @@ abstract contract UniswapResolver is Helpers, Events {
     /**
      * @dev Mint New Position
      * @notice Mint New NFT LP Position
-     * @param tokenA parameter for mint
+     * @param params parameter for mint
      * @param getIds ID to retrieve amtA
      * @param setId ID stores the amount of LP token
      */
     function mint(
-        address tokenA,
-        address tokenB,
-        uint24 fee,
-        int24 tickLower,
-        int24 tickUpper,
-        uint256 amtA,
-        uint256 amtB,
-        uint256 slippage,
+        MintParams memory params,
         uint256[] calldata getIds,
         uint256 setId
     )
@@ -34,20 +27,6 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-
-        MintParams memory params;
-        {
-            params = MintParams(
-                tokenA,
-                tokenB,
-                fee,
-                tickLower,
-                tickUpper,
-                amtA,
-                amtB,
-                slippage
-            );
-        }
         params.amtA = getUint(getIds[0], params.amtA);
         params.amtB = getUint(getIds[1], params.amtB);
 
