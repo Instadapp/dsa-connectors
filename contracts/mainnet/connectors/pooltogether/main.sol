@@ -7,7 +7,7 @@ pragma solidity ^0.7.0;
 
  import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
  import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
- import { PrizePoolInterface, TokenFaucetInterface, TokenFaucetProxyFactoryInterface } from "./interface.sol";
+ import { PrizePoolInterface, TokenFaucetInterface, TokenFaucetProxyFactoryInterface, PodInterface } from "./interface.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Events } from "./events.sol";
@@ -37,7 +37,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         address referrer,
         uint256 getId,
         uint256 setId
-    ) external returns ( string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns ( string memory _eventName, bytes memory _eventParam) {
         uint _amount = getUint(getId, amount);
 
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
@@ -75,7 +75,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         uint256 maximumExitFee,
         uint256 getId,
         uint256 setId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amount = getUint(getId, amount);
 
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
@@ -97,7 +97,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
     function claim (
         address tokenFaucet,
         address user
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         TokenFaucetInterface tokenFaucetContract = TokenFaucetInterface(tokenFaucet);
 
         tokenFaucetContract.claim(user);
@@ -117,13 +117,80 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         address tokenFaucetProxyFactory,
         address user,
         TokenFaucetInterface[] calldata tokenFaucets
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         TokenFaucetProxyFactoryInterface tokenFaucetProxyFactoryContract = TokenFaucetProxyFactoryInterface(tokenFaucetProxyFactory);
 
         tokenFaucetProxyFactoryContract.claimAll(user, tokenFaucets);
 
         _eventName = "LogClaimAll(address,address,TokenFaucetInterface[])";
         _eventParam = abi.encode(address(tokenFaucetProxyFactory), address(user), tokenFaucets);
+    }
+
+    /**
+     * @dev Deposit into Pod
+     * @notice Deposit assets into the Pod in exchange for share tokens
+     * @param prizePool PrizePool address to deposit to
+     * @param pod Pod address to deposit to
+     * @param to The address that shall receive the Pod shares
+     * @param tokenAmount The amount of tokens to deposit.  These are the same tokens used to deposit into the underlying prize pool.
+     * @param getId Get token amount at this ID from `InstaMemory` Contract.
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+    */
+    function depositToPod(
+        address prizePool,
+        address pod,
+        address to,
+        uint256 tokenAmount,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns ( string memory _eventName, bytes memory _eventParam) {
+        uint _tokenAmount= getUint(getId, tokenAmount);
+
+        PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
+        address prizePoolToken = prizePoolContract.token();
+
+        PodInterface podContract = PodInterface(pod);
+
+        // Approve pod
+        TokenInterface tokenContract = TokenInterface(prizePoolToken);
+        tokenContract.approve(pod, _tokenAmount);
+
+        podContract.depositTo(to, _tokenAmount);
+
+        setUint(setId, _tokenAmount);
+
+        _eventName = "LogDepositToPod(address,address,address,uint256,uint256, uint256)";
+        _eventParam = abi.encode(address(prizePool), address(pod), address(to), _tokenAmount, getId, setId);
+    }
+
+    /**
+     * @dev Withdraw from shares from Pod
+     * @dev The function should first withdraw from the 'float'; i.e. the funds that have not yet been deposited.
+     * @notice Withdraws a users share of the prize pool.
+     * @param pod Pod address
+     * @param shareAmount The number of Pod shares to burn.
+     * @param maxFee Max fee amount for withdrawl if amount isn't available in float.
+     * @param getId Get token amount at this ID from `InstaMemory` Contract.
+     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+    */
+
+    function withdrawFromPod (
+        address pod,
+        uint256 shareAmount,
+        uint256 maxFee,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _shareAmount = getUint(getId, shareAmount);
+
+        PodInterface podContract = PodInterface(pod);
+
+        podContract.withdraw(_shareAmount, maxFee);
+
+        setUint(setId, _shareAmount);
+
+        _eventName = "LogWithdrawFromPod(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(pod), _shareAmount, maxFee, getId, setId);
     }
 }
 

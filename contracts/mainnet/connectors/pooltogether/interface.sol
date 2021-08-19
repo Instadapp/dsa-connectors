@@ -13,3 +13,8 @@ interface TokenFaucetInterface {
 interface TokenFaucetProxyFactoryInterface {
     function claimAll(address user, TokenFaucetInterface[] calldata tokenFaucets) external;
 }
+
+interface PodInterface {
+    function depositTo(address to, uint256 tokenAmount) external returns (uint256);
+    function withdraw(uint256 shareAmount, uint256 maxFee) external returns (uint256);
+}

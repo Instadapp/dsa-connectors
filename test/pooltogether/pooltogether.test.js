@@ -22,6 +22,7 @@ const controlledToken = "0x334cBb5858417Aee161B53Ee0D5349cCF54514CF" // PT DAI T
 const daiPoolFaucet = "0xF362ce295F2A4eaE4348fFC8cDBCe8d729ccb8Eb"  // DAI POOL Faucet
 const poolTokenAddress = "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e"
 const tokenFaucetProxyFactory = "0xE4E9cDB3E139D7E8a41172C20b6Ed17b6750f117" // TokenFaucetProxyFactory for claimAll
+const daiPod = "0x2f994e2E4F3395649eeE8A89092e63Ca526dA829" // DAI Pod
 
 describe("PoolTogether", function () {
     const connectorName = "COMPOUND-TEST-A"
@@ -156,7 +157,7 @@ describe("PoolTogether", function () {
                 args: [daiPoolFaucet, dsaWallet0.address]
             }
         ]
-        
+
         // Before spell
         // DAI balance is 0
         let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
@@ -215,7 +216,7 @@ describe("PoolTogether", function () {
                 args: [prizePool, dsaWallet0.address, amount, controlledToken, amount, 0, 0]
             }
         ]
-        
+
         // Before spell
         // DAI balance is 0
         let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
@@ -229,7 +230,7 @@ describe("PoolTogether", function () {
         const tokenName = await cToken.name()
         console.log("\tBalance before: ", balance.toString(), tokenName)
 
-        // PoolToken is 0 
+        // PoolToken is 0
         let poolToken = await ethers.getContractAt(abis.basic.erc20, poolTokenAddress)
         const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
         const poolTokenName = await poolToken.name()
@@ -327,6 +328,172 @@ describe("PoolTogether", function () {
         const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
         console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
         expect(poolBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
+    });
+  })
+
+  describe("Main - DAI Pod Test", function() {
+    it("Should deposit in Pod", async function() {
+        const amount = ethers.utils.parseEther("99") // 99 DAI
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "depositToPod",
+                args: [prizePool, daiPod, dsaWallet0.address, amount, 0, 0]
+            }
+        ]
+
+        // Before spell
+        // DAI balance is 99
+        let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
+        let daiBalance = await daiToken.balanceOf(dsaWallet0.address);
+        console.log("Before Spell:")
+        console.log("\tBalance before: ", daiBalance.toString(), tokens.dai.symbol);
+
+        // PoolToken is 0
+        let poolToken = await ethers.getContractAt(abis.basic.erc20, poolTokenAddress)
+        const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
+        const poolTokenName = await poolToken.name()
+        console.log("\tBalance before: ", poolBalance.toString(), poolTokenName)
+
+        // PodToken is 0
+        let podToken = await ethers.getContractAt(abis.basic.erc20, daiPod)
+        const podBalance = await podToken.balanceOf(dsaWallet0.address)
+        const podTokenName = await podToken.name()
+        console.log("\tBalance before: ", podBalance.toString(), podTokenName)
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        // Expect DAI balance to be less than 100, because of early withdrawal fee
+        daiBalance = await daiToken.balanceOf(dsaWallet0.address);
+        console.log("After spell: ");
+        console.log("\tBalance after: ", daiBalance.toString(), tokens.dai.symbol);
+        expect(daiBalance).to.be.lt(ethers.utils.parseEther("100"));
+
+        // Expect Pool Token Balance to greater than 0
+        const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
+        expect(poolBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
+
+        // Expect Pod Token Balance to greater than 0
+        const podBalanceAfter = await podToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", podBalanceAfter.toString(), podTokenName)
+        expect(podBalanceAfter).to.be.eq(ethers.utils.parseEther("99"));
+    });
+
+    it("Should wait 11 days, withdraw all podTokens, get back 99 DAI", async function () {
+        const amount = ethers.utils.parseEther("99") // 99 DAI
+        const maxFee = 0;
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "withdrawFromPod",
+                args: [daiPod, amount, maxFee, 0, 0]
+            }
+        ]
+
+        // Before spell
+        // DAI balance is 0
+        let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
+        let daiBalance = await daiToken.balanceOf(dsaWallet0.address);
+        console.log("Before Spell:")
+        console.log("\tBalance before: ", daiBalance.toString(), tokens.dai.symbol);
+
+        // PoolToken is 0
+        let poolToken = await ethers.getContractAt(abis.basic.erc20, poolTokenAddress)
+        const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
+        const poolTokenName = await poolToken.name()
+        console.log("\tBalance before: ", poolBalance.toString(), poolTokenName)
+
+        // PodToken is 99
+        let podToken = await ethers.getContractAt(abis.basic.erc20, daiPod)
+        const podBalance = await podToken.balanceOf(dsaWallet0.address)
+        const podTokenName = await podToken.name()
+        console.log("\tBalance before: ", podBalance.toString(), podTokenName)
+
+        // Increase time by 11 days so we get back all DAI without early withdrawal fee
+        await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        // Expect DAI balance to be equal to 99, because of no early withdrawal fee
+        daiBalance = await daiToken.balanceOf(dsaWallet0.address);
+        console.log("After spell: ");
+        console.log("\tBalance after: ", daiBalance.toString(), tokens.dai.symbol);
+        expect(daiBalance).to.be.eq(ethers.utils.parseEther("99"));
+
+        // Expect Pool Token Balance to be greater than 0
+        const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
+        expect(poolBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
+
+        // Expect Pod Token Balance to equal 0
+        const podBalanceAfter = await podToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", podBalanceAfter.toString(), podTokenName)
+        expect(podBalanceAfter).to.be.eq(ethers.utils.parseEther("0"));
+    });
+
+    it("Should deposit and withdraw from pod, get back same amount of 99 DAI", async function() {
+        const amount = ethers.utils.parseEther("99")
+        const maxFee = 0;
+
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "depositToPod",
+                args: [prizePool, daiPod, dsaWallet0.address, amount, 0, 0]
+            },
+            {
+                connector: ptConnectorName,
+                method: "withdrawFromPod",
+                args: [daiPod, amount, maxFee, 0, 0]
+            }
+        ]
+
+        // Before spell
+        // DAI balance is 0
+        let daiToken = await ethers.getContractAt(abis.basic.erc20, token)
+        let daiBalance = await daiToken.balanceOf(dsaWallet0.address);
+        console.log("Before Spell:")
+        console.log("\tBalance before: ", daiBalance.toString(), tokens.dai.symbol);
+
+        // PoolToken is greater than 0
+        let poolToken = await ethers.getContractAt(abis.basic.erc20, poolTokenAddress)
+        const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
+        const poolTokenName = await poolToken.name()
+        console.log("\tBalance before: ", poolBalance.toString(), poolTokenName)
+
+        // PodToken is 0
+        let podToken = await ethers.getContractAt(abis.basic.erc20, daiPod)
+        const podBalance = await podToken.balanceOf(dsaWallet0.address)
+        const podTokenName = await podToken.name()
+        console.log("\tBalance before: ", podBalance.toString(), podTokenName)
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        // Expect DAI balance to be equal to 99, because funds still in 'float'
+        daiBalance = await daiToken.balanceOf(dsaWallet0.address);
+        console.log("After spell: ");
+        console.log("\tBalance after: ", daiBalance.toString(), tokens.dai.symbol);
+        expect(daiBalance).to.be.eq(ethers.utils.parseEther("99"));
+
+        // Expect Pool Token Balance to greater than 0
+        const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
+        expect(poolBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
+
+        // Expect Pod Token Balance to equal 0
+        const podBalanceAfter = await podToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", podBalanceAfter.toString(), podTokenName)
+        expect(podBalanceAfter).to.be.eq(ethers.utils.parseEther("0"));
     });
   })
 })
