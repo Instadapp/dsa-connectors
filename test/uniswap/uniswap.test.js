@@ -112,16 +112,14 @@ describe("UniswapV3", function () {
                     connector: connectorName,
                     method: "mint",
                     args: [
-                        {
-                            tokenA: DAI_ADDR,
-                            tokenB: ethAddress,
-                            fee: FeeAmount.MEDIUM,
-                            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                            amtA: daiAmount,
-                            amtB: ethAmount,
-                            slippage: "500000000000000000"
-                        },
+                        DAI_ADDR,
+                        ethAddress,
+                        FeeAmount.MEDIUM,
+                        getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        daiAmount,
+                        ethAmount,
+                        "500000000000000000",
                         getIds,
                         setId
                     ],
@@ -130,16 +128,14 @@ describe("UniswapV3", function () {
                     connector: connectorName,
                     method: "mint",
                     args: [
-                        {
-                            tokenA: DAI_ADDR,
-                            tokenB: USDT_ADDR,
-                            fee: FeeAmount.MEDIUM,
-                            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                            amtA: daiAmount,
-                            amtB: usdtAmount,
-                            slippage: "300000000000000000"
-                        },
+                        DAI_ADDR,
+                        USDT_ADDR,
+                        FeeAmount.MEDIUM,
+                        getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        daiAmount,
+                        usdtAmount,
+                        "300000000000000000",
                         getIds,
                         setId
                     ],
@@ -148,16 +144,14 @@ describe("UniswapV3", function () {
                     connector: connectorName,
                     method: "mint",
                     args: [
-                        {
-                            tokenA: ethAddress,
-                            tokenB: USDT_ADDR,
-                            fee: FeeAmount.MEDIUM,
-                            tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                            tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                            amtA: ethAmount,
-                            amtB: usdtAmount,
-                            slippage: "300000000000000000"
-                        },
+                        ethAddress,
+                        USDT_ADDR,
+                        FeeAmount.MEDIUM,
+                        getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        ethAmount,
+                        usdtAmount,
+                        "300000000000000000",
                         getIds,
                         setId
                     ],
