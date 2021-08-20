@@ -104,22 +104,76 @@ abstract contract Helpers is DSMath, Basic {
         (tokenId, liquidity, amountA, amountB) = nftManager.mint(params);
     }
 
+    function getAddress(uint256 _tokenId)
+        internal
+        view
+        returns (address token0, address token1)
+    {
+        (bool success, bytes memory data) = address(nftManager).staticcall(
+            abi.encodeWithSelector(nftManager.positions.selector, _tokenId)
+        );
+        require(success, "fetching positions failed");
+        {
+            (, , token0, token1, , , , ) = abi.decode(
+                data,
+                (
+                    uint96,
+                    address,
+                    address,
+                    address,
+                    uint24,
+                    int24,
+                    int24,
+                    uint128
+                )
+            );
+        }
+    }
+
     /**
      * @dev Check if token address is etherAddr and convert it to weth
      */
     function _checkETH(
-        uint256 _tokenId,
+        address _token0,
+        address _token1,
         uint256 _amount0,
         uint256 _amount1
     ) internal {
-        (, , address token0, address token1, , , , , , , , ) = nftManager
-            .positions(_tokenId);
-        bool isEth0 = token0 == wethAddr;
-        bool isEth1 = token1 == wethAddr;
-        convertEthToWeth(isEth0, TokenInterface(token0), _amount0);
-        convertEthToWeth(isEth1, TokenInterface(token1), _amount1);
-        approve(TokenInterface(token0), address(nftManager), _amount0);
-        approve(TokenInterface(token1), address(nftManager), _amount1);
+        
+        bool isEth0 = _token0 == wethAddr;
+        bool isEth1 = _token1 == wethAddr;
+        convertEthToWeth(isEth0, TokenInterface(_token0), _amount0);
+        convertEthToWeth(isEth1, TokenInterface(_token1), _amount1);
+        approve(TokenInterface(_token0), address(nftManager), _amount0);
+        approve(TokenInterface(_token1), address(nftManager), _amount1);
+    }
+
+    /**
+     * @dev addLiquidityWrapper function wrapper of _addLiquidity
+     */
+    function _addLiquidityWrapper(
+        uint256 tokenId,
+        uint256 amountA,
+        uint256 amountB,
+        uint256 slippage
+    )
+        internal
+        returns (
+            uint256 liquidity,
+            uint256 amtA,
+            uint256 amtB
+        )
+    {
+        (address token0, address token1) = getAddress(tokenId);
+
+        (liquidity, amtA, amtB) = _addLiquidity(
+            tokenId,
+            token0,
+            token1,
+            amountA,
+            amountB,
+            slippage
+        );
     }
 
     /**
@@ -127,6 +181,8 @@ abstract contract Helpers is DSMath, Basic {
      */
     function _addLiquidity(
         uint256 _tokenId,
+        address _token0,
+        address _token1,
         uint256 _amount0,
         uint256 _amount1,
         uint256 _slippage
@@ -138,11 +194,7 @@ abstract contract Helpers is DSMath, Basic {
             uint256 amount1
         )
     {
-        _checkETH(_tokenId, _amount0, _amount1);
-
-        (, , address _token0, address _token1, , , , , , , , ) = nftManager
-            .positions(_tokenId);
-
+        _checkETH(_token0, _token1, _amount0, _amount1);
         uint256 _amount0Min = getMinAmount(
             TokenInterface(_token0),
             _amount0,
@@ -203,7 +255,6 @@ abstract contract Helpers is DSMath, Basic {
             );
         (amount0, amount1) = nftManager.collect(params);
     }
-
 
     /**
      * @dev Burn Function

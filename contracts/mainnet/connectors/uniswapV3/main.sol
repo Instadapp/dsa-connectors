@@ -75,13 +75,11 @@ abstract contract UniswapResolver is Helpers, Events {
         if (tokenId == 0) tokenId = _getLastNftId(address(this));
         amountA = getUint(getIds[0], amountA);
         amountB = getUint(getIds[1], amountB);
-
-        (uint256 _liquidity, uint256 _amtA, uint256 _amtB) = _addLiquidity(
-            tokenId,
-            amountA,
-            amountB,
-            slippage
-        );
+        (
+            uint256 _liquidity,
+            uint256 _amtA,
+            uint256 _amtB
+        ) = _addLiquidityWrapper(tokenId, amountA, amountB, slippage);
         setUint(setId, _liquidity);
 
         _eventName = "LogDeposit(uint256,uint256,uint256,uint256)";
