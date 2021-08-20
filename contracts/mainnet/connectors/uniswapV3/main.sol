@@ -14,7 +14,14 @@ abstract contract UniswapResolver is Helpers, Events {
     /**
      * @dev Mint New Position
      * @notice Mint New NFT LP Position
-     * @param tokenA parameter for mint
+     * @param tokenA tokenA addreess
+     * @param tokenB tokenB addreess
+     * @param fee fee percentage
+     * @param tickLower Lower tick
+     * @param tickUpper Upper tick
+     * @param amtA amount of tokenA
+     * @param amtB amount of tokenB
+     * @param slippage slippage percentage
      * @param getIds ID to retrieve amtA
      * @param setId ID stores the amount of LP token
      */
