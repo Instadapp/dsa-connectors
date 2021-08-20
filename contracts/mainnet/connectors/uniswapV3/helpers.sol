@@ -104,7 +104,7 @@ abstract contract Helpers is DSMath, Basic {
         (tokenId, liquidity, amountA, amountB) = nftManager.mint(params);
     }
 
-    function getAddress(uint256 _tokenId)
+    function getNftTokenPairAddresses(uint256 _tokenId)
         internal
         view
         returns (address token0, address token1)
@@ -164,7 +164,7 @@ abstract contract Helpers is DSMath, Basic {
             uint256 amtB
         )
     {
-        (address token0, address token1) = getAddress(tokenId);
+        (address token0, address token1) = getNftTokenPairAddresses(tokenId);
 
         (liquidity, amtA, amtB) = _addLiquidity(
             tokenId,
