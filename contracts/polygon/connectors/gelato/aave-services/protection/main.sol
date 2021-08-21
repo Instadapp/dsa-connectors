@@ -67,11 +67,9 @@ abstract contract GAaveProtectionResolver is Events, Helpers {
     /// @dev Function for cancelling and removing allowance
     /// of aToken to _protectionAction
     function cancelAndRevoke() external payable {
-        if (_dsaHasProtection()) {
-            _cancelProtection();
-            emit LogCancelProtection(address(this), _protectionAction);
-        }
+        if (_dsaHasProtection()) _cancelProtection();
         _revokeAllowance();
+        emit LogCancelAndRevoke(address(this), _protectionAction);
     }
 }
 

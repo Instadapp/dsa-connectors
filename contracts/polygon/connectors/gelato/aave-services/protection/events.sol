@@ -17,4 +17,5 @@ contract Events {
         bool isPermanent
     );
     event LogCancelProtection(address indexed dsa, address indexed action);
+    event LogCancelAndRevoke(address indexed dsa, address indexed action);
 }
