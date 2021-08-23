@@ -57,7 +57,7 @@ module.exports = {
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-        blockNumber: 12696000,
+        blockNumber: 12796965,
       },
       blockGasLimit: 12000000,
     },
