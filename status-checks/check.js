@@ -180,10 +180,20 @@ const parseCode = async (connector) => {
         func = []
       }
     }
-    funcs = funcs
+    const allPublicFuncs = funcs
       .filter(({ raw }) => {
-        if ((raw.includes('external') || raw.includes('public')) &&
-        raw.includes('returns')) {
+        return raw.includes('external') || raw.includes('public')
+      })
+      .map(f => {
+        const name = f.raw.split('(')[0].split('function')[1].trim()
+        return {
+          ...f,
+          name
+        }
+      })
+    funcs = allPublicFuncs
+      .filter(({ raw }) => {
+        if (raw.includes('returns')) {
           const returns = raw.split('returns')[1].split('(')[1].split(')')[0]
           return returns.includes('string') && returns.includes('bytes')
         }
@@ -193,11 +203,9 @@ const parseCode = async (connector) => {
         const args = f.raw.split('(')[1].split(')')[0].split(',')
           .map(arg => arg.trim())
           .filter(arg => arg !== '')
-        const name = f.raw.split('(')[0].split('function')[1].trim()
         return {
           ...f,
-          args,
-          name
+          args
         }
       })
     const eventsPath = `${connector.path}/events.sol`
@@ -229,7 +237,8 @@ const parseCode = async (connector) => {
       eventsFirstLines,
       mainEvents,
       mainEventsLines,
-      funcs
+      funcs,
+      allPublicFuncs
     }
   } catch (error) {
     return Promise.reject(error)
@@ -254,6 +263,21 @@ const checkComments = async (connector) => {
         if (!func.comments.some(comment => comment.startsWith(reqs[i3]))) {
           errors.push(`no ${reqs[i3]} for function ${func.name} at ${connector.path}/main.sol:${func.firstLine}`)
         }
+      }
+    }
+    return errors
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
+
+const checkPublicFuncs = async (connector) => {
+  try {
+    const errors = []
+    for (let i1 = 0; i1 < connector.allPublicFuncs.length; i1++) {
+      const { raw, firstLine, name } = connector.allPublicFuncs[i1]
+      if (!raw.includes('payable')) {
+        errors.push(`public function ${name} is not payable at ${connector.path}/main.sol:${firstLine}`)
       }
     }
     return errors
@@ -313,12 +337,14 @@ async function checkMain () {
       const commentsErrors = await checkComments(connectors[index])
       const nameErrors = await checkName(connectors[index])
       const headCommentsErrors = await checkHeadComments(connectors[index])
+      const publicFuncsErrors = await checkPublicFuncs(connectors[index])
 
       errors.push(...forbiddenErrors)
       errors.push(...eventsErrors)
       errors.push(...commentsErrors)
       errors.push(...nameErrors)
       errors.push(...headCommentsErrors)
+      errors.push(...publicFuncsErrors)
       warnings.push(...eventsWarnings)
     }
     if (errors.length) {

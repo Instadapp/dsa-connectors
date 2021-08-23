@@ -3,7 +3,7 @@ const { ethers } = hre;
 
 async function main() {
 
-  const CONNECTORS_V2 = "0xFE2390DAD597594439f218190fC2De40f9Cf1179";
+  const CONNECTORS_V2 = "0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11";
 
   const ctokenMapping = {
     "ETH-A": "0x4ddc2d193948926d02f9b1fe9e1daa0718270ed5",
@@ -16,7 +16,13 @@ async function main() {
     "USDT-A": "0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9",
     "WBTC-A": "0xc11b1268c1a384e55c48c2391d8d480264a3a7f4",
     "WBTC-B": "0xccF4429DB6322D5C611ee964527D42E5d685DD6a",
-    "ZRX-A": "0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407"
+    "ZRX-A": "0xb3319f5d18bc0d84dd1b4825dcde5d5f7266d407",
+    "YFI-A": "0x80a2ae356fc9ef4305676f7a3e2ed04e12c33946",
+    "SUSHI-A": "0x4b0181102a0112a2ef11abee5563bb4a3176c9d7",
+    "MKR-A": "0x95b4ef2869ebd94beb4eee400a99824bf5dc325b",
+    "AAVE-A": "0xe65cdb6479bac1e22340e4e755fae7e509ecd06c",
+    "TUSD-A": "0x12392f67bdf24fae0af363c24ac620a2f67dad86",
+    "LINK-A": "0xface851a4921ce59e912d19329929ce6da6eb0c7",
   }
 
   const tokenMapping = {
@@ -30,7 +36,13 @@ async function main() {
     "USDT-A": "0xdac17f958d2ee523a2206206994597c13d831ec7",
     "WBTC-A": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
     "WBTC-B": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-    "ZRX-A": "0xe41d2489571d322189246dafa5ebde1f4699f498"
+    "ZRX-A": "0xe41d2489571d322189246dafa5ebde1f4699f498",
+    "YFI-A": "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e",
+    "SUSHI-A": "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2",
+    "MKR-A": "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
+    "AAVE-A": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+    "TUSD-A": "0x0000000000085d4780B73119b644AE5ecd22b376",
+    "LINK-A": "0x514910771af9ca656af840dff83e8264ecf986ca",
   }
 
   const Mapping = await ethers.getContractFactory("InstaCompoundMapping");

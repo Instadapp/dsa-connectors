@@ -335,5 +335,5 @@ contract RefinanceResolver is CompoundHelpers, AaveV1Helpers, AaveV2Helpers {
 }
 
 contract ConnectV2Refinance is RefinanceResolver {
-    string public name = "Refinance-v1.0";
+    string public name = "Refinance-v1.1";
 }
