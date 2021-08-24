@@ -13,78 +13,61 @@ import {Events} from "./events.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
     /**
-     * @dev Increase Liquidity
-     * @notice Increase Liquidity of NFT Position
-     * @param tokenId NFT LP Token ID.
-     * @param amountA tokenA amounts.
-     * @param amountB tokenB amounts.
-     * @param slippage slippage.
-     * @param getIds IDs to retrieve token amounts
-     * @param setId stores the liquidity amount
+     * @dev Deposit NFT token
+     * @notice Transfer deposited NFT token
+     * @param _tokenId NFT LP Token ID
      */
-    function deposit(
-        uint256 tokenId,
-        uint256 amountA,
-        uint256 amountB,
-        uint256 slippage,
-        uint256[] calldata getIds,
-        uint256 setId
-    )
+    function deposit(uint256 _tokenId)
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (tokenId == 0) tokenId = _getLastNftId(address(this));
-        amountA = getUint(getIds[0], amountA);
-        amountB = getUint(getIds[1], amountB);
-        (
-            uint256 _liquidity,
-            uint256 _amtA,
-            uint256 _amtB
-        ) = _addLiquidityWrapper(tokenId, amountA, amountB, slippage);
-        setUint(setId, _liquidity);
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
+        nftManager.safeTransferFrom(
+            address(this),
+            address(staker),
+            _tokenId,
+            ""
+        );
 
-        _eventName = "LogDeposit(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(tokenId, _liquidity, _amtA, _amtB);
+        _eventName = "LogDeposit(uint256)";
+        _eventParam = abi.encode(_tokenId);
     }
 
     /**
-     * @dev Decrease Liquidity
-     * @notice Decrease Liquidity of NFT Position
-     * @param tokenId NFT LP Token ID.
-     * @param liquidity LP Token amount.
-     * @param amountAMin Min amount of tokenA.
-     * @param amountBMin Min amount of tokenB.
-     * @param getId ID to retrieve LP token amounts
-     * @param setIds stores the amount of output tokens
+     * @dev Deposit Transfer
+     * @notice Transfer deposited NFT token
+     * @param _tokenId NFT LP Token ID
+     * @param _to address to transfer
      */
-    function withdraw(
-        uint256 tokenId,
-        uint256 liquidity,
-        uint256 amountAMin,
-        uint256 amountBMin,
-        uint256 getId,
-        uint256[] calldata setIds
-    )
+    function transferDeposit(uint256 _tokenId, address _to)
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (tokenId == 0) tokenId = _getLastNftId(address(this));
-        uint128 _liquidity = uint128(getUint(getId, liquidity));
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
+        staker.transferDeposit(_tokenId, _to);
 
-        (uint256 _amtA, uint256 _amtB) = _decreaseLiquidity(
-            tokenId,
-            _liquidity,
-            amountAMin,
-            amountBMin
-        );
+        _eventName = "LogDepositTransfer(uint256,address)";
+        _eventParam = abi.encode(_tokenId, _to);
+    }
 
-        setUint(setIds[0], _amtA);
-        setUint(setIds[1], _amtB);
+    /**
+     * @dev Withdraw NFT LP token
+     * @notice Withdraw NFT LP token from staking pool
+     * @param _tokenId NFT LP Token ID
+     * @param _to address to transfer
+     */
+    function withdraw(uint256 _tokenId, address _to)
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
+        staker.withdrawToken(_tokenId, _to, "");
 
-        _eventName = "LogWithdraw(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(tokenId, _liquidity, _amtA, _amtB);
+        _eventName = "LogWithdraw(uint256,address)";
+        _eventParam = abi.encode(_tokenId, _to);
     }
 
     /**
@@ -107,12 +90,6 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        nftManager.safeTransferFrom(
-            address(this),
-            address(staker),
-            _tokenId,
-            ""
-        );
         address poolAddr = getPoolAddress(_tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);

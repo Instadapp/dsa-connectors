@@ -188,6 +188,13 @@ describe("UniswapV3", function () {
             const spells = [
                 {
                     connector: connectorStaker,
+                    method: "deposit",
+                    args: [
+                        tokenIds[0]
+                    ],
+                },
+                {
+                    connector: connectorStaker,
                     method: "stake",
                     args: [
                         ethAddress,
