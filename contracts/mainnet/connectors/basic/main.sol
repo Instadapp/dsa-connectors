@@ -105,8 +105,8 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         IERC721 tokenContract = IERC721(token);
         tokenContract.safeTransferFrom(msg.sender, address(this), tokenId);
 
-        _eventName = "LogDepositERC721(address,uint256,address)";
-        _eventParam = abi.encode(token, tokenId, msg.sender);
+        _eventName = "LogDepositERC721(address,address,uint256)";
+        _eventParam = abi.encode(token, msg.sender, tokenId);
     }
 
     /**
