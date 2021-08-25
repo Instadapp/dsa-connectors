@@ -342,6 +342,6 @@ abstract contract BCompoundResolver is Events, Helpers {
     }
 }
 
-contract ConnectV1BCompound is BCompoundResolver {
+contract ConnectV2BCompound is BCompoundResolver {
     string public name = "B.Compound-v1.0";
 }
