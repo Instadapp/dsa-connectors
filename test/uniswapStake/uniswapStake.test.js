@@ -147,6 +147,9 @@ describe("UniswapV3", function () {
             });
 
             let event = await castEvent
+
+            let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
+            console.log("Balane", balance)
         });
 
         it("Should create incentive successfully", async function () {
@@ -208,6 +211,9 @@ describe("UniswapV3", function () {
 
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
             let receipt = await tx.wait()
+
+            let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
+            console.log("Balane", balance)
         });
 
         it("Should claim rewards successfully", async function () {
@@ -239,11 +245,22 @@ describe("UniswapV3", function () {
                         dsaWallet0.address,
                         tokenIds[0]
                     ],
+                },
+                {
+                    connector: connectorStaker,
+                    method: "withdraw",
+                    args: [
+                        tokenIds[0],
+                        dsaWallet0.address,
+                    ],
                 }
             ]
 
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
             let receipt = await tx.wait()
+
+            let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
+            console.log("Balane", balance)
         });
     })
 })
