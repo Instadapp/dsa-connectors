@@ -516,6 +516,6 @@ abstract contract BMakerResolver is Helpers, Events {
     }
 }
 
-contract ConnectV1BMakerDAO is BMakerResolver {
+contract ConnectV2BMakerDAO is BMakerResolver {
     string public constant name = "B.MakerDAO-v1.0";
 }
