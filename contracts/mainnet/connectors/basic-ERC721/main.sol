@@ -17,16 +17,25 @@ abstract contract BasicResolver is Events, DSMath, Basic {
      * @param token The address of the token to deposit.
      * @param tokenId The id of token to deposit.
      */
-    function depositERC721(address token, uint256 tokenId)
+    function depositERC721(
+        address token,
+        uint256 tokenId,
+        uint256 getId,
+        uint256 setId
+    )
         public
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        IERC721 tokenContract = IERC721(token);
-        tokenContract.safeTransferFrom(msg.sender, address(this), tokenId);
+        uint256 _tokenId = getUint(getId, tokenId);
 
-        _eventName = "LogDepositERC721(address,address,uint256)";
-        _eventParam = abi.encode(token, msg.sender, tokenId);
+        IERC721 tokenContract = IERC721(token);
+        tokenContract.safeTransferFrom(msg.sender, address(this), _tokenId);
+
+        setUint(setId, _tokenId);
+
+        _eventName = "LogDepositERC721(address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(token, msg.sender, _tokenId, getId, setId);
     }
 
     /**
@@ -39,17 +48,22 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     function withdrawERC721(
         address token,
         uint256 tokenId,
-        address payable to
+        address payable to,
+        uint256 getId,
+        uint256 setId
     )
         public
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        uint256 _tokenId = getUint(getId, tokenId);
         IERC721 tokenContract = IERC721(token);
-        tokenContract.safeTransferFrom(address(this), to, tokenId);
+        tokenContract.safeTransferFrom(address(this), to, _tokenId);
 
-        _eventName = "LogWithdrawERC721(address,uint256,address)";
-        _eventParam = abi.encode(token, tokenId, to);
+        setUint(setId, _tokenId);
+
+        _eventName = "LogWithdrawERC721(address,uint256,address,uint256,uint256)";
+        _eventParam = abi.encode(token, _tokenId, to, getId, setId);
     }
 }
 
