@@ -16,6 +16,8 @@ abstract contract BasicResolver is Events, DSMath, Basic {
      * @notice Deposit a ERC721 token to DSA
      * @param token The address of the token to deposit.
      * @param tokenId The id of token to deposit.
+     * @param getId ID to retrieve tokenId.
+     * @param setId ID stores the tokenId.
      */
     function depositERC721(
         address token,
@@ -44,6 +46,8 @@ abstract contract BasicResolver is Events, DSMath, Basic {
      * @param token The address of the token to deposit.
      * @param tokenId The id of token to deposit.
      * @param to The address to receive the token upon withdrawal
+     * @param getId ID to retrieve tokenId.
+     * @param setId ID stores the tokenId.
      */
     function withdrawERC721(
         address token,
