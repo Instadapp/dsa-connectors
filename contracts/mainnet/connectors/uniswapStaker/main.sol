@@ -90,6 +90,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         address poolAddr = getPoolAddress(_tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
@@ -127,6 +128,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         address poolAddr = getPoolAddress(_tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
@@ -189,6 +191,7 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         address poolAddr = getPoolAddress(_tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
@@ -210,5 +213,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV3Staker is UniswapResolver {
-    string public constant name = "UniswapStaker-v1";
+    string public constant name = "Uniswap-V3-Staker-v1";
 }
