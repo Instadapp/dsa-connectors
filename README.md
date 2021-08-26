@@ -6,6 +6,8 @@ DSAs are powerful because they can easily be extended with connectors. Every new
 
 You can create a PR to request a support for specific protocol or external contracts. The process to add a new connector is explained below.
 
+List of all the mainnet connector for referrence is (here)[https://github.com/Instadapp/dsa-connectors/tree/main/contracts/mainnet/connectors]
+
 ## How to add a new connector
 
 You can create a new PR to add a new connector. To get the PR merged, certain requirements needs to be met which will be explained here.
