@@ -35,7 +35,7 @@ Connectors are under `contracts/connectors` directory, and should be formatted a
 
 Few things to consider while writing the connector:
 
-* Connector should have a public string declared `name`, which will be the name of the connector. This will be versioned. Ex: `Compound-v1`
+* Connector should have a public constant string declared `name`, which will be the name of the connector. This will be versioned. Ex: `Compound-v1`
 * Contract name should start with `ConnectV2` appended with protocol name. Eg: `ConnectV2Compound`
 * User interacting methods (`external` methods) will not be emitting events, rather the methods will be returning 2 variables:
   * `_eventName` of `string` type: This will be the event signture defined in the `Events` contract. Ex: `LogDeposit(address,address,uint256,uint256,uint256)`
@@ -45,7 +45,7 @@ Few things to consider while writing the connector:
 * Use `uint(-1)` of `type(uint256).max` for maximum amount everywhere
 * Use `ethAddr` (declared in `Stores`) to denote Ethereum (non-ERC20)
 * Use `address(this)` instead of `msg.sender` for fetching balance on-chain, etc
-* Only `approve()` (Wrapper function to be used is declared in `Basic`) limited amount while giving ERC20 allowance, which strictly needs to be 0 by the end of the spell.
+* Only `approve()` (declared in `Basic`) limited amount while giving ERC20 allowance, which strictly needs to be 0 by the end of the spell.
 * User interacting functions should have natspec comments(@dev, @notice, @param). 
 * Use `getUint()` (declared in `Stores`) for getting value that saved from previous spell
 * Use `setUint()` (declared in `Stores`) for setting value to save for the future spell
