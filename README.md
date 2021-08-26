@@ -36,6 +36,7 @@ Connectors are under `contracts/connectors` directory, and should be formatted a
 Few things to consider while writing the connector:
 
 * Connector should have a public string declared `name`, which will be the name of the connector. This will be versioned. Ex: `Compound-v1`
+* Contract name should start with `ConnectV2` appended with protocol name. Eg: `ConnectV2Compound`
 * User interacting methods (`external` methods) will not be emitting events, rather the methods will be returning 2 variables:
   * `_eventName` of `string` type: This will be the event signture defined in the `Events` contract. Ex: `LogDeposit(address,address,uint256,uint256,uint256)`
   * `_eventParam` of `bytes` type: This will be the abi encoded event parameters
