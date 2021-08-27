@@ -35,7 +35,7 @@ contract Helpers is Basic {
     /**
      * @dev Return InstaDApp Mapping Address
      */
-    address constant internal getMappingAddr = 0xA8F9D4aA7319C54C04404765117ddBf9448E2082; // CompoundMapping Address
+    address constant internal getMappingAddr = 0xe7a85d0adDB972A4f0A4e57B698B37f171519e88; // CompoundMapping Address
 
     /**
      * @dev Return Compound Comptroller Address
