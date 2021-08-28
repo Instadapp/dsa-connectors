@@ -104,7 +104,7 @@ abstract contract UniswapResolver is Helpers, Events {
             );
         _stake(_tokenId, _key);
 
-        _eventName = "LogStake(uint256, address)";
+        _eventName = "LogStake(uint256,address)";
         _eventParam = abi.encode(_tokenId, _refundee);
     }
 
