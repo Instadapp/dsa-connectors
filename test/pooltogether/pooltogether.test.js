@@ -15,17 +15,25 @@ const tokens = require("../../scripts/constant/tokens");
 
 const connectV2CompoundArtifacts = require("../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json")
 const connectV2PoolTogetherArtifacts = require("../../artifacts/contracts/mainnet/connectors/pooltogether/main.sol/ConnectV2PoolTogether.json")
+const connectV2UniswapArtifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/main.sol/ConnectV2UniswapV2.json")
 
 const token = tokens.dai.address // DAI Token
+
+// PoolTogether Address: https://docs.pooltogether.com/resources/networks/ethereum
 const prizePool = "0xEBfb47A7ad0FD6e57323C8A42B2E5A6a4F68fc1a" // DAI Prize Pool
 const controlledToken = "0x334cBb5858417Aee161B53Ee0D5349cCF54514CF" // PT DAI Ticket
 const daiPoolFaucet = "0xF362ce295F2A4eaE4348fFC8cDBCe8d729ccb8Eb"  // DAI POOL Faucet
 const poolTokenAddress = "0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e"
 const tokenFaucetProxyFactory = "0xE4E9cDB3E139D7E8a41172C20b6Ed17b6750f117" // TokenFaucetProxyFactory for claimAll
 const daiPod = "0x2f994e2E4F3395649eeE8A89092e63Ca526dA829" // DAI Pod
+const uniswapPoolETHLPPrizePool = "0x3AF7072D29Adde20FC7e173a7CB9e45307d2FB0A"   // Uniswap Pool/ETH LP PrizePool
+const uniswapPoolETHLPFaucet = "0x9A29401EF1856b669f55Ae5b24505b3B6fAEb370"   // Uniswap Pool/ETH LP Faucet
+const uniswapPOOLETHLPToken = "0x85cb0bab616fe88a89a35080516a8928f38b518b"
+const ptUniswapPOOLETHLPTicket = "0xeb8928ee92efb06c44d072a24c2bcb993b61e543"
 
 describe("PoolTogether", function () {
     const connectorName = "COMPOUND-TEST-A"
+    const uniswapConnectorName = "UNISWAP-TEST-A"
     const ptConnectorName = "POOLTOGETHER-TEST-A"
     
     let dsaWallet0
@@ -33,6 +41,7 @@ describe("PoolTogether", function () {
     let instaConnectorsV2;
     let connector;
     let ptConnector;
+    let uniswapConnector;
     
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -55,12 +64,21 @@ describe("PoolTogether", function () {
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
+
+        // Deploy and enable Uniswap Connector
+        uniswapConnector = await deployAndEnableConnector({
+            connectorName: uniswapConnectorName,
+            contractArtifact: connectV2UniswapArtifacts,
+            signer: masterSigner,
+            connectors: instaConnectorsV2
+        })
   })
 
   it("Should have contracts deployed.", async function () {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
     expect(!!ptConnector.address).to.be.true;
+    expect(!!uniswapConnector.address).to.be.true;
     expect(!!masterSigner.address).to.be.true;
   });
 
@@ -494,6 +512,143 @@ describe("PoolTogether", function () {
         const podBalanceAfter = await podToken.balanceOf(dsaWallet0.address)
         console.log("\tBalance after: ", podBalanceAfter.toString(), podTokenName)
         expect(podBalanceAfter).to.be.eq(ethers.utils.parseEther("0"));
+    });
+  })
+
+  describe("Main - UNISWAP POOL/ETH Prize Pool Test", function () {
+    it("Should use uniswap to swap ETH for POOL, deposit to POOL/ETH LP, deposit POOL/ETH LP to PrizePool", async function () {
+        const amount = ethers.utils.parseEther("100") // 100 POOL
+        const unitAmount = ethers.utils.parseEther((11.5/2000).toString()) // unitAmt, just used avg price at the blockTime.
+        const slippage = ethers.utils.parseEther("0.1");
+        const setId = "83478237"
+        const spells = [
+            {
+                connector: uniswapConnectorName,
+                method: "buy",
+                args: [poolTokenAddress, tokens.eth.address, amount, unitAmount, 0, setId]
+            },
+            {
+                connector: uniswapConnectorName,
+                method: "deposit",
+                args: [poolTokenAddress, tokens.eth.address, amount, unitAmount, slippage, 0, setId]
+            },
+            {
+                connector: ptConnectorName,
+                method: "depositTo",
+                args: [uniswapPoolETHLPPrizePool, dsaWallet0.address, 0, ptUniswapPOOLETHLPTicket, constants.address_zero, setId, 0]
+            }
+        ]
+
+        // Before Spell
+        // ETH balance
+        let ethBalance = await ethers.provider.getBalance(dsaWallet0.address);
+        console.log("Before spell:");
+        console.log("\tBalance before: ", ethBalance.toString(), "ETH");
+
+        // PoolToken > 0
+        let poolToken = await ethers.getContractAt(abis.basic.erc20, poolTokenAddress)
+        const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
+        const poolTokenName = await poolToken.name()
+        console.log("\tBalance before: ", poolBalance.toString(), poolTokenName)
+
+        // Uniswap POOL/ETH LP is 0
+        let uniswapLPToken = await ethers.getContractAt(abis.basic.erc20, uniswapPOOLETHLPToken)
+        const uniswapPoolEthBalance = await uniswapLPToken.balanceOf(dsaWallet0.address)
+        const uniswapPoolEthLPTokenName = await uniswapLPToken.name()
+        console.log("\tBalance before: ", uniswapPoolEthBalance.toString(), uniswapPoolEthLPTokenName)
+
+        // Expect PT Uniswap POOL/ETH LP is 0
+        let ptUniswapPoolEthToken = await ethers.getContractAt(abis.basic.erc20, ptUniswapPOOLETHLPTicket)
+        const ptUniswapPoolEthBalance = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
+        const ptUniswapPoolEthLPTokenName = await ptUniswapPoolEthToken.name()
+        console.log("\tBalance before: ", ptUniswapPoolEthBalance.toString(), ptUniswapPoolEthLPTokenName)
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        // ETH balance < 0
+        ethBalance = await ethers.provider.getBalance(dsaWallet0.address);
+        console.log("After spell:");
+        console.log("\tBalance after: ", ethBalance.toString(), "ETH");
+
+        // Expect Pool Token Balance to greater than 0
+        const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
+        expect(poolBalanceAfter).to.be.eq(poolBalance);
+
+        // Expect Uniswap POOL/ETH LP to greater than 0
+        const uniswapPoolEthBalanceAfter = await uniswapLPToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", uniswapPoolEthBalanceAfter.toString(), uniswapPoolEthLPTokenName)
+        expect(uniswapPoolEthBalanceAfter).to.be.eq(ethers.utils.parseEther("0"));
+
+        // Expect PT Uniswap POOL/ETH LP to greater than 0
+        const ptUniswapPoolEthBalanceAfter = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", ptUniswapPoolEthBalanceAfter.toString(), ptUniswapPoolEthLPTokenName)
+        expect(ptUniswapPoolEthBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
+
+        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
+    });
+
+    it("Should wait 11 days, withdraw all PrizePool, get back Uniswap LP, and claim POOL", async function () {
+        let ptUniswapPoolEthToken = await ethers.getContractAt(abis.basic.erc20, ptUniswapPOOLETHLPTicket)
+        const ptUniswapPoolEthBalance = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
+
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "withdrawInstantlyFrom",
+                args: [uniswapPoolETHLPPrizePool, dsaWallet0.address, ptUniswapPoolEthBalance, ptUniswapPOOLETHLPTicket, 0, 0, 0]
+            },
+            {
+                connector: ptConnectorName,
+                method: "claim",
+                args: [uniswapPoolETHLPFaucet , dsaWallet0.address]
+            }
+        ]
+
+        // Before spell
+        console.log("Before spell:");
+        // PoolToken
+        let poolToken = await ethers.getContractAt(abis.basic.erc20, poolTokenAddress)
+        const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
+        const poolTokenName = await poolToken.name()
+        console.log("\tBalance before: ", poolBalance.toString(), poolTokenName)
+
+        // Uniswap POOL/ETH LP is 0
+        let uniswapLPToken = await ethers.getContractAt(abis.basic.erc20, uniswapPOOLETHLPToken)
+        const uniswapPoolEthBalance = await uniswapLPToken.balanceOf(dsaWallet0.address)
+        const uniswapPoolEthLPTokenName = await uniswapLPToken.name()
+        console.log("\tBalance before: ", uniswapPoolEthBalance.toString(), uniswapPoolEthLPTokenName)
+
+        // Expect PT Uniswap POOL/ETH LP > 0
+        const ptUniswapPoolEthLPTokenName = await ptUniswapPoolEthToken.name()
+        console.log("\tBalance before: ", ptUniswapPoolEthBalance.toString(), ptUniswapPoolEthLPTokenName)
+
+        // Increase time by 11 days so we get back all DAI without early withdrawal fee
+        await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        console.log("After spell:");
+        // Expect Pool Token Balance to be greater than balance before spell
+        const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
+        expect(poolBalanceAfter).to.be.gt(poolBalance);
+
+        // Expect Uniswap POOL/ETH LP to greater than 0
+        const uniswapPoolEthBalanceAfter = await uniswapLPToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", uniswapPoolEthBalanceAfter.toString(), uniswapPoolEthLPTokenName)
+        expect(uniswapPoolEthBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
+
+        // Expect PT Uniswap POOL/ETH LP equal 0
+        const ptUniswapPoolEthBalanceAfter = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", ptUniswapPoolEthBalanceAfter.toString(), ptUniswapPoolEthLPTokenName)
+        expect(ptUniswapPoolEthBalanceAfter).to.be.eq(ethers.utils.parseEther("0"));
     });
   })
 })
