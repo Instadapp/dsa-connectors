@@ -93,17 +93,21 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
      * @notice Claim token from a Token Faucet
      * @param tokenFaucet TokenFaucet address
      * @param user The user to claim tokens for
+     * @param setId Set claimed amount at this ID in `InstaMemory` Contract.
     */
     function claim (
         address tokenFaucet,
-        address user
+        address user,
+        uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         TokenFaucetInterface tokenFaucetContract = TokenFaucetInterface(tokenFaucet);
 
-        tokenFaucetContract.claim(user);
+        uint256 claimed = tokenFaucetContract.claim(user);
 
-        _eventName = "LogClaim(address,address)";
-        _eventParam = abi.encode(address(tokenFaucet), address(user));
+        setUint(setId, claimed);
+
+        _eventName = "LogClaim(address,address, uint256, uint256)";
+        _eventParam = abi.encode(address(tokenFaucet), address(user), claimed, setId);
     }
 
     /**

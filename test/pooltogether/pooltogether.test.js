@@ -30,6 +30,8 @@ const uniswapPoolETHLPPrizePool = "0x3AF7072D29Adde20FC7e173a7CB9e45307d2FB0A"  
 const uniswapPoolETHLPFaucet = "0x9A29401EF1856b669f55Ae5b24505b3B6fAEb370"   // Uniswap Pool/ETH LP Faucet
 const uniswapPOOLETHLPToken = "0x85cb0bab616fe88a89a35080516a8928f38b518b"
 const ptUniswapPOOLETHLPTicket = "0xeb8928ee92efb06c44d072a24c2bcb993b61e543"
+const poolPoolPrizePool = "0x396b4489da692788e327e2e4b2b0459a5ef26791"
+const ptPoolTicket = "0x27d22a7648e955e510a40bdb058333e9190d12d4"
 
 describe("PoolTogether", function () {
     const connectorName = "COMPOUND-TEST-A"
@@ -172,7 +174,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "claim",
-                args: [daiPoolFaucet, dsaWallet0.address]
+                args: [daiPoolFaucet, dsaWallet0.address, 0]
             }
         ]
 
@@ -591,9 +593,10 @@ describe("PoolTogether", function () {
         expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
     });
 
-    it("Should wait 11 days, withdraw all PrizePool, get back Uniswap LP, and claim POOL", async function () {
+    it("Should wait 11 days, withdraw all PrizePool, get back Uniswap LP, claim POOL, deposit claimed POOL into Pool PrizePool", async function () {
         let ptUniswapPoolEthToken = await ethers.getContractAt(abis.basic.erc20, ptUniswapPOOLETHLPTicket)
         const ptUniswapPoolEthBalance = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
+        const setId = "83478237"
 
         const spells = [
             {
@@ -604,7 +607,12 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "claim",
-                args: [uniswapPoolETHLPFaucet , dsaWallet0.address]
+                args: [uniswapPoolETHLPFaucet , dsaWallet0.address, setId]
+            },
+            {
+                connector: ptConnectorName,
+                method: "depositTo",
+                args: [poolPoolPrizePool, dsaWallet0.address, 0, ptPoolTicket, constants.address_zero, setId, 0]
             }
         ]
 
@@ -626,6 +634,12 @@ describe("PoolTogether", function () {
         const ptUniswapPoolEthLPTokenName = await ptUniswapPoolEthToken.name()
         console.log("\tBalance before: ", ptUniswapPoolEthBalance.toString(), ptUniswapPoolEthLPTokenName)
 
+        // PoolTogether Pool Ticket
+        let poolPoolTicket = await ethers.getContractAt(abis.basic.erc20, ptPoolTicket)
+        const poolPoolTicketBalance = await poolPoolTicket.balanceOf(dsaWallet0.address)
+        const poolPoolTicketName = await poolPoolTicket.name()
+        console.log("\tBalance before: ", poolPoolTicketBalance.toString(), poolPoolTicketName)
+
         // Increase time by 11 days so we get back all DAI without early withdrawal fee
         await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
 
@@ -638,7 +652,7 @@ describe("PoolTogether", function () {
         // Expect Pool Token Balance to be greater than balance before spell
         const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
         console.log("\tBalance after: ", poolBalanceAfter.toString(), poolTokenName)
-        expect(poolBalanceAfter).to.be.gt(poolBalance);
+        expect(poolBalanceAfter).to.be.eq(poolBalance);
 
         // Expect Uniswap POOL/ETH LP to greater than 0
         const uniswapPoolEthBalanceAfter = await uniswapLPToken.balanceOf(dsaWallet0.address)
@@ -649,6 +663,11 @@ describe("PoolTogether", function () {
         const ptUniswapPoolEthBalanceAfter = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
         console.log("\tBalance after: ", ptUniswapPoolEthBalanceAfter.toString(), ptUniswapPoolEthLPTokenName)
         expect(ptUniswapPoolEthBalanceAfter).to.be.eq(ethers.utils.parseEther("0"));
+
+        // Expoect PoolTogether Pool Ticket > 0
+        const poolPoolTicketBalanceAfter = await poolPoolTicket.balanceOf(dsaWallet0.address)
+        console.log("\tBalance after: ", poolPoolTicketBalanceAfter.toString(), poolPoolTicketName)
+        expect(poolPoolTicketBalanceAfter).to.be.gt(ethers.utils.parseEther("0"));
     });
   })
 })
