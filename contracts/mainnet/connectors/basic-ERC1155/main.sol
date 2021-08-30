@@ -65,7 +65,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
      * @param getId ID to retrieve amount.
      * @param setId ID stores the amount.
      */
-    function withdrawERC721(
+    function withdrawERC1155(
         address token,
         uint256 tokenId,
         address payable to,
