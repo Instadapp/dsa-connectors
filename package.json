@@ -7,8 +7,7 @@
     "test": "hardhat test",
     "coverage": "./node_modules/.bin/solidity-coverage",
     "check-husky": "node status-checks/huskyCheck.js",
-    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build",
-    "prepare": "husky install"
+    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
   },
   "repository": {
     "type": "git",
@@ -22,6 +21,8 @@
   "homepage": "https://github.com/InstaDApp/dsa-connectors-new#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.0-solc-0.7",
+    "@uniswap/v3-core": "^1.0.0",
+    "@uniswap/v3-periphery": "^1.1.1",
     "chalk": "^4.0.0",
     "commander": "^7.1.0",
     "dotenv": "^7.0.0",
@@ -31,21 +32,21 @@
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^2.1.3",
+    "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
-    "@openzeppelin/test-helpers": "^0.5.6",
+    "@openzeppelin/test-helpers": "^0.5.12",
     "@studydefi/money-legos": "^2.3.7",
-    "@tenderly/hardhat-tenderly": "^1.0.6",
+    "@tenderly/hardhat-tenderly": "^1.0.12",
     "chai-as-promised": "^7.1.1",
-    "ethereum-waffle": "^3.3.0",
-    "ethers": "^5.1.4",
-    "hardhat": "^2.3.0",
-    "hardhat-deploy": "^0.7.5",
-    "hardhat-deploy-ethers": "^0.3.0-beta.7",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.4",
+    "hardhat": "^2.6.0",
+    "hardhat-deploy": "^0.8.11",
+    "hardhat-deploy-ethers": "^0.3.0-beta.10",
     "husky": "^6.0.0",
     "sol-merger": "^2.0.1",
     "solidity-coverage": "0.5.11",
-    "web3": "^1.3.0"
+    "web3": "^1.3.6"
   }
 }
