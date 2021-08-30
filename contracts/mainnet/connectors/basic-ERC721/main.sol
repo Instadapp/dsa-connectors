@@ -72,5 +72,5 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 }
 
 contract ConnectV2BasicERC721 is BasicResolver {
-    string public constant name = "BASIC-ERC721-A";
+    string public constant name = "BASIC-ERC721-v1.0";
 }
