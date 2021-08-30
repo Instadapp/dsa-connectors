@@ -14,8 +14,8 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     /**
      * @dev Deposit Assets To Smart Account.
      * @notice Deposit a ERC721 token to DSA
-     * @param token The address of the token to deposit.
-     * @param tokenId The id of token to deposit.
+     * @param token Address of token.
+     * @param tokenId ID of token.
      * @param getId ID to retrieve tokenId.
      * @param setId ID stores the tokenId.
      */
@@ -43,8 +43,8 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     /**
      * @dev Withdraw Assets To Smart Account.
      * @notice Withdraw a ERC721 token from DSA
-     * @param token The address of the token to deposit.
-     * @param tokenId The id of token to deposit.
+     * @param token Address of the token.
+     * @param tokenId ID of token.
      * @param to The address to receive the token upon withdrawal
      * @param getId ID to retrieve tokenId.
      * @param setId ID stores the tokenId.
@@ -71,6 +71,6 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     }
 }
 
-contract ConnectV2Basic is BasicResolver {
+contract ConnectV2BasicERC721 is BasicResolver {
     string public constant name = "BASIC-ERC721-A";
 }
