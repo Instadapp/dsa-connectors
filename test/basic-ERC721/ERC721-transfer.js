@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
+const {abi: implementationsABI} = require("../../scripts/constant/abi/core/InstaImplementations.json")
 
 const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
 const buildDSAv2 = require("../../scripts/buildDSAv2")
@@ -20,6 +21,8 @@ const TOKEN_CONTRACT_ADDR = "0x4d695c615a7aacf2d7b9c481b66045bb2457dfde";
 const TOKEN_OWNER_ADDR = "0x8c6b10d42ff08e56133fca0dac75e1931b1fcc23";
 const TOKEN_ID = "38";
 
+const implementationsMappingAddr = "0xCBA828153d3a85b30B5b912e1f2daCac5816aE9D"
+
 describe("BASIC-ERC721", function () {
     const connectorName = "BASIC-ERC721-A"
 
@@ -29,6 +32,7 @@ describe("BASIC-ERC721", function () {
     let connector;
     let nftContract;
     let tokenOwner;
+    let instaImplementationsMapping;
 
 
     const wallets = provider.getWallets()
@@ -51,6 +55,11 @@ describe("BASIC-ERC721", function () {
         nftContract = await ethers.getContractAt(erc721Artifacts.abi, TOKEN_CONTRACT_ADDR)
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
+
+        instaImplementationsMapping = await ethers.getContractAt(implementationsABI, implementationsMappingAddr);
+        InstaAccountV2DefaultImpl = await ethers.getContractFactory("InstaDefaultImplementation")
+        instaAccountV2DefaultImpl = await InstaAccountV2DefaultImpl.deploy(addresses.core.instaIndex);
+        await instaAccountV2DefaultImpl.deployed()
         connector = await deployAndEnableConnector({
             connectorName,
             contractArtifact: connectV2BasicERC721Artifacts,
@@ -64,6 +73,16 @@ describe("BASIC-ERC721", function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!connector.address).to.be.true;
         expect(!!masterSigner.address).to.be.true;
+    });
+
+    describe("Implementations", function () {
+
+        it("Should add default implementation to mapping.", async function () {
+            const tx = await instaImplementationsMapping.connect(masterSigner).setDefaultImplementation(instaAccountV2DefaultImpl.address);
+            await tx.wait()
+            expect(await instaImplementationsMapping.defaultImplementation()).to.be.equal(instaAccountV2DefaultImpl.address);
+        });
+
     });
 
     describe("DSA wallet setup", function () {
