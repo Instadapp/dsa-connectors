@@ -32,6 +32,7 @@ const uniswapPOOLETHLPToken = "0x85cb0bab616fe88a89a35080516a8928f38b518b"
 const ptUniswapPOOLETHLPTicket = "0xeb8928ee92efb06c44d072a24c2bcb993b61e543"
 const poolPoolPrizePool = "0x396b4489da692788e327e2e4b2b0459a5ef26791"
 const ptPoolTicket = "0x27d22a7648e955e510a40bdb058333e9190d12d4"
+const WETHAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
 
 describe("PoolTogether", function () {
     const connectorName = "COMPOUND-TEST-A"
@@ -520,9 +521,17 @@ describe("PoolTogether", function () {
   describe("Main - UNISWAP POOL/ETH Prize Pool Test", function () {
     it("Should use uniswap to swap ETH for POOL, deposit to POOL/ETH LP, deposit POOL/ETH LP to PrizePool", async function () {
         const amount = ethers.utils.parseEther("100") // 100 POOL
-        const unitAmount = ethers.utils.parseEther((11.5/2000).toString()) // unitAmt, just used avg price at the blockTime.
-        const slippage = ethers.utils.parseEther("0.1");
+        const slippage = ethers.utils.parseEther("0.03");
         const setId = "83478237"
+
+        const UniswapV2Router02ABI = [
+            "function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)"
+        ];
+
+        const UniswapV2Router02 = await ethers.getContractAt(UniswapV2Router02ABI, "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D");
+        const amounts = await UniswapV2Router02.getAmountsOut(amount, [poolTokenAddress, WETHAddress]);
+        const unitAmount = ethers.utils.parseEther(((amounts[1]*1.03)/amounts[0]).toString());
+
         const spells = [
             {
                 connector: uniswapConnectorName,
