@@ -19,9 +19,9 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
     /**
      * @dev Deposit into Prize Pool
-     * @notice Deposit a token into a prize pool
+     * @notice Deposit assets into the Prize Pool in exchange for tokens
      * @param prizePool PrizePool address to deposit to
-     * @param to Address to whom the controlled tokens should be minted
+     * @param to The address receiving the newly minted tokens
      * @param amount The amount of the underlying asset the user wishes to deposit. The Prize Pool contract should have been pre-approved by the caller to transfer the underlying ERC20 tokens.
      * @param controlledToken The address of the token that they wish to mint. For our default Prize Strategy this will either be the Ticket address or the Sponsorship address.  Those addresses can be looked up on the Prize Strategy.
      * @param referrer The address that should receive referral awards, if any.
@@ -57,12 +57,12 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
     /**
      * @dev Withdraw from Prize Pool
-     * @notice Withdraw a token from a prize pool
+     * @notice Withdraw assets from the Prize Pool instantly.  A fairness fee may be charged for an early exit.
      * @param prizePool PrizePool address to deposit to
-     * @param from The address to withdraw from. This means you can withdraw on another user's behalf if you have an allowance for the controlled token.
-     * @param amount THe amount to withdraw
-     * @param controlledToken The controlled token to withdraw from.
-     * @param maximumExitFee The maximum early exit fee the caller is willing to pay. This prevents the Prize Strategy from changing the fee on the fly.
+     * @param from The address to redeem tokens from.. This means you can withdraw on another user's behalf if you have an allowance for the controlled token.
+     * @param amount The amount of tokens to redeem for assets.
+     * @param controlledToken The address of the token to redeem (i.e. ticket or sponsorship)
+     * @param maximumExitFee The maximum early exit fee the caller is willing to pay. This prevents the Prize Strategy from changing the fee on the fly.  This should be pre-calculated by the calculateExitFee() fxn.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
@@ -169,8 +169,8 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
     /**
      * @dev Withdraw from shares from Pod
-     * @dev The function should first withdraw from the 'float'; i.e. the funds that have not yet been deposited.
      * @notice Withdraws a users share of the prize pool.
+     * @dev The function should first withdraw from the 'float'; i.e. the funds that have not yet been deposited.
      * @param pod Pod address
      * @param shareAmount The number of Pod shares to burn.
      * @param maxFee Max fee amount for withdrawl if amount isn't available in float.
