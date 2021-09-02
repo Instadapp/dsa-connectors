@@ -23,7 +23,6 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
      * @param prizePool PrizePool address to deposit to
      * @param amount The amount of the underlying asset the user wishes to deposit. The Prize Pool contract should have been pre-approved by the caller to transfer the underlying ERC20 tokens.
      * @param controlledToken The address of the token that they wish to mint. For our default Prize Strategy this will either be the Ticket address or the Sponsorship address.  Those addresses can be looked up on the Prize Strategy.
-     * @param referrer The address that should receive referral awards, if any.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
@@ -32,7 +31,6 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         address prizePool,
         uint256 amount,
         address controlledToken,
-        address referrer,
         uint256 getId,
         uint256 setId
     ) external payable returns ( string memory _eventName, bytes memory _eventParam) {
@@ -46,12 +44,12 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         _amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
         tokenContract.approve(prizePool, _amount);
 
-        prizePoolContract.depositTo(address(this), _amount, controlledToken, referrer);
+        prizePoolContract.depositTo(address(this), _amount, controlledToken, address(0));
 
         setUint(setId, _amount);
 
-        _eventName = "LogDepositTo(address,address,uint256,address,address,uint256, uint256)";
-        _eventParam = abi.encode(address(prizePool), address(this), _amount, address(controlledToken), address(referrer), getId, setId);
+        _eventName = "LogDepositTo(address,address,uint256,address,uint256,uint256)";
+        _eventParam = abi.encode(address(prizePool), address(this), _amount, address(controlledToken), getId, setId);
     }
 
     /**

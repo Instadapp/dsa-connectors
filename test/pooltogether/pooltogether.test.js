@@ -129,7 +129,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, constants.address_zero, setId, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, setId, 0]
             }
         ]
         // Before Spell
@@ -210,7 +210,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, constants.address_zero, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, 0, 0]
             },
             {
                 connector: ptConnectorName,
@@ -256,7 +256,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, constants.address_zero, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, 0, 0]
             }
         ]
 
@@ -472,7 +472,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, 0, PT_UNISWAP_POOLETHLP_TICKET_ADDR, constants.address_zero, setId, 0]
+                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, 0, PT_UNISWAP_POOLETHLP_TICKET_ADDR, setId, 0]
             }
         ]
 
@@ -529,7 +529,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [POOL_PRIZE_POOL_ADDR, 0, PT_POOL_TICKET_ADDR, constants.address_zero, setId, 0]
+                args: [POOL_PRIZE_POOL_ADDR, 0, PT_POOL_TICKET_ADDR, setId, 0]
             }
         ]
 
