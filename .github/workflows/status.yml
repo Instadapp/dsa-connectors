@@ -42,7 +42,7 @@ jobs:
         uses: bubkoo/auto-comment@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pullRequestSynchronize: "${{ steps.status_check.outputs.output }}"
-          pullRequestAssigned: "${{ steps.status_check.outputs.output }}"
-          pullRequestOpened: "${{ steps.status_check.outputs.output }}"
-          pullRequestReopened: "${{ steps.status_check.outputs.output }}"
+          pullRequestSynchronize: "${{ steps.status_check.outputs.status_check_output }}"
+          pullRequestAssigned: "${{ steps.status_check.outputs.status_check_output }}"
+          pullRequestOpened: "${{ steps.status_check.outputs.status_check_output }}"
+          pullRequestReopened: "${{ steps.status_check.outputs.status_check_output }}"
