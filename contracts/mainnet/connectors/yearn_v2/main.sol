@@ -16,7 +16,7 @@ abstract contract YearnResolver is Events, Basic {
      * @notice This will deposit funds to a specific Yearn Vault.
      * @param vault The address of the vault to deposit funds into.
      * @param amt The amount of tokens to deposit.
-     * @param getId ID to retrieve amtA.
+     * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of shares received.
     */
     function deposit(
@@ -39,8 +39,8 @@ abstract contract YearnResolver is Events, Basic {
         uint256 _shares = yearn.deposit(_amt, address(this));
         setUint(setId, _shares);
 
-        _eventName = "LogDeposit(address, uint256, uint256, uint256)";
-        _eventParam = abi.encode(vault, _amt, getId, setId);
+        _eventName = "LogDeposit(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(vault, _shares, _amt, getId, setId);
     }
 
     /**
@@ -48,7 +48,7 @@ abstract contract YearnResolver is Events, Basic {
      * @notice This will withdraw the share from a specific Yearn Vault.
      * @param vault The address of the vault to withdraw shares from.
      * @param amt The amount of shares to withdraw.
-     * @param getId ID to retrieve amtA.
+     * @param getId ID to retrieve amt.
      * @param setId ID stores the amount want token redeemed.
     */
     function withdraw(
@@ -66,8 +66,8 @@ abstract contract YearnResolver is Events, Basic {
         uint256 _wantRedeemed = yearn.withdraw(_amt, address(this));
         setUint(setId, _wantRedeemed);
 
-        _eventName = "LogWithdraw(address, uint256, uint256, uint256)";
-        _eventParam = abi.encode(vault, _amt, getId, setId);
+        _eventName = "LogWithdraw(address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(vault, _amt, _wantRedeemed, getId, setId);
     }
 }
 
