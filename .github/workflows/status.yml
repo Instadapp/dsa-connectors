@@ -27,6 +27,22 @@ jobs:
         run: |
           npm install
       - name: Run status checks
-        run: node ./status-checks
+        id: status_check
+        run: |
+          output=$(node ./status-checks)
+          # Escape newlines so _all_ the output is included in the set-output
+          output="${output//'%'/'%25'}"
+          output="${output//$'\n'/'%0A'}"
+          output="${output//$'\r'/'%0D'}"
+          echo "::set-output name=status_check_output::$output"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Auto Comment Status Check Result
+        # Use with caution
+        uses: bubkoo/auto-comment@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pullRequestSynchronize: "${{ steps.status_check.outputs.output }}"
+          pullRequestAssigned: "${{ steps.status_check.outputs.output }}"
+          pullRequestOpened: "${{ steps.status_check.outputs.output }}"
+          pullRequestReopened: "${{ steps.status_check.outputs.output }}"
