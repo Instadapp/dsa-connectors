@@ -4,391 +4,53 @@ Connectors are standard proxy logics contract that let DeFi Smart Account (DSA) 
 
 DSAs are powerful because they can easily be extended with connectors. Every new connector that is added is immediately usable by any developer building on top of DSAs. Connectors can either be base connectors to protocols, auth connectors, higher level connectors with more specific use cases like optimized lending, or connectors to native liquidity pools.
 
-You can create a PR to request a support for specific protocol or external contracts. The process to add a new connector is explained [here](docs/how-to-add-new-connector.md). Following is the list of all the supported connectors. Following is the list of all the primary connectors used to cast spells:
+You can create a PR to request a support for specific protocol or external contracts. The process to add a new connector is explained below.
 
-[Read this post to learn about getId and setId used in the connectors](https://discuss.instadapp.io/t/how-to-use-getid-setid/104)
+List of all the mainnet connector for referrence is [here](https://github.com/Instadapp/dsa-connectors/tree/main/contracts/mainnet/connectors)
 
-## Authority
+## How to add a new connector
 
-[Code](contracts/mainnet/connectors/authority/main.sol)
+You can create a new PR to add a new connector. To get the PR merged, certain requirements needs to be met which will be explained here.
 
-### `add(authority)`
+### New connector should follow the current directory structure
 
-**Add an address authority**
+Common files for all connectors are in `contracts/common` directory.
 
-`authority` - Address of the authority to add
+* `math.sol` has methods for mathematical operations (`DSMath`)
+* `interfaces.sol` contains the common interfaces
+  * `TokenInterface` for ERC-20 interface including WETH
+* `stores.sol` contains the global constants as well as methods `getId` & `setId` (`Stores`)
+* `basic.sol` inherits `DSMath` & `Stores` contracts. This contains few details explained below
+  * Wrapping & unwrapping ETH (`convertEthToWeth` & `convertWethToEth`)
+  * Getting token & ETH balance of DSA
 
-### `remove(authority)`
+Connectors are under `contracts/connectors` directory, and should be formatted as follows:
 
-**Remove an address authority**
+* Connector events should be in a separate contract: `events.sol`
+* Interfaces should be defined in a seperate file: `interface.sol`
+* If the connector has helper methods & constants (including interface instances), this should be defined in a separate file: `helpers.sol`
+  * `Helpers` contract should inherit `Basic` contract from common directory
+  * If the connector doesn't have any helper methods, the main contract should inherit `Basic` contract
+* The main logic of the contract should be under `main.sol`, and the contract should inherit `Helpers` (if exists, otherwise `Basic`) & `Events`
 
-`authority` - Address of the authority to remove
+Few things to consider while writing the connector:
 
-## Basic
+* Connector should have a public constant string declared `name`, which will be the name of the connector. This will be versioned. Ex: `Compound-v1`
+* Contract name should start with `ConnectV2` appended with protocol name. Eg: `ConnectV2Compound`
+* User interacting methods (`external` methods) will not be emitting events, rather the methods will be returning 2 variables:
+  * `_eventName` of `string` type: This will be the event signture defined in the `Events` contract. Ex: `LogDeposit(address,address,uint256,uint256,uint256)`
+  * `_eventParam` of `bytes` type: This will be the abi encoded event parameters
+* The contracts should not have `selfdestruct()`
+* The contracts should not have `delegatecall()`
+* Use `uint(-1)` of `type(uint256).max` for maximum amount everywhere
+* Use `ethAddr` (declared in `Stores`) to denote Ethereum (non-ERC20)
+* Use `address(this)` instead of `msg.sender` for fetching balance on-chain, etc
+* Only `approve()` (declared in `Basic`) limited amount while giving ERC20 allowance, which strictly needs to be 0 by the end of the spell.
+* User interacting functions should have natspec comments(@dev, @notice, @param). 
+* Use `getUint()` (declared in `Stores`) for getting value that saved from previous spell
+* Use `setUint()` (declared in `Stores`) for setting value to save for the future spell
 
-[Code](contracts/mainnet/connectors/basic/main.sol)
+### Support
 
-### `deposit(erc20, amt, getId, setId)`
+If you can't find something you're looking for or have any questions, ask them at our developers community on [Discord](https://discord.gg/83vvrnY) or simply send an [Email](mailto:info@instadapp.io).
 
-**Deposit a token or ETH to DSA.**
-
-`erc20` - Address of the token to deposit. ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
-
-`amt` - Amount of token to deposit
-
-In case of an ERC20 Token, allowance must be given to DSA before depositing
-
-### `withdraw(erc20, amt, getId, setId)`
-
-**Withdraw a token or ETH from DSA.**
-
-`erc20` - Address of the token to withdraw. ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
-
-`amt` - Amount of token to withdraw
-
-`to` - Address to which token will be withdrawn 
-
-## MakerDAO
-
-[Code](contracts/mainnet/connectors/makerdao/main.sol)
-
-### `open(collateralType)`
-
-**Open a Maker vault** of the `collateralType`. E.g. "ETH-A", "USDC-B", etc...
-
-### `close(vault)`
-
-**Close a Maker vault**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-### `deposit(vault, amt, getId, setId)`
-
-**Deposit collateral to a Maker vault.**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-`amt` - Amount of collteral to deposit
-
-### `withdraw(vault, amt, getId, setId)`
-
-**Withdraw collateral from a Maker vault.**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-`amt` - Amount of collteral to withdraw
-
-### `borrow(vault, amt, getId, setId)`
-
-**Borrow DAI from a Maker vault.**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-`amt` - Amount of DAI to borrow
-
-### `payback(vault, amt, getId, setId)`
-
-**Payback DAI to a Maker vault.**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-`amt` - Amount of DAI to payback
-
-### `withdrawLiquidated(vault, amt, getId, setId)`
-
-**Withdraw leftover collateral after liquidation.**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-`amt` - Amount of collateral to withdraw
-
-### `depositAndBorrow(vault, depositAmt, borrowAmt, getIdDeposit, getIdBorrow, setIdDeposit, setIdBorrow)`
-
-**Deposit collateral & borrow DAI from a vault.**
-
-`vault` - Vault ID (Use 0 for last opened vault)
-
-`depositAmt` - Amount of collateral to deposit
-
-`borrowAmt` - Amount of DAI to borrow
-
-## Compound
-
-[Code](contracts/mainnet/connectors/compound/main.sol)
-
-### `deposit(token, amt, getId, setId)`
-
-**Deposit token to Compound.**
-
-`token` - Address of the token to deposit
-
-`amt` - Amount of token to deposit
-
-### `withdraw(token, amt, getId, setId)`
-
-**Withdraw token from Compound.**
-
-`token` - Address of the token to withdraw
-
-`amt` - Amount of token to withdraw
-
-### `borrow(token, amt, getId, setId)`
-
-**Borrow token from Compound.**
-
-`token` - Address of the token to borrow
-
-`amt` - Amount of token to borrow
-
-### `payback(token, amt, getId, setId)`
-
-**Payback debt to Compound.**
-
-`token` - Address of the token to payback
-
-`amt` - Amount of token to payback
-
-## COMP
-
-[Code](contracts/mainnet/connectors/COMP/main.sol)
-
-### `ClaimComp(setId)`
-
-**Claim unclaimed COMP**
-
-### `ClaimCompTwo(tokens, setId)`
-
-**Claim unclaimed COMP**
-
-`tokens` - List of tokens supplied or borrowed
-
-### `ClaimCompThree(supplyTokens, borrowTokens, setId)`
-
-**Claim unclaimed COMP**
-
-`supplyTokens` - List of tokens supplied
-
-`borrowTokens` - List of tokens borrowed
-
-### `delegate(delegatee)`
-
-**Delegate COMP votes**
-
-`delegatee` - Address of the delegatee
-
-## Aave v1
-
-[Code](contracts/mainnet/connectors/aave/main.sol)
-
-### `deposit(token, amt, getId, setId)`
-
-**Deposit token to Aave.**
-
-`token` - Address of the token to deposit
-
-`amt` - Amount of token to deposit
-
-### `withdraw(token, amt, getId, setId)`
-
-**Withdraw token from Aave.**
-
-`token` - Address of the token to withdraw
-
-`amt` - Amount of token to withdraw
-
-### `borrow(token, amt, getId, setId)`
-
-**Borrow token from Aave.**
-
-`token` - Address of the token to borrow
-
-`amt` - Amount of token to borrow
-
-### `payback(token, amt, getId, setId)`
-
-**Payback debt to Aave.**
-
-`token` - Address of the token to payback
-
-`amt` - Amount of token to payback
-
-## Aave v2
-
-[Code](contracts/mainnet/connectors/aave_v2/main.sol)
-
-### `deposit(token, amt, getId, setId)`
-
-**Deposit token to Aave.**
-
-`token` - Address of the token to deposit
-
-`amt` - Amount of token to deposit
-
-### `withdraw(token, amt, getId, setId)`
-
-**Withdraw token from Aave.**
-
-`token` - Address of the token to withdraw
-
-`amt` - Amount of token to withdraw
-
-### `borrow(token, amt, rateMode, getId, setId)`
-
-**Borrow token from Aave.**
-
-`token` - Address of the token to borrow
-
-`amt` - Amount of token to borrow
-
-`rateMode` - Borrow interest rate mode (1 = Stable & 2 = Variable)
-
-### `payback(token, amt, rateMode, getId, setId)`
-
-**Payback debt to Aave.**
-
-`token` - Address of the token to payback
-
-`amt` - Amount of token to payback
-
-`rateMode` - Borrow interest rate mode (1 = Stable & 2 = Variable)
-
-## dYdX
-
-[Code](contracts/mainnet/connectors/dydx/main.sol)
-
-### `deposit(token, amt, getId, setId)`
-
-**Deposit token to dYdX.**
-
-`token` - Address of the token to deposit
-
-`amt` - Amount of token to deposit
-
-### `withdraw(token, amt, getId, setId)`
-
-**Withdraw token from dYdX.**
-
-`token` - Address of the token to withdraw
-
-`amt` - Amount of token to withdraw
-
-### `borrow(token, amt, getId, setId)`
-
-**Borrow token from dYdX.**
-
-`token` - Address of the token to borrow
-
-`amt` - Amount of token to borrow
-
-### `payback(token, amt, getId, setId)`
-
-**Payback debt to dYdX.**
-
-`token` - Address of the token to payback
-
-`amt` - Amount of token to payback
-
-## Uniswap
-
-[Code](contracts/mainnet/connectors/uniswap/main.sol)
-
-### `deposit(tokenA, tokenB, amtA, unitAmt, slippage, getId, setId)`
-
-**Deposit liquidity to tokenA/tokenB pool**
-
-`tokenA` - Address of token A
-
-`tokenB` - Address of token B
-
-`amtA` - Amount of token A to deposit
-
-`unitAmt` - Unit amount of amtB/amtA with slippage.
-
-`slippage` - Slippage amount in wei
-
-
-### `withdraw(tokenA, tokenB, uniAmt, unitAmtA, unitAmtB, getId, setId)`
-
-**Withdraw liquidity from tokenA/tokenB pool**
-
-`tokenA` - Address of token A
-
-`tokenB` - Address of token B
-
-`uniAmt` - Amount of LP tokens to withdraw
-
-`unitAmtA` - Unit amount of amtA/uniAmt with slippage.
-
-`unitAmtB` - Unit amount of amtB/uniAmt with slippage.
-
-### `buy(buyAddr, sellAddr, buyAmt, unitAmt, getId, setId)`
-
-**Buy a token/ETH**
-
-`buyAddr` - Address of the buying token
-
-`sellAddr` - Address of the selling token
-
-`buyAmt` - Amount of tokens to buy
-
-`unitAmt` - Unit amount of sellAmt/buyAmt with slippage
-
-### `sell(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
-
-**Sell a token/ETH**
-
-`buyAddr` - Address of the buying token
-
-`sellAddr` - Address of the selling token
-
-`sellAmt` - Amount of tokens to sell
-
-`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
-
-## 1Inch
-
-[Code](contracts/mainnet/connectors/1inch/main.sol)
-
-### `sell(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
-
-**Sell ETH/ERC20 using 1proto**
-
-`buyAddr` - Address of the buying token
-
-`sellAddr` - Address of the selling token
-
-`sellAmt` - Amount of tokens to sell
-
-`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
-
-### `sellTwo(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
-
-**Sell ETH/ERC20 using 1proto**
-
-`buyAddr` - Address of the buying token
-
-`sellAddr` - Address of the selling token
-
-`sellAmt` - Amount of tokens to sell
-
-`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
-
-`[]distribution` - Distribution of swap across different dex.
-
-`disableDexes` - Disable a dex. (To disable none: 0)
-
-### `sellTwo(buyAddr, sellAddr, sellAmt, unitAmt, getId, setId)`
-
-**Sell ETH/ERC20 using 1inch**
-
-Use [1Inch API](https://docs.1inch.exchange/api/) for calldata
-
-`buyAddr` - Address of the buying token
-
-`sellAddr` - Address of the selling token
-
-`sellAmt` - Amount of tokens to sell
-
-`unitAmt` - Unit amount of buyAmt/sellAmt with slippage
-
-`callData` - Data from 1inch API
