@@ -129,7 +129,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [DAI_PRIZE_POOL_ADDR, dsaWallet0.address, amount, PT_DAI_TICKET_ADDR, constants.address_zero, setId, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, constants.address_zero, setId, 0]
             }
         ]
         // Before Spell
@@ -162,12 +162,12 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [DAI_PRIZE_POOL_ADDR, dsaWallet0.address, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
             },
             {
                 connector: ptConnectorName,
                 method: "claim",
-                args: [DAI_POOL_FAUCET_ADDR, dsaWallet0.address, 0]
+                args: [DAI_POOL_FAUCET_ADDR, 0]
             }
         ]
 
@@ -210,12 +210,12 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [DAI_PRIZE_POOL_ADDR, dsaWallet0.address, amount, PT_DAI_TICKET_ADDR, constants.address_zero, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, constants.address_zero, 0, 0]
             },
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [DAI_PRIZE_POOL_ADDR, dsaWallet0.address, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
             }
         ]
 
@@ -256,7 +256,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [DAI_PRIZE_POOL_ADDR, dsaWallet0.address, amount, PT_DAI_TICKET_ADDR, constants.address_zero, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, constants.address_zero, 0, 0]
             }
         ]
 
@@ -264,12 +264,12 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [DAI_PRIZE_POOL_ADDR, dsaWallet0.address, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
             },
             {
                 connector: ptConnectorName,
                 method: "claimAll",
-                args: [TOKEN_FAUCET_PROXY_FACTORY_ADDR, dsaWallet0.address, [DAI_POOL_FAUCET_ADDR]]
+                args: [TOKEN_FAUCET_PROXY_FACTORY_ADDR, [DAI_POOL_FAUCET_ADDR]]
             }
         ]
 
@@ -317,7 +317,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositToPod",
-                args: [DAI_PRIZE_POOL_ADDR, DAI_POD_ADDR, dsaWallet0.address, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, DAI_POD_ADDR, amount, 0, 0]
             }
         ]
 
@@ -401,7 +401,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositToPod",
-                args: [DAI_PRIZE_POOL_ADDR, DAI_POD_ADDR, dsaWallet0.address, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, DAI_POD_ADDR, amount, 0, 0]
             },
             {
                 connector: ptConnectorName,
@@ -472,7 +472,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, dsaWallet0.address, 0, PT_UNISWAP_POOLETHLP_TICKET_ADDR, constants.address_zero, setId, 0]
+                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, 0, PT_UNISWAP_POOLETHLP_TICKET_ADDR, constants.address_zero, setId, 0]
             }
         ]
 
@@ -519,17 +519,17 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, dsaWallet0.address, ptUniswapPoolEthBalance, PT_UNISWAP_POOLETHLP_TICKET_ADDR, 0, 0, 0]
+                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, ptUniswapPoolEthBalance, PT_UNISWAP_POOLETHLP_TICKET_ADDR, 0, 0, 0]
             },
             {
                 connector: ptConnectorName,
                 method: "claim",
-                args: [UNISWAP_POOLETHLP_FAUCET_ADDR , dsaWallet0.address, setId]
+                args: [UNISWAP_POOLETHLP_FAUCET_ADDR , setId]
             },
             {
                 connector: ptConnectorName,
                 method: "depositTo",
-                args: [POOL_PRIZE_POOL_ADDR, dsaWallet0.address, 0, PT_POOL_TICKET_ADDR, constants.address_zero, setId, 0]
+                args: [POOL_PRIZE_POOL_ADDR, 0, PT_POOL_TICKET_ADDR, constants.address_zero, setId, 0]
             }
         ]
 
