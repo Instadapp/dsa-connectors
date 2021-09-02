@@ -43,6 +43,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
         // Approve prizePool
         TokenInterface tokenContract = TokenInterface(prizePoolToken);
+        _amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
         tokenContract.approve(prizePool, _amount);
 
         prizePoolContract.depositTo(address(this), _amount, controlledToken, referrer);
@@ -75,6 +76,9 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         uint _amount = getUint(getId, amount);
 
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
+
+        TokenInterface ticketToken = TokenInterface(controlledToken);
+        _amount = _amount == uint256(-1) ? ticketToken.balanceOf(address(this)) : _amount;
 
         prizePoolContract.withdrawInstantlyFrom(address(this), _amount, controlledToken, maximumExitFee);
 
@@ -147,6 +151,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
         // Approve pod
         TokenInterface tokenContract = TokenInterface(prizePoolToken);
+        _tokenAmount = _tokenAmount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _tokenAmount;
         tokenContract.approve(pod, _tokenAmount);
 
         podContract.depositTo(address(this), _tokenAmount);
@@ -178,6 +183,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         uint _shareAmount = getUint(getId, shareAmount);
 
         PodInterface podContract = PodInterface(pod);
+        _shareAmount = _shareAmount == uint256(-1) ? podContract.balanceOf(address(this)) : _shareAmount;
 
         podContract.withdraw(_shareAmount, maxFee);
 

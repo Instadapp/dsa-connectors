@@ -17,4 +17,5 @@ interface TokenFaucetProxyFactoryInterface {
 interface PodInterface {
     function depositTo(address to, uint256 tokenAmount) external returns (uint256);
     function withdraw(uint256 shareAmount, uint256 maxFee) external returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
 }
