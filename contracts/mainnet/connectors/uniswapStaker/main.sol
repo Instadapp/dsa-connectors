@@ -177,24 +177,21 @@ abstract contract UniswapResolver is Helpers, Events {
      * @param _rewardToken _rewardToken address
      * @param _length incentive length
      * @param _refundee refundee address
-     * @param _tokenId NFT LP token id
+     * @param _poolAddr Uniswap V3 Pool address
      * @param _reward reward amount
      */
     function createIncentive(
         address _rewardToken,
         uint256 _length,
         address _refundee,
-        uint256 _tokenId,
+        address _poolAddr,
         uint256 _reward
     )
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
-        address poolAddr = getPoolAddress(_tokenId);
-
-        IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
+        IUniswapV3Pool pool = IUniswapV3Pool(_poolAddr);
         uint256 _startTime = block.timestamp;
         uint256 _endTime = _startTime + _length;
         IUniswapV3Staker.IncentiveKey memory _key = IUniswapV3Staker
@@ -205,10 +202,13 @@ abstract contract UniswapResolver is Helpers, Events {
                 _endTime,
                 _refundee
             );
+        if (_rewardToken != ethAddr) {
+            IERC20Minimal(_rewardToken).approve(address(staker), _reward);
+        }
         staker.createIncentive(_key, _reward);
 
-        _eventName = "LogIncentiveCreated(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_tokenId, _startTime, _endTime, _reward);
+        _eventName = "LogIncentiveCreated(address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(_poolAddr, _startTime, _endTime, _reward);
     }
 }
 

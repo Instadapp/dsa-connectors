@@ -30,6 +30,7 @@ const TICK_SPACINGS = {
 
 const DAI_ADDR = "0x6b175474e89094c44da98b954eedeac495271d0f"
 const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+const INST_ADDR = "0x6f40d4a6237c257fff2db00fa0510deeecd303eb"
 
 let tokenIds = []
 const abiCoder = ethers.utils.defaultAbiCoder
@@ -88,7 +89,7 @@ describe("UniswapV3", function () {
             await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("100000"));
         });
 
-        it("Deposit ETH & USDT into DSA wallet", async function () {
+        it("Deposit ETH & USDT & INST into DSA wallet", async function () {
             await wallet0.sendTransaction({
                 to: dsaWallet0.address,
                 value: ethers.utils.parseEther("10")
@@ -97,12 +98,14 @@ describe("UniswapV3", function () {
 
             await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("100000"));
             await addLiquidity("usdt", dsaWallet0.address, ethers.utils.parseEther("100000"));
+            await addLiquidity("inst", dsaWallet0.address, ethers.utils.parseEther("10000"));
         });
     });
 
     describe("Main", function () {
         const ethAmount = ethers.utils.parseEther("0.1") // 1 ETH
         const daiAmount = ethers.utils.parseEther("400") // 1 ETH
+        const instAmount = ethers.utils.parseEther("50")
 
         it("Should mint successfully", async function () {
             const getIds = ["0", "0"]
@@ -124,6 +127,22 @@ describe("UniswapV3", function () {
                         getIds,
                         setId
                     ],
+                },
+                {
+                    connector: connectorUniswap,
+                    method: "mint",
+                    args: [
+                        INST_ADDR,
+                        ethAddress,
+                        FeeAmount.MEDIUM,
+                        getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+                        instAmount,
+                        ethAmount,
+                        "500000000000000000",
+                        getIds,
+                        setId
+                    ],
                 }
             ]
 
@@ -133,7 +152,9 @@ describe("UniswapV3", function () {
             let castEvent = new Promise((resolve, reject) => {
                 dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
                     const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[0]);
+                    const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[1]);
                     tokenIds.push(params[0]);
+                    tokenIds.push(params1[0]);
                     event.removeListener();
 
                     resolve({
@@ -153,6 +174,7 @@ describe("UniswapV3", function () {
         });
 
         it("Should create incentive successfully", async function () {
+            console.log("TokenIds", tokenIds[1]);
             const spells = [
                 {
                     connector: connectorStaker,
@@ -161,20 +183,32 @@ describe("UniswapV3", function () {
                         ethAddress,
                         "1000",
                         dsaWallet0.address,
-                        tokenIds[0],
+                        "0xc2e9f25be6257c210d7adf0d4cd6e3e881ba25f8",
+                        ethers.utils.parseEther("0.01")
+                    ],
+                },
+                {
+                    connector: connectorStaker,
+                    method: "createIncentive",
+                    args: [
+                        INST_ADDR,
+                        "50",
+                        dsaWallet0.address,
+                        "0xcba27c8e7115b4eb50aa14999bc0866674a96ecb",
                         ethers.utils.parseEther("0.01")
                     ],
                 }]
 
-            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)
             let receipt = await tx.wait()
 
             let castEvent = new Promise((resolve, reject) => {
                 dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
                     const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[0]);
+                    const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[1]);
                     event.removeListener();
 
-                    resolve({ start: params[1], end: params[2] });
+                    resolve({ start: [params[1], params1[1]], end: [params[2], params1[2]] });
                 });
 
                 setTimeout(() => {
@@ -201,10 +235,28 @@ describe("UniswapV3", function () {
                     method: "stake",
                     args: [
                         ethAddress,
-                        startTime,
-                        endTime,
+                        startTime[0],
+                        endTime[0],
                         dsaWallet0.address,
                         tokenIds[0]
+                    ],
+                },
+                {
+                    connector: connectorStaker,
+                    method: "deposit",
+                    args: [
+                        tokenIds[1]
+                    ],
+                },
+                {
+                    connector: connectorStaker,
+                    method: "stake",
+                    args: [
+                        INST_ADDR,
+                        startTime[1],
+                        endTime[1],
+                        dsaWallet0.address,
+                        tokenIds[1]
                     ],
                 }
             ]
@@ -222,7 +274,14 @@ describe("UniswapV3", function () {
                     connector: connectorStaker,
                     method: "claimRewards",
                     args: [
-                        ethAddress,
+                        DAI_ADDR,
+                        dsaWallet0.address,
+                        "1000",
+                    ],
+                    connector: connectorStaker,
+                    method: "claimRewards",
+                    args: [
+                        INST_ADDR,
                         dsaWallet0.address,
                         "1000",
                     ],
@@ -239,7 +298,7 @@ describe("UniswapV3", function () {
                     connector: connectorStaker,
                     method: "unstake",
                     args: [
-                        ethAddress,
+                        DAI_ADDR,
                         startTime,
                         endTime,
                         dsaWallet0.address,
@@ -251,6 +310,25 @@ describe("UniswapV3", function () {
                     method: "withdraw",
                     args: [
                         tokenIds[0],
+                        dsaWallet0.address,
+                    ],
+                },
+                {
+                    connector: connectorStaker,
+                    method: "unstake",
+                    args: [
+                        INST_ADDR,
+                        startTime,
+                        endTime,
+                        dsaWallet0.address,
+                        tokenIds[1]
+                    ],
+                },
+                {
+                    connector: connectorStaker,
+                    method: "withdraw",
+                    args: [
+                        tokenIds[1],
                         dsaWallet0.address,
                     ],
                 }
