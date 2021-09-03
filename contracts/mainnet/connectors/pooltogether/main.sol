@@ -149,12 +149,12 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         _tokenAmount = _tokenAmount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _tokenAmount;
         tokenContract.approve(pod, _tokenAmount);
 
-        podContract.depositTo(address(this), _tokenAmount);
+        uint256 _podShare = podContract.depositTo(address(this), _tokenAmount);
 
-        setUint(setId, _tokenAmount);
+        setUint(setId, _podShare);
 
-        _eventName = "LogDepositToPod(address,address,address,uint256,uint256, uint256)";
-        _eventParam = abi.encode(address(prizePoolToken), address(pod), address(this), _tokenAmount, getId, setId);
+        _eventName = "LogDepositToPod(address,address,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(prizePoolToken), address(pod), address(this), _tokenAmount, _podShare, getId, setId);
     }
 
     /**
@@ -180,12 +180,12 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         PodInterface podContract = PodInterface(pod);
         _shareAmount = _shareAmount == uint256(-1) ? podContract.balanceOf(address(this)) : _shareAmount;
 
-        podContract.withdraw(_shareAmount, maxFee);
+        uint256 _tokenAmount = podContract.withdraw(_shareAmount, maxFee);
 
-        setUint(setId, _shareAmount);
+        setUint(setId, _tokenAmount);
 
-        _eventName = "LogWithdrawFromPod(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(pod), _shareAmount, maxFee, getId, setId);
+        _eventName = "LogWithdrawFromPod(address,uint256,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(pod), _shareAmount, _tokenAmount, maxFee, getId, setId);
     }
 }
 
