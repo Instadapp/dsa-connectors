@@ -127,23 +127,20 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
     /**
      * @dev Deposit into Pod
      * @notice Deposit assets into the Pod in exchange for share tokens
-     * @param prizePool PrizePool address to deposit to
+     * @param prizePoolToken Prize Pool Token Address
      * @param pod Pod address to deposit to
      * @param tokenAmount The amount of tokens to deposit.  These are the same tokens used to deposit into the underlying prize pool.
      * @param getId Get token amount at this ID from `InstaMemory` Contract.
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
     function depositToPod(
-        address prizePool,
+        address prizePoolToken,
         address pod,
         uint256 tokenAmount,
         uint256 getId,
         uint256 setId
     ) external payable returns ( string memory _eventName, bytes memory _eventParam) {
         uint _tokenAmount= getUint(getId, tokenAmount);
-
-        PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
-        address prizePoolToken = prizePoolContract.token();
 
         PodInterface podContract = PodInterface(pod);
 
@@ -157,7 +154,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         setUint(setId, _tokenAmount);
 
         _eventName = "LogDepositToPod(address,address,address,uint256,uint256, uint256)";
-        _eventParam = abi.encode(address(prizePool), address(pod), address(this), _tokenAmount, getId, setId);
+        _eventParam = abi.encode(address(prizePoolToken), address(pod), address(this), _tokenAmount, getId, setId);
     }
 
     /**

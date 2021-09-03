@@ -344,7 +344,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositToPod",
-                args: [DAI_PRIZE_POOL_ADDR, DAI_POD_ADDR, amount, 0, 0]
+                args: [DAI_TOKEN_ADDR, DAI_POD_ADDR, amount, 0, 0]
             }
         ]
 
@@ -433,7 +433,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "depositToPod",
-                args: [DAI_PRIZE_POOL_ADDR, DAI_POD_ADDR, amount, 0, 0]
+                args: [DAI_TOKEN_ADDR, DAI_POD_ADDR, amount, 0, 0]
             },
             {
                 connector: ptConnectorName,
