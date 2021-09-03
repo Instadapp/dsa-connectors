@@ -34,6 +34,14 @@ const POOL_PRIZE_POOL_ADDR = "0x396b4489da692788e327e2e4b2b0459a5ef26791"   // P
 const PT_POOL_TICKET_ADDR = "0x27d22a7648e955e510a40bdb058333e9190d12d4"   // Pool Together POOL Ticket
 const WETH_ADDR = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"  // WETH 
 
+const prizePoolABI = [
+    "function calculateEarlyExitFee( address from, address controlledToken, uint256 amount) external returns ( uint256 exitFee, uint256 burnedCredit)"
+]
+
+const podABI = [
+    "function getEarlyExitFee(uint256 amount) external returns (uint256)"
+]
+
 describe("PoolTogether", function () {
     const connectorName = "COMPOUND-TEST-A"
     const uniswapConnectorName = "UNISWAP-TEST-A"
@@ -158,11 +166,16 @@ describe("PoolTogether", function () {
 
     it("Should wait 11 days, withdraw all PrizePool, get back 100 DAI, and claim POOL", async function () {
         const amount = ethers.utils.parseEther("100") // 100 DAI
+
+        let prizePoolContract = new ethers.Contract(DAI_PRIZE_POOL_ADDR, prizePoolABI, ethers.provider);
+        let earlyExitFee = await prizePoolContract.callStatic["calculateEarlyExitFee"](dsaWallet0.address, PT_DAI_TICKET_ADDR, amount);
+        expect(earlyExitFee.exitFee, "Exit Fee equal to 1 DAI because starts at 10%").to.be.eq(ethers.utils.parseEther("1"));
+
         const spells = [
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, earlyExitFee.exitFee, 0, 0]
             },
             {
                 connector: ptConnectorName,
@@ -186,6 +199,10 @@ describe("PoolTogether", function () {
 
         // Increase time by 11 days so we get back all DAI without early withdrawal fee
         await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
+        await ethers.provider.send("evm_mine");
+
+        earlyExitFee = await prizePoolContract.callStatic["calculateEarlyExitFee"](dsaWallet0.address, PT_DAI_TICKET_ADDR, amount);
+        expect(earlyExitFee.exitFee, "Exit Fee equal to 0 DAI because past 10 days").to.be.eq(0);
 
         // Run spell transaction
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
@@ -206,6 +223,7 @@ describe("PoolTogether", function () {
 
     it("Should deposit and withdraw all PrizePool, get back less than 100 DAI", async function() {
         const amount = ethers.utils.parseEther("100") // 100 DAI
+        const exitFee = ethers.utils.parseEther("1") // 1 DAI is 10% of 100 DAI
         const spells = [
             {
                 connector: ptConnectorName,
@@ -215,7 +233,7 @@ describe("PoolTogether", function () {
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, exitFee, 0, 0]
             }
         ]
 
@@ -260,19 +278,6 @@ describe("PoolTogether", function () {
             }
         ]
 
-        const withdrawSpells = [
-            {
-                connector: ptConnectorName,
-                method: "withdrawInstantlyFrom",
-                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, amount, 0, 0]
-            },
-            {
-                connector: ptConnectorName,
-                method: "claimAll",
-                args: [TOKEN_FAUCET_PROXY_FACTORY_ADDR, [DAI_POOL_FAUCET_ADDR]]
-            }
-        ]
-
         // Before spell
         let daiToken = await ethers.getContractAt(abis.basic.erc20, DAI_TOKEN_ADDR)
         let daiBalance = await daiToken.balanceOf(dsaWallet0.address);
@@ -290,8 +295,30 @@ describe("PoolTogether", function () {
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(depositSpells), wallet1.address)
         const receipt = await tx.wait()
 
+        const prizePoolContract = new ethers.Contract(DAI_PRIZE_POOL_ADDR, prizePoolABI, ethers.provider);
+        let earlyExitFee = await prizePoolContract.callStatic["calculateEarlyExitFee"](dsaWallet0.address, PT_DAI_TICKET_ADDR, amount);
+        expect(earlyExitFee.exitFee, "Exit Fee equal to .99 DAI because starts at 10%").to.be.eq(ethers.utils.parseEther(".99"));
+
+
         // Increase time by 11 days so we get back all DAI without early withdrawal fee
         await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
+        await ethers.provider.send("evm_mine");
+
+        earlyExitFee = await prizePoolContract.callStatic["calculateEarlyExitFee"](dsaWallet0.address, PT_DAI_TICKET_ADDR, amount);
+        expect(earlyExitFee.exitFee, "Exit Fee equal to 0 DAI because past 10 days").to.be.eq(0);
+
+        const withdrawSpells = [
+            {
+                connector: ptConnectorName,
+                method: "withdrawInstantlyFrom",
+                args: [DAI_PRIZE_POOL_ADDR, amount, PT_DAI_TICKET_ADDR, earlyExitFee.exitFee, 0, 0]
+            },
+            {
+                connector: ptConnectorName,
+                method: "claimAll",
+                args: [TOKEN_FAUCET_PROXY_FACTORY_ADDR, [DAI_POOL_FAUCET_ADDR]]
+            }
+        ]
 
         // Run spell transaction
         const tx2 = await dsaWallet0.connect(wallet0).cast(...encodeSpells(withdrawSpells), wallet1.address)
@@ -351,7 +378,12 @@ describe("PoolTogether", function () {
 
     it("Should wait 11 days, withdraw all podTokens, get back 99 DAI", async function () {
         const amount = ethers.utils.parseEther("99") // 99 DAI
-        const maxFee = 0;
+
+        const podContract = new ethers.Contract(DAI_POD_ADDR, podABI, ethers.provider);
+        let maxFee = await podContract.callStatic["getEarlyExitFee"](amount);
+        expect(maxFee, "Exit Fee equal to 0 DAI because token still in float").to.be.eq(0);
+        // maxFee depends on if token has been deposited to PrizePool yet
+
         const spells = [
             {
                 connector: ptConnectorName,
@@ -395,7 +427,7 @@ describe("PoolTogether", function () {
 
     it("Should deposit and withdraw from pod, get back same amount of 99 DAI", async function() {
         const amount = ethers.utils.parseEther("99")
-        const maxFee = 0;
+        const maxFee = 0;   // maxFee 0 since it doesn't give chance for Pod to actually deposit into PrizePool
 
         const spells = [
             {
@@ -510,16 +542,20 @@ describe("PoolTogether", function () {
         expect(ptUniswapPoolEthBalanceAfter, `PT Uniswap POOL/ETH LP to greater than 0`).to.be.gt(0);
     });
 
-    it("Should wait 11 days, withdraw all PrizePool, get back Uniswap LP, claim POOL, deposit claimed POOL into Pool PrizePool", async function () {
+    it("Should withdraw all PrizePool, get back Uniswap LP, claim POOL, deposit claimed POOL into Pool PrizePool", async function () {
         let ptUniswapPoolEthToken = await ethers.getContractAt(abis.basic.erc20, PT_UNISWAP_POOLETHLP_TICKET_ADDR)
         const ptUniswapPoolEthBalance = await ptUniswapPoolEthToken.balanceOf(dsaWallet0.address)
         const setId = "83478237"
+
+        let uniswapPrizePoolContract = new ethers.Contract(UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, prizePoolABI, ethers.provider);
+        let earlyExitFee = await uniswapPrizePoolContract.callStatic["calculateEarlyExitFee"](dsaWallet0.address, PT_UNISWAP_POOLETHLP_TICKET_ADDR, ptUniswapPoolEthBalance);
+        expect(earlyExitFee.exitFee, "Exit Fee equals 0 because no early exit fee for this prize pool").to.be.eq(0);
 
         const spells = [
             {
                 connector: ptConnectorName,
                 method: "withdrawInstantlyFrom",
-                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, ptUniswapPoolEthBalance, PT_UNISWAP_POOLETHLP_TICKET_ADDR, 0, 0, 0]
+                args: [UNISWAP_POOLETHLP_PRIZE_POOL_ADDR, ptUniswapPoolEthBalance, PT_UNISWAP_POOLETHLP_TICKET_ADDR, earlyExitFee.exitFee, 0, 0]
             },
             {
                 connector: ptConnectorName,
@@ -548,9 +584,6 @@ describe("PoolTogether", function () {
         let poolPoolTicket = await ethers.getContractAt(abis.basic.erc20, PT_POOL_TICKET_ADDR)
         const poolPoolTicketBalance = await poolPoolTicket.balanceOf(dsaWallet0.address)
         expect(poolPoolTicketBalance, `PoolTogether POOL Ticket equals 0`).to.be.eq(0);
-
-        // Increase time by 11 days so we get back all DAI without early withdrawal fee
-        await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
 
         // Run spell transaction
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)

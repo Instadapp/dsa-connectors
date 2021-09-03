@@ -4,6 +4,7 @@ interface PrizePoolInterface {
     function token() external view returns (address);
     function depositTo( address to, uint256 amount, address controlledToken, address referrer) external;
     function withdrawInstantlyFrom( address from, uint256 amount, address controlledToken, uint256 maximumExitFee) external returns (uint256);
+    function calculateEarlyExitFee( address from, address controlledToken, uint256 amount) external returns ( uint256 exitFee, uint256 burnedCredit);
 }
 
 interface TokenFaucetInterface {

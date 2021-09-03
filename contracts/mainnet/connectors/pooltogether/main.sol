@@ -55,7 +55,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
     /**
      * @dev Withdraw from Prize Pool
      * @notice Withdraw assets from the Prize Pool instantly.  A fairness fee may be charged for an early exit.
-     * @param prizePool PrizePool address to deposit to
+     * @param prizePool PrizePool address to withdraw from
      * @param amount The amount of tokens to redeem for assets.
      * @param controlledToken The address of the token to redeem (i.e. ticket or sponsorship)
      * @param maximumExitFee The maximum early exit fee the caller is willing to pay. This prevents the Prize Strategy from changing the fee on the fly.  This should be pre-calculated by the calculateExitFee() fxn.
