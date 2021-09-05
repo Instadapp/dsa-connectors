@@ -54,3 +54,9 @@ Few things to consider while writing the connector:
 
 If you can't find something you're looking for or have any questions, ask them at our developers community on [Discord](https://discord.gg/83vvrnY) or simply send an [Email](mailto:info@instadapp.io).
 
+## Check run
+
+use
+`npm run check`
+to check `connectors` directory. Use `connector=$` argument to check specific connector:
+`npm run check connector=contracts/mainnet/common`
