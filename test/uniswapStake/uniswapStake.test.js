@@ -170,11 +170,10 @@ describe("UniswapV3", function () {
             let event = await castEvent
 
             let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
-            console.log("Balane", balance)
+            console.log("Balance", balance)
         });
 
         it("Should create incentive successfully", async function () {
-            console.log("TokenIds", tokenIds[1]);
             const spells = [
                 {
                     connector: connectorStaker,
@@ -265,7 +264,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
-            console.log("Balane", balance)
+            console.log("Balance", balance)
         });
 
         it("Should claim rewards successfully", async function () {
@@ -274,7 +273,7 @@ describe("UniswapV3", function () {
                     connector: connectorStaker,
                     method: "claimRewards",
                     args: [
-                        DAI_ADDR,
+                        ethAddress,
                         dsaWallet0.address,
                         "1000",
                     ],
@@ -298,9 +297,9 @@ describe("UniswapV3", function () {
                     connector: connectorStaker,
                     method: "unstake",
                     args: [
-                        DAI_ADDR,
-                        startTime,
-                        endTime,
+                        ethAddress,
+                        startTime[0],
+                        endTime[0],
                         dsaWallet0.address,
                         tokenIds[0]
                     ],
@@ -318,8 +317,8 @@ describe("UniswapV3", function () {
                     method: "unstake",
                     args: [
                         INST_ADDR,
-                        startTime,
-                        endTime,
+                        startTime[1],
+                        endTime[1],
                         dsaWallet0.address,
                         tokenIds[1]
                     ],
@@ -338,7 +337,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
-            console.log("Balane", balance)
+            console.log("Balance", balance)
         });
     })
 })
