@@ -3,13 +3,11 @@ const path = require('path')
 
 const forbiddenStrings = ['selfdestruct']
 
-const getConnectorsList = async () => {
+const getConnectorsList = async (connectorsRootsDirs) => {
   try {
     const connectors = []
-    const connectorsRootsDirs = ['mainnet', 'polygon']
     for (let index = 0; index < connectorsRootsDirs.length; index++) {
-      const root = `contracts/${connectorsRootsDirs[index]}/connectors`
-      const dirs = [root]
+      const dirs = [connectorsRootsDirs[index]]
       while (dirs.length) {
         const currentDir = dirs.pop()
         const subs = fs.readdirSync(currentDir, { withFileTypes: true })
@@ -326,9 +324,14 @@ const checkHeadComments = async (connector) => {
 
 async function checkMain () {
   try {
+    const connectorsRootsDirsDefault = ['mainnet', 'polygon'].map(v=> `contracts/${v}/connectors`)
+    const customPathArg = process.argv.find(a => a.startsWith('connector='))
+    const connectorsRootsDirs = customPathArg 
+      ? [customPathArg.slice(10)]
+      : connectorsRootsDirsDefault
     const errors = []
     const warnings = []
-    const connectors = await getConnectorsList()
+    const connectors = await getConnectorsList(connectorsRootsDirs)
     for (let index = 0; index < connectors.length; index++) {
       const { forbiddenErrors, code } = await checkForbidden(connectors[index].path)
       connectors[index].code = code
