@@ -6,7 +6,7 @@ pragma abicoder v2;
  * @dev Decentralized Exchange.
  */
 
-import {TokenInterface} from "../../common/interfaces.sol";
+import {TokenInterface} from "../../../common/interfaces.sol";
 import "./interface.sol";
 import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
@@ -56,18 +56,17 @@ abstract contract UniswapResolver is Helpers, Events {
      * @dev Withdraw NFT LP token
      * @notice Withdraw NFT LP token from staking pool
      * @param _tokenId NFT LP Token ID
-     * @param _to address to transfer
      */
-    function withdraw(uint256 _tokenId, address _to)
+    function withdraw(uint256 _tokenId)
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
         if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
-        staker.withdrawToken(_tokenId, _to, "");
+        staker.withdrawToken(_tokenId, address(this), "");
 
-        _eventName = "LogWithdraw(uint256,address)";
-        _eventParam = abi.encode(_tokenId, _to);
+        _eventName = "LogWithdraw(uint256)";
+        _eventParam = abi.encode(_tokenId);
     }
 
     /**
@@ -104,8 +103,8 @@ abstract contract UniswapResolver is Helpers, Events {
             );
         _stake(_tokenId, _key);
 
-        _eventName = "LogStake(uint256,address)";
-        _eventParam = abi.encode(_tokenId, _refundee);
+        _eventName = "LogStake(uint256,bytes32)";
+        _eventParam = abi.encode(_tokenId, keccak256(abi.encode(_key)));
     }
 
     /**
@@ -142,20 +141,18 @@ abstract contract UniswapResolver is Helpers, Events {
             );
         _unstake(_key, _tokenId);
         _eventName = "LogUnstake(uint256,bytes32)";
-        _eventParam = abi.encode(_tokenId, _key);
+        _eventParam = abi.encode(_tokenId, keccak256(abi.encode(_key)));
     }
 
     /**
      * @dev Claim rewards
      * @notice Claim rewards
      * @param _rewardToken _rewardToken address
-     * @param _to address to receive
-     * @param _amountRequested requested amount
+     * @param _amount requested amount
      */
     function claimRewards(
         address _rewardToken,
-        address _to,
-        uint256 _amountRequested
+        uint256 _amount
     )
         external
         payable
@@ -163,12 +160,12 @@ abstract contract UniswapResolver is Helpers, Events {
     {
         uint256 rewards = _claimRewards(
             IERC20Minimal(_rewardToken),
-            _to,
-            _amountRequested
+            address(this),
+            _amount
         );
 
-        _eventName = "LogRewardClaimed(address,address,uint256)";
-        _eventParam = abi.encode(_rewardToken, _to, rewards);
+        _eventName = "LogRewardClaimed(address,uint256)";
+        _eventParam = abi.encode(_rewardToken, rewards);
     }
 
     /**
@@ -207,8 +204,8 @@ abstract contract UniswapResolver is Helpers, Events {
         }
         staker.createIncentive(_key, _reward);
 
-        _eventName = "LogIncentiveCreated(address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_poolAddr, _startTime, _endTime, _reward);
+        _eventName = "LogIncentiveCreated(bytes32,address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(keccak256(abi.encode(_key)), _poolAddr, _refundee, _startTime, _endTime, _reward);
     }
 }
 

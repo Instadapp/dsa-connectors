@@ -31,7 +31,7 @@ Few things to consider while writing the connector:
   * `_eventParam` of `bytes` type: This will be the abi encoded event parameters
 * The contracts should not have `selfdestruct()`
 * The contracts should not have `delegatecall()`
-* Use `uint(-1)` for maximum amount everywhere
+* Use `uint(-1)` of `type(uint256).max` for maximum amount everywhere
 * Use `ethAddr` (declared in `Stores`) to denote Ethereum (non-ERC20)
 * Use `address(this)` instead of `msg.sender` for fetching balance on-chain, etc
 * Only `approve()` limited amount while giving ERC20 allowance, which strictly needs to be 0 by the end of the spell.

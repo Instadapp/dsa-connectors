@@ -23,6 +23,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
      * @dev Borrow Flashloan and Cast spells.
      * @param token Token Address.
      * @param amt Token Amount.
+     * @param route Flashloan source route. (0: dYdX(ETH,DAI,USDC only), 1: MakerDAO(DAI only), 2: Compound(All borrowable tokens in Compound), 3: AaveV2(All borrowable tokens in AaveV2))
      * @param data targets & data for cast.
      */
     function flashBorrowAndCast(
