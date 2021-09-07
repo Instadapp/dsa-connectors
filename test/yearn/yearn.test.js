@@ -97,7 +97,7 @@ describe("Yearn", function () {
             {
                 connector: connectorName,
                 method: "deposit",
-                args: [tokens.dai.address, DAI_VAULT, amount, 0, setId]
+                args: [DAI_VAULT, amount, 0, setId]
             },
             {
                 connector: connectorName,
@@ -124,7 +124,7 @@ describe("Yearn", function () {
             {
                 connector: connectorName,
                 method: "deposit",
-                args: [tokens.dai.address, DAI_VAULT, amount, 0, setId]
+                args: [DAI_VAULT, amount, 0, setId]
             }
         ]
 
