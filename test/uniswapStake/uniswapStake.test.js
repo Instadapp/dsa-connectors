@@ -13,8 +13,8 @@ const addresses = require("../../scripts/constant/addresses");
 const abis = require("../../scripts/constant/abis");
 const { abi: nftManagerAbi } = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json")
 
-const connectV2UniswapStakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/uniswapStaker/main.sol/ConnectV2UniswapV3Staker.json");
-const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswapV3/main.sol/ConnectV2UniswapV3.json");
+const connectV2UniswapStakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3_staker/main.sol/ConnectV2UniswapV3Staker.json");
+const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json");
 
 const FeeAmount = {
     LOW: 500,
@@ -203,11 +203,11 @@ describe("UniswapV3", function () {
 
             let castEvent = new Promise((resolve, reject) => {
                 dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
-                    const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[0]);
-                    const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[1]);
+                    const params = abiCoder.decode(["bytes32","address","address","uint256","uint256","uint256"], eventParams[0]);
+                    const params1 = abiCoder.decode(["bytes32","address","address","uint256","uint256","uint256"], eventParams[1]);
                     event.removeListener();
 
-                    resolve({ start: [params[1], params1[1]], end: [params[2], params1[2]] });
+                    resolve({ start: [params[3], params1[3]], end: [params[4], params1[4]] });
                 });
 
                 setTimeout(() => {
@@ -274,14 +274,12 @@ describe("UniswapV3", function () {
                     method: "claimRewards",
                     args: [
                         ethAddress,
-                        dsaWallet0.address,
                         "1000",
                     ],
                     connector: connectorStaker,
                     method: "claimRewards",
                     args: [
                         INST_ADDR,
-                        dsaWallet0.address,
                         "1000",
                     ],
                 }
@@ -309,7 +307,6 @@ describe("UniswapV3", function () {
                     method: "withdraw",
                     args: [
                         tokenIds[0],
-                        dsaWallet0.address,
                     ],
                 },
                 {
@@ -327,8 +324,7 @@ describe("UniswapV3", function () {
                     connector: connectorStaker,
                     method: "withdraw",
                     args: [
-                        tokenIds[1],
-                        dsaWallet0.address,
+                        tokenIds[1]
                     ],
                 }
             ]
