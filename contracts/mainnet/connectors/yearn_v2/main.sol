@@ -30,7 +30,7 @@ abstract contract YearnResolver is Events, Basic {
         YearnV2Interface yearn = YearnV2Interface(vault);
 
         address want = yearn.token();
-        bool isEth = want == ethAddr;
+        bool isEth = want == wethAddr;
         TokenInterface tokenContract = TokenInterface(want);
 
         if (isEth) {
