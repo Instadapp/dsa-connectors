@@ -32,42 +32,6 @@ abstract contract Helpers is DSMath, Basic {
         tokenId = nftManager.tokenOfOwnerByIndex(user, len - 1);
     }
 
-    function getMinAmount(
-        TokenInterface token,
-        uint256 amt,
-        uint256 slippage
-    ) internal view returns (uint256 minAmt) {
-        uint256 _amt18 = convertTo18(token.decimals(), amt);
-        minAmt = wmul(_amt18, sub(WAD, slippage));
-        minAmt = convert18ToDec(token.decimals(), minAmt);
-    }
-
-    function getNftTokenPairAddresses(uint256 _tokenId)
-        internal
-        view
-        returns (address token0, address token1)
-    {
-        (bool success, bytes memory data) = address(nftManager).staticcall(
-            abi.encodeWithSelector(nftManager.positions.selector, _tokenId)
-        );
-        require(success, "fetching positions failed");
-        {
-            (, , token0, token1, , , , ) = abi.decode(
-                data,
-                (
-                    uint96,
-                    address,
-                    address,
-                    address,
-                    uint24,
-                    int24,
-                    int24,
-                    uint128
-                )
-            );
-        }
-    }
-
     function getPoolAddress(uint256 _tokenId)
         internal
         view
