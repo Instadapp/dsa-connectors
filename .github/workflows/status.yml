@@ -29,7 +29,8 @@ jobs:
       - name: Run status checks
         id: status_check
         run: |
-          output=$(node ./status-checks)
+          # Run status checks, Remove ANSI colors from the text
+          output=$(node ./status-checks | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
           # Escape newlines so _all_ the output is included in the set-output
           output="${output//'%'/'%25'}"
           output="${output//$'\n'/'%0A'}"
@@ -42,7 +43,7 @@ jobs:
         uses: bubkoo/auto-comment@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pullRequestSynchronize: "${{ steps.status_check.outputs.status_check_output }}"
-          pullRequestAssigned: "${{ steps.status_check.outputs.status_check_output }}"
-          pullRequestOpened: "${{ steps.status_check.outputs.status_check_output }}"
-          pullRequestReopened: "${{ steps.status_check.outputs.status_check_output }}"
+          pullRequestSynchronize: "```${{ steps.status_check.outputs.status_check_output }}```"
+          pullRequestAssigned: "```${{ steps.status_check.outputs.status_check_output }}```"
+          pullRequestOpened: "```${{ steps.status_check.outputs.status_check_output }}```"
+          pullRequestReopened: "```${{ steps.status_check.outputs.status_check_output }}```"
