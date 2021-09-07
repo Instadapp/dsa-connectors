@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 
 /**
  * @title Basic.
- * @dev Deposit & Withdraw from DSA.
+ * @dev Deposit & Withdraw from ERC1155 DSA.
  */
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
@@ -13,7 +13,7 @@ import {Events} from "./events.sol";
 abstract contract BasicResolver is Events, DSMath, Basic {
     /**
      * @dev Deposit Assets To Smart Account.
-     * @notice Deposit a ERC721 token to DSA
+     * @notice Deposit a ERC1155 token to DSA
      * @param token Address of token.
      * @param tokenId ID of token.
      * @param amount Amount to deposit.
@@ -31,7 +31,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        uint256 _amount = getUint(getId, tokenId);
+        uint256 _amount = getUint(getId, amount);
 
         IERC1155 tokenContract = IERC1155(token);
         tokenContract.safeTransferFrom(
@@ -57,7 +57,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 
     /**
      * @dev Withdraw Assets To Smart Account.
-     * @notice Withdraw a ERC721 token from DSA
+     * @notice Withdraw a ERC1155 token from DSA
      * @param token Address of the token.
      * @param tokenId ID of token.
      * @param to The address to receive the token upon withdrawal

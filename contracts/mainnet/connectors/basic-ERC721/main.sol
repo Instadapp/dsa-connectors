@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 
 /**
  * @title Basic.
- * @dev Deposit & Withdraw from DSA.
+ * @dev Deposit & Withdraw ERC721 from DSA.
  */
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
