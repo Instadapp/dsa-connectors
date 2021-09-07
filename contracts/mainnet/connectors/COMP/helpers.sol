@@ -19,7 +19,7 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Compound Mapping
      */
-    CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0xA8F9D4aA7319C54C04404765117ddBf9448E2082);
+    CompoundMappingInterface internal constant compMapping = CompoundMappingInterface(0xe7a85d0adDB972A4f0A4e57B698B37f171519e88);
 
     function getMergedCTokens(
         string[] calldata supplyIds,
