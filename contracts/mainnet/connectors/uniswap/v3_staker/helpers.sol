@@ -1,9 +1,9 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {TokenInterface} from "../../common/interfaces.sol";
-import {DSMath} from "../../common/math.sol";
-import {Basic} from "../../common/basic.sol";
+import {TokenInterface} from "../../../common/interfaces.sol";
+import {DSMath} from "../../../common/math.sol";
+import {Basic} from "../../../common/basic.sol";
 import "./interface.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";

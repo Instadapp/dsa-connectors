@@ -19,6 +19,7 @@ contract Events {
 
     event LogIncentiveCreated(
         address poolAddr,
+        address refundee,
         uint256 startTime,
         uint256 endTime,
         uint256 reward
