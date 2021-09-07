@@ -14,12 +14,14 @@ abstract contract YearnResolver is Events, Basic {
     /**
      * @dev Deposit funds in the vault, issuing shares to recipient.
      * @notice This will deposit funds to a specific Yearn Vault.
+     * @param token The address of the token to deposit.
      * @param vault The address of the vault to deposit funds into.
      * @param amt The amount of tokens to deposit.
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of shares received.
     */
     function deposit(
+        address token,
         address vault,
         uint256 amt,
         uint256 getId,
@@ -29,11 +31,19 @@ abstract contract YearnResolver is Events, Basic {
 
         YearnV2Interface yearn = YearnV2Interface(vault);
 
+        bool isEth = token == ethAddr;
         address want = yearn.token();
 
         TokenInterface tokenContract = TokenInterface(want);
 
-        _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
+        if (isEth && want == wethAddr) {
+            _amt = _amt == uint(-1) ? address(this).balance : _amt;
+            convertEthToWeth(isEth, tokenContract, _amt);
+        } else {
+            require(want == token, "incorrect token");
+            _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
+        }
+
         approve(tokenContract, vault, _amt);
 
         uint256 _shares = yearn.deposit(_amt, address(this));
@@ -59,12 +69,16 @@ abstract contract YearnResolver is Events, Basic {
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        YearnV2Interface yearn = YearnV2Interface(vault);
-        TokenInterface tokenContract = TokenInterface(vault);
+        YearnV2Interface vault = YearnV2Interface(vault);
 
-        _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
-        uint256 _wantRedeemed = yearn.withdraw(_amt, address(this));
+
+        _amt = _amt == uint(-1) ? vault.balanceOf(address(this)) : _amt;
+        uint256 _wantRedeemed = vault.withdraw(_amt, address(this));
         setUint(setId, _wantRedeemed);
+
+        TokenInterface tokenContract = TokenInterface(vault.token());
+        bool isWEth = vault.token() == wethAddr;
+        convertWethToEth(isWEth, tokenContract, _amt);
 
         _eventName = "LogWithdraw(address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(vault, _amt, _wantRedeemed, getId, setId);
