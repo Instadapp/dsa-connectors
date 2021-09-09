@@ -34,12 +34,22 @@ const POOL_PRIZE_POOL_ADDR = "0x396b4489da692788e327e2e4b2b0459a5ef26791"   // P
 const PT_POOL_TICKET_ADDR = "0x27d22a7648e955e510a40bdb058333e9190d12d4"   // Pool Together POOL Ticket
 const WETH_ADDR = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"  // WETH 
 
+// Community WETH Prize Pool (Rari): https://reference-app.pooltogether.com/pools/mainnet/0xa88ca010b32a54d446fc38091ddbca55750cbfc3/manage#stats
+const WETH_PRIZE_POOL_ADDR = "0xa88ca010b32a54d446fc38091ddbca55750cbfc3"   // Community WETH Prize Pool (Rari)
+const WETH_POOL_TICKET_ADDR = "0x9b5c30aeb9ce2a6a121cea9a85bc0d662f6d9b40"  // Community WETH Prize Pool Ticket (Rari)
+
 const prizePoolABI = [
     "function calculateEarlyExitFee( address from, address controlledToken, uint256 amount) external returns ( uint256 exitFee, uint256 burnedCredit)"
 ]
 
 const podABI = [
-    "function getEarlyExitFee(uint256 amount) external returns (uint256)"
+    "function getEarlyExitFee(uint256 amount) external returns (uint256)",
+    "function balanceOfUnderlying(address user) external view returns (uint256 amount)"
+]
+
+const POD_FACTORY_ADDRESS = "0x4e3a9f9fbafb2ec49727cffa2a411f7a0c1c4ce1"
+const podFactoryABI = [
+    "function create( address _prizePool, address _ticket, address _faucet, address _manager, uint8 _decimals) external returns (address pod)"
 ]
 
 describe("PoolTogether", function () {
@@ -603,4 +613,151 @@ describe("PoolTogether", function () {
         expect(poolPoolTicketBalanceAfter, `PoolTogether POOL Ticket greater than 0`).to.be.gt(0);
     });
   })
+
+  describe("Main - WETH Prize Pool Test", function () {
+    it("Deposit 1 ETH into WETH Prize Pool and withdraw immediately", async function () {
+        const amount = ethers.utils.parseEther("1") // 1 ETH
+        const setId = "83478237"
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "depositTo",
+                args: [WETH_PRIZE_POOL_ADDR, amount, WETH_POOL_TICKET_ADDR, 0, setId]
+            },
+            {
+                connector: ptConnectorName,
+                method: "withdrawInstantlyFrom",
+                args: [WETH_PRIZE_POOL_ADDR, amount, WETH_POOL_TICKET_ADDR, amount, setId, 0]
+            },
+        ]
+        // Before Spell
+        const ethBalanceBefore = await ethers.provider.getBalance(dsaWallet0.address);
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        const ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
+
+        // ETH used for transaction
+        expect(ethBalanceAfter, `ETH Balance less than before spell because of early withdrawal fee`).to.be.lte(ethBalanceBefore);
+    });
+
+    it("Deposit 1 ETH into WETH Prize Pool, wait 14 days, then withdraw", async function () {
+        const amount = ethers.utils.parseEther("1") // 1 ETH
+        const depositSpell = [
+            {
+                connector: ptConnectorName,
+                method: "depositTo",
+                args: [WETH_PRIZE_POOL_ADDR, amount, WETH_POOL_TICKET_ADDR, 0, 0]
+            }
+        ]
+
+        const withdrawSpell = [
+            {
+                connector: ptConnectorName,
+                method: "withdrawInstantlyFrom",
+                args: [WETH_PRIZE_POOL_ADDR, amount, WETH_POOL_TICKET_ADDR, amount, 0, 0]
+            }
+        ]
+
+        // Before Deposit Spell
+        let ethBalanceBefore = await ethers.provider.getBalance(dsaWallet0.address);
+
+        // Run deposit spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(depositSpell), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After Deposit spell
+        let ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
+
+        expect(ethBalanceAfter, `ETH Balance less than before spell`).to.be.lte(ethBalanceBefore);
+
+        // Increase time by 11 days so we get back all ETH without early withdrawal fee
+        await ethers.provider.send("evm_increaseTime", [14*24*60*60]);
+        await ethers.provider.send("evm_mine");
+
+        // Run withdraw spell transaction
+        const tx2 = await dsaWallet0.connect(wallet0).cast(...encodeSpells(withdrawSpell), wallet1.address)
+        const receipt2 = await tx.wait()
+
+        // After Deposit spell
+        ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
+
+        expect(ethBalanceAfter, `ETH Balance equal to before spell because no early exit fee`).to.be.eq(ethBalanceBefore);
+    });
+  });
+
+  describe("Main - WETH Pod Test", function() {
+    let podAddress
+    it("Should deposit 1 ETH in WETH Pod and get Pod Ticket", async function() {
+        const amount = ethers.utils.parseEther("1")
+
+        // Create Pod for WETH Prize Pool (Rari)
+        const podFactoryContract = new ethers.Contract(POD_FACTORY_ADDRESS, podFactoryABI, masterSigner)
+        podAddress = await podFactoryContract.callStatic.create(WETH_PRIZE_POOL_ADDR, WETH_POOL_TICKET_ADDR, constants.address_zero, wallet0.address, 18)
+        await podFactoryContract.create(WETH_PRIZE_POOL_ADDR, WETH_POOL_TICKET_ADDR, constants.address_zero, wallet0.address, 18)
+
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "depositToPod",
+                args: [WETH_ADDR, podAddress, amount, 0, 0]
+            }
+        ]
+
+        // Before Deposit Spell
+        const podContract = new ethers.Contract(podAddress, podABI, ethers.provider);
+        let podBalanceBefore = await podContract.balanceOfUnderlying(dsaWallet0.address)
+        expect(podBalanceBefore, `Pod balance equal to 0`).to.be.eq(0);
+
+        let ethBalanceBefore = await ethers.provider.getBalance(dsaWallet0.address);
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After Deposit spell
+        let ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
+        expect(ethBalanceAfter, `ETH balance less than before`).to.be.lt(ethBalanceBefore);
+
+        podBalanceAfter = await podContract.balanceOfUnderlying(dsaWallet0.address)
+        expect(podBalanceAfter, `Pod balance equal to 1`).to.be.eq(ethers.utils.parseEther("1"));
+    });
+
+    it("Should withdraw 1 Ticket from WETH Pod and get back ETH", async function() {
+        const amount = ethers.utils.parseEther("1")
+
+        const podContract = new ethers.Contract(podAddress, podABI, ethers.provider);
+        let maxFee = await podContract.callStatic["getEarlyExitFee"](amount);
+        expect(maxFee, "Exit Fee equal to 0 DAI because token still in float").to.be.eq(0);
+        // maxFee depends on if token has been deposited to PrizePool yet
+
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "withdrawFromPod",
+                args: [podAddress, amount, maxFee, 0, 0]
+            }
+        ]
+
+        // Before Deposit Spell
+        let podBalanceBefore = await podContract.balanceOfUnderlying(dsaWallet0.address)
+        expect(podBalanceBefore, `Pod balance equal to 1`).to.be.eq(ethers.utils.parseEther("1"));
+
+        let ethBalanceBefore = await ethers.provider.getBalance(dsaWallet0.address);
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After Deposit spell
+        let ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
+        expect(ethBalanceAfter, `ETH balance greater than before`).to.be.gt(ethBalanceBefore);
+
+        podBalanceAfter = await podContract.balanceOfUnderlying(dsaWallet0.address)
+        expect(podBalanceAfter, `Pod balance equal to 0`).to.be.eq(ethers.utils.parseEther("0"));
+    });
+  });
 })

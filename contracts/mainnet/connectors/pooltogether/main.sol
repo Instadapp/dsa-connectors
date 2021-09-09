@@ -10,6 +10,7 @@ pragma solidity ^0.7.0;
  import { PrizePoolInterface, TokenFaucetInterface, TokenFaucetProxyFactoryInterface, PodInterface } from "./interface.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
+import { Stores } from "../../common/stores.sol";
 import { Events } from "./events.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
@@ -39,10 +40,18 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
         address prizePoolToken = prizePoolContract.token();
 
-        // Approve prizePool
+        bool isEth = prizePoolToken == wethAddr;
         TokenInterface tokenContract = TokenInterface(prizePoolToken);
-        _amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
-        tokenContract.approve(prizePool, _amount);
+
+        if (isEth) {
+            _amount = _amount == uint256(-1) ? address(this).balance : _amount;
+            convertEthToWeth(isEth, tokenContract, _amount);
+        } else {
+            _amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
+        }
+
+        // Approve prizePool
+        approve(tokenContract, prizePool, _amount);
 
         prizePoolContract.depositTo(address(this), _amount, controlledToken, address(0));
 
@@ -74,16 +83,22 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         uint _amount = getUint(getId, amount);
 
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
+        address prizePoolToken = prizePoolContract.token();
+        TokenInterface tokenContract = TokenInterface(prizePoolToken);
 
         TokenInterface ticketToken = TokenInterface(controlledToken);
         _amount = _amount == uint256(-1) ? ticketToken.balanceOf(address(this)) : _amount;
 
-        prizePoolContract.withdrawInstantlyFrom(address(this), _amount, controlledToken, maximumExitFee);
+        uint exitFee = prizePoolContract.withdrawInstantlyFrom(address(this), _amount, controlledToken, maximumExitFee);
+
+        _amount = _amount - exitFee;
+
+        convertWethToEth(prizePoolToken == wethAddr, tokenContract, _amount);
 
         setUint(setId, _amount);
 
-        _eventName = "LogWithdrawInstantlyFrom(address,address,uint256,address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(prizePool), address(this), _amount, address(controlledToken), maximumExitFee, getId, setId);
+        _eventName = "LogWithdrawInstantlyFrom(address,address,uint256,address,uint256,uint256,uint256,uint256)";
+        _eventParam = abi.encode(address(prizePool), address(this), _amount, address(controlledToken), maximumExitFee, exitFee, getId, setId);
     }
 
     /**
@@ -144,10 +159,17 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
         PodInterface podContract = PodInterface(pod);
 
+        bool isEth = prizePoolToken == wethAddr;
+
         // Approve pod
         TokenInterface tokenContract = TokenInterface(prizePoolToken);
-        _tokenAmount = _tokenAmount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _tokenAmount;
-        tokenContract.approve(pod, _tokenAmount);
+       if (isEth) {
+            _tokenAmount = _tokenAmount == uint256(-1) ? address(this).balance : _tokenAmount;
+            convertEthToWeth(isEth, tokenContract, _tokenAmount);
+        } else {
+            _tokenAmount = _tokenAmount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _tokenAmount;
+        }
+        approve(tokenContract, pod, _tokenAmount);
 
         uint256 _podShare = podContract.depositTo(address(this), _tokenAmount);
 
@@ -181,6 +203,8 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
         _shareAmount = _shareAmount == uint256(-1) ? podContract.balanceOf(address(this)) : _shareAmount;
 
         uint256 _tokenAmount = podContract.withdraw(_shareAmount, maxFee);
+
+        convertWethToEth(address(podContract.token()) == wethAddr, TokenInterface(podContract.token()), _tokenAmount);
 
         setUint(setId, _tokenAmount);
 
