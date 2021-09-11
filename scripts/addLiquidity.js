@@ -50,6 +50,15 @@ const tokenMapping = {
       await mineTx(contract.mint(address, amt));
     },
   },
+  inst: {
+    impersonateSigner: "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
+    address: "0x6f40d4a6237c257fff2db00fa0510deeecd303eb",
+    abi: ["function transfer(address to, uint value)"],
+    process: async function(owner, address, amt) {
+      const contract = new ethers.Contract(this.address, this.abi, owner);
+      await mineTx(contract.transfer(address, amt));
+    },
+  }
 };
 
 module.exports = async (tokenName, address, amt) => {
