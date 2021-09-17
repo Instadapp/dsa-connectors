@@ -11,6 +11,7 @@ const { utils } = require("ethers");
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
 if (!process.env.ALCHEMY_ID) {
   throw new Error("ENV Variable ALCHEMY_ID not set!");
@@ -54,6 +55,11 @@ module.exports = {
       timeout: 150000,
       gasPrice: parseInt(utils.parseUnits("30", "gwei")),
     },
+    rinkeby: {
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+      timeout: 150000,
+    },
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
@@ -70,7 +76,7 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: ETHERSCAN_API_KEY,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT,

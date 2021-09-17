@@ -7,6 +7,7 @@
     "test": "hardhat test",
     "coverage": "./node_modules/.bin/solidity-coverage",
     "check-husky": "node status-checks/huskyCheck.js",
+    "deploy": "node scripts/deployConnectorsFromCmd.js",
     "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
   },
   "repository": {
