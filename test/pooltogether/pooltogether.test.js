@@ -33,6 +33,7 @@ const PT_UNISWAP_POOLETHLP_TICKET_ADDR = "0xeb8928ee92efb06c44d072a24c2bcb993b61
 const POOL_PRIZE_POOL_ADDR = "0x396b4489da692788e327e2e4b2b0459a5ef26791"   // POOL Prize Pool
 const PT_POOL_TICKET_ADDR = "0x27d22a7648e955e510a40bdb058333e9190d12d4"   // Pool Together POOL Ticket
 const WETH_ADDR = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"  // WETH 
+const DAI_POD_TOKEN_DROP = "0xc5209623E3dFdf9C0cCbe497c8012883C4147731"
 
 // Community WETH Prize Pool (Rari): https://reference-app.pooltogether.com/pools/mainnet/0xa88ca010b32a54d446fc38091ddbca55750cbfc3/manage#stats
 const WETH_PRIZE_POOL_ADDR = "0xa88ca010b32a54d446fc38091ddbca55750cbfc3"   // Community WETH Prize Pool (Rari)
@@ -44,12 +45,18 @@ const prizePoolABI = [
 
 const podABI = [
     "function getEarlyExitFee(uint256 amount) external returns (uint256)",
-    "function balanceOfUnderlying(address user) external view returns (uint256 amount)"
+    "function balanceOfUnderlying(address user) external view returns (uint256 amount)",
+    "function drop() public returns (uint256)",
+    "function balanceOf(address account) external view returns (uint256)"
 ]
 
 const POD_FACTORY_ADDRESS = "0x4e3a9f9fbafb2ec49727cffa2a411f7a0c1c4ce1"
 const podFactoryABI = [
     "function create( address _prizePool, address _ticket, address _faucet, address _manager, uint8 _decimals) external returns (address pod)"
+]
+
+const tokenDropABI = [
+    "function claim(address user) external returns (uint256)",
 ]
 
 describe("PoolTogether", function () {
@@ -386,13 +393,50 @@ describe("PoolTogether", function () {
         expect(podBalanceAfter, `Pod DAI token greater than 0`).to.be.eq(ethers.utils.parseEther("99"));
     });
 
+    it("Should claim rewards from pod token drop", async function() {
+        const spells = [
+            {
+                connector: ptConnectorName,
+                method: "claimPodTokenDrop",
+                args: [DAI_POD_TOKEN_DROP, 0]
+            }
+        ]
+
+        const tokenDropContract = new ethers.Contract(DAI_POD_TOKEN_DROP, tokenDropABI, ethers.provider);
+        const podContract = new ethers.Contract(DAI_POD_ADDR, podABI, masterSigner);
+
+        // drop(): Claim TokenDrop asset for PrizePool Pod and transfers token(s) to external Pod TokenDrop
+        // dropt() also calls batch which, Deposit Pod float into PrizePool. Deposits the current float 
+        // amount into the PrizePool and claims current POOL rewards.
+        const dropTx = await podContract.drop();
+        await dropTx.wait();
+
+        // POOL Rewards able to claim from Pod Token Drop
+        let claimAmount = await tokenDropContract.callStatic["claim"](dsaWallet0.address);
+
+        // Before spell
+        let poolToken = await ethers.getContractAt(abis.basic.erc20, POOL_TOKEN_ADDRESS)
+        const poolBalance = await poolToken.balanceOf(dsaWallet0.address)
+        expect(poolBalance, `POOL Token greater than 0`).to.be.gt(0);
+
+        // Run spell transaction
+        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+        const receipt = await tx.wait()
+
+        // After spell
+        const poolBalanceAfter = await poolToken.balanceOf(dsaWallet0.address)
+        const total = claimAmount.add(poolBalance);
+        expect(poolBalanceAfter, `POOL Token same as before spell`).to.be.eq(total);
+    });
+
     it("Should wait 11 days, withdraw all podTokens, get back 99 DAI", async function () {
         const amount = ethers.utils.parseEther("99") // 99 DAI
 
         const podContract = new ethers.Contract(DAI_POD_ADDR, podABI, ethers.provider);
         let maxFee = await podContract.callStatic["getEarlyExitFee"](amount);
-        expect(maxFee, "Exit Fee equal to 0 DAI because token still in float").to.be.eq(0);
         // maxFee depends on if token has been deposited to PrizePool yet
+        // since we called drop in previous test case, the tokens were deposited to PrizePool
+        expect(maxFee, "Exit Fee equal to .99 DAI because token still in float").to.be.eq(ethers.utils.parseEther(".99"));
 
         const spells = [
             {
@@ -417,6 +461,7 @@ describe("PoolTogether", function () {
 
         // Increase time by 11 days so we get back all DAI without early withdrawal fee
         await ethers.provider.send("evm_increaseTime", [11*24*60*60]);
+        await ethers.provider.send("evm_mine");
 
         // Run spell transaction
         const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
@@ -434,6 +479,9 @@ describe("PoolTogether", function () {
         const podBalanceAfter = await podToken.balanceOf(dsaWallet0.address)
         expect(podBalanceAfter, `Pod DAI Token equals 0`).to.be.eq(0);
     });
+
+
+
 
     it("Should deposit and withdraw from pod, get back same amount of 99 DAI", async function() {
         const amount = ethers.utils.parseEther("99")

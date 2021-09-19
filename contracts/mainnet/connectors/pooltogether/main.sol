@@ -7,7 +7,7 @@ pragma solidity ^0.7.0;
 
  import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
  import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
- import { PrizePoolInterface, TokenFaucetInterface, TokenFaucetProxyFactoryInterface, PodInterface } from "./interface.sol";
+ import { PrizePoolInterface, TokenFaucetInterface, TokenFaucetProxyFactoryInterface, PodInterface, PodTokenDropInterface } from "./interface.sol";
 
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
@@ -137,6 +137,26 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
         _eventName = "LogClaimAll(address,address,TokenFaucetInterface[])";
         _eventParam = abi.encode(address(tokenFaucetProxyFactory), address(this), tokenFaucets);
+    }
+
+    /**
+     * @dev Claim asset rewards from a Pod TokenDrop
+     * @notice Claim asset rewards from a TokenDrop
+     * @param podTokenDrop Pod TokenDrop address
+     * @param setId Set claimed amount at this ID in `InstaMemory` Contract.
+    */
+    function claimPodTokenDrop (
+        address podTokenDrop,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        PodTokenDropInterface podTokenDropContract = PodTokenDropInterface(podTokenDrop);
+
+        uint256 claimed = podTokenDropContract.claim(address(this));
+
+        setUint(setId, claimed);
+
+        _eventName = "LogClaimPodTokenDrop(address,address,uint256,uint256)";
+        _eventParam = abi.encode(address(podTokenDrop), address(this), claimed, setId);
     }
 
     /**
