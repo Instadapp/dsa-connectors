@@ -40,6 +40,6 @@ abstract contract AuthorityResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2Auth is AuthorityResolver {
+contract ConnectV2AuthArbitrum is AuthorityResolver {
     string public constant name = "Auth-v1";
 }

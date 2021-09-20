@@ -88,6 +88,6 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     }
 }
 
-contract ConnectV2BasicERC1155 is BasicResolver {
+contract ConnectV2BasicERC1155Arbitrum is BasicResolver {
     string public constant name = "BASIC-ERC1155-v1.0";
 }

@@ -31,7 +31,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        if (token != maticAddr) {
+        if (token != ethAddr) {
             IERC20 tokenContract = IERC20(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(msg.sender) : _amt;
             tokenContract.safeTransferFrom(msg.sender, address(this), _amt);
@@ -62,7 +62,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         uint setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        if (token == maticAddr) {
+        if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             to.call{value: _amt}("");
         } else {
@@ -77,6 +77,6 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     }
 }
 
-contract ConnectV2Basic is BasicResolver {
+contract ConnectV2BasicArbitrum is BasicResolver {
     string constant public name = "Basic-v1";
 }
