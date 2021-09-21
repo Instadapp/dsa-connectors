@@ -3,6 +3,8 @@ pragma solidity ^0.7.0;
 contract Events {
     event LogDeposit(uint256 tokenId);
 
+    event LogDepositAndStake(uint256 tokenId, bytes32 incentiveId);
+
     event LogWithdraw(uint256 indexed tokenId);
 
     event LogDepositTransfer(uint256 indexed tokenId, address to);

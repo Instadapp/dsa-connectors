@@ -35,6 +35,51 @@ abstract contract UniswapResolver is Helpers, Events {
     }
 
     /**
+     * @dev Deposit and Stake NFT token
+     * @notice To Deposit and Stake NFT for Staking
+     * @param _rewardToken _rewardToken address
+     * @param _startTime stake start time
+     * @param _endTime stake end time
+     * @param _refundee refundee address
+     * @param _tokenId NFT LP token id
+     */
+    function depositAndStake (
+        address _rewardToken,
+        uint256 _startTime,
+        uint256 _endTime,
+        address _refundee,
+        uint256 _tokenId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
+        nftManager.safeTransferFrom(
+            address(this),
+            address(staker),
+            _tokenId,
+            ""
+        );
+
+        address poolAddr = getPoolAddress(_tokenId);
+
+        IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
+        IUniswapV3Staker.IncentiveKey memory _key = IUniswapV3Staker
+            .IncentiveKey(
+                IERC20Minimal(_rewardToken),
+                pool,
+                _startTime,
+                _endTime,
+                _refundee
+            );
+        _stake(_tokenId, _key);
+
+        _eventName = "LogDepositAndStake(uint256,bytes32)";
+        _eventParam = abi.encode(_tokenId, keccak256(abi.encode(_key)));
+    }
+
+    /**
      * @dev Deposit Transfer
      * @notice Transfer deposited NFT token
      * @param _tokenId NFT LP Token ID
@@ -45,7 +90,6 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         staker.transferDeposit(_tokenId, _to);
 
         _eventName = "LogDepositTransfer(uint256,address)";
@@ -62,7 +106,6 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         staker.withdrawToken(_tokenId, address(this), "");
 
         _eventName = "LogWithdraw(uint256)";
@@ -78,7 +121,7 @@ abstract contract UniswapResolver is Helpers, Events {
      * @param _refundee refundee address
      * @param _tokenId NFT LP token id
      */
-    function stake(
+    function stake (
         address _rewardToken,
         uint256 _startTime,
         uint256 _endTime,
@@ -89,7 +132,6 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         address poolAddr = getPoolAddress(_tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
@@ -127,7 +169,6 @@ abstract contract UniswapResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        if (_tokenId == 0) _tokenId = _getLastNftId(address(this));
         address poolAddr = getPoolAddress(_tokenId);
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddr);
@@ -210,5 +251,5 @@ abstract contract UniswapResolver is Helpers, Events {
 }
 
 contract ConnectV2UniswapV3Staker is UniswapResolver {
-    string public constant name = "Uniswap-V3-Staker-v1";
+    string public constant name = "Uniswap-V3-Staker-v1.1";
 }
