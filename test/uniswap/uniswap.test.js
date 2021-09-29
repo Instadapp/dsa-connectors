@@ -51,6 +51,17 @@ describe("UniswapV3", function () {
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
     before(async () => {
+        await hre.network.provider.request({
+            method: "hardhat_reset",
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                        blockNumber: 13005785,
+                    },
+                },
+            ],
+        });
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         nftManager = await ethers.getContractAt(nftManagerAbi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
@@ -184,7 +195,7 @@ describe("UniswapV3", function () {
             const data = await nftManager.positions(tokenIds[0])
 
             expect(data.liquidity).to.be.equals(liquidities[0]);
-        })
+        }).timeout(10000000000);
 
         it("Should deposit successfully", async function () {
             const daiAmount = ethers.utils.parseEther("400") // 1 ETH

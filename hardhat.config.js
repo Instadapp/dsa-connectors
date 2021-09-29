@@ -27,7 +27,7 @@ module.exports = {
         version: "0.7.6",
         settings: {
           optimizer: {
-            enabled: false,
+            enabled: true,
             runs: 200,
           },
         },
@@ -63,10 +63,9 @@ module.exports = {
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-        blockNumber: 12796965,
+        blockNumber: 12696000,
       },
       blockGasLimit: 12000000,
-      gasPrice: parseInt(utils.parseUnits("300", "gwei"))
     },
     matic: {
       url: "https://rpc-mainnet.maticvigil.com/",
