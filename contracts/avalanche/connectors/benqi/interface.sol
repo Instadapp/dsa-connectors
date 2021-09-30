@@ -27,7 +27,7 @@ interface ComptrollerInterface {
     function exitMarket(address qiTokenAddress) external returns (uint);
     function getAssetsIn(address account) external view returns (address[] memory);
     function getAccountLiquidity(address account) external view returns (uint, uint, uint);
-    function claimReward(address) external;
+    function claimReward(uint8 rewardType, address) external;
 }
 
 interface BenqiMappingInterface {

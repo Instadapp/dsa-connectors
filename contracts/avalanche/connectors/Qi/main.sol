@@ -13,14 +13,14 @@ import { Events } from "./events.sol";
 abstract contract BenqiResolver is Events, Helpers {
 
     /**
-     * @dev Claim Accrued Reward Token.
-     * @notice Claim Accrued Reward Token.
+     * @dev Claim Accrued Qi Token.
+     * @notice Claim Accrued Qi Token.
      * @param setId ID stores the amount of Reward claimed.
     */
     function ClaimReward(uint256 setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         TokenInterface _benqiToken = TokenInterface(address(benqiToken));
         uint intialBal = _benqiToken.balanceOf(address(this));
-        troller.claimReward(address(this));
+        troller.claimReward(rewardQi, address(this));
         uint finalBal = _benqiToken.balanceOf(address(this));
         uint amt = sub(finalBal, intialBal);
 
@@ -31,8 +31,8 @@ abstract contract BenqiResolver is Events, Helpers {
     }
 
     /**
-     * @dev Claim Accrued Reward Token.
-     * @notice Claim Accrued Reward Token.
+     * @dev Claim Accrued Qi Token.
+     * @notice Claim Accrued Qi Token.
      * @param tokenIds Array of supplied and borrowed token IDs.
      * @param setId ID stores the amount of Reward claimed.
     */
@@ -48,7 +48,7 @@ abstract contract BenqiResolver is Events, Helpers {
 
         TokenInterface _benqiToken = TokenInterface(address(benqiToken));
         uint intialBal = _benqiToken.balanceOf(address(this));
-        troller.claimReward(address(this), qitokens);
+        troller.claimReward(rewardQi, address(this), qitokens);
         uint finalBal = _benqiToken.balanceOf(address(this));
         uint amt = sub(finalBal, intialBal);
 
@@ -59,8 +59,8 @@ abstract contract BenqiResolver is Events, Helpers {
     }
 
     /**
-     * @dev Claim Accrued Reward Token.
-     * @notice Claim Accrued Reward Token.
+     * @dev Claim Accrued Qi Token.
+     * @notice Claim Accrued Qi Token.
      * @param supplyTokenIds Array of supplied tokenIds.
      * @param borrowTokenIds Array of borrowed tokenIds.
      * @param setId ID stores the amount of Reward claimed.
@@ -73,7 +73,7 @@ abstract contract BenqiResolver is Events, Helpers {
 
         TokenInterface _benqiToken = TokenInterface(address(benqiToken));
         uint intialBal = _benqiToken.balanceOf(address(this));
-        troller.claimReward(holders, qitokens, isBorrow, isSupply);
+        troller.claimReward(rewardQi, holders, qitokens, isBorrow, isSupply);
         uint finalBal = _benqiToken.balanceOf(address(this));
         uint amt = sub(finalBal, intialBal);
 
@@ -98,6 +98,6 @@ abstract contract BenqiResolver is Events, Helpers {
     }
 }
 
-contract ConnectBenqi is BenqiResolver {
-    string public constant name = "Benqi-v1.0";
+contract ConnectV2Benqi is BenqiResolver {
+    string public constant name = "Benqi-v1";
 }

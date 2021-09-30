@@ -1,9 +1,9 @@
 pragma solidity ^0.7.0;
 
 interface ComptrollerInterface {
-    function claimReward(address holder) external;
-    function claimReward(address holder, address[] calldata) external;
-    function claimReward(address[] calldata holders, address[] calldata qiTokens, bool borrowers, bool suppliers) external;
+    function claimReward(uint8 rewardType, address holder) external;
+    function claimReward(uint8 rewardType, address holder, address[] calldata) external;
+    function claimReward(uint8 rewardType, address[] calldata holders, address[] calldata qiTokens, bool borrowers, bool suppliers) external;
 }
 
 interface QiInterface {

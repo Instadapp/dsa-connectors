@@ -9,17 +9,23 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Benqi Comptroller
      */
-    ComptrollerInterface internal constant troller = ComptrollerInterface(0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B);
+    ComptrollerInterface internal constant troller = ComptrollerInterface(0x486Af39519B4Dc9a7fCcd318217352830E8AD9b4);
 
     /**
      * @dev Reward Token
      */
-    QiInterface internal constant benqiToken = QiInterface(0xc00e94Cb662C3520282E6f5717214004A7f26888);
+    QiInterface internal constant benqiToken = QiInterface(0x8729438EB15e2C8B576fCc6AeCdA6A148776C0F5);
 
     /**
      * @dev Benqi Mapping
      */
     BenqiMappingInterface internal constant qiMapping = BenqiMappingInterface(0xe7a85d0adDB972A4f0A4e57B698B37f171519e88);
+
+    /**
+     * @dev Benqi reward token type to show BENQI or AVAX
+     */
+    uint8 internal constant rewardQi = 0;
+    uint8 internal constant rewardAvax = 1;
 
     function getMergedQiTokens(
         string[] calldata supplyIds,
