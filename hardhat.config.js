@@ -74,6 +74,13 @@ module.exports = {
       timeout: 150000,
       gasPrice: parseInt(utils.parseUnits("2", "gwei")),
     },
+    fantom: {
+      chainId: 250,
+      url: `https://rpc.ftm.tools/`,
+      accounts: [`0x${PRIVATE_KEY}`],
+      timeout: 150000,
+      gasPrice: parseInt(utils.parseUnits("250", "gwei"))
+    }
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
