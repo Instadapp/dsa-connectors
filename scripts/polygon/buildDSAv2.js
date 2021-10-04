@@ -1,9 +1,9 @@
 const hre = require("hardhat");
 const { ethers } = hre;
 const addresses = require("./constant/addresses");
-const abis = require("./constant/abis");
+const abis = require("../constant/abis");
 
-const instaImplementations_m1 = require("../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json")
+const instaImplementations_m1 = require("../../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json")
 
 module.exports = async function (owner) {
     const instaIndex = await ethers.getContractAt(abis.core.instaIndex, addresses.core.instaIndex)

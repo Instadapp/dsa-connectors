@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 const { ethers } = hre;
 const addresses = require("./constant/addresses");
-const abis = require("./constant/abis");
+const abis = require("../constant/abis");
 
 module.exports = async function() {
   const [_, __, ___, wallet3] = await ethers.getSigners();

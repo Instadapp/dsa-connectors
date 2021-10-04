@@ -1,4 +1,4 @@
-const abis = require("./constant/abis");
+const abis = require("../constant/abis");
 const addresses = require("./constant/addresses");
 
 const hre = require("hardhat");
