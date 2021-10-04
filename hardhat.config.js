@@ -74,6 +74,13 @@ module.exports = {
       timeout: 150000,
       gasPrice: parseInt(utils.parseUnits("2", "gwei")),
     },
+    avax: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      chainId: 43114,
+      accounts: [`0x${PRIVATE_KEY}`],
+      timeout: 150000,
+      gasPrice: parseInt(utils.parseUnits("225", "gwei"))
+    }
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
