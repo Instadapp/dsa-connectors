@@ -140,6 +140,6 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
     }
 }
 
-contract ConnectV2PoolTogether is PoolTogetherResolver {
+contract ConnectV2PoolTogetherPolygon is PoolTogetherResolver {
     string public constant name = "PoolTogether-v1";
 }
