@@ -43,7 +43,6 @@ module.exports = {
     ],
   },
   networks: {
-    // defaultNetwork: "hardhat",
     kovan: {
       url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
@@ -57,9 +56,10 @@ module.exports = {
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-        blockNumber: 12696000,
+        blockNumber: 12796965,
       },
       blockGasLimit: 12000000,
+      gasPrice: parseInt(utils.parseUnits("300", "gwei"))
     },
     matic: {
       url: "https://rpc-mainnet.maticvigil.com/",
@@ -67,6 +67,20 @@ module.exports = {
       timeout: 150000,
       gasPrice: parseInt(utils.parseUnits("1", "gwei")),
     },
+    arbitrum: {
+      chainId: 42161,
+      url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
+      accounts: [`0x${PRIVATE_KEY}`],
+      timeout: 150000,
+      gasPrice: parseInt(utils.parseUnits("2", "gwei")),
+    },
+    avax: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      chainId: 43114,
+      accounts: [`0x${PRIVATE_KEY}`],
+      timeout: 150000,
+      gasPrice: parseInt(utils.parseUnits("225", "gwei"))
+    }
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
