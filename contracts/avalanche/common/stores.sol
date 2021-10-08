@@ -1,6 +1,6 @@
 pragma solidity ^0.7.0;
 
-import { MemoryInterface, InstaMapping } from "./interfaces.sol";
+import { MemoryInterface } from "./interfaces.sol";
 
 
 abstract contract Stores {
@@ -18,12 +18,7 @@ abstract contract Stores {
   /**
    * @dev Return memory variable address
    */
-  MemoryInterface constant internal instaMemory = MemoryInterface(0x8a5419CfC711B2343c17a6ABf4B2bAFaBb06957F);
-
-  /**
-   * @dev Return InstaDApp Mapping Addresses
-   */
-  InstaMapping constant internal instaMapping = InstaMapping(0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88);
+  MemoryInterface constant internal instaMemory = MemoryInterface(0x3254Ce8f5b1c82431B8f21Df01918342215825C2);
 
   /**
    * @dev Get Uint value from InstaMemory Contract.

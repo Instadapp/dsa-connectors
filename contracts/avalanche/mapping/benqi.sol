@@ -14,6 +14,10 @@ interface QiTokenInterface {
     function underlying() external view returns (address);
 }
 
+interface MappingControllerInterface {
+    function hasRole(address,address) external view returns (bool);
+}
+
 abstract contract Helpers {
 
     struct TokenMap {
@@ -24,10 +28,13 @@ abstract contract Helpers {
     event LogQiTokenAdded(string indexed name, address indexed token, address indexed qitoken);
     event LogQiTokenUpdated(string indexed name, address indexed token, address indexed qitoken);
 
-    ConnectorsInterface public immutable connectors;
-
+    // InstaConnectorsV2
+    ConnectorsInterface public constant connectors = ConnectorsInterface(0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14);
     // InstaIndex Address.
-    IndexInterface public constant instaIndex = IndexInterface(0x2971AdFa57b20E5a416aE5a708A8655A9c74f723);
+    IndexInterface public constant instaIndex = IndexInterface(0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25);
+
+    // InstaMappingController Address.
+    MappingControllerInterface public constant mappingController = MappingControllerInterface(0xF2113d0c99f36D7D6F6c6FAf05E0863892255999);
 
     address public constant avaxAddr = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -38,8 +45,14 @@ abstract contract Helpers {
         _;
     }
 
-    constructor(address _connectors) {
-        connectors = ConnectorsInterface(_connectors);
+    modifier hasRoleOrIsChief {
+        require(
+            msg.sender == instaIndex.master() ||
+                connectors.chief(msg.sender) ||
+                mappingController.hasRole(address(this), msg.sender),
+            "not-an-chief/controller"
+        );
+        _;
     }
 
     function _addQitokenMapping(
@@ -78,8 +91,7 @@ abstract contract Helpers {
         string[] calldata _names,
         address[] memory _tokens,
         address[] calldata _qitokens
-    ) external {
-        require(msg.sender == instaIndex.master(), "not-master");
+    ) external isChief {
 
         require(_names.length == _tokens.length, "updateQitokenMapping: not same length");
         require(_names.length == _qitokens.length, "updateQitokenMapping: not same length");
@@ -112,7 +124,7 @@ abstract contract Helpers {
         string[] memory _names,
         address[] memory _tokens,
         address[] memory _qitokens
-    ) external isChief {
+    ) external hasRoleOrIsChief {
         _addQitokenMapping(_names, _tokens, _qitokens);
     }
 
@@ -123,15 +135,14 @@ abstract contract Helpers {
 
 }
 
-contract InstaBenqiMapping is Helpers {
+contract InstaBenqiMappingAvalanche is Helpers {
     string constant public name = "Benqi-Mapping-v1.0";
 
     constructor(
-        address _connectors,
         string[] memory _qitokenNames,
         address[] memory _tokens,
         address[] memory _qitokens
-    ) Helpers(_connectors) {
+    ) {
         _addQitokenMapping(_qitokenNames, _tokens, _qitokens);
     }
 }

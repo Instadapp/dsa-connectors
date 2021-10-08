@@ -15,11 +15,6 @@ interface MemoryInterface {
     function setUint(uint id, uint val) external;
 }
 
-interface InstaMapping {
-    function qiTokenMapping(address) external view returns (address);
-    function gemJoinMapping(bytes32) external view returns (address);
-}
-
 interface AccountInterface {
     function enable(address) external;
     function disable(address) external;
