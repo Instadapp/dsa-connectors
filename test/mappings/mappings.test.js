@@ -20,6 +20,17 @@ describe("Test InstaMapping contract", () => {
   const testRoleAddress = "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723";
 
   before("get signers", async () => {
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 12796965,
+          },
+        },
+      ],
+    });
     [account] = await ethers.getSigners();
 
     const IndexContract = await ethers.getContractAt(
@@ -32,6 +43,11 @@ describe("Test InstaMapping contract", () => {
       method: "hardhat_impersonateAccount",
       params: [masterAddress],
     });
+
+    await network.provider.send("hardhat_setBalance", [
+      masterAddress,
+      "0x1000000000000000000000000",
+    ]);
 
     instaMaster = await ethers.getSigner(masterAddress);
   });

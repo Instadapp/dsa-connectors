@@ -8,6 +8,7 @@
     "coverage": "./node_modules/.bin/solidity-coverage",
     "check": "node status-checks/huskyCheck.js",
     "check-husky": "node status-checks/huskyCheck.js",
+    "deploy": "node scripts/deployConnectorsFromCmd.js",
     "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
   },
   "repository": {

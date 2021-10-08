@@ -13,23 +13,34 @@ const abis = require("../../scripts/constant/abis");
 const constants = require("../../scripts/constant/constant");
 const tokens = require("../../scripts/constant/tokens");
 
-const connectorMakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/main.sol/ConnectV1BMakerDAO.json")
+const connectorMakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/main.sol/ConnectV2BMakerDAO.json")
 
 describe("B.Maker", function () {
     const connectorName = "B.MAKER-TEST-A"
-    
+
     let dsaWallet0;
-    let dsaWallet1;   
+    let dsaWallet1;
     let masterSigner;
     let instaConnectorsV2;
     let connector;
     let manager;
     let vat;
     let dai;
-    
+
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
     before(async () => {
+        await hre.network.provider.request({
+            method: "hardhat_reset",
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                        blockNumber: 12696000,
+                    },
+                },
+            ],
+        });
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({
@@ -44,263 +55,263 @@ describe("B.Maker", function () {
         dai = await ethers.getContractAt("../artifacts/contracts/mainnet/common/interfaces.sol:TokenInterface", tokens.dai.address)
 
         console.log("Connector address", connector.address)
-  })
+    })
 
-  it("test veryClose.", async function () {
-    expect(veryClose(1000001, 1000000)).to.be.true
-    expect(veryClose(1000000, 1000001)).to.be.true    
-    expect(veryClose(1003000, 1000001)).to.be.false
-    expect(veryClose(1000001, 1000300)).to.be.false        
-  });
-
-  it("Should have contracts deployed.", async function () {
-    expect(!!instaConnectorsV2.address).to.be.true;
-    expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
-    expect(await connector.name()).to.be.equal("B.MakerDAO-v1.0");
-  });
-
-  describe("DSA wallet setup", function () {
-    it("Should build DSA v2", async function () {
-        dsaWallet0 = await buildDSAv2(wallet0.address)
-        expect(!!dsaWallet0.address).to.be.true;
-
-        dsaWallet1 = await buildDSAv2(wallet1.address)
-        expect(!!dsaWallet1.address).to.be.true;        
+    it("test veryClose.", async function () {
+        expect(veryClose(1000001, 1000000)).to.be.true
+        expect(veryClose(1000000, 1000001)).to.be.true
+        expect(veryClose(1003000, 1000001)).to.be.false
+        expect(veryClose(1000001, 1000300)).to.be.false
     });
 
-    it("Deposit ETH into DSA wallet", async function () {
-        await wallet0.sendTransaction({
-            to: dsaWallet0.address,
-            value: ethers.utils.parseEther("10")
+    it("Should have contracts deployed.", async function () {
+        expect(!!instaConnectorsV2.address).to.be.true;
+        expect(!!connector.address).to.be.true;
+        expect(!!masterSigner.address).to.be.true;
+        expect(await connector.name()).to.be.equal("B.MakerDAO-v1.0");
+    });
+
+    describe("DSA wallet setup", function () {
+        it("Should build DSA v2", async function () {
+            dsaWallet0 = await buildDSAv2(wallet0.address)
+            expect(!!dsaWallet0.address).to.be.true;
+
+            dsaWallet1 = await buildDSAv2(wallet1.address)
+            expect(!!dsaWallet1.address).to.be.true;
         });
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
 
-        await wallet1.sendTransaction({
-            to: dsaWallet1.address,
-            value: ethers.utils.parseEther("10")
+        it("Deposit ETH into DSA wallet", async function () {
+            await wallet0.sendTransaction({
+                to: dsaWallet0.address,
+                value: ethers.utils.parseEther("10")
+            });
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+
+            await wallet1.sendTransaction({
+                to: dsaWallet1.address,
+                value: ethers.utils.parseEther("10")
+            });
+            expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("10"));
         });
-        expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("10"));        
-    });
-  });
-
-  describe("Main", function () {
-    let vault
-    let ilk
-    let urn
-
-    it("Should open ETH-A vault Maker", async function () {
-        vault = Number(await manager.cdpi()) + 1
-        const spells = [
-            {
-                connector: connectorName,
-                method: "open",
-                args: ["ETH-A"]
-            }
-        ]
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
-        
-        expect(await manager.owns(vault)).to.be.equal(dsaWallet0.address)
-
-        ilk = await manager.ilks(vault)
-        expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
-
-        urn = await manager.urns(vault)        
     });
 
-    it("Should deposit", async function () {
-        const amount = ethers.utils.parseEther("7") // 7 ETH
-        const setId = "83478237"
+    describe("Main", function () {
+        let vault
+        let ilk
+        let urn
 
-        const spells = [
-            {
-                connector: connectorName,
-                method: "deposit",
-                args: [vault, amount, 0, setId]
-            }
-        ]
+        it("Should open ETH-A vault Maker", async function () {
+            vault = Number(await manager.cdpi()) + 1
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "open",
+                    args: ["ETH-A"]
+                }
+            ]
 
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
 
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("3"))
+            expect(await manager.owns(vault)).to.be.equal(dsaWallet0.address)
 
-        const urnData = await vat.urns(ilk, urn)
-        expect(urnData[0]).to.be.equal(amount) // ink
-        expect(urnData[1]).to.be.equal("0") // art        
+            ilk = await manager.ilks(vault)
+            expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
 
-    });
+            urn = await manager.urns(vault)
+        });
 
-    it("Should withdraw", async function () {
-        const amount = ethers.utils.parseEther("1") // 1 ETH
-        const setId = "83478237"
+        it("Should deposit", async function () {
+            const amount = ethers.utils.parseEther("7") // 7 ETH
+            const setId = "83478237"
 
-        const spells = [
-            {
-                connector: connectorName,
-                method: "withdraw",
-                args: [vault, amount, 0, setId]
-            }
-        ]
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "deposit",
+                    args: [vault, amount, 0, setId]
+                }
+            ]
 
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
 
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("4"))
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("3"))
 
-        const urnData = await vat.urns(ilk, urn)
-        expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
-        expect(urnData[1]).to.be.equal("0") // art        
+            const urnData = await vat.urns(ilk, urn)
+            expect(urnData[0]).to.be.equal(amount) // ink
+            expect(urnData[1]).to.be.equal("0") // art        
 
-    });
+        });
 
-    it("Should borrow", async function () {
-        const amount = ethers.utils.parseEther("6000") // 6000 dai
-        const setId = "83478237"
+        it("Should withdraw", async function () {
+            const amount = ethers.utils.parseEther("1") // 1 ETH
+            const setId = "83478237"
 
-        const spells = [
-            {
-                connector: connectorName,
-                method: "borrow",
-                args: [vault, amount, 0, setId]
-            }
-        ]
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "withdraw",
+                    args: [vault, amount, 0, setId]
+                }
+            ]
 
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
 
-        const urnData = await vat.urns(ilk, urn)
-        expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
-        expect(urnData[1]).to.be.equal(await daiToArt(vat, ilk, amount)) // art
-        
-        expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(amount)
-    });
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("4"))
 
-    it("Should repay", async function () {
-        const amount = ethers.utils.parseEther("500") // 500 dai
-        const setId = "83478237"
+            const urnData = await vat.urns(ilk, urn)
+            expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
+            expect(urnData[1]).to.be.equal("0") // art        
 
-        const spells = [
-            {
-                connector: connectorName,
-                method: "payback",
-                args: [vault, amount, 0, setId]
-            }
-        ]
+        });
 
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
+        it("Should borrow", async function () {
+            const amount = ethers.utils.parseEther("6000") // 6000 dai
+            const setId = "83478237"
 
-        const urnData = await vat.urns(ilk, urn)
-        expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
-        expect(urnData[1]).to.be.equal(await daiToArt(vat, ilk, ethers.utils.parseEther("5500"))) // art        
-        expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("5500"))
-    });
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "borrow",
+                    args: [vault, amount, 0, setId]
+                }
+            ]
 
-    it("Should depositAndBorrow", async function () {
-        const borrowAmount = ethers.utils.parseEther("1000") // 1000 dai
-        const depositAmount = ethers.utils.parseEther("1") // 1 dai
-        
-        const setId = "83478237"
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
 
-        const spells = [
-            {
-                connector: connectorName,
-                method: "depositAndBorrow",
-                args: [vault, depositAmount, borrowAmount, 0, 0, 0, 0]
-            }
-        ]
+            const urnData = await vat.urns(ilk, urn)
+            expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
+            expect(urnData[1]).to.be.equal(await daiToArt(vat, ilk, amount)) // art
 
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-        const receipt = await tx.wait()
+            expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(amount)
+        });
 
-        const urnData = await vat.urns(ilk, urn)
-        expect(urnData[0]).to.be.equal(ethers.utils.parseEther("7")) // ink
-        expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("6500"))
-        // calculation is not precise as the jug was dripped
-        expect(veryClose(urnData[1], await daiToArt(vat, ilk, ethers.utils.parseEther("6500")))).to.be.true    
-        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1"))        
-    });
+        it("Should repay", async function () {
+            const amount = ethers.utils.parseEther("500") // 500 dai
+            const setId = "83478237"
 
-    it("Should close", async function () {
-        // open a new vault
-        const newVault = vault + 1
-        let spells = [
-            {
-                connector: connectorName,
-                method: "open",
-                args: ["ETH-A"]
-            }
-        ]
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "payback",
+                    args: [vault, amount, 0, setId]
+                }
+            ]
 
-        let tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
-        let receipt = await tx.wait()
-        
-        expect(await manager.owns(newVault)).to.be.equal(dsaWallet1.address)
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
 
-        ilk = await manager.ilks(newVault)
-        expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
+            const urnData = await vat.urns(ilk, urn)
+            expect(urnData[0]).to.be.equal(ethers.utils.parseEther("6")) // ink
+            expect(urnData[1]).to.be.equal(await daiToArt(vat, ilk, ethers.utils.parseEther("5500"))) // art        
+            expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("5500"))
+        });
 
-        urn = await manager.urns(newVault) 
+        it("Should depositAndBorrow", async function () {
+            const borrowAmount = ethers.utils.parseEther("1000") // 1000 dai
+            const depositAmount = ethers.utils.parseEther("1") // 1 dai
 
-        // deposit and borrow
-        const borrowAmount = ethers.utils.parseEther("6000") // 6000 dai
-        const depositAmount = ethers.utils.parseEther("5") // 5 ETH
-        
-        spells = [
-            {
-                connector: connectorName,
-                method: "depositAndBorrow",
-                args: [newVault, depositAmount, borrowAmount, 0, 0, 0, 0]
-            }
-        ]
+            const setId = "83478237"
 
-        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
-        receipt = await tx.wait()
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "depositAndBorrow",
+                    args: [vault, depositAmount, borrowAmount, 0, 0, 0, 0]
+                }
+            ]
 
-        const setId = 0
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
 
-        // repay borrow
-        spells = [
-            {
-                connector: connectorName,
-                method: "payback",
-                args: [newVault, borrowAmount, 0, setId]
-            }
-        ]
+            const urnData = await vat.urns(ilk, urn)
+            expect(urnData[0]).to.be.equal(ethers.utils.parseEther("7")) // ink
+            expect(await dai.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("6500"))
+            // calculation is not precise as the jug was dripped
+            expect(veryClose(urnData[1], await daiToArt(vat, ilk, ethers.utils.parseEther("6500")))).to.be.true
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1"))
+        });
 
-        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
-        receipt = await tx.wait()
+        it("Should close", async function () {
+            // open a new vault
+            const newVault = vault + 1
+            let spells = [
+                {
+                    connector: connectorName,
+                    method: "open",
+                    args: ["ETH-A"]
+                }
+            ]
 
-        // withdraw deposit
-        spells = [
-            {
-                connector: connectorName,
-                method: "withdraw",
-                args: [newVault, depositAmount, 0, setId]
-            }
-        ]
+            let tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+            let receipt = await tx.wait()
 
-        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
-        receipt = await tx.wait()
+            expect(await manager.owns(newVault)).to.be.equal(dsaWallet1.address)
 
-        // close
-        spells = [
-            {
-                connector: connectorName,
-                method: "close",
-                args: [newVault]
-            }
-        ]
+            ilk = await manager.ilks(newVault)
+            expect(ilk).to.be.equal("0x4554482d41000000000000000000000000000000000000000000000000000000")
 
-        tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
-        receipt = await tx.wait()
+            urn = await manager.urns(newVault)
 
-        expect(await manager.owns(newVault)).not.to.be.equal(dsaWallet1.address)        
-    });    
-  })
+            // deposit and borrow
+            const borrowAmount = ethers.utils.parseEther("6000") // 6000 dai
+            const depositAmount = ethers.utils.parseEther("5") // 5 ETH
+
+            spells = [
+                {
+                    connector: connectorName,
+                    method: "depositAndBorrow",
+                    args: [newVault, depositAmount, borrowAmount, 0, 0, 0, 0]
+                }
+            ]
+
+            tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+            receipt = await tx.wait()
+
+            const setId = 0
+
+            // repay borrow
+            spells = [
+                {
+                    connector: connectorName,
+                    method: "payback",
+                    args: [newVault, borrowAmount, 0, setId]
+                }
+            ]
+
+            tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+            receipt = await tx.wait()
+
+            // withdraw deposit
+            spells = [
+                {
+                    connector: connectorName,
+                    method: "withdraw",
+                    args: [newVault, depositAmount, 0, setId]
+                }
+            ]
+
+            tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+            receipt = await tx.wait()
+
+            // close
+            spells = [
+                {
+                    connector: connectorName,
+                    method: "close",
+                    args: [newVault]
+                }
+            ]
+
+            tx = await dsaWallet1.connect(wallet1).cast(...encodeSpells(spells), wallet1.address)
+            receipt = await tx.wait()
+
+            expect(await manager.owns(newVault)).not.to.be.equal(dsaWallet1.address)
+        });
+    })
 })
 
 async function daiToArt(vat, ilk, dai) {
@@ -317,10 +328,10 @@ function veryClose(n1, n2) {
     n2 = web3.utils.toBN(n2)
 
     _10000 = web3.utils.toBN(10000)
-    _9999 = web3.utils.toBN(9999)    
+    _9999 = web3.utils.toBN(9999)
 
-    if(n1.mul(_10000).lt(n2.mul(_9999))) return false
-    if(n2.mul(_10000).lt(n1.mul(_9999))) return false
+    if (n1.mul(_10000).lt(n2.mul(_9999))) return false
+    if (n2.mul(_10000).lt(n1.mul(_9999))) return false
 
     return true
 }

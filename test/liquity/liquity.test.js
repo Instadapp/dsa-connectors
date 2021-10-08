@@ -21,6 +21,17 @@ describe("Liquity", () => {
   let liquity = null;
 
   before(async () => {
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 13300000,
+          },
+        },
+      ],
+    });
     liquity = await helpers.deployAndConnect(contracts, true);
     expect(liquity.troveManager.address).to.exist;
     expect(liquity.borrowerOperations.address).to.exist;

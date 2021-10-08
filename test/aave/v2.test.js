@@ -23,6 +23,17 @@ describe("Aave V2", function() {
   let masterSigner;
 
   before(async () => {
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 12796965,
+          },
+        },
+      ],
+    });
     [wallet0, wallet1] = await ethers.getSigners();
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(

@@ -32,6 +32,17 @@ describe("Yearn", function () {
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
     before(async () => {
+        await hre.network.provider.request({
+            method: "hardhat_reset",
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                        blockNumber: 12996975,
+                    },
+                },
+            ],
+        });
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({

@@ -16,7 +16,7 @@ const constants = require("../../scripts/constant/constant");
 const tokens = require("../../scripts/constant/tokens");
 const { abi: nftManagerAbi } = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json")
 
-const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswapV3/main.sol/ConnectV2UniswapV3.json");
+const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json");
 const { eth } = require("../../scripts/constant/tokens");
 const { BigNumber } = require("ethers");
 
@@ -51,6 +51,17 @@ describe("UniswapV3", function () {
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
     before(async () => {
+        await hre.network.provider.request({
+            method: "hardhat_reset",
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                        blockNumber: 13005785,
+                    },
+                },
+            ],
+        });
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         nftManager = await ethers.getContractAt(nftManagerAbi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
@@ -112,13 +123,13 @@ describe("UniswapV3", function () {
                     connector: connectorName,
                     method: "mint",
                     args: [
-                        DAI_ADDR,
                         ethAddress,
+                        DAI_ADDR,
                         FeeAmount.MEDIUM,
                         getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
                         getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-                        daiAmount,
                         ethAmount,
+                        daiAmount,
                         "500000000000000000",
                         getIds,
                         setId
@@ -184,7 +195,7 @@ describe("UniswapV3", function () {
             const data = await nftManager.positions(tokenIds[0])
 
             expect(data.liquidity).to.be.equals(liquidities[0]);
-        })
+        }).timeout(10000000000);
 
         it("Should deposit successfully", async function () {
             const daiAmount = ethers.utils.parseEther("400") // 1 ETH

@@ -13,7 +13,7 @@ const abis = require("../../scripts/constant/abis");
 const constants = require("../../scripts/constant/constant");
 const tokens = require("../../scripts/constant/tokens");
 
-const connectV2CompoundArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/compound/main.sol/ConnectV1BCompound.json")
+const connectV2CompoundArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/compound/main.sol/ConnectV2BCompound.json")
 
 describe("B.Compound", function () {
     const connectorName = "B.COMPOUND-TEST-A"
@@ -26,6 +26,17 @@ describe("B.Compound", function () {
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
     before(async () => {
+        await hre.network.provider.request({
+            method: "hardhat_reset",
+            params: [
+              {
+                forking: {
+                  jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                  blockNumber: 13300000,
+                },
+              },
+            ],
+          });
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({

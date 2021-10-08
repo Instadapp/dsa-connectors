@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
-const {abi: implementationsABI} = require("../../scripts/constant/abi/core/InstaImplementations.json")
+const { abi: implementationsABI } = require("../../scripts/constant/abi/core/InstaImplementations.json")
 
 const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
 const buildDSAv2 = require("../../scripts/buildDSAv2")
@@ -38,6 +38,17 @@ describe("BASIC-ERC721", function () {
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
     before(async () => {
+        await hre.network.provider.request({
+            method: "hardhat_reset",
+            params: [
+                {
+                    forking: {
+                        jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                        blockNumber: 13300000,
+                    },
+                },
+            ],
+        });
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
             params: [TOKEN_OWNER_ADDR],
