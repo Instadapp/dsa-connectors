@@ -3,7 +3,7 @@ pragma solidity ^0.7.6;
 interface BorrowerOperationsLike {
     function openTrove(
         uint256 _maxFee,
-        uint256 _LUSDAmount,
+        uint256 _TSDAmount,
         address _upperHint,
         address _lowerHint
     ) external payable;
@@ -58,8 +58,8 @@ interface StabilityPoolLike {
 }
 
 interface StakingLike {
-    function stake(uint _LQTYamount) external;
-    function unstake(uint _LQTYamount) external;
+    function stake(uint _TEDDYamount) external;
+    function unstake(uint _TEDDYamount) external;
     function getPendingETHGain(address _user) external view returns (uint);
     function getPendingLUSDGain(address _user) external view returns (uint);
     function stakes(address owner) external view returns (uint);
@@ -69,6 +69,6 @@ interface CollateralSurplusLike {
     function getCollateral(address _account) external view returns (uint);
 }
 
-interface LqtyTokenLike {
+interface TeddyTokenLike {
     function balanceOf(address account) external view returns (uint256);
 }

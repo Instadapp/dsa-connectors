@@ -32,27 +32,27 @@ contract Events {
     event LogStabilityDeposit(
         address indexed borrower,
         uint amount,
-        uint ethGain,
-        uint lqtyGain,
+        uint avaxGain,
+        uint teddyGain,
         address frontendTag,
         uint getDepositId,
         uint setDepositId,
-        uint setEthGainId,
-        uint setLqtyGainId
+        uint setAvaxGainId,
+        uint setTeddyGainId
     );
     event LogStabilityWithdraw(address indexed borrower,
         uint amount,
-        uint ethGain,
-        uint lqtyGain,
+        uint avaxGain,
+        uint teddyGain,
         uint getWithdrawId,
         uint setWithdrawId,
-        uint setEthGainId,
-        uint setLqtyGainId
+        uint setAvaxGainId,
+        uint setTeddyGainId
     );
     event LogStabilityMoveEthGainToTrove(address indexed borrower, uint amount);
 
     /* Staking */
-    event LogStake(address indexed borrower, uint amount, uint getStakeId, uint setStakeId, uint setEthGainId, uint setLusdGainId);
-    event LogUnstake(address indexed borrower, uint amount, uint getUnstakeId, uint setUnstakeId, uint setEthGainId, uint setLusdGainId);
-    event LogClaimStakingGains(address indexed borrower, uint ethGain, uint lusdGain, uint setEthGainId, uint setLusdGainId);
+    event LogStake(address indexed borrower, uint amount, uint getStakeId, uint setStakeId, uint setAvaxGainId, uint setTsdGainId);
+    event LogUnstake(address indexed borrower, uint amount, uint getUnstakeId, uint setUnstakeId, uint setAvaxGainId, uint setTsdGainId);
+    event LogClaimStakingGains(address indexed borrower, uint avaxGain, uint tsdGain, uint setAvaxGainId, uint setTsdGainId);
 }

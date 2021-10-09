@@ -11,25 +11,25 @@ import {
     StabilityPoolLike,
     StakingLike,
     CollateralSurplusLike,
-    LqtyTokenLike
+    TeddyTokenLike
 } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
 
-    BorrowerOperationsLike internal constant borrowerOperations = BorrowerOperationsLike(0x24179CD81c9e782A4096035f7eC97fB8B783e007);
-    TroveManagerLike internal constant troveManager = TroveManagerLike(0xA39739EF8b0231DbFA0DcdA07d7e29faAbCf4bb2);
-    StabilityPoolLike internal constant stabilityPool = StabilityPoolLike(0x66017D22b0f8556afDd19FC67041899Eb65a21bb);
-    StakingLike internal constant staking = StakingLike(0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d);
-    CollateralSurplusLike internal constant collateralSurplus = CollateralSurplusLike(0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521);
-    LqtyTokenLike internal constant lqtyToken = LqtyTokenLike(0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D);
-    TokenInterface internal constant lusdToken = TokenInterface(0x5f98805A4E8be255a32880FDeC7F6728C6568bA0);
+    BorrowerOperationsLike internal constant borrowerOperations = BorrowerOperationsLike(0xF582CAE047853cbe7F0Bc8f8321bEF4a1eBE0307);
+    TroveManagerLike internal constant troveManager = TroveManagerLike(0xd22b04395705144Fd12AfFD854248427A2776194);
+    StabilityPoolLike internal constant stabilityPool = StabilityPoolLike(0x7AEd63385C03Dc8ed2133F705bbB63E8EA607522);
+    StakingLike internal constant staking = StakingLike(0xb4387D93B5A9392f64963cd44389e7D9D2E1053c);
+    CollateralSurplusLike internal constant collateralSurplus = CollateralSurplusLike(0xBC6C16283c1260CE5CF72C951b4D399E81FBcA36);
+    TeddyTokenLike internal constant teddyToken = TeddyTokenLike(0x094bd7B2D99711A1486FB94d4395801C6d0fdDcC);
+    TokenInterface internal constant tsdToken = TokenInterface(0x4fbf0429599460D327BD5F55625E30E4fC066095);
     
     // Prevents stack-too-deep error
     struct AdjustTrove {
         uint maxFeePercentage;
         uint withdrawAmount;
         uint depositAmount;
-        uint lusdChange;
+        uint tsdChange;
         bool isBorrow;
     }
 

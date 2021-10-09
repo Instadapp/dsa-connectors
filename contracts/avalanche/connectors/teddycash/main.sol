@@ -1,7 +1,7 @@
 pragma solidity ^0.7.6;
 
 /**
- * @title Liquity.
+ * @title TeddyCash.
  * @dev Lending & Borrowing.
  */
 import {
@@ -10,23 +10,23 @@ import {
     StabilityPoolLike,
     StakingLike,
     CollateralSurplusLike,
-    LqtyTokenLike
+    TeddyTokenLike
 } from "./interface.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-abstract contract LiquityResolver is Events, Helpers {
+abstract contract TeddyCashResolver is Events, Helpers {
 
 
     /* Begin: Trove */
 
     /**
-     * @dev Deposit native ETH and borrow LUSD
-     * @notice Opens a Trove by depositing ETH and borrowing LUSD
-     * @param depositAmount The amount of ETH to deposit
+     * @dev Deposit native AVAX and borrow TSD
+     * @notice Opens a Trove by depositing AVAX and borrowing TSD
+     * @param depositAmount The amount of AVAX to deposit
      * @param maxFeePercentage The maximum borrow fee that this transaction should permit 
-     * @param borrowAmount The amount of LUSD to borrow
+     * @param borrowAmount The amount of TSD to borrow
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getIds Optional (default: 0) Optional storage slot to get deposit & borrow amounts stored using other spells
@@ -62,9 +62,9 @@ abstract contract LiquityResolver is Events, Helpers {
     }
 
     /**
-     * @dev Repay LUSD debt from the DSA account's LUSD balance, and withdraw ETH to DSA
-     * @notice Closes a Trove by repaying LUSD debt
-     * @param setId Optional storage slot to store the ETH withdrawn from the Trove
+     * @dev Repay TSD debt from the DSA account's TSD balance, and withdraw AVAX to DSA
+     * @notice Closes a Trove by repaying TSD debt
+     * @param setId Optional storage slot to store the AVAX withdrawn from the Trove
     */
     function close(uint setId) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint collateral = troveManager.getTroveColl(address(this));
@@ -77,13 +77,13 @@ abstract contract LiquityResolver is Events, Helpers {
     }
 
     /**
-     * @dev Deposit ETH to Trove
+     * @dev Deposit AVAX to Trove
      * @notice Increase Trove collateral (collateral Top up)
-     * @param amount Amount of ETH to deposit into Trove
+     * @param amount Amount of AVAX to deposit into Trove
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve the ETH from
-     * @param setId Optional storage slot to set the ETH deposited
+     * @param getId Optional storage slot to retrieve the AVAX from
+     * @param setId Optional storage slot to set the AVAX deposited
     */
     function deposit(
         uint amount,
@@ -106,13 +106,13 @@ abstract contract LiquityResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw ETH from Trove
+     * @dev Withdraw AVAX from Trove
      * @notice Move Trove collateral from Trove to DSA
-     * @param amount Amount of ETH to move from Trove to DSA
+     * @param amount Amount of AVAX to move from Trove to DSA
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to get the amount of ETH to withdraw
-     * @param setId Optional storage slot to store the withdrawn ETH in
+     * @param getId Optional storage slot to get the amount of AVAX to withdraw
+     * @param setId Optional storage slot to store the withdrawn AVAX in
     */
    function withdraw(
         uint amount,
@@ -133,14 +133,14 @@ abstract contract LiquityResolver is Events, Helpers {
     }
     
     /**
-     * @dev Mints LUSD tokens
-     * @notice Borrow LUSD via an existing Trove
+     * @dev Mints TSD tokens
+     * @notice Borrow TSD via an existing Trove
      * @param maxFeePercentage The maximum borrow fee that this transaction should permit 
-     * @param amount Amount of LUSD to borrow
+     * @param amount Amount of TSD to borrow
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve the amount of LUSD to borrow
-     * @param setId Optional storage slot to store the final amount of LUSD borrowed
+     * @param getId Optional storage slot to retrieve the amount of TSD to borrow
+     * @param setId Optional storage slot to store the final amount of TSD borrowed
     */
     function borrow(
         uint maxFeePercentage,
@@ -161,13 +161,13 @@ abstract contract LiquityResolver is Events, Helpers {
     }
 
     /**
-     * @dev Send LUSD to repay debt
-     * @notice Repay LUSD Trove debt
-     * @param amount Amount of LUSD to repay
+     * @dev Send TSD to repay debt
+     * @notice Repay TSD Trove debt
+     * @param amount Amount of TSD to repay
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
-     * @param getId Optional storage slot to retrieve the amount of LUSD from
-     * @param setId Optional storage slot to store the final amount of LUSD repaid
+     * @param getId Optional storage slot to retrieve the amount of TSD from
+     * @param setId Optional storage slot to store the final amount of TSD repaid
     */
     function repay(
         uint amount,
@@ -179,9 +179,9 @@ abstract contract LiquityResolver is Events, Helpers {
         uint _amount = getUint(getId, amount);
 
         if (_amount == uint(-1)) {
-            uint _lusdBal = lusdToken.balanceOf(address(this));
+            uint _tsdBal = tsdToken.balanceOf(address(this));
             uint _totalDebt = troveManager.getTroveDebt(address(this));
-            _amount = _lusdBal > _totalDebt ? _totalDebt : _lusdBal;
+            _amount = _tsdBal > _totalDebt ? _totalDebt : _tsdBal;
         }
 
         borrowerOperations.repayLUSD(_amount, upperHint, lowerHint);
@@ -193,13 +193,13 @@ abstract contract LiquityResolver is Events, Helpers {
     }
 
     /**
-     * @dev Increase or decrease Trove ETH collateral and LUSD debt in one transaction
+     * @dev Increase or decrease Trove AVAX collateral and TSD debt in one transaction
      * @notice Adjust Trove debt and/or collateral
      * @param maxFeePercentage The maximum borrow fee that this transaction should permit 
-     * @param withdrawAmount Amount of ETH to withdraw
-     * @param depositAmount Amount of ETH to deposit
-     * @param borrowAmount Amount of LUSD to borrow
-     * @param repayAmount Amount of LUSD to repay
+     * @param withdrawAmount Amount of AVAX to withdraw
+     * @param depositAmount Amount of AVAX to deposit
+     * @param borrowAmount Amount of TSD to borrow
+     * @param repayAmount Amount of TSD to repay
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
      * @param getIds Optional Get Ids for deposit, withdraw, borrow & repay
@@ -230,9 +230,9 @@ abstract contract LiquityResolver is Events, Helpers {
 
         repayAmount = getUint(getIds[3], repayAmount);
         if (repayAmount == uint(-1)) {
-            uint _lusdBal = lusdToken.balanceOf(address(this));
+            uint _tsdBal = tsdToken.balanceOf(address(this));
             uint _totalDebt = troveManager.getTroveDebt(address(this));
-            repayAmount = _lusdBal > _totalDebt ? _totalDebt : _lusdBal;
+            repayAmount = _tsdBal > _totalDebt ? _totalDebt : _tsdBal;
         }
 
         adjustTrove.isBorrow = borrowAmount > 0;
@@ -257,8 +257,8 @@ abstract contract LiquityResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw remaining ETH balance from user's redeemed Trove to their DSA
-     * @param setId Optional storage slot to store the ETH claimed
+     * @dev Withdraw remaining AVAX balance from user's redeemed Trove to their DSA
+     * @param setId Optional storage slot to store the AVAX claimed
      * @notice Claim remaining collateral from Trove
     */
     function claimCollateralFromRedemption(uint setId) external payable returns(string memory _eventName, bytes memory _eventParam) {
@@ -274,82 +274,82 @@ abstract contract LiquityResolver is Events, Helpers {
     /* Begin: Stability Pool */
 
     /**
-     * @dev Deposit LUSD into Stability Pool
-     * @notice Deposit LUSD into Stability Pool
-     * @param amount Amount of LUSD to deposit into Stability Pool
+     * @dev Deposit TSD into Stability Pool
+     * @notice Deposit TSD into Stability Pool
+     * @param amount Amount of TSD to deposit into Stability Pool
      * @param frontendTag Address of the frontend to make this deposit against (determines the kickback rate of rewards)
-     * @param getDepositId Optional storage slot to retrieve the amount of LUSD from
-     * @param setDepositId Optional storage slot to store the final amount of LUSD deposited
-     * @param setEthGainId Optional storage slot to store any ETH gains in
-     * @param setLqtyGainId Optional storage slot to store any LQTY gains in
+     * @param getDepositId Optional storage slot to retrieve the amount of TSD from
+     * @param setDepositId Optional storage slot to store the final amount of TSD deposited
+     * @param setAvaxGainId Optional storage slot to store any AVAX gains in
+     * @param setTeddyGainId Optional storage slot to store any TEDDY gains in
     */
     function stabilityDeposit(
         uint amount,
         address frontendTag,
         uint getDepositId,
         uint setDepositId,
-        uint setEthGainId,
-        uint setLqtyGainId
+        uint setAvaxGainId,
+        uint setTeddyGainId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getDepositId, amount);
 
-        amount = amount == uint(-1) ? lusdToken.balanceOf(address(this)) : amount;
-
+        amount = amount == uint(-1) ? tsdToken.balanceOf(address(this)) : amount;
+ 
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
+        uint teddyBalanceBefore = teddyToken.balanceOf(address(this));
         
         stabilityPool.provideToSP(amount, frontendTag);
         
-        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
-        uint lqtyGain = sub(lqtyBalanceAfter, lqtyBalanceBefore);
+        uint teddyBalanceAfter = teddyToken.balanceOf(address(this));
+        uint teddyGain = sub(teddyBalanceAfter, teddyBalanceBefore);
 
         setUint(setDepositId, amount);
-        setUint(setEthGainId, ethGain);
-        setUint(setLqtyGainId, lqtyGain);
+        setUint(setAvaxGainId, ethGain);
+        setUint(setTeddyGainId, teddyGain);
 
         _eventName = "LogStabilityDeposit(address,uint256,uint256,uint256,address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, frontendTag, getDepositId, setDepositId, setEthGainId, setLqtyGainId);
+        _eventParam = abi.encode(address(this), amount, ethGain, teddyGain, frontendTag, getDepositId, setDepositId, setAvaxGainId, setTeddyGainId);
     }
 
     /**
-     * @dev Withdraw user deposited LUSD from Stability Pool
-     * @notice Withdraw LUSD from Stability Pool
-     * @param amount Amount of LUSD to withdraw from Stability Pool
-     * @param getWithdrawId Optional storage slot to retrieve the amount of LUSD to withdraw from
-     * @param setWithdrawId Optional storage slot to store the withdrawn LUSD
-     * @param setEthGainId Optional storage slot to store any ETH gains in
-     * @param setLqtyGainId Optional storage slot to store any LQTY gains in
+     * @dev Withdraw user deposited TSD from Stability Pool
+     * @notice Withdraw TSD from Stability Pool
+     * @param amount Amount of TSD to withdraw from Stability Pool
+     * @param getWithdrawId Optional storage slot to retrieve the amount of TSD to withdraw from
+     * @param setWithdrawId Optional storage slot to store the withdrawn TSD
+     * @param setAvaxGainId Optional storage slot to store any AVAX gains in
+     * @param setTeddyGainId Optional storage slot to store any TEDDY gains in
     */
     function stabilityWithdraw(
         uint amount,
         uint getWithdrawId,
         uint setWithdrawId,
-        uint setEthGainId,
-        uint setLqtyGainId
+        uint setAvaxGainId,
+        uint setTeddyGainId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getWithdrawId, amount);
 
         amount = amount == uint(-1) ? stabilityPool.getCompoundedLUSDDeposit(address(this)) : amount;
 
         uint ethGain = stabilityPool.getDepositorETHGain(address(this));
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
+        uint teddyBalanceBefore = teddyToken.balanceOf(address(this));
         
         stabilityPool.withdrawFromSP(amount);
         
-        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
-        uint lqtyGain = sub(lqtyBalanceAfter, lqtyBalanceBefore);
+        uint teddyBalanceAfter = teddyToken.balanceOf(address(this));
+        uint teddyGain = sub(teddyBalanceAfter, teddyBalanceBefore);
 
         setUint(setWithdrawId, amount);
-        setUint(setEthGainId, ethGain);
-        setUint(setLqtyGainId, lqtyGain);
+        setUint(setAvaxGainId, ethGain);
+        setUint(setTeddyGainId, teddyGain);
 
         _eventName = "LogStabilityWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, ethGain, lqtyGain, getWithdrawId, setWithdrawId, setEthGainId, setLqtyGainId);
+        _eventParam = abi.encode(address(this), amount, ethGain, teddyGain, getWithdrawId, setWithdrawId, setAvaxGainId, setTeddyGainId);
     }
 
     /**
-     * @dev Increase Trove collateral by sending Stability Pool ETH gain to user's Trove
-     * @notice Moves user's ETH gain from the Stability Pool into their Trove
+     * @dev Increase Trove collateral by sending Stability Pool AVAX gain to user's Trove
+     * @notice Moves user's AVAX gain from the Stability Pool into their Trove
      * @param upperHint Address of the Trove near the upper bound of where the user's Trove should now sit in the ordered Trove list
      * @param lowerHint Address of the Trove near the lower bound of where the user's Trove should now sit in the ordered Trove list
     */
@@ -367,92 +367,92 @@ abstract contract LiquityResolver is Events, Helpers {
     /* Begin: Staking */
 
     /**
-     * @dev Sends LQTY tokens from user to Staking Pool
-     * @notice Stake LQTY in Staking Pool
-     * @param amount Amount of LQTY to stake
-     * @param getStakeId Optional storage slot to retrieve the amount of LQTY to stake
+     * @dev Sends TEDDY tokens from user to Staking Pool
+     * @notice Stake TEDDY in Staking Pool
+     * @param amount Amount of TEDDY to stake
+     * @param getStakeId Optional storage slot to retrieve the amount of TEDDY to stake
      * @param setStakeId Optional storage slot to store the final staked amount (can differ if requested with max balance: uint(-1))
-     * @param setEthGainId Optional storage slot to store any ETH gains
-     * @param setLusdGainId Optional storage slot to store any LUSD gains
+     * @param setAvaxGainId Optional storage slot to store any AVAX gains
+     * @param setTsdGainId Optional storage slot to store any TSD gains
     */
     function stake(
         uint amount,
         uint getStakeId,
         uint setStakeId,
-        uint setEthGainId,
-        uint setLusdGainId
+        uint setAvaxGainId,
+        uint setTsdGainId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getStakeId, amount);
-        amount = amount == uint(-1) ? lqtyToken.balanceOf(address(this)) : amount;
+        amount = amount == uint(-1) ? teddyToken.balanceOf(address(this)) : amount;
 
         uint ethGain = staking.getPendingETHGain(address(this));
-        uint lusdGain = staking.getPendingLUSDGain(address(this));
+        uint tsdGain = staking.getPendingLUSDGain(address(this));
 
         staking.stake(amount);
         setUint(setStakeId, amount);
-        setUint(setEthGainId, ethGain);
-        setUint(setLusdGainId, lusdGain);
+        setUint(setAvaxGainId, ethGain);
+        setUint(setTsdGainId, tsdGain);
 
         _eventName = "LogStake(address,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, getStakeId, setStakeId, setEthGainId, setLusdGainId);
+        _eventParam = abi.encode(address(this), amount, getStakeId, setStakeId, setAvaxGainId, setTsdGainId);
     }
 
     /**
-     * @dev Sends LQTY tokens from Staking Pool to user
-     * @notice Unstake LQTY in Staking Pool
-     * @param amount Amount of LQTY to unstake
-     * @param getUnstakeId Optional storage slot to retrieve the amount of LQTY to unstake
-     * @param setUnstakeId Optional storage slot to store the unstaked LQTY
-     * @param setEthGainId Optional storage slot to store any ETH gains
-     * @param setLusdGainId Optional storage slot to store any LUSD gains
+     * @dev Sends TEDDY tokens from Staking Pool to user
+     * @notice Unstake TEDDY in Staking Pool
+     * @param amount Amount of TEDDY to unstake
+     * @param getUnstakeId Optional storage slot to retrieve the amount of TEDDY to unstake
+     * @param setUnstakeId Optional storage slot to store the unstaked TEDDY
+     * @param setAvaxGainId Optional storage slot to store any AVAX gains
+     * @param setTsdGainId Optional storage slot to store any TSD gains
     */
     function unstake(
         uint amount,
         uint getUnstakeId,
         uint setUnstakeId,
-        uint setEthGainId,
-        uint setLusdGainId
+        uint setAvaxGainId,
+        uint setTsdGainId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         amount = getUint(getUnstakeId, amount);
         amount = amount == uint(-1) ? staking.stakes(address(this)) : amount;
 
-        uint ethGain = staking.getPendingETHGain(address(this));
-        uint lusdGain = staking.getPendingLUSDGain(address(this));
+        uint avaxGain = staking.getPendingETHGain(address(this));
+        uint tsdGain = staking.getPendingLUSDGain(address(this));
 
         staking.unstake(amount);
         setUint(setUnstakeId, amount);
-        setUint(setEthGainId, ethGain);
-        setUint(setLusdGainId, lusdGain);
+        setUint(setAvaxGainId, avaxGain);
+        setUint(setTsdGainId, tsdGain);
 
         _eventName = "LogUnstake(address,uint256,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), amount, getUnstakeId, setUnstakeId, setEthGainId, setLusdGainId);
+        _eventParam = abi.encode(address(this), amount, getUnstakeId, setUnstakeId, setAvaxGainId, setTsdGainId);
     }
 
     /**
-     * @dev Sends ETH and LUSD gains from Staking to user
-     * @notice Claim ETH and LUSD gains from Staking
-     * @param setEthGainId Optional storage slot to store the claimed ETH
-     * @param setLusdGainId Optional storage slot to store the claimed LUSD
+     * @dev Sends AVAX and TSD gains from Staking to user
+     * @notice Claim AVAX and TSD gains from Staking
+     * @param setAvaxGainId Optional storage slot to store the claimed AVAX
+     * @param setTsdGainId Optional storage slot to store the claimed TSD
     */
     function claimStakingGains(
-        uint setEthGainId,
-        uint setLusdGainId
+        uint setAvaxGainId,
+        uint setTsdGainId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint ethGain = staking.getPendingETHGain(address(this));
-        uint lusdGain = staking.getPendingLUSDGain(address(this));
+        uint avaxGain = staking.getPendingETHGain(address(this));
+        uint tsdGain = staking.getPendingLUSDGain(address(this));
 
         // Gains are claimed when a user's stake is adjusted, so we unstake 0 to trigger the claim
         staking.unstake(0);
-        setUint(setEthGainId, ethGain);
-        setUint(setLusdGainId, lusdGain);
+        setUint(setAvaxGainId, avaxGain);
+        setUint(setTsdGainId, tsdGain);
         
         _eventName = "LogClaimStakingGains(address,uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(address(this), ethGain, lusdGain, setEthGainId, setLusdGainId);
+        _eventParam = abi.encode(address(this), avaxGain, tsdGain, setAvaxGainId, setTsdGainId);
     }
     /* End: Staking */
 
 }
 
-contract ConnectV2Liquity is LiquityResolver {
-    string public name = "Liquity-v1";
+contract ConnectV2TeddyCash is TeddyCashResolver {
+    string public name = "TeddyCash-v1";
 }
