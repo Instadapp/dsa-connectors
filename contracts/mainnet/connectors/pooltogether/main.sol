@@ -117,7 +117,7 @@ abstract contract PoolTogetherResolver is Events, DSMath, Basic {
 
         setUint(setId, claimed);
 
-        _eventName = "LogClaim(address,address, uint256, uint256)";
+        _eventName = "LogClaim(address,address,uint256,uint256)";
         _eventParam = abi.encode(address(tokenFaucet), address(this), claimed, setId);
     }
 
