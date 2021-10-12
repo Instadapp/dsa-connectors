@@ -16,7 +16,7 @@ const constants = require("../../scripts/polygon/constant/constant");
 const tokens = require("../../scripts/polygon/constant/tokens");
 
 const connectV2AaveV2Artifacts = require("../../artifacts/contracts/polygon/connectors/aave/v2/main.sol/ConnectV2AaveV2Polygon.json")
-const connectV2PoolTogetherArtifacts = require("../../artifacts/contracts/polygon/connectors/pooltogether/main.sol/ConnectV2PoolTogether.json")
+const connectV2PoolTogetherArtifacts = require("../../artifacts/contracts/polygon/connectors/pooltogether/main.sol/ConnectV2PoolTogetherPolygon.json")
 
 const DAI_TOKEN_ADDR = tokens.dai.address // DAI Token
 // PoolTogether Address: https://docs.pooltogether.com/resources/networks/matic
