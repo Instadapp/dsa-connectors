@@ -194,48 +194,113 @@ describe("Ubiquity", function () {
     await USDTContract.transfer(dsa.address, onep.mul(amount));
   };
 
-  describe("DSA wallet setup", function () {
-    it("Should have contracts deployed.", async function () {
-      expect(POOL3Contract.address).to.be.properAddress;
-      expect(CRV3Contract.address).to.be.properAddress;
-      expect(uADContract.address).to.be.properAddress;
-      expect(uAD3CRVfContract.address).to.be.properAddress;
-      expect(DAIContract.address).to.be.properAddress;
-      expect(USDCContract.address).to.be.properAddress;
-      expect(USDTContract.address).to.be.properAddress;
-      expect(BONDContract.address).to.be.properAddress;
-      expect(instaIndex.address).to.be.properAddress;
-      expect(instaConnectorsV2.address).to.be.properAddress;
-      expect(connector.address).to.be.properAddress;
-      expect(dsa.address).to.be.properAddress;
-    });
-    it("Should deposit uAD3CRVf into DSA wallet", async function () {
+  describe("Deposit", function () {
+    it("should deposit uAD3CRVf to get Ubiquity Bonding Shares", async function () {
+      await logAll();
       await dsaDepositUAD3CRVf(100);
-      expect(await uAD3CRVfContract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
+      await expect(
+        dsa.cast(
+          ...encodeSpells([
+            {
+              connector: ubiquityTest,
+              method: "deposit",
+              args: [UAD3CRVF, one.mul(100), 4, 0, 0]
+            }
+          ]),
+          uadWhaleAddress
+        )
+      ).to.be.not.reverted;
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
     });
-    it("Should deposit uAD into DSA wallet", async function () {
+
+    it("should deposit uAD to get Ubiquity Bonding Shares", async function () {
       await dsaDepositUAD(100);
-      expect(await uADContract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
+      await expect(
+        dsa.cast(
+          ...encodeSpells([
+            {
+              connector: ubiquityTest,
+              method: "deposit",
+              args: [UAD, one.mul(100), 4, 0, 0]
+            }
+          ]),
+          uadWhaleAddress
+        )
+      ).to.be.not.reverted;
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
     });
-    it("Should deposit 3CRV into DSA wallet", async function () {
+
+    it("should deposit 3CRV to get Ubiquity Bonding Shares", async function () {
       await dsaDepositCRV3(100);
-      expect(await CRV3Contract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
+      await expect(
+        dsa.cast(
+          ...encodeSpells([
+            {
+              connector: ubiquityTest,
+              method: "deposit",
+              args: [CRV3, one.mul(100), 4, 0, 0]
+            }
+          ]),
+          uadWhaleAddress
+        )
+      ).to.be.not.reverted;
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
     });
-    it("Should deposit DAI into DSA wallet", async function () {
+
+    it("should deposit DAI to get Ubiquity Bonding Shares", async function () {
       await dsaDepositDAI(100);
-      expect(await DAIContract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
+      await expect(
+        dsa.cast(
+          ...encodeSpells([
+            {
+              connector: ubiquityTest,
+              method: "deposit",
+              args: [DAI, one.mul(100), 4, 0, 0]
+            }
+          ]),
+          uadWhaleAddress
+        )
+      ).to.be.not.reverted;
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
     });
-    it("Should deposit USDC into DSA wallet", async function () {
+
+    it("should deposit USDC to get Ubiquity Bonding Shares", async function () {
       await dsaDepositUSDC(100);
-      expect(await USDCContract.balanceOf(dsa.address)).to.be.gte(onep.mul(100));
+      await expect(
+        dsa.cast(
+          ...encodeSpells([
+            {
+              connector: ubiquityTest,
+              method: "deposit",
+              args: [USDC, onep.mul(100), 4, 0, 0]
+            }
+          ]),
+          uadWhaleAddress
+        )
+      ).to.be.not.reverted;
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
     });
-    it("Should deposit USDT into DSA wallet", async function () {
+
+    it("should deposit USDT to get Ubiquity Bonding Shares", async function () {
       await dsaDepositUSDT(100);
-      expect(await USDTContract.balanceOf(dsa.address)).to.be.gte(onep.mul(100));
+      await expect(
+        dsa.cast(
+          ...encodeSpells([
+            {
+              connector: ubiquityTest,
+              method: "deposit",
+              args: [USDT, onep.mul(100), 4, 0, 0]
+            }
+          ]),
+          uadWhaleAddress
+        )
+      ).to.be.not.reverted;
+      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
     });
   });
 
-  describe.only("Withdraw", function () {
+  describe("Withdraw", function () {
     let bondId = -1;
 
     before(async () => {
@@ -343,133 +408,44 @@ describe("Ubiquity", function () {
     });
   });
 
-  describe("Deposit", function () {
-    it("should deposit uAD3CRVf to get Ubiquity Bonding Shares", async function () {
+  describe("DSA wallet setup", function () {
+    it("Should have contracts deployed.", async function () {
+      expect(POOL3Contract.address).to.be.properAddress;
+      expect(CRV3Contract.address).to.be.properAddress;
+      expect(uADContract.address).to.be.properAddress;
+      expect(uAD3CRVfContract.address).to.be.properAddress;
+      expect(DAIContract.address).to.be.properAddress;
+      expect(USDCContract.address).to.be.properAddress;
+      expect(USDTContract.address).to.be.properAddress;
+      expect(BONDContract.address).to.be.properAddress;
+      expect(instaIndex.address).to.be.properAddress;
+      expect(instaConnectorsV2.address).to.be.properAddress;
+      expect(connector.address).to.be.properAddress;
+      expect(dsa.address).to.be.properAddress;
+    });
+    it("Should deposit uAD3CRVf into DSA wallet", async function () {
       await dsaDepositUAD3CRVf(100);
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
-      await expect(
-        dsa.cast(
-          ...encodeSpells([
-            {
-              connector: ubiquityTest,
-              method: "deposit",
-              args: [UAD3CRVF, one, 4, 0, 0]
-            }
-          ]),
-          uadWhaleAddress
-        )
-      ).to.be.not.reverted;
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
+      expect(await uAD3CRVfContract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
     });
-
-    it("should deposit uAD to get Ubiquity Bonding Shares", async function () {
+    it("Should deposit uAD into DSA wallet", async function () {
       await dsaDepositUAD(100);
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
-      await expect(
-        dsa.cast(
-          ...encodeSpells([
-            {
-              connector: ubiquityTest,
-              method: "deposit",
-              args: [UAD, one, 4, 0, 0]
-            }
-          ]),
-          uadWhaleAddress
-        )
-      ).to.be.not.reverted;
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
+      expect(await uADContract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
     });
-
-    it("should deposit 3CRV to get Ubiquity Bonding Shares", async function () {
+    it("Should deposit 3CRV into DSA wallet", async function () {
       await dsaDepositCRV3(100);
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
-      await expect(
-        dsa.cast(
-          ...encodeSpells([
-            {
-              connector: ubiquityTest,
-              method: "deposit",
-              args: [CRV3, one, 4, 0, 0]
-            }
-          ]),
-          uadWhaleAddress
-        )
-      ).to.be.not.reverted;
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
+      expect(await CRV3Contract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
     });
-
-    it("should deposit DAI to get Ubiquity Bonding Shares", async function () {
+    it("Should deposit DAI into DSA wallet", async function () {
       await dsaDepositDAI(100);
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
-      await expect(
-        dsa.cast(
-          ...encodeSpells([
-            {
-              connector: ubiquityTest,
-              method: "deposit",
-              args: [DAI, one.mul(100), 4, 0, 0]
-            }
-          ]),
-          uadWhaleAddress
-        )
-      ).to.be.not.reverted;
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
+      expect(await DAIContract.balanceOf(dsa.address)).to.be.gte(one.mul(100));
     });
-
-    it("should deposit USDC to get Ubiquity Bonding Shares", async function () {
+    it("Should deposit USDC into DSA wallet", async function () {
       await dsaDepositUSDC(100);
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
-      await expect(
-        dsa.cast(
-          ...encodeSpells([
-            {
-              connector: ubiquityTest,
-              method: "deposit",
-              args: [USDC, onep.mul(100), 4, 0, 0]
-            }
-          ]),
-          uadWhaleAddress
-        )
-      ).to.be.not.reverted;
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
+      expect(await USDCContract.balanceOf(dsa.address)).to.be.gte(onep.mul(100));
     });
-
-    it("should deposit USDT to get Ubiquity Bonding Shares", async function () {
+    it("Should deposit USDT into DSA wallet", async function () {
       await dsaDepositUSDT(100);
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.equal(0);
-      await expect(
-        dsa.cast(
-          ...encodeSpells([
-            {
-              connector: ubiquityTest,
-              method: "deposit",
-              args: [USDT, onep.mul(100), 4, 0, 0]
-            }
-          ]),
-          uadWhaleAddress
-        )
-      ).to.be.not.reverted;
-      expect((await bondingShare(dsa.address)).lpAmount).to.be.gt(0);
-    });
-  });
-
-  describe("3Pool test", function () {
-    it("Should add DAI liquidity to 3Pool", async function () {
-      const n = 100;
-      await dsaDepositDAI(n);
-      const amount = one.mul(n);
-      const [dsaSigner] = await impersonate([dsa.address]);
-
-      expect(await DAIContract.balanceOf(dsa.address)).to.be.equal(amount);
-      expect(await CRV3Contract.balanceOf(dsa.address)).to.be.equal(0);
-
-      await (await DAIContract.connect(dsaSigner).approve(POOL3, amount)).wait();
-      await (await POOL3Contract.connect(dsaSigner).add_liquidity([amount, 0, 0], amount.mul(98).div(100))).wait();
-
-      expect(await DAIContract.balanceOf(dsa.address)).to.be.equal(0);
-      expect(await CRV3Contract.balanceOf(dsa.address))
-        .to.be.gte(amount.mul(98).div(100))
-        .to.be.lte(amount.mul(102).div(100));
+      expect(await USDTContract.balanceOf(dsa.address)).to.be.gte(onep.mul(100));
     });
   });
 });

@@ -38,17 +38,20 @@ contract ConnectV2Ubiquity is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		address UAD = getUAD();
 		address UAD3CRVf = getUADCRV3();
+		bool[6] memory tok = [
+			token == DAI, // 0
+			token == USDC, // 1
+			token == USDT, // 2
+			token == CRV3, // 3
+			token == getUAD(), // 4
+			token == UAD3CRVf // 5
+		];
 
 		require(
-			token == DAI ||
-				token == USDC ||
-				token == USDT ||
-				token == UAD ||
-				token == CRV3 ||
-				token == UAD3CRVf,
-			"Invalid token: must be DAI, USDC, USDT, uAD, 3CRV or uAD3CRV-f"
+			// DAI / USDC / USDT / CRV3 / UAD / UAD3CRVF
+			tok[0] || tok[1] || tok[2] || tok[3] || tok[4] || tok[5],
+			"Invalid token: must be DAI, USDC, USDT, 3CRV, uAD or uAD3CRV-f"
 		);
 
 		uint256 _amount = getUint(getId, amount);
@@ -60,34 +63,30 @@ contract ConnectV2Ubiquity is Helpers, Events {
 		}
 
 		// STEP 1 : SwapTo3CRV : Deposit DAI, USDC or USDT into 3Pool to get 3Crv LPs
-		if (token == DAI || token == USDC || token == USDT) {
+		// DAI / USDC / USDT
+		if (tok[0] || tok[1] || tok[2]) {
 			uint256[3] memory amounts1;
 
-			if (token == DAI) amounts1[0] = _amount;
-			else if (token == USDC) amounts1[1] = _amount;
-			else if (token == USDT) amounts1[2] = _amount;
+			if (tok[0]) amounts1[0] = _amount;
+			else if (tok[1]) amounts1[1] = _amount;
+			else if (tok[2]) amounts1[2] = _amount;
 
 			approve(TokenInterface(token), Pool3, _amount);
 			I3Pool(Pool3).add_liquidity(amounts1, 0);
 		}
 
 		// STEP 2 : ProvideLiquidityToMetapool : Deposit in uAD3CRV pool to get uAD3CRV-f LPs
-		if (
-			token == DAI ||
-			token == USDC ||
-			token == USDT ||
-			token == UAD ||
-			token == CRV3
-		) {
+		// DAI / USDC / USDT / CRV3 / UAD
+		if (tok[0] || tok[1] || tok[2] || tok[3] || tok[4]) {
 			uint256[2] memory amounts2;
 			address token2 = token;
 			uint256 _amount2;
 
-			if (token == UAD) {
+			if (tok[4]) {
 				_amount2 = _amount;
 				amounts2[0] = _amount2;
 			} else {
-				if (token == CRV3) {
+				if (tok[3]) {
 					_amount2 = _amount;
 				} else {
 					token2 = CRV3;
@@ -101,7 +100,8 @@ contract ConnectV2Ubiquity is Helpers, Events {
 		}
 
 		// STEP 3 : Farm/ApeIn : Deposit uAD3CRV-f LPs into UbiquityBondingV2 and get Ubiquity Bonding Shares
-		if (token == UAD3CRVf) {
+		// UAD3CRVF
+		if (tok[5]) {
 			lpAmount = _amount;
 		}
 
@@ -161,7 +161,7 @@ contract ConnectV2Ubiquity is Helpers, Events {
 		require(
 			// DAI / USDC / USDT / CRV3 / UAD / UAD3CRVF
 			tok[0] || tok[1] || tok[2] || tok[3] || tok[4] || tok[5],
-			"Invalid token: must be DAI, USDC, USDT, uAD, 3CRV or uAD3CRV-f"
+			"Invalid token: must be DAI, USDC, USDT, 3CRV, uAD or uAD3CRV-f"
 		);
 
 		uint256 _bondingShareId = getUint(getId, bondingShareId);
