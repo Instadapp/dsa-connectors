@@ -28,63 +28,63 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
-          },
-        },
+            runs: 200
+          }
+        }
       },
       {
-        version: "0.6.0",
+        version: "0.6.0"
       },
       {
-        version: "0.6.2",
+        version: "0.6.2"
       },
       {
-        version: "0.6.5",
-      },
-    ],
+        version: "0.6.5"
+      }
+    ]
   },
   networks: {
     kovan: {
       url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
+      accounts: [`0x${PRIVATE_KEY}`]
     },
     mainnet: {
       url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("30", "gwei")),
+      gasPrice: parseInt(utils.parseUnits("30", "gwei"))
     },
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
-      timeout: 150000,
+      timeout: 150000
     },
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-        blockNumber: 12696000,
+        blockNumber: 13097100
       },
       blockGasLimit: 12000000,
-      gasPrice: parseInt(utils.parseUnits("300", "gwei")),
+      gasPrice: parseInt(utils.parseUnits("300", "gwei"))
     },
     local: {
-      url: "http://127.0.0.1:8545",
+      url: "http://127.0.0.1:8545"
     },
     matic: {
       url: "https://rpc-mainnet.maticvigil.com/",
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("1", "gwei")),
+      gasPrice: parseInt(utils.parseUnits("1", "gwei"))
     },
     arbitrum: {
       chainId: 42161,
       url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("2", "gwei")),
+      gasPrice: parseInt(utils.parseUnits("2", "gwei"))
     },
     avax: {
-      url: 'https://api.avax.network/ext/bc/C/rpc',
+      url: "https://api.avax.network/ext/bc/C/rpc",
       chainId: 43114,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
@@ -92,13 +92,14 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY,
+    apiKey: ETHERSCAN_API_KEY
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT,
-    username: process.env.TENDERLY_USERNAME,
+    username: process.env.TENDERLY_USERNAME
   },
   mocha: {
     timeout: 100 * 1000,
-  },
+    bail: true
+  }
 };
