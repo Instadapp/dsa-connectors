@@ -23,7 +23,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
      * @dev Borrow Flashloan and Cast spells.
      * @param token Token Address.
      * @param amt Token Amount.
-     * @param route Flashloan source route. (0: dYdX(ETH,DAI,USDC only), 1: MakerDAO(DAI only), 2: Compound(All borrowable tokens in Compound), 3: AaveV2(All borrowable tokens in AaveV2))
+     * @param route Flashloan source route.
      * @param data targets & data for cast.
      */
     function flashBorrowAndCast(
@@ -31,7 +31,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         uint amt,
         uint route,
         bytes memory data
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         AccountInterface(address(this)).enable(address(instaPool));
         (string[] memory _targets, bytes[] memory callDatas) = abi.decode(data, (string[], bytes[]));
 
@@ -39,8 +39,10 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
         instaPool.initiateFlashLoan(token, amt, route, callData);
 
-        emit LogFlashBorrow(token, amt);
         AccountInterface(address(this)).disable(address(instaPool));
+
+        _eventName = "LogFlashBorrow(address,uint256)";
+        _eventParam = abi.encode(token, amt);
     }
 
     /**
@@ -55,7 +57,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         uint amt,
         uint getId,
         uint setId
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
         
         IERC20 tokenContract = IERC20(token);
@@ -68,14 +70,15 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
         setUint(setId, _amt);
 
-        emit LogFlashPayback(token, _amt);
+        _eventName = "LogFlashPayback(address,uint256)";
+        _eventParam = abi.encode(token, amt);
     }
 
     /**
-     * @dev Borrow Flashloan and Cast spells.
-     * @param token Token Address.
-     * @param amt Token Amount.
-     * @param route Flashloan source route. (0: dYdX(ETH,DAI,USDC only), 1: MakerDAO(DAI only), 2: Compound(All borrowable tokens in Compound), 3: AaveV2(All borrowable tokens in AaveV2))
+     * @dev Borrow multi-tokens Flashloan and Cast spells.
+     * @param tokens_ Array of Token Addresses.
+     * @param amts_ Array of Token Amounts.
+     * @param route Flashloan source route.
      * @param data targets & data for cast.
      */
     function flashMultiBorrowAndCast(
@@ -83,7 +86,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         uint[] memory amts_,
         uint route,
         bytes memory data
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         AccountInterface(address(this)).enable(address(instaPool));
         (string[] memory _targets, bytes[] memory callDatas) = abi.decode(data, (string[], bytes[]));
 
@@ -91,23 +94,24 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
         instaPool.initiateMultiFlashLoan(tokens_, amts_, route, callData);
 
-        emit LogMultiFlashBorrow(tokens_, amts_);
         AccountInterface(address(this)).disable(address(instaPool));
+        _eventName = "LogFlashPayback(address[],uint256[])";
+        _eventParam = abi.encode(tokens_, amts_);
     }
 
     /**
-     * @dev Return token to InstaPool.
-     * @param token Token Address.
-     * @param amt Token Amount.
-     * @param getId Get token amount at this ID from `InstaMemory` Contract.
-     * @param setId Set token amount at this ID in `InstaMemory` Contract.
+     * @dev Return multi-tokens to InstaPool.
+     * @param tokens_ Array of Token Addresses.
+     * @param amts_ Array of Token Amounts.
+     * @param getIds Array of getId token amounts.
+     * @param setIds Array of setId token amounts.
     */
     function flashMultiPayback(
         address[] memory tokens_,
         uint[] memory amts_,
         uint[] memory getIds,
         uint[] memory setIds
-    ) external payable {
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         for (uint i = 0; i < tokens_.length; i++) {
             amts_[i] = getUint(getIds[i], amts_[i]);
 
@@ -125,6 +129,6 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
 
 }
 
-contract ConnectV2InstaPool is LiquidityResolver {
-    string public name = "Instapool-v1.2";
+contract ConnectV2InstaPoolV3 is LiquidityResolver {
+    string public name = "Instapool-v3";
 }
