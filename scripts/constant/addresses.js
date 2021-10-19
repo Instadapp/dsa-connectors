@@ -5,7 +5,7 @@ module.exports = {
     "INSTAPOOL-A": "0x5806af7ab22e2916fa582ff05731bf7c682387b2",
   },
   core: {
-    connectorsV2: "0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11",
-    instaIndex: "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723",
+    connectorsV2: "0x2A00684bFAb9717C21271E0751BCcb7d2D763c88",
+    instaIndex: "0xA9B99766E6C676Cf1975c0D3166F96C0848fF5ad",
   },
 };

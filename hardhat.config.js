@@ -61,13 +61,13 @@ module.exports = {
     },
     hardhat: {
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-        blockNumber: 12696000,
+        enabled: true,
+        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
       },
       blockGasLimit: 12000000,
     },
     matic: {
-      url: "https://rpc-mainnet.maticvigil.com/",
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
       gasPrice: parseInt(utils.parseUnits("1", "gwei")),
