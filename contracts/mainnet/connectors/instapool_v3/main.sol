@@ -95,7 +95,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         instaPool.initiateMultiFlashLoan(tokens_, amts_, route, callData);
 
         AccountInterface(address(this)).disable(address(instaPool));
-        _eventName = "LogFlashPayback(address[],uint256[])";
+        _eventName = "LogFlashMultiBorrow(address[],uint256[])";
         _eventParam = abi.encode(tokens_, amts_);
     }
 
@@ -124,7 +124,8 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
             setUint(setIds[i], amts_[i]);
         }
 
-        emit LogFlashPayback(tokens_, amts_);
+        _eventName = "LogFlashMultiPayback(address[],uint256[])";
+        _eventParam = abi.encode(tokens_, amts_);
     }
 
 }
