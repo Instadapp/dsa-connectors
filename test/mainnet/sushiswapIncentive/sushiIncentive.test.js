@@ -1,51 +1,31 @@
 const { expect } = require("chai");
 const hre = require("hardhat");
-const { web3, deployments, waffle, ethers } = hre;
-const { provider, deployContract } = waffle
+const { waffle, ethers } = hre;
+const { provider } = waffle
 
 const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
 const buildDSAv2 = require("../../scripts/buildDSAv2")
 const encodeSpells = require("../../scripts/encodeSpells.js")
-const encodeFlashcastData = require("../../scripts/encodeFlashcastData.js")
 const getMasterSigner = require("../../scripts/getMasterSigner")
 const addLiquidity = require("../../scripts/addLiquidity");
 
 const addresses = require("../../scripts/constant/addresses");
 const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/constant/constant");
-const tokens = require("../../scripts/constant/tokens");
-const { abi: nftManagerAbi } = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json")
 
 const connectV2SushiswapArtifacts = require("../../artifacts/contracts/mainnet/connectors/sushiswap/main.sol/ConnectV2Sushiswap.json");
-const { eth } = require("../../scripts/constant/tokens");
-const { BigNumber } = require("ethers");
+const connectV2SushiswapIncentiveArtifacts = require("../../artifacts/contracts/mainnet/connectors/sushi-incentive/main.sol/ConnectV2SushiswapIncentive.json");
 
-const FeeAmount = {
-    LOW: 500,
-    MEDIUM: 3000,
-    HIGH: 10000,
-}
-
-const TICK_SPACINGS = {
-    500: 10,
-    3000: 60,
-    10000: 200
-}
-
-const USDT_ADDR = "0xdac17f958d2ee523a2206206994597c13d831ec7"
 const DAI_ADDR = "0x6b175474e89094c44da98b954eedeac495271d0f"
-
-let tokenIds = []
-let liquidities = []
-const abiCoder = ethers.utils.defaultAbiCoder
+const WETH_ADDR = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 
 describe("Sushiswap", function () {
     const connectorName = "Sushiswap-v1"
+    const incentiveConnectorName = "Sushiswp-Incentive-v1"
 
     let dsaWallet0
     let masterSigner;
     let instaConnectorsV2;
-    let connector;
+    let connector, connectorIncentive;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -70,6 +50,14 @@ describe("Sushiswap", function () {
             connectors: instaConnectorsV2
         })
         console.log("Connector address", connector.address)
+
+        connectorIncentive = await deployAndEnableConnector({
+            connectorName: incentiveConnectorName,
+            contractArtifact: connectV2SushiswapIncentiveArtifacts,
+            signer: masterSigner,
+            connectors: instaConnectorsV2
+        })
+        console.log("Incentive Connector address", connectorIncentive.address)
     })
 
     it("Should have contracts deployed.", async function () {
@@ -108,7 +96,7 @@ describe("Sushiswap", function () {
     describe("Main", function () {
 
         it("Should deposit successfully", async function () {
-            const ethAmount = ethers.utils.parseEther("0.1") // 1 ETH
+            const ethAmount = ethers.utils.parseEther("2") // 1 ETH
             const daiUnitAmount = ethers.utils.parseEther("4000") // 1 ETH
             const usdtAmount = ethers.utils.parseEther("400") / Math.pow(10, 12) // 1 ETH
             const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
@@ -133,59 +121,91 @@ describe("Sushiswap", function () {
             ]
 
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-            let receipt = await tx.wait()
-            // let castEvent = new Promise((resolve, reject) => {
-            //     dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
-            //         const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[0]);
-            //         const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[2]);
-            //         tokenIds.push(params[0]);
-            //         tokenIds.push(params1[0]);
-            //         liquidities.push(params[1]);
-            //         event.removeListener();
+            await tx.wait()
 
-            //         resolve({
-            //             eventNames,
-            //         });
-            //     });
-
-            //     setTimeout(() => {
-            //         reject(new Error('timeout'));
-            //     }, 60000)
-            // });
-
-            // let event = await castEvent
-
-            // const data = await nftManager.positions(tokenIds[0])
-
-            // expect(data.liquidity).to.be.equals(liquidities[0]);
-        }).timeout(10000000000);
-
-        it("Should withdraw successfully", async function () {
-            const ethAmount = ethers.utils.parseEther("0.1") // 1 ETH
-            const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-
-            const getId = "0"
-            const setIds = ["0", "0"]
-
-            const spells = [
-                {
-                    connector: connectorName,
-                    method: "withdraw",
-                    args: [
-                        ethAddress,
-                        DAI_ADDR,
-                        ethAmount,
-                        0,
-                        0,
-                        getId,
-                        setIds
+            describe("Incentive", () => {
+                it("Should deposit successfully", async () => {
+                    const getId = 0
+                    const setId = 0
+                    const spells = [
+                        {
+                            connector: incentiveConnectorName,
+                            method: "deposit",
+                            args: [
+                                WETH_ADDR,
+                                DAI_ADDR,
+                                ethers.utils.parseEther("10"),
+                                getId,
+                                setId
+                            ]
+                        }
                     ]
-                }
-            ]
 
-            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-            let receipt = await tx.wait()
-        });
+                    const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)
+                    await tx.wait();
+                })
+
+                it("Should harvest successfully", async () => {
+                    const setId = 0
+                    const spells = [
+                        {
+                            connector: incentiveConnectorName,
+                            method: "harvest",
+                            args: [
+                                WETH_ADDR,
+                                DAI_ADDR,
+                                setId
+                            ]
+                        }
+                    ]
+
+                    const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)
+                    await tx.wait();
+                })
+
+                it("Should harvest and withdraw successfully", async () => {
+                    const getId = 0
+                    const setId = 0
+                    const spells = [
+                        {
+                            connector: incentiveConnectorName,
+                            method: "withdrawAndHarvest",
+                            args: [
+                                WETH_ADDR,
+                                DAI_ADDR,
+                                ethers.utils.parseEther("1"),
+                                getId,
+                                setId
+                            ]
+                        }
+                    ]
+
+                    const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)
+                    await tx.wait();
+                })
+
+                it("Should withdraw successfully", async () => {
+                    const getId = 0
+                    const setId = 0
+                    const spells = [
+                        {
+                            connector: incentiveConnectorName,
+                            method: "withdraw",
+                            args: [
+                                WETH_ADDR,
+                                DAI_ADDR,
+                                ethers.utils.parseEther("1"),
+                                getId,
+                                setId
+                            ]
+                        }
+                    ]
+
+                    const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)
+                    await tx.wait();
+                })
+            })
+        }).timeout(10000000000);
 
         it("Should buy successfully", async function () {
             const ethAmount = ethers.utils.parseEther("0.1") // 1 ETH
