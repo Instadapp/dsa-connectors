@@ -12,9 +12,7 @@ import { IUbiquityBondingV2, IUbiquityMetaPool, I3Pool } from "./interfaces.sol"
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-contract ConnectV2Ubiquity is Helpers, Events {
-	string public constant name = "Ubiquity-v1";
-
+abstract contract UbiquityResolver is Helpers, Events {
 	/**
 	 * @dev Deposit into Ubiquity protocol
 	 * @notice 3POOL (DAI / USDC / USDT) => METAPOOL (3CRV / uAD) => uAD3CRV-f => Ubiquity BondingShare
@@ -114,7 +112,7 @@ contract ConnectV2Ubiquity is Helpers, Events {
 
 		setUint(setId, bondingShareId);
 
-		_eventName = "Deposit(address,address,uint256,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogDeposit(address,address,uint256,uint256,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			address(this),
 			token,
@@ -205,7 +203,7 @@ contract ConnectV2Ubiquity is Helpers, Events {
 		uint256 amount = getTokenBal(TokenInterface(token));
 
 		setUint(setId, amount);
-		_eventName = "Withdraw(address,uint256,uint256,uint256,address,uint256,uint256,uint256)";
+		_eventName = "LogWithdraw(address,uint256,uint256,uint256,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			address(this),
 			_bondingShareId,
@@ -217,4 +215,8 @@ contract ConnectV2Ubiquity is Helpers, Events {
 			setId
 		);
 	}
+}
+
+contract ConnectV2Ubiquity is UbiquityResolver {
+	string public constant name = "Ubiquity-v1";
 }
