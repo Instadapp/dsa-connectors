@@ -19,7 +19,7 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Benqi Mapping
      */
-    BenqiMappingInterface internal constant qiMapping = BenqiMappingInterface(0xe7a85d0adDB972A4f0A4e57B698B37f171519e88);
+    BenqiMappingInterface internal constant qiMapping = BenqiMappingInterface(0xFb0388DAF4004D34D5A3209E1E5dd8C96a2A6D9a);
 
     /**
      * @dev Benqi reward token type to show BENQI or AVAX
