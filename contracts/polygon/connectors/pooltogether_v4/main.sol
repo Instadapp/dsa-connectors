@@ -38,12 +38,12 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
         address prizePoolToken = prizePoolContract.getToken();
 
-        bool isEth = prizePoolToken == wethAddr;
+        bool isMatic = prizePoolToken == wmaticAddr;
         TokenInterface tokenContract = TokenInterface(prizePoolToken);
 
-        if (isEth) {
+        if (isMatic) {
             _amount = _amount == uint256(-1) ? address(this).balance : _amount;
-            convertEthToWeth(isEth, tokenContract, _amount);
+            convertMaticToWmatic(isMatic, tokenContract, _amount);
         } else {
             _amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
         }
@@ -81,12 +81,12 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
         PrizePoolInterface prizePoolContract = PrizePoolInterface(prizePool);
         address prizePoolToken = prizePoolContract.getToken();
 
-        bool isEth = prizePoolToken == wethAddr;
+        bool isMatic = prizePoolToken == wmaticAddr;
         TokenInterface tokenContract = TokenInterface(prizePoolToken);
 
-        if (isEth) {
+        if (isMatic) {
             _amount = _amount == uint256(-1) ? address(this).balance : _amount;
-            convertEthToWeth(isEth, tokenContract, _amount);
+            convertMaticToWmatic(isMatic, tokenContract, _amount);
         } else {
             _amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
         }
@@ -128,7 +128,7 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
 
         _amount = prizePoolContract.withdrawFrom(address(this), _amount);
 
-        convertWethToEth(prizePoolToken == wethAddr, tokenContract, _amount);
+        convertWmaticToMatic(prizePoolToken == wmaticAddr, tokenContract, _amount);
 
         setUint(setId, _amount);
 
@@ -185,6 +185,6 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
     }
 }
 
-contract ConnectV2PoolTogetherV4 is PoolTogetherV4Resolver {
+contract ConnectV2PoolTogetherV4Polygon is PoolTogetherV4Resolver {
     string public constant name = "PoolTogetherV4-v1";
 }
