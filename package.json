@@ -8,8 +8,7 @@
     "coverage": "./node_modules/.bin/solidity-coverage",
     "check": "node status-checks/huskyCheck.js",
     "check-husky": "node status-checks/huskyCheck.js",
-    "deploy": "node scripts/deployConnectorsFromCmd.js",
-    "build-contracts": "sol-merger \"./contracts/connectors/mock.sol\" ./contracts/build"
+    "deploy": "node scripts/deployConnectorsFromCmd.js"
   },
   "repository": {
     "type": "git",
@@ -22,19 +21,18 @@
   },
   "homepage": "https://github.com/InstaDApp/dsa-connectors-new#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^3.4.2",
+    "@openzeppelin/contracts": "^3.4.0-solc-0.7",
     "@uniswap/v3-core": "^1.0.0",
     "@uniswap/v3-periphery": "^1.2.1",
     "chalk": "^4.1.2",
-    "commander": "^7.2.0",
-    "dotenv": "^7.0.0",
+    "dotenv": "^10.0.0",
     "hardhat-docgen": "^1.1.2",
     "minimist": "^1.2.5",
     "solc": "^0.7.6"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^2.1.6",
+    "@nomiclabs/hardhat-etherscan": "^2.1.7",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/test-helpers": "^0.5.15",
@@ -42,15 +40,14 @@
     "@tenderly/hardhat-tenderly": "^1.0.12",
     "chai-as-promised": "^7.1.1",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.4.7",
-    "hardhat": "^2.6.6",
-    "hardhat-deploy": "^0.9.3",
+    "ethers": "^5.5.1",
+    "hardhat": "^2.6.7",
+    "hardhat-deploy": "^0.9.4",
     "hardhat-deploy-ethers": "^0.3.0-beta.11",
-    "husky": "^6.0.0",
     "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.18",
-    "sol-merger": "^2.0.1",
     "solhint": "^3.3.6",
+    "husky": "^7.0.4",
     "solidity-coverage": "0.5.11",
     "web3": "^1.6.0"
   }
