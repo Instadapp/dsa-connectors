@@ -3,7 +3,7 @@ const hre = require("hardhat");
 const { web3, deployments, waffle, ethers, artifacts} = hre;
 const { provider, deployMockContract } = waffle
 
-const ALCHEMY_ID = process.env.ALCHEMY_ID;
+const ALCHEMY_ID = process.env.ALCHEMY_POLYGON_ID;
 
 const impersonate = require("../../scripts/impersonate.js")
 const deployAndEnableConnector = require("../../scripts/polygon/deployAndEnableConnector.js")
@@ -157,7 +157,7 @@ describe("PoolTogether", function () {
             },
             {
                 connector: ptConnectorName,
-                method: "depositTo",
+                method: "deposit",
                 args: [PRIZE_POOL_ADDR, amount, 0, 0]
             }
         ]
@@ -201,7 +201,7 @@ describe("PoolTogether", function () {
         const spells = [
             {
                 connector: ptConnectorName,
-                method: "depositToAndDelegate",
+                method: "depositAndDelegate",
                 args: [PRIZE_POOL_ADDR, amount, dsaWallet0.address, 0, 0]
             }
         ]
@@ -243,7 +243,7 @@ describe("PoolTogether", function () {
         const spells = [
             {
                 connector: ptConnectorName,
-                method: "withdrawFrom",
+                method: "withdraw",
                 args: [PRIZE_POOL_ADDR, amount, 0, 0]
             }
         ]
@@ -280,12 +280,12 @@ describe("PoolTogether", function () {
     });
 
     it("Should deposit USDC into USDC Prize Pool and delegate to dsaWallet0", async function () {
-        const amount = ethers.utils.parseUnits("500", 6) // 500 USDC 
+        const amount = ethers.utils.parseUnits("500", 6) // 500 USDC
         const setId = "83478237"
         const spells = [
             {
                 connector: ptConnectorName,
-                method: "depositTo",
+                method: "deposit",
                 args: [PRIZE_POOL_ADDR, amount, 0, 0]
             },
             {
@@ -403,7 +403,7 @@ describe("PoolTogether", function () {
             },
             {
                 connector: ptConnectorName,
-                method: "withdrawFrom",
+                method: "withdraw",
                 args: [PRIZE_POOL_ADDR, amount, setId, 0]
             }
         ]

@@ -27,7 +27,7 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
 
-    function depositTo(
+    function deposit(
         address prizePool,
         uint256 amount,
         uint256 getId,
@@ -69,7 +69,7 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
     */
 
-    function depositToAndDelegate(
+    function depositAndDelegate(
         address prizePool,
         uint256 amount,
         address delegateTo,
@@ -98,7 +98,7 @@ abstract contract PoolTogetherV4Resolver is Events, DSMath, Basic {
 
         setUint(setId, _amount);
 
-        _eventName = "LogDepositToDelegate(address,address,uint256,address,uint256,uint256)";
+        _eventName = "LogDepositAndDelegate(address,address,uint256,address,uint256,uint256)";
         _eventParam = abi.encode(address(prizePool), address(this), _amount, address(delegateTo), getId, setId);
     }
 

@@ -163,7 +163,7 @@ describe("PoolTogether", function () {
             },
             {
                 connector: ptConnectorName,
-                method: "depositTo",
+                method: "deposit",
                 args: [PRIZE_POOL_ADDR, amount, 0, 0]
             }
         ]
@@ -207,7 +207,7 @@ describe("PoolTogether", function () {
         const spells = [
             {
                 connector: ptConnectorName,
-                method: "depositToAndDelegate",
+                method: "depositAndDelegate",
                 args: [PRIZE_POOL_ADDR, amount, dsaWallet0.address, 0, 0]
             }
         ]
@@ -249,7 +249,7 @@ describe("PoolTogether", function () {
         const spells = [
             {
                 connector: ptConnectorName,
-                method: "withdrawFrom",
+                method: "withdraw",
                 args: [PRIZE_POOL_ADDR, amount, 0, 0]
             }
         ]
@@ -291,7 +291,7 @@ describe("PoolTogether", function () {
         const spells = [
             {
                 connector: ptConnectorName,
-                method: "depositTo",
+                method: "deposit",
                 args: [PRIZE_POOL_ADDR, amount, 0, 0]
             },
             {
@@ -432,7 +432,7 @@ describe("PoolTogether", function () {
             },
             {
                 connector: ptConnectorName,
-                method: "withdrawFrom",
+                method: "withdraw",
                 args: [PRIZE_POOL_ADDR, amount, setId, 0]
             }
         ]
