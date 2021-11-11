@@ -8,4 +8,6 @@ contract Helpers {
     // function getNTokenBalance(uint16 currencyId);
     // function convertToInternal(uint16 currencyId);
 
+    function getDepositAmountAndSetApproval(uint16 currencyId)
+    function executeActionWithBalanceChange(uint16 currencyId)
 }

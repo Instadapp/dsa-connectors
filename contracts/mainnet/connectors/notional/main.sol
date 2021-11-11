@@ -2,6 +2,7 @@ pragma solidity ^0.7.6;
 
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
+import { TokenInterface } from "../common/interfaces.sol";
 
 /**
  * @title Notional
@@ -332,6 +333,7 @@ abstract contract NotionalResolver is Events, Helpers {
     function depositCollateralBorrowAndWithdraw(
         uint16 depositCurrencyId,
         bool useUnderlying,
+        uint depositAmount,
         uint16 borrowCurrencyId,
         uint8 marketIndex,
         uint fCashAmount,
@@ -341,7 +343,7 @@ abstract contract NotionalResolver is Events, Helpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         require(depositCurrencyId != borrowCurrencyId);
-        address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
+        address tokenAddress = useUnderlying ? getUnderlyingToken(depositCurrencyId) : getAssetToken(depositCurrencyId);
         depositAmount = getUint(getId, depositAmount);
         if (depositAmount == uint(-1)) depositAmount = ERC20(tokenAddress).balanceOf(address(this));
 
@@ -374,15 +376,71 @@ abstract contract NotionalResolver is Events, Helpers {
         trades[borrowIndex] = encodeBorrowTrade(marketIndex, fCashAmount, minLendRate);
         action[borrowIndex].trades = trades;
 
+        address borrowToken;
+        uint balanceBefore;
+        if (setId != 0) {
+            address borrowToken = useUnderlying ? getUnderlyingToken(borrowCurrencyId) : getAssetToken(borrowCurrencyId);
+            balanceBefore = ERC20(borrowToken).balanceOf(address(this));
+        }
+
         notional.batchBalanceActionWithTrades{value: msgValue}(address(this), action);
 
+        if (setId != 0) {
+            setUint(setId, ERC20(borrowToken).balanceOf(address(this)).sub(balanceBefore));
+        }
+
         // todo: events
+    }
+
+    function withdrawLend(
+        uint16 currencyId,
+        uint8 marketIndex,
+        uint fCashAmount,
+        uint maxBorrowRate,
+        uint getId,
+        uint setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[]();
+        action[0].actionType = DepositActionType.None;
+        action[0].currencyId = currencyId;
+        // Withdraw borrowed amount to wallet
+        action[0].withdrawEntireCashBalance = true;
+        // TODO: will redeem underlying work with ETH?
+        action[0].redeemToUnderlying = useUnderlying;
+
+        bytes32[] memory trades = new bytes32[](1);
+        trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
+        action[0].trades = trades;
+
+        address tokenAddress;
+        uint balanceBefore;
+        if (setId != 0) {
+            address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
+            balanceBefore = ERC20(borrowToken).balanceOf(address(this));
+        }
+
+        notional.batchBalanceActionWithTrades{value: msgValue}(address(this), action);
+
+        if (setId != 0) {
+            setUint(setId, ERC20(borrowToken).balanceOf(address(this)).sub(balanceBefore));
+        }
+    }
+
+    function repayBorrow(
+        uint16 currencyId,
+        uint8 marketIndex,
+        uint fCashAmount,
+        uint minLendRate,
+        uint getId,
+        uint setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        // might want to use getfCashAmountGivenCashAmount
     }
 
     /**
      * @notice Executes a number of batch actions on the account without getId or setId integration
      * @dev This method will allow the user to take almost any action on Notional but does not have any
-     * getId or setId integration.
+     * getId or setId integration. This can be used to roll lends and borrows forward.
      * @param actions a set of BatchActionWithTrades that will be executed for this account
      */
     function batchActionRaw(
