@@ -99,5 +99,5 @@ abstract contract BenqiResolver is Events, Helpers {
 }
 
 contract ConnectV2QiAvalanche is BenqiResolver {
-    string public constant name = "Benqi-v1";
+    string public constant name = "QI-v1";
 }
