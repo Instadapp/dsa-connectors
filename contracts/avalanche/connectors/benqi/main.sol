@@ -437,5 +437,5 @@ abstract contract BenqiResolver is Events, Helpers {
 }
 
 contract ConnectV2BenqiAvalanche is BenqiResolver {
-    string public name = "Benqi-v1";
+    string public constant name = "Benqi-v1";
 }
