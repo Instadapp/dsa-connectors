@@ -15,20 +15,6 @@ import { Events } from "./events.sol";
 
 abstract contract OneInchResolver is Helpers, Events {
     /**
-     * @dev 1inch swap uses `.call()`. This function restrict it to call only swap/trade functionality
-     * @param callData - calldata to extract the first 4 bytes for checking function signature
-     */
-    function checkOneInchSig(bytes memory callData) internal pure returns(bool isOk) {
-        bytes memory _data = callData;
-        bytes4 sig;
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            sig := mload(add(_data, 32))
-        }
-        isOk = sig == oneInchSwapSig || sig == oneInchUnoswapSig;
-    }
-
-    /**
      * @dev 1inch API swap handler
      * @param oneInchData - contains data returned from 1inch API. Struct defined in interfaces.sol
      * @param ethAmt - Eth to swap for .value()
@@ -77,8 +63,6 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
             approve(TokenInterface(_sellAddr), oneInchAddr, oneInchData._sellAmt);
         }
 
-        require(checkOneInchSig(oneInchData.callData), "Not-swap-function");
-
         oneInchData._buyAmt = oneInchSwap(oneInchData, ethAmt);
         setUint(setId, oneInchData._buyAmt);
 
@@ -124,5 +108,5 @@ abstract contract OneInch is OneInchResolverHelpers {
 }
 
 contract ConnectV2OneInchPolygon is OneInch {
-    string public name = "1Inch-v1";
+    string public name = "1Inch-v4-v1";
 }
