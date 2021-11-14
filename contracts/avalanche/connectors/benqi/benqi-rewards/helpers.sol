@@ -1,8 +1,8 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import { DSMath } from "../../common/math.sol";
-import { Basic } from "../../common/basic.sol";
+import { DSMath } from "../../../common/math.sol";
+import { Basic } from "../../../common/basic.sol";
 import { ComptrollerInterface, QiInterface, BenqiMappingInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
@@ -12,7 +12,7 @@ abstract contract Helpers is DSMath, Basic {
     ComptrollerInterface internal constant troller = ComptrollerInterface(0x486Af39519B4Dc9a7fCcd318217352830E8AD9b4);
 
     /**
-     * @dev Reward Token
+     * @dev Qi Reward Token
      */
     QiInterface internal constant benqiToken = QiInterface(0x8729438EB15e2C8B576fCc6AeCdA6A148776C0F5);
 
