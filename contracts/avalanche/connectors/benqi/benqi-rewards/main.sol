@@ -117,7 +117,7 @@ abstract contract IncentivesResolver is Events, Helpers {
         }
 
         uint intialBal = address(this).balance;
-        troller.claimReward(rewardAvax, address(this));
+        troller.claimReward(rewardAvax, address(this), qitokens);
         uint finalBal = address(this).balance;
         uint amt = sub(finalBal, intialBal);
 
@@ -141,7 +141,7 @@ abstract contract IncentivesResolver is Events, Helpers {
         holders[0] = address(this);
 
         uint intialBal = address(this).balance;
-        troller.claimReward(rewardAvax, address(this));
+        troller.claimReward(rewardAvax, holders, qitokens, isBorrow, isSupply);
         uint finalBal = address(this).balance;
         uint amt = sub(finalBal, intialBal);
 
