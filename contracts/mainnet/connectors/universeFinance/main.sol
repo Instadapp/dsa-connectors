@@ -52,7 +52,6 @@ abstract contract UniverseFinanceResolver is Helpers, Events {
 }
 
 contract ConnectV2UniverseFinance is UniverseFinanceResolver {
-
     string public constant name = "UniverseFinance-v1";
 
 }
