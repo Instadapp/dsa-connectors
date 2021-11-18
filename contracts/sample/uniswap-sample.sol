@@ -46,30 +46,6 @@ contract uniswapSample {
         UniswapV3Pool(0xCEda10b4d3bdE429DdA3A6daB87b38360313CBdB);
     uint24 public constant poolFee = 3000;
 
-    function computeAddress(address factory_, PoolKey memory key_)
-        internal
-        pure
-        returns (address pool_)
-    {
-        require(key_.token0 < key_.token1);
-        pool_ = address(
-            uint160(
-                uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            hex"ff",
-                            factory_,
-                            keccak256(
-                                abi.encode(key_.token0, key_.token1, key_.fee)
-                            ),
-                            POOL_INIT_CODE_HASH
-                        )
-                    )
-                )
-            )
-        );
-    }
-
     function getPriceLimit(
         ISwapRouter.ExactInputSingleParams params,
         bool zeroForOne
