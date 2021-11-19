@@ -58,7 +58,7 @@ abstract contract Helpers is ISwapRouter {
         TransferHelper.safeApprove(tokenIn, address(router), amountIn);
     }
 
-    function getSingleInput(ISwapRouter.ExactInputSingleParams memory params)
+    function swapSingleInput(ISwapRouter.ExactInputSingleParams memory params)
         public
         returns (uint256)
     {

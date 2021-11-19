@@ -8,18 +8,17 @@ abstract contract uniswapSellBeta is Helpers {
         address tokenIn,
         address tokenOut,
         uint24 fee,
-        uint256 amountIn,
         uint256 amountOutMinimum,
         bool zeroForOne
-    ) public returns (uint256 amountOut) {
-        approveTransfer(tokenIn, msg.sender, address(this), amountIn);
-        amountOut = getSingleInput(
+    ) public payable returns (uint256 amountOut) {
+        approveTransfer(tokenIn, msg.sender, address(this), msg.value);
+        amountOut = swapSingleInput(
             getParams(
                 tokenIn,
                 tokenOut,
                 msg.sender,
                 fee,
-                amountIn,
+                msg.value,
                 amountOutMinimum,
                 zeroForOne
             )
@@ -27,6 +26,6 @@ abstract contract uniswapSellBeta is Helpers {
     }
 }
 
-abstract contract UniswapSellBetaArbitrum is uniswapSellBeta {
-    string public constant name = "UniswapSample-v1";
+contract UniswapSellBetaArbitrum is uniswapSellBeta {
+    string public constant name = "UniswapSellBeta";
 }
