@@ -65,7 +65,7 @@ contract Helpers {
         address tokenA,
         address tokenB,
         uint24 fee
-    ) public returns (uint160) {
+    ) internal view returns (uint160) {
         UniswapV3Pool state = UniswapV3Pool(
             getPoolAddress(tokenA, tokenB, fee)
         );
@@ -88,7 +88,7 @@ contract Helpers {
         uint256 amountIn,
         uint256 amountOutMinimum,
         bool zeroForOne
-    ) public returns (ISwapRouter.ExactInputSingleParams memory params) {
+    ) internal view returns (ISwapRouter.ExactInputSingleParams memory params) {
         params = ISwapRouter.ExactInputSingleParams({
             tokenIn: tokenIn,
             tokenOut: tokenOut,
@@ -107,21 +107,17 @@ contract Helpers {
         });
     }
 
-    function approveTransfer(address tokenIn, uint256 amountIn) public {
-        IERC20(tokenIn).safeApprove(address(router), amountIn);
-    }
-
     function SwapTokens(
         address tokenIn,
         address tokenOut,
         bool zeroForOne
-    ) public returns (address, address) {
+    ) internal pure returns (address, address) {
         if (!zeroForOne) return (tokenOut, tokenIn);
         else return (tokenIn, tokenOut);
     }
 
     function swapSingleInput(ISwapRouter.ExactInputSingleParams memory params)
-        public
+        internal
         returns (uint256)
     {
         return (uint256(router.exactInputSingle(params)));
