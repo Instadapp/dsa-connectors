@@ -1,6 +1,7 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
+import "hardhat/console.sol";
 import {UniswapV3Pool, ISwapRouter} from "./interface.sol";
 import {SqrtPriceMath} from "./libraries/SqrtPriceMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -106,15 +107,18 @@ contract Helpers {
         });
     }
 
-    function approveTransfer(
-        address tokenIn,
-        address sender,
-        address recipient,
-        uint256 amountIn
-    ) public {
-        IERC20(tokenIn).safeTransferFrom(sender, recipient, amountIn);
+    function approveTransfer(address tokenIn, uint256 amountIn) public {
+        console.log(IERC20(tokenIn).balanceOf(msg.sender));
+        IERC20(tokenIn).safeApprove(address(router), amountIn);
+    }
 
-        IERC20(tokenIn).safeApprove(recipient, amountIn);
+    function SwapTokens(
+        address tokenIn,
+        address tokenOut,
+        bool zeroForOne
+    ) public returns (address, address) {
+        if (!zeroForOne) return (tokenOut, tokenIn);
+        else return (tokenIn, tokenOut);
     }
 
     function swapSingleInput(ISwapRouter.ExactInputSingleParams memory params)

@@ -12,11 +12,16 @@ contract uniswapSellBeta is Helpers {
         uint256 amountOutMinimum,
         bool zeroForOne
     ) public payable returns (uint256 amountOut) {
-        approveTransfer(tokenIn, msg.sender, address(this), msg.value);
+        (address tokenA, address tokenB) = SwapTokens(
+            tokenIn,
+            tokenOut,
+            zeroForOne
+        );
+        approveTransfer(tokenA, amountIn);
         amountOut = swapSingleInput(
             getParams(
-                tokenIn,
-                tokenOut,
+                tokenA,
+                tokenB,
                 msg.sender,
                 fee,
                 amountIn,
