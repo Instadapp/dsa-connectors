@@ -3,7 +3,7 @@ pragma abicoder v2;
 
 import "./helpers.sol";
 
-abstract contract uniswapSellBeta is Helpers {
+contract uniswapSellBeta is Helpers {
     function sell(
         address tokenIn,
         address tokenOut,

@@ -1,11 +1,17 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import "./interface.sol";
+import {
+    UniswapV3Pool,
+    ISwapRouter
+} from "./interface.sol";
 import {SqrtPriceMath} from "./libraries/SqrtPriceMath.sol";
-import "./libraries/TransferHelper.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-contract Helpers is ISwapRouter {
+contract Helpers {
+    using SafeERC20 for IERC20;
+
     ISwapRouter constant public router =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
@@ -53,9 +59,9 @@ contract Helpers is ISwapRouter {
         address recipient,
         uint256 amountIn
     ) public {
-        TransferHelper.safeTransferFrom(tokenIn, sender, recipient, amountIn);
+        IERC20(tokenIn).safeTransferFrom(sender, recipient, amountIn);
 
-        TransferHelper.safeApprove(tokenIn, address(router), amountIn);
+        IERC20(tokenIn).safeApprove(address(router), amountIn);
     }
 
     function swapSingleInput(ISwapRouter.ExactInputSingleParams memory params)
