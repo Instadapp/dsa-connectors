@@ -108,7 +108,6 @@ contract Helpers {
     }
 
     function approveTransfer(address tokenIn, uint256 amountIn) public {
-        console.log(IERC20(tokenIn).balanceOf(msg.sender));
         IERC20(tokenIn).safeApprove(address(router), amountIn);
     }
 
