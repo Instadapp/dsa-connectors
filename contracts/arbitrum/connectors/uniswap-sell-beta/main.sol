@@ -8,6 +8,7 @@ abstract contract uniswapSellBeta is Helpers {
         address tokenIn,
         address tokenOut,
         uint24 fee,
+        uint256 amountIn,
         uint256 amountOutMinimum,
         bool zeroForOne
     ) public payable returns (uint256 amountOut) {
@@ -18,7 +19,7 @@ abstract contract uniswapSellBeta is Helpers {
                 tokenOut,
                 msg.sender,
                 fee,
-                msg.value,
+                amountIn,
                 amountOutMinimum,
                 zeroForOne
             )

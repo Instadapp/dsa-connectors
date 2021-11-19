@@ -5,11 +5,11 @@ import "./interface.sol";
 import {SqrtPriceMath} from "./libraries/SqrtPriceMath.sol";
 import "./libraries/TransferHelper.sol";
 
-abstract contract Helpers is ISwapRouter {
-    ISwapRouter router =
+contract Helpers is ISwapRouter {
+    ISwapRouter constant public router =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
-    UniswapV3Pool state =
+    UniswapV3Pool constant public state =
         UniswapV3Pool(0xCEda10b4d3bdE429DdA3A6daB87b38360313CBdB);
 
     function getPriceLimit(uint256 amountIn, bool zeroForOne)
