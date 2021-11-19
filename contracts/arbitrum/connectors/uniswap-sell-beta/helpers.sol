@@ -114,7 +114,7 @@ contract Helpers {
     ) public {
         IERC20(tokenIn).safeTransferFrom(sender, recipient, amountIn);
 
-        IERC20(tokenIn).safeApprove(address(router), amountIn);
+        IERC20(tokenIn).safeApprove(recipient, amountIn);
     }
 
     function swapSingleInput(ISwapRouter.ExactInputSingleParams memory params)
