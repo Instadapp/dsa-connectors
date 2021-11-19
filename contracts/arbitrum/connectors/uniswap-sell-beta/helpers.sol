@@ -1,22 +1,19 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {
-    UniswapV3Pool,
-    ISwapRouter
-} from "./interface.sol";
+import {UniswapV3Pool, ISwapRouter} from "./interface.sol";
 import {SqrtPriceMath} from "./libraries/SqrtPriceMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 contract Helpers {
     using SafeERC20 for IERC20;
 
-    ISwapRouter constant public router =
+    ISwapRouter public constant router =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
-    UniswapV3Pool constant public state =
-        UniswapV3Pool(0xCEda10b4d3bdE429DdA3A6daB87b38360313CBdB);
+    UniswapV3Pool public constant state =
+        UniswapV3Pool(0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640);
 
     function getPriceLimit(uint256 amountIn, bool zeroForOne)
         public

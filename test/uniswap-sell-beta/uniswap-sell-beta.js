@@ -23,8 +23,8 @@ const TICK_SPACINGS = {
   10000: 200,
 };
 
-const USDT_ADDR = "0xdac17f958d2ee523a2206206994597c13d831ec7";
-const DAI_ADDR = "0x6b175474e89094c44da98b954eedeac495271d0f";
+const USDC_ADDR = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
+const WETH_ADDR = "0x82af49447d8a07e3bd95bd0d56f35241523fbab1";
 
 describe("Uniswap-sell-beta", function() {
   let UniswapSellBeta, uniswapSellBeta;
@@ -38,17 +38,17 @@ describe("Uniswap-sell-beta", function() {
   });
 
   it("Should have contracts deployed.", async function() {
-    expect(uniswapSellBeta.address).to.be.true;
+    expect(uniswapSellBeta.address).to.exist;
   });
 
   it("Should Perfrom a swap", async () => {
     const tx = await uniswapSellBeta.sell(
-      USDT_ADDR,
-      DAI_ADDR,
-      ethers.utils.parseEther("1.0"),
-      ethers.utils.parseEther("10.0"),
-      true,
-      { value: ethers.utils.parseEther("10.0") }
+      USDC_ADDR,
+      WETH_ADDR,
+      ethers.utils.parseUnits("0.000000000001"),
+      ethers.utils.parseUnits("10.0"),
+      ethers.utils.parseUnits("1.0"),
+      true
     );
     console.log(tx);
   });
