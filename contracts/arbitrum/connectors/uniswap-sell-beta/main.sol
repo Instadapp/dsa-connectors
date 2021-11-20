@@ -32,12 +32,7 @@ contract uniswapSellBeta is Helpers, Events {
             )
         );
         _eventName = "LogSell(uint24,uint256,uint256,uint256)";
-        _eventParam = abi.encode(
-            fee,
-            amountIn,
-            amountOut,
-            amountOutMinimum
-        );
+        _eventParam = abi.encode(fee, amountIn, amountOut, amountOutMinimum);
     }
 }
 

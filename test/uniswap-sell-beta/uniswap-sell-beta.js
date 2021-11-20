@@ -92,8 +92,7 @@ describe("Uniswap-sell-beta", function() {
       USDC_ADDR,
       3000,
       ethers.utils.parseUnits("10.0", 18),
-      0,
-      true
+      0
     );
     // console.log(tx);
   });
@@ -118,12 +117,11 @@ describe("Uniswap-sell-beta", function() {
       .transfer(uniswapSellBeta.address, ethers.utils.parseUnits("10.0", 6));
 
     const tx = await uniswapSellBeta.sell(
-      WETH_ADDR,
       USDC_ADDR,
+      WETH_ADDR,
       3000,
       ethers.utils.parseUnits("10.0", 6),
-      0,
-      false
+      0
     );
     // console.log(tx);
   });
