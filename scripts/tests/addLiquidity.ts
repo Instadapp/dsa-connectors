@@ -8,14 +8,15 @@ const mineTx = async (tx: any) => {
 };
 
 const tokenMapping: Record<string, any> = {
-  usdc: {
-    impersonateSigner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
-    address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    abi: [
-      "function mint(address _to, uint256 _amount) external returns (bool);",
-    ],
-    process: async function(owner: Signer | Provider, to: any, amt: any) {
-      const contract = new ethers.Contract(this.address, this.abi, owner);
+  eth:{
+    usdc: {
+      impersonateSigner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
+      address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      abi: [
+        "function mint(address _to, uint256 _amount) external returns (bool);",
+      ],
+      process: async function(owner: Signer | Provider, to: any, amt: any) {
+        const contract = new ethers.Contract(this.address, this.abi, owner);
 
       await mineTx(contract.mint(to, amt));
     },
@@ -39,40 +40,53 @@ const tokenMapping: Record<string, any> = {
     process: async function(owner: Signer | Provider, address: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
 
-      await mineTx(contract.issue(amt));
-      await mineTx(contract.transfer(address, amt));
+        await mineTx(contract.issue(amt));
+        await mineTx(contract.transfer(address, amt));
+      },
     },
-  },
-  wbtc: {
-    impersonateSigner: "0xCA06411bd7a7296d7dbdd0050DFc846E95fEBEB7",
-    address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-    abi: ["function mint(address _to, uint256 _amount) public returns (bool)"],
-    process: async function(owner: Signer | Provider, address: any, amt: any) {
-      const contract = new ethers.Contract(this.address, this.abi, owner);
-      await mineTx(contract.mint(address, amt));
+    wbtc: {
+      impersonateSigner: "0xCA06411bd7a7296d7dbdd0050DFc846E95fEBEB7",
+      address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      abi: ["function mint(address _to, uint256 _amount) public returns (bool)"],
+      process: async function(owner: Signer | Provider, address: any, amt: any) {
+        const contract = new ethers.Contract(this.address, this.abi, owner);
+        await mineTx(contract.mint(address, amt));
+      },
     },
+    inst: {
+      impersonateSigner: "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
+      address: "0x6f40d4a6237c257fff2db00fa0510deeecd303eb",
+      abi: ["function transfer(address to, uint value)"],
+      process: async function(owner: Signer | Provider, address: any, amt: any) {
+        const contract = new ethers.Contract(this.address, this.abi, owner);
+        await mineTx(contract.transfer(address, amt));
+      },
+    }, 
   },
-  inst: {
-    impersonateSigner: "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
-    address: "0x6f40d4a6237c257fff2db00fa0510deeecd303eb",
-    abi: ["function transfer(address to, uint value)"],
-    process: async function(owner: Signer | Provider, address: any, amt: any) {
-      const contract = new ethers.Contract(this.address, this.abi, owner);
-      await mineTx(contract.transfer(address, amt));
-    },
-  },
+  polygon: {
+    link: {
+      impersonateSigner: "0x7d3a61907f6e2ef5ed901b6d9e5baf36827625af",
+      abi: ["function transfer(address to, uint value)"],
+      address: "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+      process: async function (owner, to, amt) {
+        const contract = new ethers.Contract(this.address, this.abi, owner);
+        await mineTx(contract.transfer(to, amt));
+      },
+    }
+  }
 };
 
-export async function addLiquidity(tokenName: string, address: any, amt: any) {
+export async function addLiquidity(tokenName: string, address: any, amt: any, chain: string) {
   const [signer] = await ethers.getSigners();
+  const _chain = chain ? chain : 'eth';
   tokenName = tokenName.toLowerCase();
-  if (!tokenMapping[tokenName]) {
+  if (!tokenMapping[_chain][tokenName]) {
     throw new Error(
       `Add liquidity doesn't support the following token: ${tokenName}`
     );
   }
 
-  const token = tokenMapping[tokenName];
+  const token = tokenMapping[_chain][tokenName];
 
   const [impersonatedSigner] = await impersonateAccounts([
     token.impersonateSigner,

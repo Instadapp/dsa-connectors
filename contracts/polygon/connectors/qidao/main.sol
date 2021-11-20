@@ -153,7 +153,6 @@ abstract contract QiDaoResolver is Events, Helpers {
 
         erc20StablecoinInterface vault = erc20StablecoinInterface(vaultAddress);
         vault.borrowToken(_vaultId, _amt);
-        vault.transferVault(_vaultId, address(this));
 
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
