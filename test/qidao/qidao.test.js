@@ -69,6 +69,9 @@ describe("QiDao", function() {
         parseEther("10")
       );
     });
+    it("Deposit LINK into DSA wallet", async function() {
+      await addLiquidity("link", dsaWallet0.address, parseEther("100"), "polygon")
+    })
   });
 
   describe("Main", function() {
@@ -115,6 +118,49 @@ describe("QiDao", function() {
       );
     });
 
+
+    it("should create a LINK vault in QiDao and deposit LINK into that vault", async function() {
+      const amt = parseEther("50");
+      const brwAmt = parseEther("10");
+      const setVaultId = "13571113";
+      const spells = [
+        {
+          connector: connectorName,
+          method: "createVault",
+          args: [vaults.link.address, setVaultId],
+        },
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: [polygonTokens.link.address, vaults.link.address, 0, amt, setVaultId, 0, 0, 0],
+        },
+        {
+          connector: connectorName,
+          method: "borrow",
+          args: [vaults.link.address, 0, brwAmt, setVaultId, 0, 0 , 0]
+        },
+        {
+          connector: connectorName,
+          method: "payback",
+          args: [vaults.link.address, 0, brwAmt, setVaultId, 0, 0 , 0],
+        },
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [polygonTokens.link.address, vaults.link.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
+        },
+      ];
+
+      const tx = await dsaWallet0
+        .connect(wallet0)
+        .cast(...encodeSpells(spells), wallet1.address);
+
+      await tx.wait();
+
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.eq(
+        parseEther("9.975")
+      );
+    });
     // it("Should borrow and payback half DAI from Aave V2", async function() {
     //   const amt = parseEther("100"); // 100 DAI
     //   // const setId = "83478237";
