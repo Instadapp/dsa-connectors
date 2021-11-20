@@ -14,37 +14,29 @@ contract uniswapSellBeta is Helpers, Events {
         address tokenOut,
         uint24 fee,
         uint256 amountIn,
-        uint256 amountOutMinimum,
-        bool zeroForOne
+        uint256 amountOutMinimum
     )
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        (address token0, address token1) = SwapTokens(
-            tokenIn,
-            tokenOut,
-            zeroForOne
-        );
-        IERC20(token0).safeApprove(address(router), amountIn);
+        IERC20(tokenIn).safeApprove(address(router), amountIn);
         uint256 amountOut = swapSingleInput(
             getParams(
-                token0,
-                token1,
+                tokenIn,
+                tokenOut,
                 address(this),
                 fee,
                 amountIn,
-                amountOutMinimum,
-                zeroForOne
+                amountOutMinimum
             )
         );
-        _eventName = "LogSell(uint24,uint256,uint256,uint256,bool)";
+        _eventName = "LogSell(uint24,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             fee,
             amountIn,
             amountOut,
-            amountOutMinimum,
-            zeroForOne
+            amountOutMinimum
         );
     }
 }

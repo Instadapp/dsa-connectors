@@ -85,8 +85,7 @@ contract Helpers {
         address recipient,
         uint24 fee,
         uint256 amountIn,
-        uint256 amountOutMinimum,
-        bool zeroForOne
+        uint256 amountOutMinimum
     ) internal view returns (ISwapRouter.ExactInputSingleParams memory params) {
         params = ISwapRouter.ExactInputSingleParams({
             tokenIn: tokenIn,
@@ -98,7 +97,7 @@ contract Helpers {
             amountOutMinimum: amountOutMinimum,
             sqrtPriceLimitX96: getPriceLimit(
                 amountIn,
-                zeroForOne,
+                tokenIn < tokenOut,
                 tokenIn,
                 tokenOut,
                 fee

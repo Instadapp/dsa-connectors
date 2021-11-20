@@ -5,7 +5,6 @@ contract Events {
         uint24 fee,
         uint256 amountIn,
         uint256 amountOut,
-        uint256 amountOutMinimum,
-        bool zeroForOne
+        uint256 amountOutMinimum
     );
 }
