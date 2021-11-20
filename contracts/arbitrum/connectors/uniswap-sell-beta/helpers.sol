@@ -10,7 +10,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 contract Helpers {
     using SafeERC20 for IERC20;
 
-    ISwapRouter public constant router =
+    ISwapRouter internal constant router =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     bytes32 internal constant POOL_INIT_CODE_HASH =
