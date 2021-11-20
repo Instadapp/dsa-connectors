@@ -14,7 +14,7 @@ contract uniswapSellBeta is Helpers {
         uint24 fee,
         uint256 amountIn,
         uint256 amountOutMinimum
-    ) public payable returns (uint256 amountOut) {
+    ) external payable returns (uint256 amountOut) {
         IERC20(tokenIn).safeApprove(address(router), amountIn);
         amountOut = swapSingleInput(
             getParams(
