@@ -11,7 +11,7 @@ interface IUniverseAdapter {
 
 }
 
-interface IUniverseVaultV3 {
+interface IVaultV3 {
 
     function withdraw(uint256 share0, uint256 share1) external returns(uint256, uint256);
 }
