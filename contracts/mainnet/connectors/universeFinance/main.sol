@@ -5,7 +5,7 @@ import {TokenInterface} from "../../common/interfaces.sol";
 import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
 
-abstract contract UniverseFinanceResolver is Helpers, Events {
+abstract contract UniverseFinanceConnect is Helpers, Events {
 
     /**
      * @notice Deposit in Universe Vault by Adapter
@@ -51,7 +51,6 @@ abstract contract UniverseFinanceResolver is Helpers, Events {
 
 }
 
-contract ConnectV2UniverseFinance is UniverseFinanceResolver {
+contract ConnectV2UniverseFinance is UniverseFinanceConnect {
     string public constant name = "UniverseFinance-v1";
-
 }
