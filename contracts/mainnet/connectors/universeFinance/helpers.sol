@@ -8,8 +8,7 @@ import  "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
 
-    // TODO The vault is currently under audit and the address needs to be updated
-    IUniverseAdapter constant universeAdapter = IUniverseAdapter(0x0000000000000000000000000000000000000000);
+    IUniverseAdapter constant universeAdapter = IUniverseAdapter(0x876861Ad49f911442720cF97c9b3fCe4070F07d5);
 
     function _deposit(
         address universeVault,
@@ -25,7 +24,7 @@ abstract contract Helpers is DSMath, Basic {
         uint256 share1
     ) internal returns(uint256, uint256){
         require(share0 > 0 || share1 > 0, "ZERO");
-        return IUniverseVaultV3(universeVault).withdraw(share0, share1);
+        return IVaultV3(universeVault).withdraw(share0, share1);
     }
 
 }
