@@ -19,6 +19,12 @@ abstract contract QiDaoResolver is Events, Helpers {
 
     address constant internal MAI = 0xa3Fa99A148fA48D14Ed51d610c367C61876997F1;
 
+    /**
+     * @dev Create a vault
+     * @notice Create a vault on QiDao
+     * @param vaultAddress The address of the vault smart contract for the token/asset
+     * @param setId ID of the created vault.
+    */
     function createVault(address vaultAddress, uint256 setId) external payable  returns (string memory _eventName, bytes memory _eventParam) {
         erc20StablecoinInterface vault = erc20StablecoinInterface(vaultAddress);
         uint256 vaultId = vault.createVault();
@@ -29,6 +35,13 @@ abstract contract QiDaoResolver is Events, Helpers {
         _eventParam = abi.encode(vaultId, address(this));
     }
 
+    /**
+     * @dev Destroy a specific vault
+     * @notice Destroy a specific vault on QiDao
+     * @param vaultAddress The address of the vault smart contract for the token/asset
+     * @param vaultId The NFT ID which identifies the vault to be interacted with
+     * @param getId ID to retrieve vaultId.
+    */
     function destroyVault(address vaultAddress, uint256 vaultId, uint256 getId)  external payable  returns (string memory _eventName, bytes memory _eventParam) {
         erc20StablecoinInterface vault = erc20StablecoinInterface(vaultAddress);
         uint256 _vaultId = getUint(getId, vaultId);
@@ -40,10 +53,16 @@ abstract contract QiDaoResolver is Events, Helpers {
 
 
     /**
-     * @dev Deposit ETH/ERC20_Token.
-     * @notice Deposit a token to Aave v2 for lending / collaterization.
+     * @dev Deposit MATIC/ERC20_Token.
+     * @notice Deposit a token to QiDao for lending / collaterization.
      * @param token The address of the token to deposit.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param vaultAddress The address of the vault smart contract for the token/asset
+     * @param vaultId The NFT ID which identifies the vault to be interacted with
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getVaultId ID to retrieve vaultId.
+     * @param setVaultId ID stores the vault being interacted with.
+     * @param getAmtId ID to retrieve amt.
+     * @param setAmtId ID stores the amount of tokens withdrawn.
     */
     function deposit(
         address token,
@@ -80,10 +99,14 @@ abstract contract QiDaoResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw ETH/ERC20_Token.
-     * @notice Withdraw deposited token from Aave v2
-     * @param token The address of the token to withdraw.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+     * @dev Withdraw MATIC/ERC20_Token.
+     * @notice Withdraw deposited token from QiDao
+     * @param token The address of the token to deposit.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param vaultAddress The address of the vault smart contract for the token/asset
+     * @param vaultId The NFT ID which identifies the vault to be interacted with
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getVaultId ID to retrieve vaultId.
+     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
      * @param setAmtId ID stores the amount of tokens withdrawn.
     */
@@ -133,11 +156,16 @@ abstract contract QiDaoResolver is Events, Helpers {
     }
 
     /**
-     * @dev Borrow ETH/ERC20_Token.
-     * @notice Borrow a token using Aave v2
+     * @dev Borrow MAI.
+     * @notice Borrow MAI from a specific vault on QiDao
      * @param amt The amount of the token to borrow.
+     * @param vaultAddress The address of the vault smart contract for the token/asset
+     * @param vaultId The NFT ID which identifies the vault to be interacted with
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getVaultId ID to retrieve vaultId.
+     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
-     * @param setAmtId ID stores the amount of tokens borrowed.
+     * @param setAmtId ID stores the amount of tokens withdrawn.
     */
     function borrow(
         address vaultAddress,
@@ -162,11 +190,15 @@ abstract contract QiDaoResolver is Events, Helpers {
     }
 
     /**
-     * @dev Payback borrowed ETH/ERC20_Token.
-     * @notice Payback debt owed.
-     * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+     * @dev Payback borrowed MAI.
+     * @notice Payback MAI from a specific vault on QiDao
+     * @param vaultAddress The address of the vault smart contract for the token/asset
+     * @param vaultId The NFT ID which identifies the vault to be interacted with
+     * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+     * @param getVaultId ID to retrieve vaultId.
+     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
-     * @param setAmtId ID stores the amount of tokens paid back.
+     * @param setAmtId ID stores the amount of tokens withdrawn.
     */
     function payback(
         address vaultAddress,
