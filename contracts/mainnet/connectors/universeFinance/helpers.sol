@@ -27,4 +27,17 @@ abstract contract Helpers is DSMath, Basic {
         return IVaultV3(universeVault).withdraw(share0, share1);
     }
 
+    function _approve(address universeVault, uint256 amount0, uint256 amount1) internal {
+        IVaultV3 universe = IVaultV3(universeVault);
+        TokenInterface token;
+        if (amount0 > 0) {
+            token = universe.token0();
+            token.approve(address(universeAdapter), amount0);
+        }
+        if (amount1 > 0) {
+            token = universe.token1();
+            token.approve(address(universeAdapter), amount1);
+        }
+    }
+
 }
