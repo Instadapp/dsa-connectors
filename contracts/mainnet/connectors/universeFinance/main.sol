@@ -22,6 +22,7 @@ abstract contract UniverseFinanceConnect is Helpers, Events {
     ) external returns (string memory _eventName, bytes memory _eventParam){
         amountA = getUint(getIds[0], amountA);
         amountB = getUint(getIds[1], amountB);
+        _approve(universeVault, amountA, amountB);
         (uint256 share0, uint256 share1) = _deposit(universeVault, amountA, amountB);
         // EVENT
         _eventName = "LogDeposit(address,uint256,uint256,uint256,uint256)";
