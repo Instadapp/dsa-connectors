@@ -118,7 +118,6 @@ describe("QiDao", function() {
       );
     });
 
-
     it("should create a LINK vault in QiDao and deposit LINK into that vault", async function() {
       const amt = parseEther("50");
       const brwAmt = parseEther("10");

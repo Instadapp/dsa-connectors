@@ -44,47 +44,12 @@ module.exports = {
     ],
   },
   networks: {
-    kovan: {
-      url: `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
-    },
-    mainnet: {
-      url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
-      timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("30", "gwei")),
-    },
-    rinkeby: {
-      url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
-      timeout: 150000,
-    },
     hardhat: {
       forking: {
         enabled: true,
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
       },
       blockGasLimit: 12000000,
-    },
-    matic: {
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
-      timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("1", "gwei")),
-    },
-    arbitrum: {
-      chainId: 42161,
-      url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-      accounts: [`0x${PRIVATE_KEY}`],
-      timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("2", "gwei")),
-    },
-    avax: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
-      chainId: 43114,
-      accounts: [`0x${PRIVATE_KEY}`],
-      timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("225", "gwei")),
     },
   },
   etherscan: {
