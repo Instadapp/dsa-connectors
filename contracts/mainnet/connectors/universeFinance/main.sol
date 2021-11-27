@@ -18,12 +18,15 @@ abstract contract UniverseFinanceConnect is Helpers, Events {
         address universeVault,
         uint256 amountA,
         uint256 amountB,
-        uint256[] calldata getIds
+        uint256[] calldata getIds,
+        uint256[] calldata setIds
     ) external returns (string memory _eventName, bytes memory _eventParam){
         amountA = getUint(getIds[0], amountA);
         amountB = getUint(getIds[1], amountB);
         _approve(universeVault, amountA, amountB);
         (uint256 share0, uint256 share1) = _deposit(universeVault, amountA, amountB);
+        setUint(setIds[0], share0);
+        setUint(setIds[1], share1);
         // EVENT
         _eventName = "LogDeposit(address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(universeVault, amountA, amountB, share0, share1);
@@ -40,8 +43,11 @@ abstract contract UniverseFinanceConnect is Helpers, Events {
         address universeVault,
         uint256 share0,
         uint256 share1,
+        uint256[] calldata getIds,
         uint256[] calldata setIds
     ) external returns (string memory _eventName, bytes memory _eventParam){
+        share0 = getUint(getIds[0], share0);
+        share1 = getUint(getIds[1], share1);
         (uint256 _amtA, uint256 _amtB) = _withdraw(universeVault, share0, share1);
         setUint(setIds[0], _amtA);
         setUint(setIds[1], _amtB);
