@@ -1,6 +1,6 @@
-const { ethers, network } = require("hardhat");
+import { ethers, network } from "hardhat";
 
-module.exports = async (accounts) => {
+export const impersonateAccounts = async (accounts: any) => {
   const signers = [];
   for (const account of accounts) {
     await network.provider.request({

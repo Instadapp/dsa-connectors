@@ -1,7 +1,9 @@
-const { ethers } = require("hardhat");
-const impersonateAccounts = require("./impersonate");
+import { Provider } from "@ethersproject/abstract-provider";
+import { Signer } from "@ethersproject/abstract-signer";
+import { ethers } from "hardhat";
+import { impersonateAccounts } from "./impersonate";
 
-const mineTx = async (tx) => {
+const mineTx = async (tx: any) => {
   await (await tx).wait();
 };
 
@@ -12,7 +14,7 @@ const tokenMapping = {
     abi: [
       "function mint(address _to, uint256 _amount) external returns (bool);",
     ],
-    process: async function(owner, to, amt) {
+    process: async function(owner: Signer | Provider, to: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
 
       await mineTx(contract.mint(to, amt));
@@ -22,7 +24,7 @@ const tokenMapping = {
     impersonateSigner: "0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503",
     abi: ["function transfer(address to, uint value)"],
     address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-    process: async function(owner, to, amt) {
+    process: async function(owner: Signer | Provider, to: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
       await mineTx(contract.transfer(to, amt));
     },
@@ -34,7 +36,7 @@ const tokenMapping = {
       "function issue(uint amount)",
       "function transfer(address to, uint value)",
     ],
-    process: async function(owner, address, amt) {
+    process: async function(owner: Signer | Provider, address: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
 
       await mineTx(contract.issue(amt));
@@ -45,7 +47,7 @@ const tokenMapping = {
     impersonateSigner: "0xCA06411bd7a7296d7dbdd0050DFc846E95fEBEB7",
     address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
     abi: ["function mint(address _to, uint256 _amount) public returns (bool)"],
-    process: async function(owner, address, amt) {
+    process: async function(owner: Signer | Provider, address: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
       await mineTx(contract.mint(address, amt));
     },
@@ -54,20 +56,19 @@ const tokenMapping = {
     impersonateSigner: "0x75e89d5979E4f6Fba9F97c104c2F0AFB3F1dcB88",
     address: "0x6f40d4a6237c257fff2db00fa0510deeecd303eb",
     abi: ["function transfer(address to, uint value)"],
-    process: async function(owner, address, amt) {
+    process: async function(owner: Signer | Provider, address: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
       await mineTx(contract.transfer(address, amt));
     },
-  }
+  },
 };
 
-module.exports = async (tokenName, address, amt) => {
+module.exports = async (tokenName: string, address: any, amt: any) => {
   const [signer] = await ethers.getSigners();
   tokenName = tokenName.toLowerCase();
   if (!tokenMapping[tokenName]) {
     throw new Error(
-      "Add liquidity doesn't support the following token: ",
-      tokenName
+      `Add liquidity doesn't support the following token: ${tokenName}`
     );
   }
 
