@@ -1,15 +1,15 @@
 const hre = require("hardhat");
-const hardhatConfig = require("../../hardhat.config");
+const hardhatConfig = require("../../../hardhat.config");
 
 // Instadapp deployment and testing helpers
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js");
-const encodeSpells = require("../../scripts/encodeSpells.js");
-const getMasterSigner = require("../../scripts/getMasterSigner");
-const buildDSAv2 = require("../../scripts/buildDSAv2");
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js");
+const encodeSpells = require("../../../scripts/encodeSpells.js");
+const getMasterSigner = require("../../../scripts/getMasterSigner");
+const buildDSAv2 = require("../../../scripts/buildDSAv2");
 
 // Instadapp instadappAddresses/ABIs
-const instadappAddresses = require("../../scripts/constant/addresses");
-const instadappAbi = require("../../scripts/constant/abis");
+const instadappAddresses = require("../../../scripts/constant/addresses");
+const instadappAbi = require("../../../scripts/constant/abis");
 
 // Instadapp Liquity Connector artifacts
 const connectV2LiquityArtifacts = require("../../artifacts/contracts/mainnet/connectors/liquity/main.sol/ConnectV2Liquity.json");
@@ -17,7 +17,7 @@ const connectV2BasicV1Artifacts = require("../../artifacts/contracts/mainnet/con
 const { ethers } = require("hardhat");
 
 // Instadapp uses a fake address to represent native ETH
-const { eth_addr: ETH_ADDRESS } = require("../../scripts/constant/constant");
+const { eth_addr: ETH_ADDRESS } = require("../../../scripts/constant/constant");
 
 const LIQUITY_CONNECTOR = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment

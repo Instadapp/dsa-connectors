@@ -3,15 +3,15 @@ const hre = require("hardhat");
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
+const buildDSAv2 = require("../../../scripts/buildDSAv2")
+const encodeSpells = require("../../../scripts/encodeSpells.js")
+const getMasterSigner = require("../../../scripts/getMasterSigner")
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/constant/constant");
-const tokens = require("../../scripts/constant/tokens");
+const addresses = require("../../../scripts/constant/addresses");
+const abis = require("../../../scripts/constant/abis");
+const constants = require("../../../scripts/constant/constant");
+const tokens = require("../../../scripts/constant/tokens");
 
 const connectV2CompoundArtifacts = require("../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json")
 const connectV2PoolTogetherArtifacts = require("../../artifacts/contracts/mainnet/connectors/pooltogether/main.sol/ConnectV2PoolTogether.json")

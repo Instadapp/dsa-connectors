@@ -1,4 +1,4 @@
-module.exports = {
+export const abis = {
   core: {
     connectorsV2: require("./abi/core/connectorsV2.json"),
     instaIndex: require("./abi/core/instaIndex.json"),

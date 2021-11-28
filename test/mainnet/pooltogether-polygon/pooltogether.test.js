@@ -5,15 +5,15 @@ const { provider, deployContract } = waffle
 
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
 
-const deployAndEnableConnector = require("../../scripts/polygon/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/polygon/buildDSAv2")
-const encodeSpells = require("../../scripts/polygon/encodeSpells.js")
-const getMasterSigner = require("../../scripts/polygon/getMasterSigner")
+const deployAndEnableConnector = require("../../../scripts/polygon/deployAndEnableConnector.js")
+const buildDSAv2 = require("../../../scripts/polygon/buildDSAv2")
+const encodeSpells = require("../../../scripts/polygon/encodeSpells.js")
+const getMasterSigner = require("../../../scripts/polygon/getMasterSigner")
 
-const addresses = require("../../scripts/polygon/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/polygon/constant/constant");
-const tokens = require("../../scripts/polygon/constant/tokens");
+const addresses = require("../../../scripts/polygon/constant/addresses");
+const abis = require("../../../scripts/constant/abis");
+const constants = require("../../../scripts/polygon/constant/constant");
+const tokens = require("../../../scripts/polygon/constant/tokens");
 
 const connectV2AaveV2Artifacts = require("../../artifacts/contracts/polygon/connectors/aave/v2/main.sol/ConnectV2AaveV2Polygon.json")
 const connectV2PoolTogetherArtifacts = require("../../artifacts/contracts/polygon/connectors/pooltogether/main.sol/ConnectV2PoolTogetherPolygon.json")
