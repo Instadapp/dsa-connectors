@@ -2,17 +2,17 @@ const { expect } = require("chai");
 const hre = require("hardhat");
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
-const { abi: implementationsABI } = require("../../scripts/constant/abi/core/InstaImplementations.json")
+const { abi: implementationsABI } = require("../../../scripts/constant/abi/core/InstaImplementations.json")
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
+const buildDSAv2 = require("../../../scripts/buildDSAv2")
+const encodeSpells = require("../../../scripts/encodeSpells.js")
+const getMasterSigner = require("../../../scripts/getMasterSigner")
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/constant/constant");
-const tokens = require("../../scripts/constant/tokens");
+const addresses = require("../../../scripts/constant/addresses");
+const abis = require("../../../scripts/constant/abis");
+const constants = require("../../../scripts/constant/constant");
+const tokens = require("../../../scripts/constant/tokens");
 
 const connectV2BasicERC721Artifacts = require("../../artifacts/contracts/mainnet/connectors/basic-ERC721/main.sol/ConnectV2BasicERC721.json")
 const erc721Artifacts = require("../../artifacts/@openzeppelin/contracts/token/ERC721/IERC721.sol/IERC721.json")

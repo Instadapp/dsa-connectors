@@ -1,4 +1,4 @@
-module.exports = {
+export const addresses = {
   connectors: {
     basic: "0xe5398f279175962E56fE4c5E0b62dc7208EF36c6",
     auth: "0xd1aff9f2acf800c876c409100d6f39aea93fc3d9",
@@ -9,3 +9,4 @@ module.exports = {
     instaIndex: "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723",
   },
 };
+ 

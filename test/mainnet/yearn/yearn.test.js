@@ -3,14 +3,14 @@ const hre = require("hardhat");
 const { waffle, ethers } = hre;
 const { provider } = waffle
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
+const buildDSAv2 = require("../../../scripts/buildDSAv2")
+const encodeSpells = require("../../../scripts/encodeSpells.js")
+const getMasterSigner = require("../../../scripts/getMasterSigner")
 
-const tokens = require("../../scripts/constant/tokens");
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
+const tokens = require("../../../scripts/constant/tokens");
+const addresses = require("../../../scripts/constant/addresses");
+const abis = require("../../../scripts/constant/abis");
 const connectV2YearnArtifacts = require("../../artifacts/contracts/mainnet/connectors/yearn_v2/main.sol/ConnectV2YearnV2.json")
 
 const toBytes32 = (bn) => {

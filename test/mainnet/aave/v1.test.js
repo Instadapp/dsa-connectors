@@ -1,16 +1,16 @@
 const { expect } = require("chai");
 const hre = require("hardhat");
-const abis = require("../../scripts/constant/abis");
-const addresses = require("../../scripts/constant/addresses");
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector");
-const getMasterSigner = require("../../scripts/getMasterSigner");
-const buildDSAv2 = require("../../scripts/buildDSAv2");
+const abis = require("../../../scripts/constant/abis");
+const addresses = require("../../../scripts/constant/addresses");
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector");
+const getMasterSigner = require("../../../scripts/getMasterSigner");
+const buildDSAv2 = require("../../../scripts/buildDSAv2");
 const ConnectV2AaveV1 = require("../../artifacts/contracts/mainnet/connectors/aave/v1/main.sol/ConnectV2AaveV1.json");
 const { parseEther } = require("@ethersproject/units");
-const encodeSpells = require("../../scripts/encodeSpells");
-const tokens = require("../../scripts/constant/tokens");
-const constants = require("../../scripts/constant/constant");
-const addLiquidity = require("../../scripts/addLiquidity");
+const encodeSpells = require("../../../scripts/encodeSpells");
+const tokens = require("../../../scripts/constant/tokens");
+const constants = require("../../../scripts/constant/constant");
+const addLiquidity = require("../../../scripts/addLiquidity");
 const { ethers } = hre;
 
 const ALCHEMY_ID = process.env.ALCHEMY_ID;

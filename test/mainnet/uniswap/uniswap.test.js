@@ -3,23 +3,23 @@ const hre = require("hardhat");
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle;
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js");
-const buildDSAv2 = require("../../scripts/buildDSAv2");
-const encodeSpells = require("../../scripts/encodeSpells.js");
-const encodeFlashcastData = require("../../scripts/encodeFlashcastData.js");
-const getMasterSigner = require("../../scripts/getMasterSigner");
-const addLiquidity = require("../../scripts/addLiquidity");
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js");
+const buildDSAv2 = require("../../../scripts/buildDSAv2");
+const encodeSpells = require("../../../scripts/encodeSpells.js");
+const encodeFlashcastData = require("../../../scripts/encodeFlashcastData.js");
+const getMasterSigner = require("../../../scripts/getMasterSigner");
+const addLiquidity = require("../../../scripts/addLiquidity");
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/constant/constant");
-const tokens = require("../../scripts/constant/tokens");
+const addresses = require("../../../scripts/constant/addresses");
+const abis = require("../../../scripts/constant/abis");
+const constants = require("../../../scripts/constant/constant");
+const tokens = require("../../../scripts/constant/tokens");
 const {
   abi: nftManagerAbi,
 } = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json");
 
 const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json");
-const { eth } = require("../../scripts/constant/tokens");
+const { eth } = require("../../../scripts/constant/tokens");
 const { BigNumber } = require("ethers");
 
 const FeeAmount = {

@@ -3,14 +3,14 @@ const hre = require("hardhat");
 const { waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
-const addLiquidity = require("../../scripts/addLiquidity");
+const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
+const buildDSAv2 = require("../../../scripts/buildDSAv2")
+const encodeSpells = require("../../../scripts/encodeSpells.js")
+const getMasterSigner = require("../../../scripts/getMasterSigner")
+const addLiquidity = require("../../../scripts/addLiquidity");
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
+const addresses = require("../../../scripts/constant/addresses");
+const abis = require("../../../scripts/constant/abis");
 const { abi: nftManagerAbi } = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json")
 
 const connectV2UniswapStakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3_staker/main.sol/ConnectV2UniswapV3Staker.json");
