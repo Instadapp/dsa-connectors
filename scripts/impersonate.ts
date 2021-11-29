@@ -10,6 +10,5 @@ export const impersonateAccounts = async (accounts: any) => {
 
     signers.push(await ethers.getSigner(account));
   }
-
   return signers;
 };

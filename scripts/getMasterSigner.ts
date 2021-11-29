@@ -1,9 +1,8 @@
-const hre = require("hardhat");
-const { ethers } = hre;
-const addresses = require("./constant/addresses");
-const abis = require("./constant/abis");
+import { ethers, network } from "hardhat";
+import { addresses } from "./constant/addresses";
+import { abis } from "./constant/abis";
 
-module.exports = async function() {
+export async function getMasterSigner() {
   const [_, __, ___, wallet3] = await ethers.getSigners();
   const instaIndex = new ethers.Contract(
     addresses.core.instaIndex,
@@ -12,7 +11,7 @@ module.exports = async function() {
   );
 
   const masterAddress = await instaIndex.master(); // TODO: make it constant?
-  await hre.network.provider.request({
+  await network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [masterAddress],
   });
@@ -22,4 +21,4 @@ module.exports = async function() {
   });
 
   return await ethers.getSigner(masterAddress);
-};
+}

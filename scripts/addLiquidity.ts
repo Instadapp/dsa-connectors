@@ -63,7 +63,7 @@ const tokenMapping = {
   },
 };
 
-module.exports = async (tokenName: string, address: any, amt: any) => {
+export async function addLiquidity(tokenName: string, address: any, amt: any) {
   const [signer] = await ethers.getSigners();
   tokenName = tokenName.toLowerCase();
   if (!tokenMapping[tokenName]) {
@@ -85,4 +85,4 @@ module.exports = async (tokenName: string, address: any, amt: any) => {
   });
 
   await token.process(impersonatedSigner, address, amt);
-};
+}
