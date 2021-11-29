@@ -4,10 +4,10 @@ const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 import { abi: implementationsABI } from "../../../scripts/constant/abi/core/InstaImplementations.json"
 
-import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
-import buildDSAv2 from "../../../scripts/buildDSAv2"
-import encodeSpells from "../../../scripts/encodeSpells.js"
-import getMasterSigner from "../../../scripts/getMasterSigner"
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
 
 import { addresses } from "../../../scripts/constant/addresses"
 import { abis } from "../../../scripts/constant/abis"
@@ -26,13 +26,15 @@ const implementationsMappingAddr = "0xCBA828153d3a85b30B5b912e1f2daCac5816aE9D"
 describe("BASIC-ERC1155", function () {
     const connectorName = "BASIC-ERC1155-A"
 
-    let dsaWallet0
-    let masterSigner;
-    let instaConnectorsV2;
-    let connector;
-    let nftContract;
-    let tokenOwner;
-    let instaImplementationsMapping;
+    let dsaWallet0: any;
+    let masterSigner: any;
+    let instaConnectorsV2: any;
+    let connector: any;
+    let nftContract: any;
+    let tokenOwner: any;
+    let instaImplementationsMapping: any;
+    let InstaAccountV2DefaultImpl: any;
+    let instaAccountV2DefaultImpl: any;
 
 
     const wallets = provider.getWallets()

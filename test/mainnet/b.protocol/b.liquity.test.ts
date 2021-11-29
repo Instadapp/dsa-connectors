@@ -3,10 +3,10 @@ import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre; //check
 const { provider, deployContract } = waffle
 
-import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
-import buildDSAv2 from "../../../scripts/buildDSAv2"
-import encodeSpells from "../../../scripts/encodeSpells.js"
-import getMasterSigner from "../../../scripts/getMasterSigner"
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
@@ -21,16 +21,16 @@ const BAMM_ADDRESS = "0x0d3AbAA7E088C2c82f54B2f47613DA438ea8C598"
 describe("B.Liquity", function () {
   const connectorName = "B.LIQUITY-TEST-A"
 
-  let dsaWallet0;
-  let dsaWallet1;
-  let masterSigner;
-  let instaConnectorsV2;
-  let connector;
-  let manager;
-  let vat;
-  let lusd;
-  let bammToken;
-  let stabilityPool;
+  let dsaWallet0: any;
+  let dsaWallet1: any
+  let masterSigner: any;
+  let instaConnectorsV2: any;
+  let connector: any;
+  let manager: any;
+  let vat: any;
+  let lusd: any;
+  let bammToken: any;
+  let stabilityPool: any;
 
   const wallets = provider.getWallets()
   const [wallet0, wallet1, wallet2, wallet3] = wallets

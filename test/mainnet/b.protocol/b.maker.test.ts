@@ -3,29 +3,29 @@ import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
-import buildDSAv2 from "../../../scripts/buildDSAv2"
-import encodeSpells from "../../../scripts/encodeSpells.js"
-import getMasterSigner from "../../../scripts/getMasterSigner"
 
-import addresses from "../../../scripts/constant/addresses"
-import abis from "../../../scripts/constant/abis"
-import constants from "../../../scripts/constant/constant"
-import tokens from "../../../scripts/constant/tokens"
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
+import { addresses } from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { constants } from "../../../scripts/constant/constant";
+import { tokens } from "../../../scripts/constant/tokens";
 
 import connectorMakerArtifacts from ("../../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/main.sol/ConnectV2BMakerDAO.json")
 
 describe("B.Maker", function () {
     const connectorName = "B.MAKER-TEST-A"
 
-    let dsaWallet0;
-    let dsaWallet1;
-    let masterSigner;
-    let instaConnectorsV2;
-    let connector;
-    let manager;
-    let vat;
-    let dai;
+    let dsaWallet0: any;
+    let dsaWallet1: any;
+    let masterSigner: any;
+    let instaConnectorsV2: any;
+    let connector: any;
+    let manager: any;
+    let vat: any;
+    let dai: any;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets

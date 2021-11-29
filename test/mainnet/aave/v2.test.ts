@@ -2,25 +2,25 @@ import { expect } from "chai";
 import hre from "hardhat";
 import { abis } from "../../../scripts/constant/abis";
 import { addresses } from "../../../scripts/constant/addresses";
-import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector";
-import getMasterSigner from "../../../scripts/getMasterSigner";
-import buildDSAv2 from "../../../scripts/buildDSAv2";
-import ConnectV2AaveV2 from "../../artifacts/contracts/mainnet/connectors/aave/v2/main.sol/ConnectV2AaveV2.json";
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector";
+import { getMasterSigner } from "../../../scripts/getMasterSigner";
+import { buildDSAv2 } from "../../../scripts/buildDSAv2";
+import { ConnectV2AaveV2 } from "../../artifacts/contracts/mainnet/connectors/aave/v2/main.sol/ConnectV2AaveV2.json";
 import { parseEther } from "@ethersproject/units";
-import encodeSpells from "../../../scripts/encodeSpells";
+import { encodeSpells } from "../../../scripts/encodeSpells";
 import { tokens } from "../../../scripts/constant/tokens";
 import { constants } from "../../../scripts/constant/constant";
-import addLiquidity from "../../../scripts/addLiquidity";
-const { ethers } = hre;
+import { addLiquidity } from "../../../scripts/addLiquidity";
+// const { ethers } = hre;
 
 describe("Aave V2", function () {
   const connectorName = "AAVEV2-TEST-A";
 
-  let wallet0, wallet1;
-  let dsaWallet0;
-  let instaConnectorsV2;
-  let connector;
-  let masterSigner;
+  let wallet0: any, wallet1: any;
+  let dsaWallet0: any;
+  let instaConnectorsV2: any;
+  let connector: any;
+  let masterSigner: any;
 
   before(async () => {
     await hre.network.provider.request({

@@ -2,14 +2,14 @@ import hre from "hardhat";
 import hardhatConfig from "../../../hardhat.config";
 
 // Instadapp deployment and testing helpers
-import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js";
-import encodeSpells from "../../../scripts/encodeSpells.js";
-import getMasterSigner from "../../../scripts/getMasterSigner";
-import buildDSAv2 from "../../../scripts/buildDSAv2";
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
 
 // Instadapp instadappAddresses/ABIs
-import instadappAddresses from "../../../scripts/important/addresses";
-import instadappAbi from "../../../scripts/constant/abis";
+import { instadappAddresses } from "../../../scripts/important/addresses";
+import { instadappAbi } from "../../../scripts/constant/abis";
 
 // Instadapp Liquity Connector artifacts
 import connectV2LiquityArtifacts from "../../artifacts/contracts/mainnet/connectors/liquity/main.sol/ConnectV2Liquity.json";
@@ -29,12 +29,12 @@ const INSTADAPP_BASIC_V1_CONNECTOR = "Basic-v1";
 
 const openTroveSpell = async (
   dsa,
-  signer,
-  depositAmount,
-  borrowAmount,
-  upperHint,
-  lowerHint,
-  maxFeePercentage
+  signer: any,
+  depositAmount: any,
+  borrowAmount: any,
+  upperHint: any,
+  lowerHint: any,
+  maxFeePercentage: any
 ) => {
   let address = signer.address;
   if (signer.address === undefined) {

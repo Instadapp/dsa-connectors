@@ -5,10 +5,11 @@ const { provider, deployContract } = waffle
 
 const ALCHEMY_ID = process.env.ALCHEMY_ID;
 
-import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
-import buildDSAv2 from "../../../scripts/buildDSAv2"
-import encodeSpells from "../../../scripts/encodeSpells.js"
-import getMasterSigner from "../../../scripts/getMasterSigner"
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
+
 
 import { addresses } from "../../../scripts/constant/addresses"
 import { abis } from "../../../scripts/constant/abis"

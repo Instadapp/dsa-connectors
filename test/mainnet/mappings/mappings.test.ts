@@ -13,9 +13,9 @@ const getMapping = (address, signer) => {
 };
 
 describe("Test InstaMapping contract", () => {
-  let account, instaMaster;
-  let mappingAddress;
-  let masterMapping;
+  let account: any, instaMaster: any;
+  let mappingAddress: any;
+  let masterMapping: any;
   const indexInterfaceAddress = "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723";
   const testRoleAddress = "0x2971AdFa57b20E5a416aE5a708A8655A9c74f723";
 
