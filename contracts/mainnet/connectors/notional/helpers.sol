@@ -12,7 +12,7 @@ contract Helpers is Basic {
     int256 private constant _INT256_MIN = type(int256).min;
 
     NotionalInterface internal constant notional =
-        NotionalInterface(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+        NotionalInterface(0x1344a36a1b56144c3bc62e7757377d288fde0369);
 
     function getUnderlyingToken(uint16 currencyId) internal returns (address) {
         (, Token memory underlyingToken) = notional.getCurrency(currencyId);
