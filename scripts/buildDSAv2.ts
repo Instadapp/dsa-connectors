@@ -4,7 +4,7 @@ import { addresses } from "./constant/addresses";
 import { abis } from "./constant/abis";
 import { abi } from "../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json";
 
-export default async function(owner: any) {
+export async function buildDSAv2(owner: any) {
   const instaIndex = await ethers.getContractAt(
     abis.core.instaIndex,
     addresses.core.instaIndex
