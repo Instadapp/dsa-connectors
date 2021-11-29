@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import hre from "hardhat";
+import "hardhat";
 import { abis } from "../../../scripts/constant/abis";
 import { addresses } from "../../../scripts/constant/addresses";
 import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector";
