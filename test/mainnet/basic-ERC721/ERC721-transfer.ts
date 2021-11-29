@@ -1,30 +1,30 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
+import { expect } from "chai";
+import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
-const { abi: implementationsABI } = require("../../../scripts/constant/abi/core/InstaImplementations.json")
+import { abi : implementationsABI } from "../../../scripts/constant/abi/core/InstaImplementations.json"
 
-const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../../scripts/buildDSAv2")
-const encodeSpells = require("../../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../../scripts/getMasterSigner")
+import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
+import buildDSAv2 from "../../../scripts/buildDSAv2"
+import encodeSpells from "../../../scripts/encodeSpells.js"
+import getMasterSigner from "../../../scripts/getMasterSigner"
 
-const addresses = require("../../../scripts/constant/addresses");
-const abis = require("../../../scripts/constant/abis");
-const constants = require("../../../scripts/constant/constant");
-const tokens = require("../../../scripts/constant/tokens");
+import { addresses } from "../../../scripts/constant/addresses"
+import { abis } from "../../../scripts/constant/abis"
+import { constants } from "../../../scripts/constant/constant"
+import { tokens } from "../../../scripts/constant/tokens"
 
-const connectV2BasicERC1155Artifacts = require("../../artifacts/contracts/mainnet/connectors/basic-ERC1155/main.sol/ConnectV2BasicERC1155.json")
-const erc1155Artifacts = require("../../artifacts/@openzeppelin/contracts/token/ERC1155/IERC1155.sol/IERC1155.json")
+import connectV2BasicERC721Artifacts from "../../artifacts/contracts/mainnet/connectors/basic-ERC721/main.sol/ConnectV2BasicERC721.json"
+import erc721Artifacts from "../../artifacts/@openzeppelin/contracts/token/ERC721/IERC721.sol/IERC721.json"
 
-const TOKEN_CONTRACT_ADDR = "0x1ca3262009b21F944e6b92a2a88D039D06F1acFa";
-const TOKEN_OWNER_ADDR = "0x1ca3262009b21F944e6b92a2a88D039D06F1acFa";
-const TOKEN_ID = "1";
+const TOKEN_CONTRACT_ADDR = "0x4d695c615a7aacf2d7b9c481b66045bb2457dfde";
+const TOKEN_OWNER_ADDR = "0x8c6b10d42ff08e56133fca0dac75e1931b1fcc23";
+const TOKEN_ID = "38";
 
 const implementationsMappingAddr = "0xCBA828153d3a85b30B5b912e1f2daCac5816aE9D"
 
-describe("BASIC-ERC1155", function () {
-    const connectorName = "BASIC-ERC1155-A"
+describe("BASIC-ERC721", function () {
+    const connectorName = "BASIC-ERC721-A"
 
     let dsaWallet0
     let masterSigner;
@@ -63,7 +63,7 @@ describe("BASIC-ERC1155", function () {
         tokenOwner = await ethers.getSigner(
             TOKEN_OWNER_ADDR
         );
-        nftContract = await ethers.getContractAt(erc1155Artifacts.abi, TOKEN_CONTRACT_ADDR)
+        nftContract = await ethers.getContractAt(erc721Artifacts.abi, TOKEN_CONTRACT_ADDR)
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
 
@@ -73,7 +73,7 @@ describe("BASIC-ERC1155", function () {
         await instaAccountV2DefaultImpl.deployed()
         connector = await deployAndEnableConnector({
             connectorName,
-            contractArtifact: connectV2BasicERC1155Artifacts,
+            contractArtifact: connectV2BasicERC721Artifacts,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
@@ -118,11 +118,10 @@ describe("BASIC-ERC1155", function () {
             const spells = [
                 {
                     connector: connectorName,
-                    method: "depositERC1155",
+                    method: "depositERC721",
                     args: [
                         TOKEN_CONTRACT_ADDR,
                         TOKEN_ID,
-                        1,
                         "0",
                         "0"
                     ]

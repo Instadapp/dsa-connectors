@@ -1,22 +1,22 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
-const { web3, deployments, waffle, ethers } = hre;
+import { expect } from "chai";
+import hre from "hardhat";
+const { web3, deployments, waffle, ethers } = hre; //check
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../../scripts/buildDSAv2")
-const encodeSpells = require("../../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../../scripts/getMasterSigner")
+import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
+import buildDSAv2 from "../../../scripts/buildDSAv2"
+import encodeSpells from "../../../scripts/encodeSpells.js"
+import getMasterSigner from "../../../scripts/getMasterSigner"
 
-const addresses = require("../../../scripts/constant/addresses");
-const abis = require("../../../scripts/constant/abis");
-const constants = require("../../../scripts/constant/constant");
-const tokens = require("../../../scripts/constant/tokens");
+import { addresses } from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { constants } from "../../../scripts/constant/constant";
+import { tokens } from "../../../scripts/constant/tokens";
 
-const connectV2CompoundArtifacts = require("../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json")
+import connectV2CompoundArtifacts from "../../artifacts/contracts/mainnet/connectors/b.protocol/compound/main.sol/ConnectV2BCompound.json"
 
-describe("Compound", function () {
-    const connectorName = "COMPOUND-TEST-A"
+describe("B.Compound", function () {
+    const connectorName = "B.COMPOUND-TEST-A"
 
     let dsaWallet0
     let masterSigner;
@@ -52,6 +52,7 @@ describe("Compound", function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!connector.address).to.be.true;
         expect(!!masterSigner.address).to.be.true;
+        expect(await connector.name()).to.be.equal("B.Compound-v1.0");
     });
 
     describe("DSA wallet setup", function () {

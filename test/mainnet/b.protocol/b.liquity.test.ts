@@ -1,19 +1,18 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
-const { web3, deployments, waffle, ethers } = hre;
+import { expect } from "chai";
+import hre from "hardhat";
+const { web3, deployments, waffle, ethers } = hre; //check
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
+import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
+import buildDSAv2 from "../../../scripts/buildDSAv2"
+import encodeSpells from "../../../scripts/encodeSpells.js"
+import getMasterSigner from "../../../scripts/getMasterSigner"
+import { addresses } from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { constants } from "../../../scripts/constant/constant";
+import { tokens } from "../../../scripts/constant/tokens";
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/constant/constant");
-const tokens = require("../../scripts/constant/tokens");
-
-const connectorLiquityArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/liquity/main.sol/ConnectV2BLiquity.json")
+import connectorLiquityArtifacts from ("../../artifacts/contracts/mainnet/connectors/b.protocol/liquity/main.sol/ConnectV2BLiquity.json")
 
 const LUSD_WHALE = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb" // stability pool
 

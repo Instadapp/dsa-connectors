@@ -1,7 +1,7 @@
-const { ethers, network } = require("hardhat");
-const chai = require("chai");
-const chaiPromise = require("chai-as-promised");
-const { solidity } = require("ethereum-waffle");
+import { ethers, network } from "hardhat";
+import chai from "chai";
+import chaiPromise from "chai-as-promised";
+import { solidity } from "ethereum-waffle";
 
 chai.use(chaiPromise);
 chai.use(solidity);

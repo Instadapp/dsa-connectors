@@ -1,15 +1,15 @@
-const hre = require("hardhat");
-const { expect } = require("chai");
+import hre from "hardhat";
+import { expect } from "chai";
 
 // Instadapp deployment and testing helpers
-const buildDSAv2 = require("../../scripts/buildDSAv2");
-const encodeSpells = require("../../scripts/encodeSpells.js");
+import buildDSAv2 from "../../../scripts/buildDSAv2";
+import encodeSpells from "../../../scripts/encodeSpells.js";
 
 // Liquity smart contracts
-const contracts = require("./liquity.contracts");
+import contracts from "./liquity.contracts";
 
 // Liquity helpers
-const helpers = require("./liquity.helpers");
+import helpers from "./liquity.helpers";
 
 describe("Liquity", () => {
   const { waffle, ethers } = hre;

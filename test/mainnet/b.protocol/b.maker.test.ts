@@ -1,19 +1,19 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
+import { expect } from "chai";
+import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../../scripts/buildDSAv2")
-const encodeSpells = require("../../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../../scripts/getMasterSigner")
+import deployAndEnableConnector from "../../../scripts/deployAndEnableConnector.js"
+import buildDSAv2 from "../../../scripts/buildDSAv2"
+import encodeSpells from "../../../scripts/encodeSpells.js"
+import getMasterSigner from "../../../scripts/getMasterSigner"
 
-const addresses = require("../../../scripts/constant/addresses");
-const abis = require("../../../scripts/constant/abis");
-const constants = require("../../../scripts/constant/constant");
-const tokens = require("../../../scripts/constant/tokens");
+import addresses from "../../../scripts/constant/addresses"
+import abis from "../../../scripts/constant/abis"
+import constants from "../../../scripts/constant/constant"
+import tokens from "../../../scripts/constant/tokens"
 
-const connectorMakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/main.sol/ConnectV2BMakerDAO.json")
+import connectorMakerArtifacts from ("../../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/main.sol/ConnectV2BMakerDAO.json")
 
 describe("B.Maker", function () {
     const connectorName = "B.MAKER-TEST-A"
