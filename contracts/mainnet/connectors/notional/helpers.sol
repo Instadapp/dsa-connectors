@@ -12,7 +12,7 @@ contract Helpers is Basic {
     int256 private constant _INT256_MIN = type(int256).min;
 
     NotionalInterface internal constant notional =
-        NotionalInterface(0x1344a36a1b56144c3bc62e7757377d288fde0369);
+        NotionalInterface(0x1344A36A1B56144C3Bc62E7757377D288fDE0369);
 
     function getUnderlyingToken(uint16 currencyId) internal returns (address) {
         (, Token memory underlyingToken) = notional.getCurrency(currencyId);
@@ -46,7 +46,6 @@ contract Helpers is Basic {
 
     function convertToInternal(uint16 currencyId, int256 amount)
         internal
-        pure
         returns (int256)
     {
         // If token decimals is greater than INTERNAL_TOKEN_PRECISION then this will truncate
@@ -64,13 +63,10 @@ contract Helpers is Basic {
         uint32 minLendRate
     ) internal returns (bytes32) {
         return
-            abi.encodePacked(
-                LEND_TRADE,
-                marketIndex,
-                fCashAmount,
-                minLendRate,
-                uint120(0)
-            );
+            (bytes32(uint256(LEND_TRADE)) << 248) |
+            (bytes32(uint256(marketIndex)) << 240) |
+            (bytes32(uint256(fCashAmount)) << 152) |
+            (bytes32(uint256(minLendRate)) << 120);
     }
 
     function encodeBorrowTrade(
@@ -79,13 +75,10 @@ contract Helpers is Basic {
         uint32 maxBorrowRate
     ) internal returns (bytes32) {
         return
-            abi.encodePacked(
-                BORROW_TRADE,
-                marketIndex,
-                fCashAmount,
-                maxBorrowRate,
-                uint120(0)
-            );
+            (bytes32(uint256(BORROW_TRADE)) << 248) |
+            (bytes32(uint256(marketIndex)) << 240) |
+            (bytes32(uint256(fCashAmount)) << 152) |
+            (bytes32(uint256(maxBorrowRate)) << 120);
     }
 
     function mul(int256 a, int256 b) internal pure returns (int256 c) {

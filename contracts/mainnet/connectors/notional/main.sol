@@ -5,7 +5,6 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { DepositActionType, BalanceActionWithTrades, BalanceAction } from "./interface.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title Notional
@@ -32,9 +31,9 @@ abstract contract NotionalResolver is Events, Helpers {
         uint assetCashDeposited;
         address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
         depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = IERC20(tokenAddress).balanceOf(address(this));
+        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
 
-        approve(tokenAddress, address(notional), depositAmount);
+        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
 
         if (useUnderlying && currencyId == ETH_CURRENCY_ID) {
             assetCashDeposited = notional.depositUnderlyingToken{value: depositAmount}(address(this), currencyId, depositAmount);
@@ -68,9 +67,9 @@ abstract contract NotionalResolver is Events, Helpers {
         uint setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         withdrawAmount = getUint(getId, withdrawAmount);
-        uint amountInternalPrecision = withdrawAmount == uint(-1) ?
-            getCashBalance(currencyId) :
-            convertToInternal(currencyId, withdrawAmount);
+        uint88 amountInternalPrecision = withdrawAmount == uint(-1) ?
+            uint88(getCashBalance(currencyId)) :
+            uint88(convertToInternal(currencyId, int256(withdrawAmount)));
 
         uint amountWithdrawn = notional.withdraw(currencyId, amountInternalPrecision, redeemToUnderlying);
         // Sets the amount of tokens withdrawn to address(this)
@@ -108,12 +107,12 @@ abstract contract NotionalResolver is Events, Helpers {
     function redeemNTokenRaw(
         uint16 currencyId,
         bool sellTokenAssets,
-        uint tokensToRedeem,
+        uint96 tokensToRedeem,
         uint getId,
         uint setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = getUint(getId, tokensToRedeem);
-        if (tokensToRedeem == uint(-1)) tokensToRedeem = getNTokenBalance(currencyId);
+        tokensToRedeem = uint96(getUint(getId, tokensToRedeem));
+        if (tokensToRedeem == uint96(-1)) tokensToRedeem = uint96(getNTokenBalance(currencyId));
         int _assetCashChange = notional.nTokenRedeem(address(this), currencyId, tokensToRedeem, sellTokenAssets);
 
         // Floor asset cash change at zero in order to properly set the uint. If the asset cash change is negative
@@ -147,9 +146,9 @@ abstract contract NotionalResolver is Events, Helpers {
         uint setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         tokensToRedeem = getUint(getId, tokensToRedeem);
-        if (tokensToRedeem == uint(-1)) tokensToRedeem = getNTokenBalance(currencyId);
+        if (tokensToRedeem == uint(-1)) tokensToRedeem = uint(getNTokenBalance(currencyId));
 
-        BalanceAction[] memory action = new BalanceAction[1];
+        BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = DepositActionType.RedeemNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = tokensToRedeem;
@@ -169,14 +168,14 @@ abstract contract NotionalResolver is Events, Helpers {
                 getAssetToken(currencyId);
             
             // TODO: handle ETH
-            balanceBefore = IERC20(tokenAddress).balanceOf(address(this));
+            balanceBefore = TokenInterface(tokenAddress).balanceOf(address(this));
         }
 
         notional.batchBalanceAction(address(this), action);
 
         if (setId != 0) {
             // TODO: handle ETH
-            uint netBalance = sub(balanceBefore, IERC20(tokenAddress).balanceOf(address(this)));
+            uint netBalance = sub(balanceBefore, TokenInterface(tokenAddress).balanceOf(address(this)));
             // This can be used to determine the exact amount withdrawn
             setUint(setId, netBalance);
         }
@@ -200,17 +199,17 @@ abstract contract NotionalResolver is Events, Helpers {
      */
     function redeemNTokenAndDeleverage(
         uint16 currencyId,
-        uint tokensToRedeem,
+        uint96 tokensToRedeem,
         uint8 marketIndex,
-        uint fCashAmount,
+        uint88 fCashAmount,
         uint32 minLendRate,
         uint getId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = getUint(getId, tokensToRedeem);
-        if (tokensToRedeem == uint(-1)) tokensToRedeem = getNTokenBalance(currencyId);
-        notional.nTokenRedeem(currencyId, tokensToRedeem, true);
+        tokensToRedeem = uint96(getUint(getId, tokensToRedeem));
+        if (tokensToRedeem == uint96(-1)) tokensToRedeem = uint96(getNTokenBalance(currencyId));
+        notional.nTokenRedeem(address(this), currencyId, tokensToRedeem, true);
 
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[1];
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](1);
         action[0].actionType = DepositActionType.RedeemNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = tokensToRedeem;
@@ -245,26 +244,26 @@ abstract contract NotionalResolver is Events, Helpers {
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
         depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = IERC20(tokenAddress).balanceOf(address(this));
+        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
 
-        approve(tokenAddress, address(notional), depositAmount);
-        BalanceAction[] memory action = new BalanceAction[1];
+        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
+        BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = useUnderlying ? DepositActionType.DepositUnderlyingAndMintNToken : DepositActionType.DepositAssetAndMintNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = depositAmount;
         // withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
-        uint nTokenBefore;
+        int256 nTokenBefore;
         if (setId != 0) {
             nTokenBefore = getNTokenBalance(currencyId);
         }
 
         uint msgValue = currencyId == ETH_CURRENCY_ID ? depositAmount : 0;
-        notional.batchBalanceAndTradeAction{value: msgValue}(address(this), action);
+        notional.batchBalanceAction{value: msgValue}(address(this), action);
 
         if (setId != 0) {
             // Set the amount of nTokens minted
-            setUint(setId, sub(getNTokenBalance(currencyId), nTokenBefore));
+            setUint(setId, uint(sub(getNTokenBalance(currencyId), nTokenBefore)));
         }
 
         // todo: events
@@ -277,24 +276,24 @@ abstract contract NotionalResolver is Events, Helpers {
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         cashBalanceToMint = getUint(getId, cashBalanceToMint);
-        if (cashBalanceToMint == uint(-1)) cashBalanceToMint = getCashBalance(currencyId);
+        if (cashBalanceToMint == uint(-1)) cashBalanceToMint = uint(getCashBalance(currencyId));
 
-        BalanceAction[] memory action = new BalanceAction[1];
+        BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = DepositActionType.ConvertCashToNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = cashBalanceToMint;
         // NOTE: withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
-        uint nTokenBefore;
+        int256 nTokenBefore;
         if (setId != 0) {
             nTokenBefore = getNTokenBalance(currencyId);
         }
 
-        notional.batchBalanceActionWithTrades(address(this), action);
+        notional.batchBalanceAction(address(this), action);
 
         if (setId != 0) {
             // Set the amount of nTokens minted
-            setUint(setId, getNTokenBalance(currencyId).sub(nTokenBefore));
+            setUint(setId, uint(sub(getNTokenBalance(currencyId), nTokenBefore)));
         }
 
         // todo: events
@@ -305,16 +304,16 @@ abstract contract NotionalResolver is Events, Helpers {
         uint depositAmount,
         bool useUnderlying,
         uint8 marketIndex,
-        uint fCashAmount,
-        uint minLendRate,
+        uint88 fCashAmount,
+        uint32 minLendRate,
         uint getId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
         depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = IERC20(tokenAddress).balanceOf(address(this));
+        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
 
-        approve(tokenAddress, address(notional), depositAmount);
-        BalanceAction[] memory action = new BalanceAction[1];
+        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](1);
         action[0].actionType = useUnderlying ? DepositActionType.DepositUnderlying : DepositActionType.DepositAsset;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = depositAmount;
@@ -328,7 +327,7 @@ abstract contract NotionalResolver is Events, Helpers {
         action[0].trades = trades;
 
         uint msgValue = currencyId == ETH_CURRENCY_ID ? depositAmount : 0;
-        notional.batchBalanceActionWithTrades{value: msgValue}(address(this), action);
+        notional.batchBalanceAndTradeAction{value: msgValue}(address(this), action);
 
         // todo: events
     }
@@ -339,8 +338,8 @@ abstract contract NotionalResolver is Events, Helpers {
         uint depositAmount,
         uint16 borrowCurrencyId,
         uint8 marketIndex,
-        uint fCashAmount,
-        uint maxBorrowRate,
+        uint88 fCashAmount,
+        uint32 maxBorrowRate,
         bool redeemToUnderlying,
         uint getId,
         uint setId
@@ -348,9 +347,9 @@ abstract contract NotionalResolver is Events, Helpers {
         require(depositCurrencyId != borrowCurrencyId);
         address tokenAddress = useUnderlying ? getUnderlyingToken(depositCurrencyId) : getAssetToken(depositCurrencyId);
         depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = IERC20(tokenAddress).balanceOf(address(this));
+        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
 
-        approve(tokenAddress, address(notional), depositAmount);
+        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
         BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](2);
 
         uint256 depositIndex;
@@ -383,13 +382,13 @@ abstract contract NotionalResolver is Events, Helpers {
         uint balanceBefore;
         if (setId != 0) {
             address borrowToken = useUnderlying ? getUnderlyingToken(borrowCurrencyId) : getAssetToken(borrowCurrencyId);
-            balanceBefore = IERC20(borrowToken).balanceOf(address(this));
+            balanceBefore = TokenInterface(borrowToken).balanceOf(address(this));
         }
 
-        notional.batchBalanceActionWithTrades{value: msgValue}(address(this), action);
+        notional.batchBalanceAndTradeAction{value: msgValue}(address(this), action);
 
         if (setId != 0) {
-            setUint(setId, IERC20(borrowToken).balanceOf(address(this)).sub(balanceBefore));
+            setUint(setId, sub(TokenInterface(borrowToken).balanceOf(address(this)), balanceBefore));
         }
 
         // todo: events
@@ -398,13 +397,13 @@ abstract contract NotionalResolver is Events, Helpers {
     function withdrawLend(
         uint16 currencyId,
         uint8 marketIndex,
-        uint fCashAmount,
-        uint maxBorrowRate,
+        uint88 fCashAmount,
+        uint32 maxBorrowRate,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         bool useUnderlying = currencyId != ETH_CURRENCY_ID;
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[]();
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](1);
         action[0].actionType = DepositActionType.None;
         action[0].currencyId = currencyId;
         // Withdraw borrowed amount to wallet
@@ -420,13 +419,12 @@ abstract contract NotionalResolver is Events, Helpers {
         uint balanceBefore;
         if (setId != 0) {
             address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
-            balanceBefore = IERC20(tokenAddress).balanceOf(address(this));
+            balanceBefore = TokenInterface(tokenAddress).balanceOf(address(this));
         }
-
-        notional.batchBalanceActionWithTrades{value: msg.value}(address(this), action);
+        notional.batchBalanceAndTradeAction(address(this), action);
 
         if (setId != 0) {
-            setUint(setId, IERC20(tokenAddress).balanceOf(address(this)).sub(balanceBefore));
+            setUint(setId, sub(TokenInterface(tokenAddress).balanceOf(address(this)), balanceBefore));
         }
     }
 
