@@ -11,12 +11,11 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import { AccountInterface } from "./interfaces.sol";
-import { DSMath } from "../../common/math.sol";
 import { Stores } from "../../common/stores.sol";
 import { Variables } from "./variables.sol";
 import { Events } from "./events.sol";
 
-contract LiquidityResolver is DSMath, Stores, Variables, Events {
+contract LiquidityResolver is Stores, Variables, Events {
     using SafeERC20 for IERC20;
 
     /**
@@ -70,11 +69,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         
         IERC20 tokenContract = IERC20(token);
 
-        if (token == ethAddr) {
-            Address.sendValue(payable(address(instaPool)), _amt);
-        } else {
-            tokenContract.safeTransfer(address(instaPool), _amt);
-        }
+        tokenContract.safeTransfer(address(instaPool), _amt);
 
         setUint(setId, _amt);
 
@@ -127,11 +122,7 @@ contract LiquidityResolver is DSMath, Stores, Variables, Events {
         for (uint i = 0; i < tokens_.length; i++) {
             amts_[i] = getUint(getIds[i], amts_[i]);
 
-            if (tokens_[i] == ethAddr) {
-                Address.sendValue(payable(address(instaPool)), amts_[i]);
-            } else {
-                IERC20(tokens_[i]).safeTransfer(address(instaPool), amts_[i]);
-            }
+            IERC20(tokens_[i]).safeTransfer(address(instaPool), amts_[i]);
 
             setUint(setIds[i], amts_[i]);
         }
