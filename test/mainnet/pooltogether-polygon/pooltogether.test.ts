@@ -46,11 +46,11 @@ describe("PoolTogether", function () {
     const connectorName = "AAVEV2-TEST-A"
     const ptConnectorName = "POOLTOGETHER-TEST-A"
 
-    let dsaWallet0
-    let masterSigner;
-    let instaConnectorsV2;
-    let connector;
-    let ptConnector;
+    let dsaWallet0: any;
+    let masterSigner: any;
+    let instaConnectorsV2: any;
+    let connector: any;
+    let ptConnector: any;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets

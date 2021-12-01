@@ -28,7 +28,7 @@ const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit; // Maximum gas lim
 const INSTADAPP_BASIC_V1_CONNECTOR = "Basic-v1";
 
 const openTroveSpell = async (
-  dsa,
+  dsa: any,
   signer: any,
   depositAmount: any,
   borrowAmount: any,
@@ -63,9 +63,9 @@ const openTroveSpell = async (
 };
 
 const createDsaTrove = async (
-  dsa,
-  signer,
-  liquity,
+  dsa: any,
+  signer: any,
+  liquity: any,
   depositAmount = hre.ethers.utils.parseEther("5"),
   borrowAmount = hre.ethers.utils.parseUnits("2000", 18)
 ) => {
@@ -86,7 +86,7 @@ const createDsaTrove = async (
   );
 };
 
-const sendToken = async (token, amount, from, to) => {
+const sendToken = async (token: any, amount: any, from: any, to: any) => {
   await hre.network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [from],
@@ -98,14 +98,14 @@ const sendToken = async (token, amount, from, to) => {
   });
 };
 
-const resetInitialState = async (walletAddress, contracts, isDebug = false) => {
+const resetInitialState = async (walletAddress: any, contracts: any, isDebug = false) => {
   const liquity = await deployAndConnect(contracts, isDebug);
   const dsa = await buildDSAv2(walletAddress);
 
   return [liquity, dsa];
 };
 
-const resetHardhatBlockNumber = async (blockNumber) => {
+const resetHardhatBlockNumber = async (blockNumber: any) => {
   return await hre.network.provider.request({
     method: "hardhat_reset",
     params: [
@@ -119,7 +119,7 @@ const resetHardhatBlockNumber = async (blockNumber) => {
   });
 };
 
-const deployAndConnect = async (contracts, isDebug = false) => {
+const deployAndConnect = async (contracts: any, isDebug = false) => {
   // Pin Liquity tests to a particular block number to create deterministic state (Ether price etc.)
   await resetHardhatBlockNumber(LIQUIDATABLE_TROVES_BLOCK_NUMBER);
   const liquity = {
@@ -226,7 +226,7 @@ const deployAndConnect = async (contracts, isDebug = false) => {
   return liquity;
 };
 
-const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity) => {
+const getTroveInsertionHints = async (depositAmount: any, borrowAmount: any, liquity: any => {
   const nominalCR = await liquity.hintHelpers.computeNominalCR(
     depositAmount,
     borrowAmount
@@ -260,7 +260,7 @@ const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity) => {
 
 let randomSeed = 4223;
 
-const getRedemptionHints = async (amount, liquity) => {
+const getRedemptionHints = async (amount: any, liquity: any) => {
   const ethPrice = await liquity.priceFeed.callStatic.fetchPrice();
   const [
     firstRedemptionHint,
@@ -300,7 +300,7 @@ const getRedemptionHints = async (amount, liquity) => {
   };
 };
 
-const redeem = async (amount, from, wallet, liquity) => {
+const redeem = async (amount: any, from: any, wallet: any, liquity: any) => {
   await sendToken(liquity.lusdToken, amount, from, wallet.address);
   const {
     partialRedemptionHintNicr,

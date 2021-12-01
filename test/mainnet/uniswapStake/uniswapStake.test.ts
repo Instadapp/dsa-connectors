@@ -161,7 +161,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let castEvent = new Promise((resolve, reject) => {
-                dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
+                dsaWallet0.on('LogCast', (origin: any, sender: any, value: any, targetNames: any, targets: any, eventNames: any, eventParams: any, event: any) => {
                     const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[0]);
                     const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[1]);
                     tokenIds.push(params[0]);
@@ -351,5 +351,5 @@ describe("UniswapV3", function () {
     })
 })
 
-const getMinTick = (tickSpacing) => Math.ceil(-887272 / tickSpacing) * tickSpacing
-const getMaxTick = (tickSpacing) => Math.floor(887272 / tickSpacing) * tickSpacing
+const getMinTick = (tickSpacing: any) => Math.ceil(-887272 / tickSpacing) * tickSpacing
+const getMaxTick = (tickSpacing: any) => Math.floor(887272 / tickSpacing) * tickSpacing

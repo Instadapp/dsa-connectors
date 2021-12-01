@@ -177,12 +177,12 @@ describe("B.Liquity", function () {
   })
 })
 
-function veryClose(n1, n2) {
+function veryClose(n1: any, n2: any) {
   n1 = web3.utils.toBN(n1)
   n2 = web3.utils.toBN(n2)
 
-  _10000 = web3.utils.toBN(10000)
-  _9999 = web3.utils.toBN(9999)
+  let _10000 = web3.utils.toBN(10000)
+  let _9999 = web3.utils.toBN(9999)
 
   if (n1.mul(_10000).lt(n2.mul(_9999))) return false
   if (n2.mul(_10000).lt(n1.mul(_9999))) return false

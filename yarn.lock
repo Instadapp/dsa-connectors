@@ -200,7 +200,7 @@
     "rustbn.js" "~0.2.0"
     "util.promisify" "^1.0.1"
 
-"@ethersproject/abi@^5.0.1", "@ethersproject/abi@^5.1.2", "@ethersproject/abi@^5.4.0":
+"@ethersproject/abi@^5.0.0", "@ethersproject/abi@^5.0.1", "@ethersproject/abi@^5.1.2", "@ethersproject/abi@^5.4.0":
   "integrity" "sha512-9gU2H+/yK1j2eVMdzm6xvHSnMxk8waIHQGYCZg5uvAyH0rsAzxkModzBSpbAkAuhKFEovC2S9hM4nPuLym8IZw=="
   "resolved" "https://registry.npmjs.org/@ethersproject/abi/-/abi-5.4.0.tgz"
   "version" "5.4.0"
@@ -373,7 +373,7 @@
     "@ethersproject/logger" "^5.5.0"
     "bn.js" "^4.11.9"
 
-"@ethersproject/bytes@^5.0.4", "@ethersproject/bytes@^5.4.0", "@ethersproject/bytes@^5.5.0", "@ethersproject/bytes@5.5.0":
+"@ethersproject/bytes@^5.0.0", "@ethersproject/bytes@^5.0.4", "@ethersproject/bytes@^5.4.0", "@ethersproject/bytes@^5.5.0", "@ethersproject/bytes@5.5.0":
   "integrity" "sha512-ABvc7BHWhZU9PNM/tANm/Qx4ostPGadAuQzWTr3doklZOhDlmcBqclrQe/ZXUIj3K8wC28oYeuRa+A37tX9kog=="
   "resolved" "https://registry.npmjs.org/@ethersproject/bytes/-/bytes-5.5.0.tgz"
   "version" "5.5.0"
@@ -542,7 +542,7 @@
   dependencies:
     "@ethersproject/logger" "^5.0.8"
 
-"@ethersproject/providers@^5.4.4", "@ethersproject/providers@5.5.0":
+"@ethersproject/providers@^5.0.0", "@ethersproject/providers@^5.4.4", "@ethersproject/providers@5.5.0":
   "integrity" "sha512-xqMbDnS/FPy+J/9mBLKddzyLLAQFjrVff5g00efqxPzcAwXiR+SiCGVy6eJ5iAIirBOATjx7QLhDNPGV+AEQsw=="
   "resolved" "https://registry.npmjs.org/@ethersproject/providers/-/providers-5.5.0.tgz"
   "version" "5.5.0"
@@ -1192,6 +1192,14 @@
   "version" "2.0.0"
   dependencies:
     "ethers" "^5.0.2"
+
+"@typechain/ethers-v5@^8.0.5":
+  "integrity" "sha512-ntpj4cS3v4WlDu+hSKSyj9A3o1tKtWC30RX1gobeYymZColeJiUemC1Kgfa0MWGmInm5CKxoHVhEvYVgPOZn1A=="
+  "resolved" "https://registry.npmjs.org/@typechain/ethers-v5/-/ethers-v5-8.0.5.tgz"
+  "version" "8.0.5"
+  dependencies:
+    "lodash" "^4.17.15"
+    "ts-essentials" "^7.0.1"
 
 "@typechain/hardhat@^3.0.0":
   "integrity" "sha512-FpnIIXkDXm54XCHI/Z2iOet7h1MrFSvZfuljX9Uzc6FEjEfb01Tuzu8ywe2iquD3g5JXqovgdv+M54L/2Z6jkg=="
@@ -4758,7 +4766,7 @@
     "uuid" "2.0.1"
     "xmlhttprequest" "1.8.0"
 
-"ethers@^5.0.0", "ethers@^5.0.1", "ethers@^5.0.13", "ethers@^5.0.2", "ethers@^5.1.0", "ethers@^5.4.7", "ethers@^5.5.1":
+"ethers@^5.0.0", "ethers@^5.0.1", "ethers@^5.0.13", "ethers@^5.0.2", "ethers@^5.1.0", "ethers@^5.1.3", "ethers@^5.4.7", "ethers@^5.5.1":
   "integrity" "sha512-RodEvUFZI+EmFcE6bwkuJqpCYHazdzeR1nMzg+YWQSmQEsNtfl1KHGfp/FWZYl48bI/g7cgBeP2IlPthjiVngw=="
   "resolved" "https://registry.npmjs.org/ethers/-/ethers-5.5.1.tgz"
   "version" "5.5.1"
@@ -10424,7 +10432,7 @@
     "ts-essentials" "^6.0.3"
     "ts-generator" "^0.1.1"
 
-"typechain@^6.0.0":
+"typechain@^6.0.0", "typechain@^6.0.4":
   "integrity" "sha512-Kr2rATu2Y7Y0wOC/I0zKuyLU8EEUpnuPGkiloZ65ACm4sSLFVF8Tnxn8LEUJSN93dX3RMu2DLF5fwRBOjNB+Gw=="
   "resolved" "https://registry.npmjs.org/typechain/-/typechain-6.0.5.tgz"
   "version" "6.0.5"
@@ -10452,7 +10460,7 @@
   "resolved" "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   "version" "0.0.6"
 
-"typescript@^4.3.4", "typescript@^4.5.2", "typescript@>=2.7", "typescript@>=3.7.0", "typescript@>=4.1.0":
+"typescript@^4.3.4", "typescript@^4.5.2", "typescript@>=2.7", "typescript@>=3.7.0", "typescript@>=4.0.0", "typescript@>=4.1.0":
   "integrity" "sha512-5BlMof9H1yGt0P8/WF+wPNw6GfctgGjXp5hkblpyT+8rkASSmkUKMXrxR0Xg8ThVCi/JnHQiKXeBaEwCeQwMFw=="
   "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.5.2.tgz"
   "version" "4.5.2"

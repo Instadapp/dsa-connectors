@@ -45,11 +45,11 @@ const abiCoder = ethers.utils.defaultAbiCoder;
 describe("UniswapV3", function () {
   const connectorName = "UniswapV3-v1";
 
-  let dsaWallet0;
-  let masterSigner;
-  let instaConnectorsV2;
-  let connector;
-  let nftManager;
+  let dsaWallet0: any;
+  let masterSigner: any;
+  let instaConnectorsV2: any;
+  let connector: any;
+  let nftManager: any;
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
@@ -197,14 +197,14 @@ describe("UniswapV3", function () {
         dsaWallet0.on(
           "LogCast",
           (
-            origin,
-            sender,
-            value,
-            targetNames,
-            targets,
-            eventNames,
-            eventParams,
-            event
+            origin: any,
+            sender: any,
+            value: any,
+            targetNames: any,
+            targets: any,
+            eventNames: any,
+            eventParams: any,
+            event: any
           ) => {
             const params = abiCoder.decode(
               ["uint256", "uint256", "uint256", "uint256", "int24", "int24"],
@@ -270,14 +270,14 @@ describe("UniswapV3", function () {
         dsaWallet0.on(
           "LogCast",
           (
-            origin,
-            sender,
-            value,
-            targetNames,
-            targets,
-            eventNames,
-            eventParams,
-            event
+            origin: any,
+            sender: any,
+            value: any,
+            targetNames: any,
+            targets: any,
+            eventNames: any,
+            eventParams: any,
+            event: any
           ) => {
             const params = abiCoder.decode(
               ["uint256", "uint256", "uint256", "uint256"],
@@ -369,7 +369,7 @@ describe("UniswapV3", function () {
   });
 });
 
-const getMinTick = (tickSpacing) =>
+const getMinTick = (tickSpacing: any) =>
   Math.ceil(-887272 / tickSpacing) * tickSpacing;
-const getMaxTick = (tickSpacing) =>
+const getMaxTick = (tickSpacing: any) =>
   Math.floor(887272 / tickSpacing) * tickSpacing;
