@@ -1,26 +1,27 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
+import { expect } from "chai";
+import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
-const { provider, deployContract } = waffle;
+const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js");
-const buildDSAv2 = require("../../../scripts/buildDSAv2");
-const encodeSpells = require("../../../scripts/encodeSpells.js");
-const encodeFlashcastData = require("../../../scripts/encodeFlashcastData.js");
-const getMasterSigner = require("../../../scripts/getMasterSigner");
-const addLiquidity = require("../../../scripts/addLiquidity");
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js";
+import { buildDSAv2 } from "../../../scripts/buildDSAv2";
+import { encodeSpells } from "../../../scripts/encodeSpells.js";
+import { encodeFlashcastData } from "../../../scripts/encodeFlashcastData.js";
+import { getMasterSigner } from "../../../scripts/getMasterSigner";
+import { addLiquidity } from "../../../scripts/addLiquidity";
 
-const addresses = require("../../../scripts/constant/addresses");
-const abis = require("../../../scripts/constant/abis");
-const constants = require("../../../scripts/constant/constant");
-const tokens = require("../../../scripts/constant/tokens");
-const {
+import { addresses } from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { constants } from "../../../scripts/constant/constant";
+import { tokens } from "../../../scripts/constant/tokens";
+
+import {
   abi: nftManagerAbi,
-} = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json");
+} from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json";
 
-const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json");
-const { eth } = require("../../../scripts/constant/tokens");
-const { BigNumber } = require("ethers");
+import connectV2UniswapV3Artifacts from "../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json"
+import { eth } from "../../../scripts/constant/tokens"
+import { BigNumber } from "ethers"
 
 const FeeAmount = {
   LOW: 500,
@@ -41,7 +42,7 @@ let tokenIds = [];
 let liquidities = [];
 const abiCoder = ethers.utils.defaultAbiCoder;
 
-describe("UniswapV3", function() {
+describe("UniswapV3", function () {
   const connectorName = "UniswapV3-v1";
 
   let dsaWallet0;
@@ -82,19 +83,19 @@ describe("UniswapV3", function() {
     console.log("Connector address", connector.address);
   });
 
-  it("Should have contracts deployed.", async function() {
+  it("Should have contracts deployed.", async function () {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
     expect(!!masterSigner.address).to.be.true;
   });
 
-  describe("DSA wallet setup", function() {
-    it("Should build DSA v2", async function() {
+  describe("DSA wallet setup", function () {
+    it("Should build DSA v2", async function () {
       dsaWallet0 = await buildDSAv2(wallet0.address);
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH & DAI into DSA wallet", async function() {
+    it("Deposit ETH & DAI into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10"),
@@ -110,7 +111,7 @@ describe("UniswapV3", function() {
       );
     });
 
-    it("Deposit ETH & USDT into DSA wallet", async function() {
+    it("Deposit ETH & USDT into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10"),
@@ -127,8 +128,8 @@ describe("UniswapV3", function() {
     });
   });
 
-  describe("Main", function() {
-    it("Should mint successfully", async function() {
+  describe("Main", function () {
+    it("Should mint successfully", async function () {
       const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
       const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
       const usdtAmount = ethers.utils.parseEther("400") / Math.pow(10, 12); // 1 ETH
@@ -236,7 +237,7 @@ describe("UniswapV3", function() {
       expect(data.liquidity).to.be.equals(liquidities[0]);
     }).timeout(10000000000);
 
-    it("Should deposit successfully", async function() {
+    it("Should deposit successfully", async function () {
       const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
       const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
       const usdtAmount = ethers.utils.parseEther("400") / Math.pow(10, 12); // 1 ETH
@@ -302,7 +303,7 @@ describe("UniswapV3", function() {
       expect(data.liquidity).to.be.equals(liquidities[0]);
     });
 
-    it("Should withdraw successfully", async function() {
+    it("Should withdraw successfully", async function () {
       const getId = "0";
       const setIds = ["0", "0"];
 
@@ -331,7 +332,7 @@ describe("UniswapV3", function() {
       expect(data1.liquidity.toNumber()).to.be.equals(0);
     });
 
-    it("Should collect successfully", async function() {
+    it("Should collect successfully", async function () {
       const ethAmount = ethers.utils.parseEther("0.2"); // 1 ETH
       const daiAmount = ethers.utils.parseEther("800"); // 1 ETH
       const getIds = ["0", "0"];
@@ -351,7 +352,7 @@ describe("UniswapV3", function() {
       const receipt = await tx.wait();
     });
 
-    it("Should burn successfully", async function() {
+    it("Should burn successfully", async function () {
       const spells = [
         {
           connector: connectorName,

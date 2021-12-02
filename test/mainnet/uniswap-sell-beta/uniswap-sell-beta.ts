@@ -1,12 +1,12 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
+import { expect } from "chai";
+import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
-const { provider, deployContract } = waffle;
+const { provider, deployContract } = waffle
 
 const USDC_ADDR = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
 const WETH_ADDR = "0x82af49447d8a07e3bd95bd0d56f35241523fbab1";
 
-describe("Uniswap-sell-beta", function() {
+describe("Uniswap-sell-beta", function () {
   let UniswapSellBeta, uniswapSellBeta;
 
   async function setBalance(address) {
@@ -64,7 +64,7 @@ describe("Uniswap-sell-beta", function() {
     await uniswapSellBeta.deployed();
   });
 
-  it("Should have contracts deployed.", async function() {
+  it("Should have contracts deployed.", async function () {
     expect(uniswapSellBeta.address).to.exist;
   });
 
