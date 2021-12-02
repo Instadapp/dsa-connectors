@@ -1,20 +1,20 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
-const { waffle, ethers } = hre;
+import { expect } from "chai";
+import hre from "hardhat";
+const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../../scripts/buildDSAv2")
-const encodeSpells = require("../../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../../scripts/getMasterSigner")
-const addLiquidity = require("../../../scripts/addLiquidity");
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js";
+import { buildDSAv2 } from "../../../scripts/buildDSAv2";
+import { encodeSpells } from "../../../scripts/encodeSpells.js";
+import { getMasterSigner } from "../../../scripts/getMasterSigner";
+import { addLiquidity } from "../../../scripts/addLiquidity";
 
-const addresses = require("../../../scripts/constant/addresses");
-const abis = require("../../../scripts/constant/abis");
-const { abi: nftManagerAbi } = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json")
+import { addresses } from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { abi: nftManagerAbi } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json"
 
-const connectV2UniswapStakerArtifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3_staker/main.sol/ConnectV2UniswapV3Staker.json");
-const connectV2UniswapV3Artifacts = require("../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json");
+import connectV2UniswapStakerArtifacts from "../../artifacts/contracts/mainnet/connectors/uniswap/v3_staker/main.sol/ConnectV2UniswapV3Staker.json";
+import connectV2UniswapV3Artifacts from "../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json";
 
 const FeeAmount = {
     LOW: 500,
@@ -39,11 +39,11 @@ describe("UniswapV3", function () {
     const connectorStaker = "UniswapStaker-v1"
     const connectorUniswap = "UniswapV3-v1"
 
-    let dsaWallet0
-    let masterSigner;
-    let instaConnectorsV2;
-    let connector;
-    let startTime, endTime;
+    let dsaWallet0: any
+    let masterSigner: any;
+    let instaConnectorsV2: any;
+    let connector: any;
+    let startTime: any, endTime: any;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -61,7 +61,7 @@ describe("UniswapV3", function () {
         });
         masterSigner = await getMasterSigner(wallet3)
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
-        nftManager = await ethers.getContractAt(nftManagerAbi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
+        let nftManager = await ethers.getContractAt(nftManagerAbi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
         connector = await deployAndEnableConnector({
             connectorName: connectorStaker,
             contractArtifact: connectV2UniswapStakerArtifacts,
@@ -70,7 +70,7 @@ describe("UniswapV3", function () {
         })
         console.log("Connector address", connector.address)
 
-        uniswapConnector = await deployAndEnableConnector({
+        let uniswapConnector = await deployAndEnableConnector({
             connectorName: connectorUniswap,
             contractArtifact: connectV2UniswapV3Artifacts,
             signer: masterSigner,
@@ -214,8 +214,8 @@ describe("UniswapV3", function () {
 
             let castEvent = new Promise((resolve, reject) => {
                 dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
-                    const params = abiCoder.decode(["bytes32","address","address","uint256","uint256","uint256"], eventParams[0]);
-                    const params1 = abiCoder.decode(["bytes32","address","address","uint256","uint256","uint256"], eventParams[1]);
+                    const params = abiCoder.decode(["bytes32", "address", "address", "uint256", "uint256", "uint256"], eventParams[0]);
+                    const params1 = abiCoder.decode(["bytes32", "address", "address", "uint256", "uint256", "uint256"], eventParams[1]);
                     event.removeListener();
 
                     resolve({ start: [params[3], params1[3]], end: [params[4], params1[4]] });
@@ -287,6 +287,8 @@ describe("UniswapV3", function () {
                         ethAddress,
                         "1000",
                     ],
+                },
+                {
                     connector: connectorStaker,
                     method: "claimRewards",
                     args: [

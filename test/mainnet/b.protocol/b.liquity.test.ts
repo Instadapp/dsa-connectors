@@ -1,19 +1,18 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
-const { web3, deployments, waffle, ethers } = hre;
+import { expect } from "chai";
+import hre from "hardhat";
+const { web3, deployments, waffle, ethers } = hre; //check
 const { provider, deployContract } = waffle
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
+import { addresses } from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { constants } from "../../../scripts/constant/constant";
+import { tokens } from "../../../scripts/constant/tokens";
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const constants = require("../../scripts/constant/constant");
-const tokens = require("../../scripts/constant/tokens");
-
-const connectorLiquityArtifacts = require("../../artifacts/contracts/mainnet/connectors/b.protocol/liquity/main.sol/ConnectV2BLiquity.json")
+import connectorLiquityArtifacts from ("../../artifacts/contracts/mainnet/connectors/b.protocol/liquity/main.sol/ConnectV2BLiquity.json")
 
 const LUSD_WHALE = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb" // stability pool
 
@@ -22,16 +21,16 @@ const BAMM_ADDRESS = "0x0d3AbAA7E088C2c82f54B2f47613DA438ea8C598"
 describe("B.Liquity", function () {
   const connectorName = "B.LIQUITY-TEST-A"
 
-  let dsaWallet0;
-  let dsaWallet1;
-  let masterSigner;
-  let instaConnectorsV2;
-  let connector;
-  let manager;
-  let vat;
-  let lusd;
-  let bammToken;
-  let stabilityPool;
+  let dsaWallet0: any;
+  let dsaWallet1: any
+  let masterSigner: any;
+  let instaConnectorsV2: any;
+  let connector: any;
+  let manager: any;
+  let vat: any;
+  let lusd: any;
+  let bammToken: any;
+  let stabilityPool: any;
 
   const wallets = provider.getWallets()
   const [wallet0, wallet1, wallet2, wallet3] = wallets

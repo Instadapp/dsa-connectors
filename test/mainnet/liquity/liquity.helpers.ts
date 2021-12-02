@@ -1,23 +1,23 @@
-const hre = require("hardhat");
-const hardhatConfig = require("../../../hardhat.config");
+import hre from "hardhat";
+import hardhatConfig from "../../../hardhat.config";
 
 // Instadapp deployment and testing helpers
-const deployAndEnableConnector = require("../../../scripts/deployAndEnableConnector.js");
-const encodeSpells = require("../../../scripts/encodeSpells.js");
-const getMasterSigner = require("../../../scripts/getMasterSigner");
-const buildDSAv2 = require("../../../scripts/buildDSAv2");
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/buildDSAv2"
+import { encodeSpells } from "../../../scripts/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/getMasterSigner"
 
 // Instadapp instadappAddresses/ABIs
-const instadappAddresses = require("../../../scripts/constant/addresses");
-const instadappAbi = require("../../../scripts/constant/abis");
+import { instadappAddresses } from "../../../scripts/important/addresses";
+import { instadappAbi } from "../../../scripts/constant/abis";
 
 // Instadapp Liquity Connector artifacts
-const connectV2LiquityArtifacts = require("../../artifacts/contracts/mainnet/connectors/liquity/main.sol/ConnectV2Liquity.json");
-const connectV2BasicV1Artifacts = require("../../artifacts/contracts/mainnet/connectors/basic/main.sol/ConnectV2Basic.json");
-const { ethers } = require("hardhat");
+import connectV2LiquityArtifacts from "../../artifacts/contracts/mainnet/connectors/liquity/main.sol/ConnectV2Liquity.json";
+import connectV2BasicV1Artifacts from "../../artifacts/contracts/mainnet/connectors/basic/main.sol/ConnectV2Basic.json";
+import { ethers } from "hardhat";
 
 // Instadapp uses a fake address to represent native ETH
-const { eth_addr: ETH_ADDRESS } = require("../../../scripts/constant/constant");
+import { eth_addr: ETH_ADDRESS } from "../../../scripts/constant/constant";
 
 const LIQUITY_CONNECTOR = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment
@@ -29,12 +29,12 @@ const INSTADAPP_BASIC_V1_CONNECTOR = "Basic-v1";
 
 const openTroveSpell = async (
   dsa,
-  signer,
-  depositAmount,
-  borrowAmount,
-  upperHint,
-  lowerHint,
-  maxFeePercentage
+  signer: any,
+  depositAmount: any,
+  borrowAmount: any,
+  upperHint: any,
+  lowerHint: any,
+  maxFeePercentage: any
 ) => {
   let address = signer.address;
   if (signer.address === undefined) {
