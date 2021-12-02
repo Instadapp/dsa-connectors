@@ -738,7 +738,7 @@ describe("PoolTogether", function () {
     });
 
     describe("Main - WETH Pod Test", function () {
-        let podAddress: any;
+        let podAddress
         it("Should deposit 1 ETH in WETH Pod and get Pod Ticket", async function () {
             const amount = ethers.utils.parseEther("1")
 
@@ -770,7 +770,7 @@ describe("PoolTogether", function () {
             let ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
             expect(ethBalanceAfter, `ETH balance less than before`).to.be.lt(ethBalanceBefore);
 
-            let podBalanceAfter = await podContract.balanceOfUnderlying(dsaWallet0.address)
+            podBalanceAfter = await podContract.balanceOfUnderlying(dsaWallet0.address)
             expect(podBalanceAfter, `Pod balance equal to 1`).to.be.eq(ethers.utils.parseEther("1"));
         });
 
@@ -804,7 +804,7 @@ describe("PoolTogether", function () {
             let ethBalanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
             expect(ethBalanceAfter, `ETH balance greater than before`).to.be.gt(ethBalanceBefore);
 
-            let podBalanceAfter = await podContract.balanceOfUnderlying(dsaWallet0.address)
+            podBalanceAfter = await podContract.balanceOfUnderlying(dsaWallet0.address)
             expect(podBalanceAfter, `Pod balance equal to 0`).to.be.eq(ethers.utils.parseEther("0"));
         });
     });

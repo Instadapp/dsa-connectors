@@ -76,7 +76,7 @@ function getBlockNumber(networkType: string) {
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-const config: HardhatUserConfig = {
+ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
@@ -124,10 +124,10 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },
-  // tenderly: {
-  //   // project: process.env.TENDERLY_PROJECT,
-  //   // username: process.env.TENDERLY_USERNAME,
-  // },
+  tenderly: {
+    project: process.env.TENDERLY_PROJECT,
+    username: process.env.TENDERLY_USERNAME,
+  },
   typechain: {
     outDir: "typechain",
     target: "ethers-v5",

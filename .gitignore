@@ -61,6 +61,6 @@ Thumbs.db
 build/contracts
 
 # buidler
-typechain
 artifacts
 cache
+typechain

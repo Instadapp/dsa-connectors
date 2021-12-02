@@ -8,7 +8,7 @@ chai.use(solidity);
 
 const { expect } = chai;
 
-const getMapping = (address: any, signer: any) => {
+const getMapping = (address, signer) => {
   return ethers.getContractAt("InstaMappingController", address, signer);
 };
 

@@ -7,7 +7,7 @@ const USDC_ADDR = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
 const WETH_ADDR = "0x82af49447d8a07e3bd95bd0d56f35241523fbab1";
 
 describe("Uniswap-sell-beta", function () {
-  let UniswapSellBeta: any, uniswapSellBeta: any;
+  let UniswapSellBeta, uniswapSellBeta;
 
   async function setBalance(address) {
     await network.provider.send("hardhat_setBalance", [

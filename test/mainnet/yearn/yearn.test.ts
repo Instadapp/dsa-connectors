@@ -14,10 +14,10 @@ import { tokens } from "../../../scripts/constant/tokens";
 
 import connectV2YearnArtifacts from "../../artifacts/contracts/mainnet/connectors/yearn_v2/main.sol/ConnectV2YearnV2.json"
 
-const toBytes32 = (bn: any) => {
+const toBytes32 = (bn) => {
     return ethers.utils.hexlify(ethers.utils.zeroPad(bn.toHexString(), 32));
 };
-const setStorageAt = async (address: any, index: any, value: any) => {
+const setStorageAt = async (address, index, value) => {
     await ethers.provider.send("hardhat_setStorageAt", [address, index, value]);
     await ethers.provider.send("evm_mine", []); // Just mines to the next block
 };
@@ -25,10 +25,10 @@ const setStorageAt = async (address: any, index: any, value: any) => {
 describe("Yearn", function () {
     const connectorName = "YEARN-TEST-A"
 
-    let dsaWallet0: any;
-    let masterSigner: any;
-    let instaConnectorsV2: any;
-    let connector: any;
+    let dsaWallet0
+    let masterSigner;
+    let instaConnectorsV2;
+    let connector;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
