@@ -5,21 +5,21 @@ pragma solidity ^0.7.0;
  * @dev DEX Aggregator.
  */
 
-import { TokenInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
-import { Helpers } from "./helpers.sol";
+import {TokenInterface} from "../../common/interfaces.sol";
+import {Stores} from "../../common/stores.sol";
+import {Helpers} from "./helpers.sol";
 
 abstract contract ParaswapResolver is Helpers {
     /**
      * @dev Sell ETH/ERC20_Token using ParaSwap.
      * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
-     * @param buyAddr The address of the token to buy.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
      * @param callData Data from paraswap API.
      * @param setId ID stores the amount of token brought.
-    */
+     */
     function swap(
         address buyAddr,
         address sellAddr,
@@ -27,7 +27,11 @@ abstract contract ParaswapResolver is Helpers {
         uint256 unitAmt,
         bytes calldata callData,
         uint256 setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
         Helpers.SwapData memory swapData = Helpers.SwapData({
             buyToken: TokenInterface(buyAddr),
             sellToken: TokenInterface(sellAddr),
