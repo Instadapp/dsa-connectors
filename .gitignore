@@ -63,3 +63,4 @@ build/contracts
 # buidler
 artifacts
 cache
+typechain
