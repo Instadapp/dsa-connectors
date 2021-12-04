@@ -1,26 +1,26 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
-const abis = require("../../scripts/constant/abis");
-const addresses = require("../../scripts/constant/addresses");
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector");
-const getMasterSigner = require("../../scripts/getMasterSigner");
-const buildDSAv2 = require("../../scripts/buildDSAv2");
-const ConnectV2AaveV2 = require("../../artifacts/contracts/mainnet/connectors/aave/v2/main.sol/ConnectV2AaveV2.json");
-const { parseEther } = require("@ethersproject/units");
-const encodeSpells = require("../../scripts/encodeSpells");
-const tokens = require("../../scripts/constant/tokens");
-const constants = require("../../scripts/constant/constant");
-const addLiquidity = require("../../scripts/addLiquidity");
-const { ethers } = hre;
+import { expect } from "chai";
+import hre from "hardhat";
+import { abis } from "../../../scripts/constant/abis";
+import { addresses } from "../../../scripts/constant/addresses";
+import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector";
+import { getMasterSigner } from "../../../scripts/getMasterSigner";
+import { buildDSAv2 } from "../../../scripts/buildDSAv2";
+import { ConnectV2AaveV2 } from "../../artifacts/contracts/mainnet/connectors/aave/v2/main.sol/ConnectV2AaveV2.json";
+import { parseEther } from "@ethersproject/units";
+import { encodeSpells } from "../../../scripts/encodeSpells";
+import { tokens } from "../../../scripts/constant/tokens";
+import { constants } from "../../../scripts/constant/constant";
+import { addLiquidity } from "../../../scripts/addLiquidity";
+// const { ethers } = hre;
 
-describe("Aave V2", function() {
+describe("Aave V2", function () {
   const connectorName = "AAVEV2-TEST-A";
 
-  let wallet0, wallet1;
-  let dsaWallet0;
-  let instaConnectorsV2;
-  let connector;
-  let masterSigner;
+  let wallet0: any, wallet1: any;
+  let dsaWallet0: any;
+  let instaConnectorsV2: any;
+  let connector: any;
+  let masterSigner: any;
 
   before(async () => {
     await hre.network.provider.request({
@@ -55,13 +55,13 @@ describe("Aave V2", function() {
     expect(!!masterSigner.address).to.be.true;
   });
 
-  describe("DSA wallet setup", function() {
-    it("Should build DSA v2", async function() {
+  describe("DSA wallet setup", function () {
+    it("Should build DSA v2", async function () {
       dsaWallet0 = await buildDSAv2(wallet0.address);
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH into DSA wallet", async function() {
+    it("Deposit ETH into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: parseEther("10"),
@@ -72,8 +72,8 @@ describe("Aave V2", function() {
     });
   });
 
-  describe("Main", function() {
-    it("should deposit ETH in Aave V2", async function() {
+  describe("Main", function () {
+    it("should deposit ETH in Aave V2", async function () {
       const amt = parseEther("1");
       const spells = [
         {
@@ -94,7 +94,7 @@ describe("Aave V2", function() {
       );
     });
 
-    it("Should borrow and payback DAI from Aave V2", async function() {
+    it("Should borrow and payback DAI from Aave V2", async function () {
       const amt = parseEther("100"); // 100 DAI
       const setId = "83478237";
       const spells = [
@@ -119,7 +119,7 @@ describe("Aave V2", function() {
       );
     });
 
-    it("Should borrow and payback half DAI from Aave V2", async function() {
+    it("Should borrow and payback half DAI from Aave V2", async function () {
       const amt = parseEther("100"); // 100 DAI
       // const setId = "83478237";
       await addLiquidity("dai", dsaWallet0.address, parseEther("1"));
@@ -161,7 +161,7 @@ describe("Aave V2", function() {
       );
     });
 
-    it("Should deposit all ETH in Aave V2", async function() {
+    it("Should deposit all ETH in Aave V2", async function () {
       const spells = [
         {
           connector: connectorName,
@@ -179,7 +179,7 @@ describe("Aave V2", function() {
       );
     });
 
-    it("Should withdraw all ETH from Aave V2", async function() {
+    it("Should withdraw all ETH from Aave V2", async function () {
       const spells = [
         {
           connector: connectorName,
