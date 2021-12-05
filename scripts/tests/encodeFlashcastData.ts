@@ -3,7 +3,7 @@ const { web3 } = hre;
 
 import { encodeSpells } from "./encodeSpells.js";
 
-module.exports = function(spells: any) {
+export default function encodeFlashcastData(spells: any) {
   const encodeSpellsData = encodeSpells(spells);
   const targetType = "string[]";
   let argTypes = [targetType, "bytes[]"];

@@ -15,7 +15,7 @@ function getCurrentCommitSha() {
 // We need to get the current commit sha ourself.
 const sha = getCurrentCommitSha();
 
-async function setStatus(context, state, description) {
+async function setStatus(context: any, state: string, description: string) {
   return fetch(
     `https://api.github.com/repos/${owner}/${repo}/statuses/${sha}`,
     {

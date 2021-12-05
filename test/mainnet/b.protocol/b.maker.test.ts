@@ -3,25 +3,23 @@ import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { constants } from "../../../scripts/constant/constant";
 import { tokens } from "../../../scripts/constant/tokens";
-
-import connectorMakerArtifacts from ("../../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/main.sol/ConnectV2BMakerDAO.json")
+import { ConnectV2BMakerDAO__factory } from "../../../typechain";
+import type { Signer, Contract } from "ethers";
 
 describe("B.Maker", function () {
     const connectorName = "B.MAKER-TEST-A"
 
     let dsaWallet0: any;
     let dsaWallet1: any;
-    let masterSigner: any;
-    let instaConnectorsV2: any;
+    let masterSigner: Signer;
+    let instaConnectorsV2: Contract;
     let connector: any;
     let manager: any;
     let vat: any;
@@ -35,17 +33,18 @@ describe("B.Maker", function () {
             params: [
                 {
                     forking: {
+                        // @ts-ignore
                         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
                         blockNumber: 12696000,
                     },
                 },
             ],
         });
-        masterSigner = await getMasterSigner(wallet3)
+        masterSigner = await getMasterSigner()
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({
             connectorName,
-            contractArtifact: connectorMakerArtifacts,
+            contractArtifact: ConnectV2BMakerDAO__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
@@ -67,7 +66,7 @@ describe("B.Maker", function () {
     it("Should have contracts deployed.", async function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!connector.address).to.be.true;
-        expect(!!masterSigner.address).to.be.true;
+        expect(!!(await masterSigner.getAddress())).to.be.true;
         expect(await connector.name()).to.be.equal("B.MakerDAO-v1.0");
     });
 
@@ -96,9 +95,9 @@ describe("B.Maker", function () {
     });
 
     describe("Main", function () {
-        let vault
-        let ilk
-        let urn
+        let vault: any;
+        let ilk: any;
+        let urn: any;
 
         it("Should open ETH-A vault Maker", async function () {
             vault = Number(await manager.cdpi()) + 1
@@ -314,7 +313,7 @@ describe("B.Maker", function () {
     })
 })
 
-async function daiToArt(vat, ilk, dai) {
+async function daiToArt(vat: any, ilk: any, dai: any) {
     const ilks = await vat.ilks(ilk)
     const rate = ilks[1] // second parameter
     const _1e27 = ethers.utils.parseEther("1000000000") // 1e9 * 1e18
@@ -323,12 +322,12 @@ async function daiToArt(vat, ilk, dai) {
     return art.add(1)
 }
 
-function veryClose(n1, n2) {
+function veryClose(n1: any, n2: any) {
     n1 = web3.utils.toBN(n1)
     n2 = web3.utils.toBN(n2)
 
-    _10000 = web3.utils.toBN(10000)
-    _9999 = web3.utils.toBN(9999)
+    let _10000 = web3.utils.toBN(10000)
+    let _9999 = web3.utils.toBN(9999)
 
     if (n1.mul(_10000).lt(n2.mul(_9999))) return false
     if (n2.mul(_10000).lt(n1.mul(_9999))) return false

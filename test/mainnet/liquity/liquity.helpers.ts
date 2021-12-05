@@ -1,4 +1,5 @@
 import hre from "hardhat";
+import { ethers } from "hardhat";
 import hardhatConfig from "../../../hardhat.config";
 
 // Instadapp deployment and testing helpers
@@ -12,34 +13,31 @@ import { instadappAddresses } from "../../../scripts/important/addresses";
 import { instadappAbi } from "../../../scripts/constant/abis";
 
 // Instadapp Liquity Connector artifacts
-import connectV2LiquityArtifacts from "../../artifacts/contracts/mainnet/connectors/liquity/main.sol/ConnectV2Liquity.json";
-import connectV2BasicV1Artifacts from "../../artifacts/contracts/mainnet/connectors/basic/main.sol/ConnectV2Basic.json";
-import { ethers } from "hardhat";
+import { ConnectV2Liquity__factory, ConnectV2Basic__factory } from "../../../typechain";
 
 // Instadapp uses a fake address to represent native ETH
-import { eth_addr: ETH_ADDRESS } from "../../../scripts/constant/constant";
+import { constants } from "../../../scripts/constant/constant.js";
+import type { Signer, Contract } from "ethers";
+
 
 const LIQUITY_CONNECTOR = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment
 const LIQUIDATABLE_TROVES_BLOCK_NUMBER = 12478159; // Deterministic block number for tests to run against, if you change this, tests will break.
 const JUSTIN_SUN_ADDRESS = "0x903d12bf2c57a29f32365917c706ce0e1a84cce3"; // LQTY whale address
 const LIQUIDATABLE_TROVE_ADDRESS = "0xafbeb4cb97f3b08ec2fe07ef0dac15d37013a347"; // Trove which is liquidatable at blockNumber: LIQUIDATABLE_TROVES_BLOCK_NUMBER
-const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit; // Maximum gas limit (12000000)
+// const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit; // Maximum gas limit (12000000)
 const INSTADAPP_BASIC_V1_CONNECTOR = "Basic-v1";
 
 const openTroveSpell = async (
-  dsa,
-  signer: any,
+  dsa: any,
+  signer: Signer,
   depositAmount: any,
   borrowAmount: any,
   upperHint: any,
   lowerHint: any,
   maxFeePercentage: any
 ) => {
-  let address = signer.address;
-  if (signer.address === undefined) {
-    address = await signer.getAddress();
-  }
+  let address = await signer.getAddress();
 
   const openTroveSpell = {
     connector: LIQUITY_CONNECTOR,
@@ -63,9 +61,9 @@ const openTroveSpell = async (
 };
 
 const createDsaTrove = async (
-  dsa,
-  signer,
-  liquity,
+  dsa: any,
+  signer: any,
+  liquity: any,
   depositAmount = hre.ethers.utils.parseEther("5"),
   borrowAmount = hre.ethers.utils.parseUnits("2000", 18)
 ) => {
@@ -86,32 +84,33 @@ const createDsaTrove = async (
   );
 };
 
-const sendToken = async (token, amount, from, to) => {
+const sendToken = async (token: any, amount: any, from: any, to: any) => {
   await hre.network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [from],
   });
-  const signer = await hre.ethers.provider.getSigner(from);
+  const signer = hre.ethers.provider.getSigner(from);
 
   return await token.connect(signer).transfer(to, amount, {
     gasPrice: 0,
   });
 };
 
-const resetInitialState = async (walletAddress, contracts, isDebug = false) => {
+const resetInitialState = async (walletAddress: any, contracts: any, isDebug = false) => {
   const liquity = await deployAndConnect(contracts, isDebug);
   const dsa = await buildDSAv2(walletAddress);
 
   return [liquity, dsa];
 };
 
-const resetHardhatBlockNumber = async (blockNumber) => {
+const resetHardhatBlockNumber = async (blockNumber: number) => {
   return await hre.network.provider.request({
     method: "hardhat_reset",
     params: [
       {
         forking: {
-          jsonRpcUrl: hardhatConfig.networks.hardhat.forking.url,
+          // @ts-ignore
+          jsonRpcUrl: hre.config.networks.hardhat.forking.url,
           blockNumber,
         },
       },
@@ -119,11 +118,11 @@ const resetHardhatBlockNumber = async (blockNumber) => {
   });
 };
 
-const deployAndConnect = async (contracts, isDebug = false) => {
+const deployAndConnect = async (contracts: any, isDebug = false) => {
   // Pin Liquity tests to a particular block number to create deterministic state (Ether price etc.)
   await resetHardhatBlockNumber(LIQUIDATABLE_TROVES_BLOCK_NUMBER);
-  const liquity = {
-    troveManager: null,
+  let liquity = {
+    troveManager: Contract,
     borrowerOperations: null,
     stabilityPool: null,
     lusdToken: null,
@@ -143,7 +142,7 @@ const deployAndConnect = async (contracts, isDebug = false) => {
   );
   const connector = await deployAndEnableConnector({
     connectorName: LIQUITY_CONNECTOR,
-    contractArtifact: connectV2LiquityArtifacts,
+    contractArtifact: ConnectV2Liquity__factory,
     signer: masterSigner,
     connectors: instaConnectorsV2,
   });
@@ -152,7 +151,7 @@ const deployAndConnect = async (contracts, isDebug = false) => {
 
   const basicConnector = await deployAndEnableConnector({
     connectorName: "Basic-v1",
-    contractArtifact: connectV2BasicV1Artifacts,
+    contractArtifact: ConnectV2Basic__factory,
     signer: masterSigner,
     connectors: instaConnectorsV2,
   });
@@ -226,7 +225,7 @@ const deployAndConnect = async (contracts, isDebug = false) => {
   return liquity;
 };
 
-const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity) => {
+const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity: any) => {
   const nominalCR = await liquity.hintHelpers.computeNominalCR(
     depositAmount,
     borrowAmount
