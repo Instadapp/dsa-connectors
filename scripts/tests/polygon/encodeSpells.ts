@@ -1,8 +1,7 @@
-import { addresses } from "./constant/addresses";
-import { abis } from "../constant/abis";
+import { abis } from "../../constant/abis";
 import { web3 } from "hardhat";
 
-module.exports = function(spells: any[]) {
+export function encodeSpells(spells: any[]) {
   const targets = spells.map((a) => a.connector);
   const calldatas = spells.map((a) => {
     const functionName = a.method;
@@ -15,4 +14,4 @@ module.exports = function(spells: any[]) {
     return web3.eth.abi.encodeFunctionCall(abi, a.args);
   });
   return [targets, calldatas];
-};
+}

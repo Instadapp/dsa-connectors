@@ -1,19 +1,19 @@
-import "@nomiclabs/hardhat-waffle";
-
-import { addresses } from "./constant/addresses";
+import { addresses } from "../constant/addresses";
 import { abis } from "../constant/abis";
 
-import * as hre from "hardhat";
-const { ethers, waffle } = hre;
-const { deployContract } = waffle;
+// const { deployContract } = waffle;
+// import { ethers } from "hardhat";
+// import { promises as fs } from "fs";
+// import { deployContract } from "ethereum-waffle";
 
-module.exports = async function({
+export async function deployAndEnableConnector({
   connectorName,
   contractArtifact,
   signer,
   connectors,
 }) {
-  const connectorInstanace = await deployContract(signer, contractArtifact, []);
+  const deployer = new contractArtifact(signer);
+  const connectorInstanace = await deployer.deploy();
 
   await connectors
     .connect(signer)
@@ -23,4 +23,4 @@ module.exports = async function({
   abis.connectors[connectorName] = contractArtifact.abi;
 
   return connectorInstanace;
-};
+}

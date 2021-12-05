@@ -1,5 +1,3 @@
-import { addresses } from "./constant/addresses";
-import { abis } from "./constant/abis";
 import * as hre from "hardhat";
 const { web3 } = hre;
 

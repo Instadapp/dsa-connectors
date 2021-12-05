@@ -1,9 +1,8 @@
 import { ethers } from "hardhat";
 
 import { addresses } from "./constant/addresses";
-import { abis } from "../constant/abis";
-
-import { abi } from "../../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json";
+import { abis } from "../../constant/abis";
+import { abi } from "../../../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json";
 
 module.exports = async function(owner: any) {
   const instaIndex = await ethers.getContractAt(

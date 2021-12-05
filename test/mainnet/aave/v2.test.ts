@@ -2,38 +2,37 @@ import { expect } from "chai";
 import hre from "hardhat";
 import { abis } from "../../../scripts/constant/abis";
 import { addresses } from "../../../scripts/constant/addresses";
-import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector";
-import { getMasterSigner } from "../../../scripts/getMasterSigner";
-import { buildDSAv2 } from "../../../scripts/buildDSAv2";
-import { ConnectV2AaveV2 } from "../../artifacts/contracts/mainnet/connectors/aave/v2/main.sol/ConnectV2AaveV2.json";
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
+import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
+import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
+import { ConnectV2AaveV2, ConnectV2AaveV2__factory } from "../../../typechain";
 import { parseEther } from "@ethersproject/units";
-import { encodeSpells } from "../../../scripts/encodeSpells";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { tokens } from "../../../scripts/constant/tokens";
 import { constants } from "../../../scripts/constant/constant";
-import { addLiquidity } from "../../../scripts/addLiquidity";
-// const { ethers } = hre;
+import { addLiquidity } from "../../../scripts/tests/addLiquidity";
+const { ethers } = hre;
 
 describe("Aave V2", function () {
   const connectorName = "AAVEV2-TEST-A";
+  let connector: ConnectV2AaveV2;
 
-  let wallet0: any, wallet1: any;
+  let wallet0: any, wallet1: { address: any; };
   let dsaWallet0: any;
-  let instaConnectorsV2: any;
-  let connector: any;
-  let masterSigner: any;
-
+  let instaConnectorsV2: { address: any; };
+  let masterSigner: { address: any; };
   before(async () => {
-    await hre.network.provider.request({
-      method: "hardhat_reset",
-      params: [
-        {
-          forking: {
-            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 12796965,
-          },
-        },
-      ],
-    });
+    // await hre.network.provider.request({
+    //   method: "hardhat_reset",
+    //   params: [
+    //     {
+    //       forking: {
+    //         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+    //         blockNumber: 12796965,
+    //       },
+    //     },
+    //   ],
+    // });
     [wallet0, wallet1] = await ethers.getSigners();
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
@@ -42,7 +41,7 @@ describe("Aave V2", function () {
     );
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2AaveV2,
+      contractArtifact: ConnectV2AaveV2__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });

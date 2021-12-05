@@ -1,7 +1,6 @@
 import * as hre from "hardhat";
 const { ethers } = hre;
-
-const deployConnector = require("./deployConnector");
+import { deployConnector } from "./deployConnector";
 
 async function main() {
   const address = await deployConnector("ConnectOne"); // Example

@@ -2,10 +2,10 @@ import hre from "hardhat";
 import hardhatConfig from "../../../hardhat.config";
 
 // Instadapp deployment and testing helpers
-import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector.js"
-import { buildDSAv2 } from "../../../scripts/buildDSAv2"
-import { encodeSpells } from "../../../scripts/encodeSpells.js"
-import { getMasterSigner } from "../../../scripts/getMasterSigner"
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
+import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
+import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
+import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 
 // Instadapp instadappAddresses/ABIs
 import { instadappAddresses } from "../../../scripts/important/addresses";
