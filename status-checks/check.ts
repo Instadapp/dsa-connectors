@@ -3,7 +3,7 @@ import * as path from "path";
 
 const forbiddenStrings: any = ["selfdestruct"];
 
-const getConnectorsList = async (connectorsRootsDirs: string | any[]) => {
+const getConnectorsList= async (connectorsRootsDirs: string | any[]): Promise<Record<string, any>>  => {
   try {
     const connectors = [];
     for (let index = 0; index < connectorsRootsDirs.length; index++) {
