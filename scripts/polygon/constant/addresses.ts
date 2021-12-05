@@ -1,4 +1,4 @@
-module.exports = {
+export const addresses = {
   connectors: {
     basic: "0x1cAF5EC802ca602E98139AD96A8f2B7BC524264E",
     auth: "0xf6474aD0dA75A0dE15D2c915e601D9f754B9e6fe",
