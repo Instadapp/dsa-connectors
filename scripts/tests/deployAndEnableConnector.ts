@@ -6,11 +6,8 @@ import hre from "hardhat";
 import type { Signer, Contract } from "ethers";
 import type { ContractJSON } from "ethereum-waffle/dist/esm/ContractJSON";
 
-
 const { ethers, waffle } = hre;
 const { deployContract } = waffle;
-
-
 
 interface DeployInterface {
   connectorName: string;
@@ -18,7 +15,6 @@ interface DeployInterface {
   signer: Signer;
   connectors: Contract;
 }
-
 
 function getAddress(network: string | undefined) {
   if (network === "polygon") return addressesPolygon;

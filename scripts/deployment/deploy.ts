@@ -3,7 +3,6 @@ import { deployConnector } from "./deployConnector";
 
 async function main() {
   const accounts = await ethers.getSigners();
-  const wallet = accounts[0];
 
   const connectMapping: Record<string, string> = {
     "1INCH-A": "ConnectV2OneInch",

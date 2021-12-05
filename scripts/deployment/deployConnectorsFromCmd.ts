@@ -1,9 +1,10 @@
 import * as fs from "fs";
-import { ethers, network, config } from "hardhat";
+import * as hre from "hardhat"
+const { ethers, network, config } = hre;
 
 let args = process.argv;
 args = args.splice(2, args.length);
-let params = {};
+let params: Record<string, string> = {};
 
 for (let i = 0; i < args.length; i += 2) {
   if (args[i][0] !== "-" || args[i][1] !== "-") {
@@ -38,17 +39,16 @@ let wallet = new ethers.Wallet(privateKey, provider);
 network.name = params["networkName"];
 network.config = config.networks[params["networkName"]];
 network.provider = provider;
-let contracts = [];
+let contracts: (string | string[])[] = [];
 
 const parseFile = async (filePath: fs.PathOrFileDescriptor) => {
   const data = fs.readFileSync(filePath, "utf-8");
   let parsedData = data.split("contract ");
   parsedData = parsedData[parsedData.length - 1].split(" ");
-  parsedData = parsedData[0];
-  return parsedData;
+  return parsedData[0];
 };
 
-const parseDir = async (root, basePath, addPath) => {
+const parseDir = async (root: string | any[], basePath: string, addPath: string) => {
   for (let i = 0; i < root.length; i++) {
     addPath = "/" + root[i];
     const dir = fs.readdirSync(basePath + addPath);

@@ -1,4 +1,4 @@
-import * as hre from "hardhat";
+import hre from "hardhat";
 const { web3 } = hre;
 
 import { encodeSpells } from "./encodeSpells.js";

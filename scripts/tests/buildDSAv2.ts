@@ -1,7 +1,5 @@
 import { ethers } from "hardhat";
 
-const network = String(process.env.networkType);
-
 import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";

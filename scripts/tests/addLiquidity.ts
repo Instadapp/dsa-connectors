@@ -7,7 +7,7 @@ const mineTx = async (tx: any) => {
   await (await tx).wait();
 };
 
-const tokenMapping = {
+const tokenMapping: Record<string, any> = {
   usdc: {
     impersonateSigner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",

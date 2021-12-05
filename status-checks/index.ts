@@ -38,7 +38,7 @@ async function setStatus(context, state, description) {
 
   // Run in parallel
   await Promise.all(
-    checks.map(async (check) => {
+    checks.map(async (check: { name: any; callback: any }) => {
       const { name, callback } = check;
 
       await setStatus(name, "pending", "Running check..");
