@@ -1,11 +1,19 @@
 import { ethers, network } from "hardhat";
-import { addresses } from "../constant/addresses";
+import { addressesPolygon } from "./polygon/addressesPolygon";
+import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";
+
+function getAddress(network: string | undefined) {
+  if (network === "polygon") return addressesPolygon.core.instaIndex;
+  // else if (network === "arbitrum") return addressesPolygon.core.instaIndex;
+  // else if (network === "avalanche") return addressesPolygon.core.instaIndex;
+  else return addresses.core.instaIndex;
+}
 
 export async function getMasterSigner() {
   const [_, __, ___, wallet3] = await ethers.getSigners();
   const instaIndex = new ethers.Contract(
-    addresses.core.instaIndex,
+    getAddress(String(process.env.networkType)),
     abis.core.instaIndex,
     wallet3
   );
