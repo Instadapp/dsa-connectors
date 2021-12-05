@@ -5,7 +5,7 @@ async function main() {
   const accounts = await ethers.getSigners();
   const wallet = accounts[0];
 
-  const connectMapping = {
+  const connectMapping: Record<string, string> = {
     "1INCH-A": "ConnectV2OneInch",
     "1INCH-B": "ConnectV2OneProto",
     "AAVE-V1-A": "ConnectV2AaveV1",
@@ -21,7 +21,7 @@ async function main() {
     "UNISWAP-A": "ConnectV2UniswapV2",
   };
 
-  const addressMapping = {};
+  const addressMapping: Record<string, string> = {};
 
   for (const key in connectMapping) {
     addressMapping[key] = await deployConnector(connectMapping[key]);
