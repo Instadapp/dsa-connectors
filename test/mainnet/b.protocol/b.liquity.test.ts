@@ -44,11 +44,11 @@ describe("B.Liquity", function () {
         },
       ],
     });
-    masterSigner = await getMasterSigner(wallet3)
+    masterSigner = await getMasterSigner()
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: connectorLiquityArtifacts,
+      contractArtifact: ConnectV2BLiquity__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
     })
@@ -70,7 +70,7 @@ describe("B.Liquity", function () {
   it("Should have contracts deployed.", async function () {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
+    expect(!!(await masterSigner.getAddress())).to.be.true;
     expect(await connector.name()).to.be.equal("B.Liquity-v1");
   });
 
@@ -175,12 +175,12 @@ describe("B.Liquity", function () {
   })
 })
 
-function veryClose(n1, n2) {
+function veryClose(n1: any, n2: any) {
   n1 = web3.utils.toBN(n1)
   n2 = web3.utils.toBN(n2)
 
-  _10000 = web3.utils.toBN(10000)
-  _9999 = web3.utils.toBN(9999)
+  let _10000 = web3.utils.toBN(10000)
+  let _9999 = web3.utils.toBN(9999)
 
   if (n1.mul(_10000).lt(n2.mul(_9999))) return false
   if (n2.mul(_10000).lt(n1.mul(_9999))) return false
