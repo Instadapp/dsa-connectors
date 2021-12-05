@@ -1,6 +1,6 @@
 import checkMain from "./check";
 
-module.exports = [
+export default [
   {
     name: "Solidity check",
     callback: async () => {
