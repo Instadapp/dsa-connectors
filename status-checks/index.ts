@@ -35,7 +35,6 @@ async function setStatus(context, state, description) {
 
 (async () => {
   console.log(`Starting status checks for commit ${sha}`);
-
   // Run in parallel
   await Promise.all(
     checks.map(async (check: { name: any; callback: any }) => {

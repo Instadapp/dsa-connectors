@@ -1,29 +1,27 @@
+import hre from "hardhat";
 import { expect } from "chai";
-import "hardhat";
 import { abis } from "../../../scripts/constant/abis";
 import { addresses } from "../../../scripts/constant/addresses";
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
-
-import ConnectV2AaveV1 from "../../artifacts/contracts/mainnet/connectors/aave/v1/main.sol/ConnectV2AaveV1.json";
+import { ConnectV2AaveV1, ConnectV2AaveV1__factory } from "../../../typechain";
 import { parseEther } from "@ethersproject/units";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { tokens } from "../../../scripts/constant/tokens";
 import { constants } from "../../../scripts/constant/constant";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
-// const { ethers } = hre;
-
-const ALCHEMY_ID = process.env.ALCHEMY_ID;
+const { ethers } = hre;
+import type { Signer, Contract } from "ethers";
 
 describe("Aave V1", function () {
   const connectorName = "AAVEV1-TEST-A";
 
   let wallet0: any, wallet1: any;
   let dsaWallet0: any;
-  let instaConnectorsV2: any;
+  let instaConnectorsV2: Contract;
   let connector: any;
-  let masterSigner: any;
+  let masterSigner: Signer;
 
   before(async () => {
     try {
@@ -32,6 +30,7 @@ describe("Aave V1", function () {
         params: [
           {
             forking: {
+              // @ts-ignore
               jsonRpcUrl: hre.config.networks.hardhat.forking.url,
               blockNumber: 12796965,
             },
@@ -46,7 +45,7 @@ describe("Aave V1", function () {
       );
       connector = await deployAndEnableConnector({
         connectorName,
-        contractArtifact: ConnectV2AaveV1,
+        contractArtifact: ConnectV2AaveV1__factory,
         signer: masterSigner,
         connectors: instaConnectorsV2,
       });
@@ -59,7 +58,7 @@ describe("Aave V1", function () {
   it("should have contracts deployed", async () => {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
+    expect(!!(await masterSigner.getAddress())).to.be.true;
   });
 
   describe("DSA wallet setup", function () {

@@ -9,13 +9,10 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { constants } from "../../../scripts/constant/constant";
-import { tokens } from "../../../scripts/constant/tokens";
-
-import connectorLiquityArtifacts from ("../../artifacts/contracts/mainnet/connectors/b.protocol/liquity/main.sol/ConnectV2BLiquity.json")
+import { ConnectV2BLiquity__factory } from "../../../typechain";
+import type { Signer, Contract } from "ethers";
 
 const LUSD_WHALE = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb" // stability pool
-
 const BAMM_ADDRESS = "0x0d3AbAA7E088C2c82f54B2f47613DA438ea8C598"
 
 describe("B.Liquity", function () {
@@ -23,8 +20,8 @@ describe("B.Liquity", function () {
 
   let dsaWallet0: any;
   let dsaWallet1: any
-  let masterSigner: any;
-  let instaConnectorsV2: any;
+  let masterSigner: Signer;
+  let instaConnectorsV2: Contract;
   let connector: any;
   let manager: any;
   let vat: any;
@@ -40,6 +37,7 @@ describe("B.Liquity", function () {
       params: [
         {
           forking: {
+            // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
             blockNumber: 12996875,
           },
