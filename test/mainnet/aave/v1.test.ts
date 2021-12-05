@@ -2,16 +2,16 @@ import { expect } from "chai";
 import "hardhat";
 import { abis } from "../../../scripts/constant/abis";
 import { addresses } from "../../../scripts/constant/addresses";
-import { deployAndEnableConnector } from "../../../scripts/deployAndEnableConnector";
-import { getMasterSigner } from "../../../scripts/getMasterSigner";
-import { buildDSAv2 } from "../../../scripts/buildDSAv2";
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
+import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
+import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 
 import ConnectV2AaveV1 from "../../artifacts/contracts/mainnet/connectors/aave/v1/main.sol/ConnectV2AaveV1.json";
 import { parseEther } from "@ethersproject/units";
-import { encodeSpells } from "../../../scripts/encodeSpells";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { tokens } from "../../../scripts/constant/tokens";
 import { constants } from "../../../scripts/constant/constant";
-import { addLiquidity } from "../../../scripts/addLiquidity";
+import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 // const { ethers } = hre;
 
 const ALCHEMY_ID = process.env.ALCHEMY_ID;

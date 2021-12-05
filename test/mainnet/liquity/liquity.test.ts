@@ -2,8 +2,8 @@ import hre from "hardhat";
 import { expect } from "chai";
 
 // Instadapp deployment and testing helpers
-import { buildDSAv2 } from "../../../scripts/buildDSAv2";
-import { encodeSpells } from "../../../scripts/encodeSpells.js";
+import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells.js";
 
 // Liquity smart contracts
 import contracts from "./liquity.contracts";

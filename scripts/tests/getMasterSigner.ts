@@ -1,8 +1,8 @@
-const { ethers, network } = "hardhat";
-import { addresses } from "./constant/addresses";
+import { ethers, network } from "hardhat";
+import { addresses } from "../constant/addresses";
 import { abis } from "../constant/abis";
 
-module.exports = async function() {
+export async function getMasterSigner() {
   const [_, __, ___, wallet3] = await ethers.getSigners();
   const instaIndex = new ethers.Contract(
     addresses.core.instaIndex,
@@ -21,4 +21,4 @@ module.exports = async function() {
   });
 
   return await ethers.getSigner(masterAddress);
-};
+}
