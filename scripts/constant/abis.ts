@@ -1,4 +1,4 @@
-export const abis = {
+export const abis: Record<string, any> = {
   core: {
     connectorsV2: require("./abi/core/connectorsV2.json"),
     instaIndex: require("./abi/core/instaIndex.json"),
