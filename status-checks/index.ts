@@ -1,7 +1,7 @@
 import * as cp from "child_process";
 import fetch from "node-fetch";
 
-import checkMain from "./check";
+import checks from "./checks";
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
