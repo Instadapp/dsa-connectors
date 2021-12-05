@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
-import { addressesPolygon } from "./polygon/addressesPolygon";
 import { addresses } from "./mainnet/addresses";
+import { addresses as addressesPolygon } from "./polygon/addresses";
 import { abis } from "../constant/abis";
 
 function getAddress(network: string | undefined) {
