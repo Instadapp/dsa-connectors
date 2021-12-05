@@ -1,4 +1,4 @@
-import { addressesPolygon } from "./polygon/addressesPolygon";
+import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";
 
