@@ -1,7 +1,10 @@
 import { expect } from "chai";
 import hre from "hardhat";
-import { web3, deployments, waffle, ethers } = hre;
-import { provider, deployContract } = waffle
+const { web3, deployments, waffle, ethers } = hre;
+const { provider, deployContract} = waffle
+
+import type { Signer, Contract } from "ethers";
+import type { ContractJSON } from "ethereum-waffle/dist/esm/ContractJSON";
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
@@ -13,14 +16,14 @@ import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
 import { tokens } from "../../../scripts/constant/tokens";
 
-import connectV2CompoundArtifacts from "../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json"
+import connectV2CompoundArtifacts from "../../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json"
 
 describe("Compound", function () {
     const connectorName = "COMPOUND-TEST-A"
 
-    let dsaWallet0: any;
-    let masterSigner: any;
-    let instaConnectorsV2: any;
+    let dsaWallet0: Signer;
+    let masterSigner: Signer;
+    let instaConnectorsV2: Contract;
     let connector: any;
 
     const wallets = provider.getWallets()
@@ -31,6 +34,7 @@ describe("Compound", function () {
             params: [
                 {
                     forking: {
+                        //@ts-ignore
                         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
                         blockNumber: 13300000,
                     },

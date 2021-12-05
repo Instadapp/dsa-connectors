@@ -2,10 +2,23 @@ import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";
 
-// const { deployContract } = waffle;
-// import { ethers } from "hardhat";
-// import { promises as fs } from "fs";
-// import { deployContract } from "ethereum-waffle";
+import hre from "hardhat";
+import type { Signer, Contract } from "ethers";
+import type { ContractJSON } from "ethereum-waffle/dist/esm/ContractJSON";
+
+
+const { ethers, waffle } = hre;
+const { deployContract } = waffle;
+
+
+
+interface DeployInterface {
+  connectorName: string;
+  contractArtifact: ContractJSON;
+  signer: Signer;
+  connectors: Contract;
+}
+
 
 function getAddress(network: string | undefined) {
   if (network === "polygon") return addressesPolygon;
@@ -14,14 +27,15 @@ function getAddress(network: string | undefined) {
   else return addresses;
 }
 
-export async function deployAndEnableConnector({
-  connectorName,
-  contractArtifact,
-  signer,
-  connectors,
-}) {
-  const deployer = new contractArtifact(signer);
-  const connectorInstanace = await deployer.deploy();
+export async function deployAndEnableConnector(
+  {
+    connectorName,
+    contractArtifact,
+    signer,
+    connectors
+  } : DeployInterface
+) {
+  const connectorInstanace: Contract = await deployContract(signer, contractArtifact);
 
   await connectors
     .connect(signer)
