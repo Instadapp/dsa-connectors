@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 const network = String(process.env.networkType);
 
-import { addressesPolygon } from "./polygon/addressesPolygon";
+import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";
 import { abi } from "../../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json";
