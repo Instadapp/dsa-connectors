@@ -1,27 +1,23 @@
 import { expect } from "chai";
 import hre from "hardhat";
-const { web3, deployments, waffle, ethers } = hre;
+const { waffle, ethers } = hre;
 const { provider, deployContract} = waffle
 
 import type { Signer, Contract } from "ethers";
-import type { ContractJSON } from "ethereum-waffle/dist/esm/ContractJSON";
 
-import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
-import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
+import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
-import { tokens } from "../../../scripts/constant/tokens";
-
-import connectV2CompoundArtifacts from "../../../artifacts/contracts/mainnet/connectors/compound/main.sol/ConnectV2Compound.json"
+import { ConnectV2Compound__factory } from "../../../typechain";
 
 describe("Compound", function () {
     const connectorName = "COMPOUND-TEST-A"
 
-    let dsaWallet0: Signer;
+    let dsaWallet0: any;
     let masterSigner: Signer;
     let instaConnectorsV2: Contract;
     let connector: any;
@@ -41,11 +37,11 @@ describe("Compound", function () {
                 },
             ],
         });
-        masterSigner = await getMasterSigner(wallet3)
+        masterSigner = await getMasterSigner()
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({
             connectorName,
-            contractArtifact: connectV2CompoundArtifacts,
+            contractArtifact: ConnectV2Compound__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
@@ -55,7 +51,7 @@ describe("Compound", function () {
     it("Should have contracts deployed.", async function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!connector.address).to.be.true;
-        expect(!!masterSigner.address).to.be.true;
+        expect(!!(await masterSigner.getAddress())).to.be.true;
     });
 
     describe("DSA wallet setup", function () {

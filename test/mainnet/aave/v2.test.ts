@@ -12,27 +12,29 @@ import { tokens } from "../../../scripts/constant/tokens";
 import { constants } from "../../../scripts/constant/constant";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 const { ethers } = hre;
+import type { Signer, Contract } from "ethers";
 
 describe("Aave V2", function () {
   const connectorName = "AAVEV2-TEST-A";
-  let connector: ConnectV2AaveV2;
+  let connector: any;
 
-  let wallet0: any, wallet1: { address: any; };
+  let wallet0: any, wallet1:any;
   let dsaWallet0: any;
-  let instaConnectorsV2: { address: any; };
-  let masterSigner: { address: any; };
+  let instaConnectorsV2: Contract;
+  let masterSigner: Signer;
   before(async () => {
-    // await hre.network.provider.request({
-    //   method: "hardhat_reset",
-    //   params: [
-    //     {
-    //       forking: {
-    //         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-    //         blockNumber: 12796965,
-    //       },
-    //     },
-    //   ],
-    // });
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            // @ts-ignore
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 12796965,
+          },
+        },
+      ],
+    });
     [wallet0, wallet1] = await ethers.getSigners();
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
@@ -51,7 +53,7 @@ describe("Aave V2", function () {
   it("should have contracts deployed", async () => {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
+    expect(!!(await masterSigner.getAddress())).to.be.true;
   });
 
   describe("DSA wallet setup", function () {
