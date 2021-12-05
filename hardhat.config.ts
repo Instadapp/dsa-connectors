@@ -26,6 +26,7 @@ const chainIds = {
   ropsten: 3,
   avalanche: 43114,
   polygon: 137,
+  arbitrum: 42161,
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
