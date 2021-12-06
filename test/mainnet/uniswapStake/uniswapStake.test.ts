@@ -3,18 +3,18 @@ import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js";
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
-import { encodeSpells } from "../../../scripts/tests/encodeSpells.js";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { abi: nftManagerAbi } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json"
+import { abi } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json"
+import type { Signer, Contract } from "ethers";
 
-import connectV2UniswapStakerArtifacts from "../../artifacts/contracts/mainnet/connectors/uniswap/v3_staker/main.sol/ConnectV2UniswapV3Staker.json";
-import connectV2UniswapV3Artifacts from "../../artifacts/contracts/mainnet/connectors/uniswap/v3/main.sol/ConnectV2UniswapV3.json";
+import { ConnectV2UniswapV3Staker__factory, ConnectV2UniswapV3__factory } from "../../../typechain";
 
 const FeeAmount = {
     LOW: 500,
@@ -22,7 +22,7 @@ const FeeAmount = {
     HIGH: 10000,
 }
 
-const TICK_SPACINGS = {
+const TICK_SPACINGS: Record<number, number> = {
     500: 10,
     3000: 60,
     10000: 200
@@ -32,7 +32,7 @@ const DAI_ADDR = "0x6b175474e89094c44da98b954eedeac495271d0f"
 const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 const INST_ADDR = "0x6f40d4a6237c257fff2db00fa0510deeecd303eb"
 
-let tokenIds = []
+let tokenIds: any[] = []
 const abiCoder = ethers.utils.defaultAbiCoder
 
 describe("UniswapV3", function () {
@@ -44,6 +44,7 @@ describe("UniswapV3", function () {
     let instaConnectorsV2: any;
     let connector: any;
     let startTime: any, endTime: any;
+    let nftManager: Contract;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -53,18 +54,19 @@ describe("UniswapV3", function () {
             params: [
                 {
                     forking: {
+                        // @ts-ignore
                         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
                         blockNumber: 13300000,
                     },
                 },
             ],
         });
-        masterSigner = await getMasterSigner(wallet3)
+        masterSigner = await getMasterSigner()
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
-        let nftManager = await ethers.getContractAt(nftManagerAbi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
+        nftManager = await ethers.getContractAt(abi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
         connector = await deployAndEnableConnector({
             connectorName: connectorStaker,
-            contractArtifact: connectV2UniswapStakerArtifacts,
+            contractArtifact: ConnectV2UniswapV3Staker__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
@@ -72,7 +74,7 @@ describe("UniswapV3", function () {
 
         let uniswapConnector = await deployAndEnableConnector({
             connectorName: connectorUniswap,
-            contractArtifact: connectV2UniswapV3Artifacts,
+            contractArtifact: ConnectV2UniswapV3__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         });
@@ -161,7 +163,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let castEvent = new Promise((resolve, reject) => {
-                dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
+                dsaWallet0.on('LogCast', (origin: any, sender: any, value: any, targetNames: any, targets: any, eventNames: any, eventParams: any, event: any) => {
                     const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[0]);
                     const params1 = abiCoder.decode(["uint256", "uint256", "uint256", "uint256", "int24", "int24"], eventParams[1]);
                     tokenIds.push(params[0]);
@@ -213,7 +215,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let castEvent = new Promise((resolve, reject) => {
-                dsaWallet0.on('LogCast', (origin, sender, value, targetNames, targets, eventNames, eventParams, event) => {
+                dsaWallet0.on('LogCast', (origin: any, sender: any, value: any, targetNames: any, targets: any, eventNames: any, eventParams: any, event: any) => {
                     const params = abiCoder.decode(["bytes32", "address", "address", "uint256", "uint256", "uint256"], eventParams[0]);
                     const params1 = abiCoder.decode(["bytes32", "address", "address", "uint256", "uint256", "uint256"], eventParams[1]);
                     event.removeListener();
@@ -226,7 +228,7 @@ describe("UniswapV3", function () {
                 }, 60000)
             });
 
-            let event = await castEvent
+            let event: any = await castEvent
             startTime = event.start;
             endTime = event.end;
         });
@@ -351,5 +353,5 @@ describe("UniswapV3", function () {
     })
 })
 
-const getMinTick = (tickSpacing) => Math.ceil(-887272 / tickSpacing) * tickSpacing
-const getMaxTick = (tickSpacing) => Math.floor(887272 / tickSpacing) * tickSpacing
+const getMinTick = (tickSpacing: number) => Math.ceil(-887272 / tickSpacing) * tickSpacing
+const getMaxTick = (tickSpacing: number) => Math.floor(887272 / tickSpacing) * tickSpacing
