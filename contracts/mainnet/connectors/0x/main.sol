@@ -14,6 +14,7 @@ import {Events} from "./events.sol";
 
 abstract contract ZeroEx is Helpers {
     /**
+     * @notice Swap tokens on 0x
      * @dev Sell ETH/ERC20_Token using 0x.
      * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
