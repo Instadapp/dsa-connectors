@@ -33,19 +33,29 @@ async function testRunner() {
   start = Date.now();
   let path: string;
   if (testName === "all") {
-    path = availableTests.map((file) => join(testsPath, file)).join(" ");
+    for (let test of availableTests) {
+      path = join(testsPath, test);
+      path += "/*";
+      await execScript({
+        cmd: "npx",
+        args: ["hardhat", "test", path],
+        env: {
+          networkType: chain,
+        },
+      });
+    }
   } else {
     path = join(testsPath, testName);
-  }
-  path += "/*";
+    path += "/*";
 
-  await execScript({
-    cmd: "npx",
-    args: ["hardhat", "test", path],
-    env: {
-      networkType: chain,
-    },
-  });
+    await execScript({
+      cmd: "npx",
+      args: ["hardhat", "test", path],
+      env: {
+        networkType: chain,
+      },
+    });
+  }
   end = Date.now();
 }
 
