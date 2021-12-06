@@ -56,9 +56,8 @@ describe("BASIC-ERC1155", function () {
 
         await hre.network.provider.send("hardhat_setBalance", [
             TOKEN_OWNER_ADDR,
-            "0x1000000000000000",
+            "0x10000000000000000",
         ]);
-
         // get tokenOwner
         tokenOwner = await ethers.getSigner(
             TOKEN_OWNER_ADDR
