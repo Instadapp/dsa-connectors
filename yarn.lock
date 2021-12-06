@@ -1271,6 +1271,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/chai-as-promised@^7.1.4":
+  "integrity" "sha512-1y3L1cHePcIm5vXkh1DSGf/zQq5n5xDKG1fpCvf18+uOkpce0Z1ozNFPkyWsVswK7ntN1sZBw3oU6gmN+pDUcA=="
+  "resolved" "https://registry.npmjs.org/@types/chai-as-promised/-/chai-as-promised-7.1.4.tgz"
+  "version" "7.1.4"
+  dependencies:
+    "@types/chai" "*"
+
 "@types/chai@*", "@types/chai@^4.2.22":
   "integrity" "sha512-tFfcE+DSTzWAgifkjik9AySNqIyNoYwmR+uecPwwD/XRNfvOjmC/FjCxpiUGDkDVDphPfCUecSQVFw+lN3M3kQ=="
   "resolved" "https://registry.npmjs.org/@types/chai/-/chai-4.2.22.tgz"

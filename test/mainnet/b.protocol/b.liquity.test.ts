@@ -3,9 +3,9 @@ import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre; //check
 const { provider, deployContract } = waffle
 
-import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector"
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
-import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
+import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";

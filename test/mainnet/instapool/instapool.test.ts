@@ -3,10 +3,10 @@ import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle
 
-import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector"
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
-import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
-import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData.js"
+import { encodeSpells } from "../../../scripts/tests/encodeSpells"
+import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 
 import { addresses } from "../../../scripts/constant/addresses";

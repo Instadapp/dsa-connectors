@@ -1,22 +1,23 @@
+import { BigNumberish } from "@ethersproject/bignumber";
+import { Contract } from "@ethersproject/contracts";
 import { expect } from "chai";
-import hre from "hardhat";
-const { web3, deployments, waffle, ethers } = hre;
-const { provider, deployContract } = waffle
+import hre, { artifacts } from "hardhat";
+const { ethers } = hre;
 
 const USDC_ADDR = "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8";
 const WETH_ADDR = "0x82af49447d8a07e3bd95bd0d56f35241523fbab1";
 
 describe("Uniswap-sell-beta", function () {
-  let UniswapSellBeta, uniswapSellBeta;
+  let UniswapSellBeta, uniswapSellBeta: Contract;
 
-  async function setBalance(address) {
-    await network.provider.send("hardhat_setBalance", [
+  async function setBalance(address: any) {
+    await hre.network.provider.send("hardhat_setBalance", [
       address,
       ethers.utils.parseEther("10.0").toHexString(),
     ]);
   }
 
-  async function impersonate(owner, account, token0, decimals) {
+  async function impersonate(owner: string, account: any, token0: string, decimals: BigNumberish | undefined) {
     const tokenArtifact = await artifacts.readArtifact(
       "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20"
     );

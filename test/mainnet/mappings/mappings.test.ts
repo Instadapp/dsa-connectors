@@ -1,14 +1,15 @@
-import { ethers, network } from "hardhat";
+import hre, { ethers, network } from "hardhat";
 import chai from "chai";
 import chaiPromise from "chai-as-promised";
 import { solidity } from "ethereum-waffle";
+import type { Signer, Contract } from "ethers";
 
 chai.use(chaiPromise);
 chai.use(solidity);
 
 const { expect } = chai;
 
-const getMapping = (address, signer) => {
+const getMapping = (address: string, signer: Signer) => {
   return ethers.getContractAt("InstaMappingController", address, signer);
 };
 
@@ -25,6 +26,7 @@ describe("Test InstaMapping contract", () => {
       params: [
         {
           forking: {
+            // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
             blockNumber: 12796965,
           },
