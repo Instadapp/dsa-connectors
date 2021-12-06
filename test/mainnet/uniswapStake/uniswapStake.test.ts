@@ -40,7 +40,7 @@ describe("UniswapV3", function () {
     const connectorUniswap = "UniswapV3-v1"
 
     let dsaWallet0: any
-    let masterSigner: any;
+    let masterSigner: Signer;
     let instaConnectorsV2: any;
     let connector: any;
     let startTime: any, endTime: any;
@@ -83,7 +83,7 @@ describe("UniswapV3", function () {
     it("Should have contracts deployed.", async function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!connector.address).to.be.true;
-        expect(!!masterSigner.address).to.be.true;
+        expect(!!(await masterSigner.getAddress())).to.be.true;
     });
 
     describe("DSA wallet setup", function () {
@@ -183,7 +183,7 @@ describe("UniswapV3", function () {
             let event = await castEvent
 
             let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
-            console.log("Balance", balance)
+            console.log("Balance", balance.toString())
         });
 
         it("Should create incentive successfully", async function () {
@@ -277,7 +277,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
-            console.log("Balance", balance)
+            console.log("Balance", balance.toString())
         });
 
         it("Should claim rewards successfully", async function () {
@@ -348,7 +348,7 @@ describe("UniswapV3", function () {
             let receipt = await tx.wait()
 
             let balance = await nftManager.connect(wallet0).balanceOf(dsaWallet0.address)
-            console.log("Balance", balance)
+            console.log("Balance", balance.toString())
         });
     })
 })

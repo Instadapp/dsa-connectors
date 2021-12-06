@@ -51,8 +51,8 @@ describe("Uniswap-sell-beta", function () {
   }
 
   beforeEach(async () => {
-    const account0 = "0x36cc7B13029B5DEe4034745FB4F24034f3F2ffc6";
-    const account1 = "0xce2cc46682e9c6d5f174af598fb4931a9c0be68e";
+    const account0 = "0xa067668661c84476afcdc6fa5d758c4c01c34352";
+    const account1 = "0x0db3fe3b770c95a0b99d1ed6f2627933466c0dd8";
 
     const [owner, add1, add2] = await ethers.getSigners();
     await impersonate(owner.address, account1, USDC_ADDR, 6);

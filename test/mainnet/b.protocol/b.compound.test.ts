@@ -10,7 +10,7 @@ import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
-import { ConnectV2Compound__factory } from "../../../typechain";
+import { ConnectV2BCompound__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
 
 describe("B.Compound", function () {
@@ -19,7 +19,7 @@ describe("B.Compound", function () {
     let dsaWallet0: any;
     let masterSigner: Signer;
     let instaConnectorsV2: Contract;
-    let connector: any;
+    let connector: Contract;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -40,7 +40,7 @@ describe("B.Compound", function () {
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({
             connectorName,
-            contractArtifact: ConnectV2Compound__factory,
+            contractArtifact: ConnectV2BCompound__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
