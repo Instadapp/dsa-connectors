@@ -2,8 +2,8 @@ pragma solidity ^0.7.0;
 
 import {TokenInterface} from "../../common/interfaces.sol";
 import {DSMath} from "../../common/math.sol";
-import {Basic} from "../../common/basic.sol";
 import {ZeroExData, zeroExInterface} from "./interface.sol";
+import {Basic} from "../../common/basic.sol";
 
 contract Helpers is DSMath, Basic {
     /**
@@ -12,7 +12,7 @@ contract Helpers is DSMath, Basic {
     address internal constant zeroExAddr =
         0xDef1C0ded9bec7F1a1670819833240f027b25EfF;
 
-    function _swapHelper(ZeroExData memory zeroExData, uint256 ethAmt)
+    function _swapHelper(ZeroExData memory zeroExData, uint256 maticAmt)
         internal
         returns (uint256 buyAmt)
     {
@@ -30,7 +30,9 @@ contract Helpers is DSMath, Basic {
         uint256 initalBal = getTokenBal(buyToken);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, ) = zeroExAddr.call{value: ethAmt}(zeroExData.callData);
+        (bool success, ) = zeroExAddr.call{value: maticAmt}(
+            zeroExData.callData
+        );
         if (!success) revert("0x-swap-failed");
 
         uint256 finalBal = getTokenBal(buyToken);
@@ -46,9 +48,9 @@ contract Helpers is DSMath, Basic {
     {
         TokenInterface _sellAddr = zeroExData.sellToken;
 
-        uint256 ethAmt;
-        if (address(_sellAddr) == ethAddr) {
-            ethAmt = zeroExData._sellAmt;
+        uint256 maticAmt;
+        if (address(_sellAddr) == maticAddr) {
+            maticAmt = zeroExData._sellAmt;
         } else {
             address transformWallet = address(
                 zeroExInterface(zeroExAddr).getTransformWallet()
@@ -60,7 +62,7 @@ contract Helpers is DSMath, Basic {
             );
         }
 
-        zeroExData._buyAmt = _swapHelper(zeroExData, ethAmt);
+        zeroExData._buyAmt = _swapHelper(zeroExData, maticAmt);
         setUint(setId, zeroExData._buyAmt);
 
         return zeroExData;
