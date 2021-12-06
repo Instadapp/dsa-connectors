@@ -12,6 +12,7 @@ interface IFlashWallet {
     /// @param callData The call data.
     /// @param value Ether to attach to the call.
     /// @return resultData The data returned by the call.
+
     function executeCall(
         address payable target,
         bytes calldata callData,
@@ -23,6 +24,7 @@ interface IFlashWallet {
     /// @param target The call target.
     /// @param callData The call data.
     /// @return resultData The data returned by the call.
+
     function executeDelegateCall(
         address payable target,
         bytes calldata callData
@@ -33,6 +35,7 @@ interface IFlashWallet {
 
     /// @dev Fetch the immutable owner/deployer of this contract.
     /// @return owner_ The immutable owner/deployer/
+
     function owner() external view returns (address owner_);
 }
 
