@@ -1,14 +1,15 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {TokenInterface} from "../../common/interfaces.sol";
-import {Helpers} from "./helpers.sol";
-import {Events} from "./events.sol";
-
 /**
  * @title Universe finance
  * @dev Maximising uniswap v3 returns
  */
+
+import {TokenInterface} from "../../common/interfaces.sol";
+import {Helpers} from "./helpers.sol";
+import {Events} from "./events.sol";
+
 abstract contract UniverseFinanceConnect is Helpers, Events {
     /**
      * @notice Deposit in Universe Vault by Adapter
