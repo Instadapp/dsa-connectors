@@ -10,7 +10,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev IQuickSwapRouter
      */
     IQuickSwapRouter internal constant router =
-        IQuickSwapRouter(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
+        IQuickSwapRouter(0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff);
 
     function getExpectedBuyAmt(address[] memory paths, uint256 sellAmt)
         internal
