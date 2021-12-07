@@ -67,10 +67,10 @@ module.exports = {
       blockGasLimit: 12000000,
     },
     matic: {
-      url: "https://rpc-mainnet.maticvigil.com/",
+      url: "https://polygon-rpc.com/",
       accounts: [`0x${PRIVATE_KEY}`],
       timeout: 150000,
-      gasPrice: parseInt(utils.parseUnits("1", "gwei")),
+      gasPrice: parseInt(utils.parseUnits("50", "gwei")),
     },
     arbitrum: {
       chainId: 42161,
