@@ -39,7 +39,7 @@ describe("Aave V2", function () {
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
-      addresses.core.connectorsV2
+      addresses.mainnet.core.connectorsV2
     );
     connector = await deployAndEnableConnector({
       connectorName,
@@ -80,7 +80,7 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.eth.address, amt, 0, 0],
+          args: [tokens.mainnet.eth.address, amt, 0, 0],
         },
       ];
 
@@ -102,12 +102,12 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "borrow",
-          args: [tokens.dai.address, amt, 2, 0, setId],
+          args: [tokens.mainnet.dai.address, amt, 2, 0, setId],
         },
         {
           connector: connectorName,
           method: "payback",
-          args: [tokens.dai.address, amt, 2, setId, 0],
+          args: [tokens.mainnet.dai.address, amt, 2, setId, 0],
         },
       ];
 
@@ -128,12 +128,12 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "borrow",
-          args: [tokens.dai.address, amt, 2, 0, 0],
+          args: [tokens.mainnet.dai.address, amt, 2, 0, 0],
         },
         {
           connector: connectorName,
           method: "payback",
-          args: [tokens.dai.address, amt.div(2), 2, 0, 0],
+          args: [tokens.mainnet.dai.address, amt.div(2), 2, 0, 0],
         },
       ];
 
@@ -149,7 +149,7 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "payback",
-          args: [tokens.dai.address, constants.max_value, 2, 0, 0],
+          args: [tokens.mainnet.dai.address, constants.max_value, 2, 0, 0],
         },
       ];
 
@@ -167,7 +167,7 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.eth.address, constants.max_value, 0, 0],
+          args: [tokens.mainnet.eth.address, constants.max_value, 0, 0],
         },
       ];
 
@@ -185,7 +185,7 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokens.eth.address, constants.max_value, 0, 0],
+          args: [tokens.mainnet.eth.address, constants.max_value, 0, 0],
         },
       ];
 
@@ -205,12 +205,12 @@ describe("Aave V2", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.eth.address, amt, 0, setId],
+          args: [tokens.mainnet.eth.address, amt, 0, setId],
         },
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokens.eth.address, amt, setId, 0],
+          args: [tokens.mainnet.eth.address, amt, setId, 0],
         },
       ];
 
