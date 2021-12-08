@@ -20,7 +20,7 @@ import {
   ConnectV2UniswapV2__factory,
 } from "../../../typechain";
 
-const DAI_TOKEN_ADDR = tokens.dai.address; // DAI Token
+const DAI_TOKEN_ADDR = tokens.mainnet.dai.address; // DAI Token
 
 // PoolTogether Address: https://docs.pooltogether.com/resources/networks/ethereum
 const DAI_PRIZE_POOL_ADDR = "0xEBfb47A7ad0FD6e57323C8A42B2E5A6a4F68fc1a"; // DAI Prize Pool
@@ -85,7 +85,7 @@ describe("PoolTogether", function() {
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
-      addresses.core.connectorsV2
+      addresses.mainnet.core.connectorsV2
     );
 
     // Deploy and enable Compound Connector
@@ -757,7 +757,7 @@ describe("PoolTogether", function() {
           method: "buy",
           args: [
             POOL_TOKEN_ADDRESS,
-            tokens.eth.address,
+            tokens.mainnet.eth.address,
             amount,
             unitAmount,
             0,
@@ -769,7 +769,7 @@ describe("PoolTogether", function() {
           method: "deposit",
           args: [
             POOL_TOKEN_ADDRESS,
-            tokens.eth.address,
+            tokens.mainnet.eth.address,
             amount,
             unitAmount,
             slippage,

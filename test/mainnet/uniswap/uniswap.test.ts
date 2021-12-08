@@ -61,7 +61,7 @@ describe("UniswapV3", function() {
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
-      addresses.core.connectorsV2
+      addresses.mainnet.core.connectorsV2
     );
     nftManager = await ethers.getContractAt(
       abi,

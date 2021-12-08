@@ -38,7 +38,7 @@ describe("Compound", function () {
             ],
         });
         masterSigner = await getMasterSigner()
-        instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
+        instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.mainnet.core.connectorsV2);
         connector = await deployAndEnableConnector({
             connectorName,
             contractArtifact: ConnectV2Compound__factory,

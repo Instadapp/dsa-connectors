@@ -41,7 +41,7 @@ describe("Aave V1", function () {
       masterSigner = await getMasterSigner();
       instaConnectorsV2 = await ethers.getContractAt(
         abis.core.connectorsV2,
-        addresses.core.connectorsV2
+        addresses.mainnet.core.connectorsV2
       );
       connector = await deployAndEnableConnector({
         connectorName,
@@ -85,7 +85,7 @@ describe("Aave V1", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.eth.address, amt, 0, 0],
+          args: [tokens.mainnet.eth.address, amt, 0, 0],
         },
       ];
 
@@ -110,13 +110,13 @@ describe("Aave V1", function () {
         {
           connector: connectorName,
           method: "borrow",
-          args: [tokens.dai.address, amt, 0, 0],
+          args: [tokens.mainnet.dai.address, amt, 0, 0],
         },
         {
           connector: connectorName,
           method: "payback",
           // FIXME: we need to pass max_value because of roundoff/shortfall errors
-          args: [tokens.dai.address, constants.max_value, 0, 0],
+          args: [tokens.mainnet.dai.address, constants.max_value, 0, 0],
         },
       ];
 
@@ -134,7 +134,7 @@ describe("Aave V1", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.eth.address, constants.max_value, 0, 0],
+          args: [tokens.mainnet.eth.address, constants.max_value, 0, 0],
         },
       ];
 
@@ -152,7 +152,7 @@ describe("Aave V1", function () {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokens.eth.address, constants.max_value, 0, 0],
+          args: [tokens.mainnet.eth.address, constants.max_value, 0, 0],
         },
       ];
 
