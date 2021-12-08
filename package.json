@@ -9,7 +9,9 @@
     "check": "node status-checks/huskyCheck.js",
     "check-husky": "node status-checks/huskyCheck.js",
     "deploy": "node scripts/deployConnectorsFromCmd.js",
-    "test:runner": "hardhat run scripts/tests/run-tests.ts"
+    "test:runner": "hardhat run scripts/tests/run-tests.ts",
+    "typechain": "hardhat typechain",
+    "compile": "hardhat compile"
   },
   "repository": {
     "type": "git",
