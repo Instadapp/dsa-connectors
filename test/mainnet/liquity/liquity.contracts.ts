@@ -69,7 +69,7 @@ const COLL_SURPLUS_ABI = [
   "function getCollateral(address _account) external view returns (uint)",
 ];
 
-module.exports = {
+export default {
   TROVE_MANAGER_ADDRESS,
   TROVE_MANAGER_ABI,
   BORROWER_OPERATIONS_ADDRESS,

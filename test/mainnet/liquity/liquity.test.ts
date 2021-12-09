@@ -3,13 +3,14 @@ import { expect } from "chai";
 
 // Instadapp deployment and testing helpers
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
-import { encodeSpells } from "../../../scripts/tests/encodeSpells.js";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 
 // Liquity smart contracts
 import contracts from "./liquity.contracts";
 
 // Liquity helpers
 import helpers from "./liquity.helpers";
+import { Contract, Signer } from "ethers";
 
 describe("Liquity", () => {
   const { waffle, ethers } = hre;
@@ -17,8 +18,8 @@ describe("Liquity", () => {
 
   // Waffle test account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (holds 1000 ETH)
   const userWallet = provider.getWallets()[0];
-  let dsa = null;
-  let liquity = null;
+  let dsa: any;
+  let liquity: any;
 
   before(async () => {
     await hre.network.provider.request({
@@ -26,6 +27,7 @@ describe("Liquity", () => {
       params: [
         {
           forking: {
+            // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
             blockNumber: 13300000,
           },
@@ -143,7 +145,7 @@ describe("Liquity", () => {
           const depositEthSpell = {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "deposit",
-            args: [helpers.ETH_ADDRESS, depositAmount, 0, depositId],
+            args: [helpers.ETH, depositAmount, 0, depositId],
           };
 
           const openTroveSpell = {
@@ -321,8 +323,9 @@ describe("Liquity", () => {
             }
           );
           const receipt = await openTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           expect(castLogEvent.eventNames[0]).eq(
             "LogOpen(address,uint256,uint256,uint256,uint256[],uint256[])"
           );
@@ -541,7 +544,7 @@ describe("Liquity", () => {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "withdraw",
             args: [
-              helpers.ETH_ADDRESS,
+              helpers.ETH,
               0, // amount comes from the previous spell's setId
               dsa.address,
               collateralWithdrawId,
@@ -612,8 +615,9 @@ describe("Liquity", () => {
             .cast(...encodeSpells([closeTroveSpell]), userWallet.address);
 
           const receipt = await closeTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256"],
             [dsa.address, 0]
@@ -673,7 +677,7 @@ describe("Liquity", () => {
           const depositEthSpell = {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "deposit",
-            args: [helpers.ETH_ADDRESS, topupAmount, 0, depositId],
+            args: [helpers.ETH, topupAmount, 0, depositId],
           };
 
           const upperHint = ethers.constants.AddressZero;
@@ -725,8 +729,9 @@ describe("Liquity", () => {
             });
 
           const receipt = await depositTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256"],
             [dsa.address, topupAmount, 0, 0]
@@ -796,7 +801,7 @@ describe("Liquity", () => {
           const withdrawEthSpell = {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "withdraw",
-            args: [helpers.ETH_ADDRESS, 0, userWallet.address, withdrawId, 0],
+            args: [helpers.ETH, 0, userWallet.address, withdrawId, 0],
           };
           const spells = [withdrawEthFromTroveSpell, withdrawEthSpell];
           await dsa
@@ -844,8 +849,9 @@ describe("Liquity", () => {
             .cast(...encodeSpells([withdrawEthSpell]), userWallet.address);
 
           const receipt = await withdrawTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256"],
             [dsa.address, withdrawAmount, 0, 0]
@@ -973,8 +979,9 @@ describe("Liquity", () => {
             .cast(...encodeSpells([borrowSpell]), userWallet.address);
 
           const receipt = await borrowTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256"],
             [dsa.address, borrowAmount, 0, 0]
@@ -1130,8 +1137,9 @@ describe("Liquity", () => {
             });
 
           const receipt = await repayTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256"],
             [dsa.address, repayAmount, 0, 0]
@@ -1295,7 +1303,7 @@ describe("Liquity", () => {
           const depositEthSpell = {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "deposit",
-            args: [helpers.ETH_ADDRESS, depositAmount, 0, ethDepositId],
+            args: [helpers.ETH, depositAmount, 0, ethDepositId],
           };
 
           const depositLusdSpell = {
@@ -1403,13 +1411,7 @@ describe("Liquity", () => {
           const withdrawEthSpell = {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "withdraw",
-            args: [
-              helpers.ETH_ADDRESS,
-              0,
-              userWallet.address,
-              ethWithdrawId,
-              0,
-            ],
+            args: [helpers.ETH, 0, userWallet.address, ethWithdrawId, 0],
           };
 
           const withdrawLusdSpell = {
@@ -1484,8 +1486,9 @@ describe("Liquity", () => {
             });
 
           const receipt = await adjustTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             [
               "address",
@@ -1645,8 +1648,9 @@ describe("Liquity", () => {
             );
 
           const receipt = await claimTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256"],
             [dsa.address, claimAmount, setId]
@@ -1768,7 +1772,7 @@ describe("Liquity", () => {
 
           // Fast forward in time so we have an LQTY gain
           await provider.send("evm_increaseTime", [600]);
-          await provider.send("evm_mine");
+          await provider.send("evm_mine", []);
 
           // Create a Stability Pool deposit with a differen DSA so that LQTY gains can be calculated
           // See: https://github.com/liquity/dev/#lqty-reward-events-and-payouts
@@ -1796,8 +1800,9 @@ describe("Liquity", () => {
             .cast(...encodeSpells([stabilityDepositSpell]), userWallet.address);
 
           const receipt = await depositAgainTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             [
               "address",
@@ -1992,7 +1997,7 @@ describe("Liquity", () => {
 
           // Fast forward in time so we have an LQTY gain
           await provider.send("evm_increaseTime", [600]);
-          await provider.send("evm_mine");
+          await provider.send("evm_mine", []);
 
           // Create another Stability Pool deposit so that LQTY gains are realized
           // See: https://github.com/liquity/dev/#lqty-reward-events-and-payouts
@@ -2034,8 +2039,9 @@ describe("Liquity", () => {
             );
 
           const receipt = await withdrawTx.wait();
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             [
               "address",
@@ -2172,8 +2178,9 @@ describe("Liquity", () => {
 
           const receipt = await moveEthGainTx.wait();
 
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256"],
             [dsa.address, ethGainFromLiquidation]
@@ -2293,8 +2300,9 @@ describe("Liquity", () => {
 
           const receipt = await stakeTx.wait();
 
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256", "uint256"],
             [
@@ -2457,8 +2465,9 @@ describe("Liquity", () => {
 
           const receipt = await unstakeTx.wait();
 
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256", "uint256"],
             [
@@ -2601,7 +2610,7 @@ describe("Liquity", () => {
           const withdrawEthSpell = {
             connector: helpers.INSTADAPP_BASIC_V1_CONNECTOR,
             method: "withdraw",
-            args: [helpers.ETH_ADDRESS, 0, userWallet.address, ethGainId, 0],
+            args: [helpers.ETH, 0, userWallet.address, ethGainId, 0],
           };
 
           const withdrawLusdSpell = {
@@ -2702,8 +2711,9 @@ describe("Liquity", () => {
 
           const receipt = await claimGainsTx.wait();
 
-          const castLogEvent = receipt.events.find((e) => e.event === "LogCast")
-            .args;
+          const castLogEvent = receipt.events.find(
+            (e: { event: string }) => e.event === "LogCast"
+          ).args;
           const expectedEventParams = ethers.utils.defaultAbiCoder.encode(
             ["address", "uint256", "uint256", "uint256", "uint256"],
             [stakerDsa.address, ethGain, lusdGain, setEthGainId, setLusdGainId]

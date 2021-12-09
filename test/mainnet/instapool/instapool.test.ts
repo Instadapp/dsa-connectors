@@ -9,7 +9,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 
-import { addresses } from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import type { Signer, Contract } from "ethers";
 import { ConnectV2Compound__factory } from "../../../typechain";
