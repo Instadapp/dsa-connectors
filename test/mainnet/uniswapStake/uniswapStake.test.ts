@@ -9,7 +9,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 
-import { addresses } from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { abi } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json"
 import type { Signer, Contract } from "ethers";

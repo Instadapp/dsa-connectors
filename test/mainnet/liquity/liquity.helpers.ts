@@ -3,30 +3,31 @@ import { ethers } from "hardhat";
 import hardhatConfig from "../../../hardhat.config";
 
 // Instadapp deployment and testing helpers
-import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector.js"
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector"
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
-import { encodeSpells } from "../../../scripts/tests/encodeSpells.js"
+import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 
 // Instadapp instadappAddresses/ABIs
-import { instadappAddresses } from "../../../scripts/important/addresses";
-import { instadappAbi } from "../../../scripts/constant/abis";
+import instadappAddresses from "../../../scripts/constant/addresses";
+import { abis } from "../../../scripts/constant/abis";
 
 // Instadapp Liquity Connector artifacts
 import { ConnectV2Liquity__factory, ConnectV2Basic__factory } from "../../../typechain";
 
 // Instadapp uses a fake address to represent native ETH
-import { constants } from "../../../scripts/constant/constant.js";
-import type { Signer, Contract } from "ethers";
-
+import { constants } from "../../../scripts/constant/constant";
+import type { Signer, Contract, BigNumber } from "ethers";
 
 const LIQUITY_CONNECTOR = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment
 const LIQUIDATABLE_TROVES_BLOCK_NUMBER = 12478159; // Deterministic block number for tests to run against, if you change this, tests will break.
 const JUSTIN_SUN_ADDRESS = "0x903d12bf2c57a29f32365917c706ce0e1a84cce3"; // LQTY whale address
 const LIQUIDATABLE_TROVE_ADDRESS = "0xafbeb4cb97f3b08ec2fe07ef0dac15d37013a347"; // Trove which is liquidatable at blockNumber: LIQUIDATABLE_TROVES_BLOCK_NUMBER
-// const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit; // Maximum gas limit (12000000)
+// @ts-ignore
+const MAX_GAS = hardhatConfig.networks.hardhat.blockGasLimit ?? 12000000; // Maximum gas limit (12000000)
 const INSTADAPP_BASIC_V1_CONNECTOR = "Basic-v1";
+const ETH = constants.native_address
 
 const openTroveSpell = async (
   dsa: any,
@@ -121,24 +122,26 @@ const resetHardhatBlockNumber = async (blockNumber: number) => {
 const deployAndConnect = async (contracts: any, isDebug = false) => {
   // Pin Liquity tests to a particular block number to create deterministic state (Ether price etc.)
   await resetHardhatBlockNumber(LIQUIDATABLE_TROVES_BLOCK_NUMBER);
-  let liquity = {
+  type Liquidity = {
     troveManager: Contract,
-    borrowerOperations: null,
-    stabilityPool: null,
-    lusdToken: null,
-    lqtyToken: null,
-    activePool: null,
-    priceFeed: null,
-    hintHelpers: null,
-    sortedTroves: null,
-    staking: null,
-    collSurplus: null,
+    borrowerOperations: Contract,
+    stabilityPool: Contract,
+    lusdToken: Contract,
+    lqtyToken: Contract,
+    activePool: Contract,
+    priceFeed: Contract,
+    hintHelpers: Contract,
+    sortedTroves: Contract,
+    staking: Contract,
+    collSurplus: Contract,
   };
+
+  const liquity = {} as Liquidity
 
   const masterSigner = await getMasterSigner();
   const instaConnectorsV2 = await ethers.getContractAt(
-    instadappAbi.core.connectorsV2,
-    instadappAddresses.core.connectorsV2
+    abis.core.connectorsV2,
+    instadappAddresses.mainnet.core.connectorsV2
   );
   const connector = await deployAndEnableConnector({
     connectorName: LIQUITY_CONNECTOR,
@@ -225,7 +228,7 @@ const deployAndConnect = async (contracts: any, isDebug = false) => {
   return liquity;
 };
 
-const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity: any) => {
+const getTroveInsertionHints = async (depositAmount: BigNumber, borrowAmount: BigNumber, liquity: any) => {
   const nominalCR = await liquity.hintHelpers.computeNominalCR(
     depositAmount,
     borrowAmount
@@ -259,7 +262,7 @@ const getTroveInsertionHints = async (depositAmount, borrowAmount, liquity: any)
 
 let randomSeed = 4223;
 
-const getRedemptionHints = async (amount, liquity) => {
+const getRedemptionHints = async (amount: any, liquity: any) => {
   const ethPrice = await liquity.priceFeed.callStatic.fetchPrice();
   const [
     firstRedemptionHint,
@@ -299,7 +302,7 @@ const getRedemptionHints = async (amount, liquity) => {
   };
 };
 
-const redeem = async (amount, from, wallet, liquity) => {
+const redeem = async (amount: any, from: any, wallet: { address: any; }, liquity: any) => {
   await sendToken(liquity.lusdToken, amount, from, wallet.address);
   const {
     partialRedemptionHintNicr,
@@ -325,7 +328,7 @@ const redeem = async (amount, from, wallet, liquity) => {
     );
 };
 
-module.exports = {
+export default {
   deployAndConnect,
   resetInitialState,
   createDsaTrove,
@@ -339,5 +342,5 @@ module.exports = {
   LIQUIDATABLE_TROVE_ADDRESS,
   MAX_GAS,
   INSTADAPP_BASIC_V1_CONNECTOR,
-  ETH_ADDRESS,
+  ETH,
 };
