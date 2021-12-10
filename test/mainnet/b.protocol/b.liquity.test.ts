@@ -10,7 +10,7 @@ import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import abis from "../../../scripts/constant/abis";
 import { ConnectV2BLiquity__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
-import addresses from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/tests/mainnet/addresses";
 
 const LUSD_WHALE = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb" // stability pool
 const BAMM_ADDRESS = "0x0d3AbAA7E088C2c82f54B2f47613DA438ea8C598"
@@ -45,7 +45,7 @@ describe("B.Liquity", function () {
       ],
     });
     masterSigner = await getMasterSigner()
-    instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.mainnet.core.connectorsV2);
+    instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
       contractArtifact: ConnectV2BLiquity__factory,

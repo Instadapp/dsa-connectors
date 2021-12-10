@@ -10,14 +10,14 @@ import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 
-import addresses from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/tests/polygon/addresses";
 import abis from "../../../scripts/constant/abis";
-import { tokens } from "../../../scripts/constant/tokens";
+import { tokens } from "../../../scripts/tests/polygon/tokens";
 import type { Signer, Contract } from "ethers";
 
 import { ConnectV2AaveV2Polygon__factory, ConnectV2PoolTogetherPolygon__factory } from "../../../typechain";
 
-const DAI_TOKEN_ADDR = tokens.polygon.dai.address; // DAI Token
+const DAI_TOKEN_ADDR = tokens.dai.address; // DAI Token
 // PoolTogether Address: https://docs.pooltogether.com/resources/networks/matic
 const USDC_PRIZE_POOL_ADDR = "0xEE06AbE9e2Af61cabcb13170e01266Af2DEFa946"; // USDC Prize Pool
 const PT_USDC_TICKET_ADDR = "0x473E484c722EF9ec6f63B509b07Bb9cfB258820b"; // PT USDC Ticket
@@ -69,7 +69,7 @@ describe("PoolTogether", function() {
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
-      addresses.polygon.core.connectorsV2
+      addresses.core.connectorsV2
     );
 
     // Deploy and enable Compound Connector
@@ -120,7 +120,7 @@ describe("PoolTogether", function() {
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.polygon.eth.address, amount, 0, 0],
+          args: [tokens.eth.address, amount, 0, 0],
         },
       ];
 
@@ -141,7 +141,7 @@ describe("PoolTogether", function() {
         {
           connector: connectorName,
           method: "borrow",
-          args: [tokens.polygon.usdc.address, amount, 2, 0, setId],
+          args: [tokens.usdc.address, amount, 2, 0, setId],
         },
         {
           connector: ptConnectorName,
@@ -158,7 +158,7 @@ describe("PoolTogether", function() {
       // Before Spell
       let usdcToken = await ethers.getContractAt(
         abis.basic.erc20,
-        tokens.polygon.usdc.address
+        tokens.usdc.address
       );
       let usdcBalance = await usdcToken.balanceOf(dsaWallet0.address);
       expect(usdcBalance, `USDC balance is 0`).to.be.eq(
@@ -239,7 +239,7 @@ describe("PoolTogether", function() {
       // Before spell
       let usdcToken = await ethers.getContractAt(
         abis.basic.erc20,
-        tokens.polygon.usdc.address
+        tokens.usdc.address
       );
       let usdcBalance = await usdcToken.balanceOf(dsaWallet0.address);
       expect(usdcBalance, `USDC balance equals 0`).to.be.eq(
@@ -330,7 +330,7 @@ describe("PoolTogether", function() {
       // Before spell
       let usdcToken = await ethers.getContractAt(
         abis.basic.erc20,
-        tokens.polygon.usdc.address
+        tokens.usdc.address
       );
       let usdcBalance = await usdcToken.balanceOf(dsaWallet0.address);
       expect(usdcBalance, `USDC Balance equals 100`).to.be.eq(
@@ -394,7 +394,7 @@ describe("PoolTogether", function() {
       // Before spell
       let usdcToken = await ethers.getContractAt(
         abis.basic.erc20,
-        tokens.polygon.usdc.address
+        tokens.usdc.address
       );
       let usdcBalance = await usdcToken.balanceOf(dsaWallet0.address);
       expect(usdcBalance, `USDC balance less than 10`).to.be.lt(

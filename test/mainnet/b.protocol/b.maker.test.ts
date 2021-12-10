@@ -7,9 +7,9 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-import addresses from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/tests/mainnet/addresses";
 import abis from "../../../scripts/constant/abis";
-import { tokens } from "../../../scripts/constant/tokens";
+import { tokens } from "../../../scripts/tests/mainnet/tokens";
 import { ConnectV2BMakerDAO__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
 
@@ -41,7 +41,7 @@ describe("B.Maker", function () {
             ],
         });
         masterSigner = await getMasterSigner()
-        instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.mainnet.core.connectorsV2);
+        instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({
             connectorName,
             contractArtifact: ConnectV2BMakerDAO__factory,
@@ -51,7 +51,7 @@ describe("B.Maker", function () {
 
         manager = await ethers.getContractAt("BManagerLike", "0x3f30c2381CD8B917Dd96EB2f1A4F96D91324BBed")
         vat = await ethers.getContractAt("../artifacts/contracts/mainnet/connectors/b.protocol/makerdao/interface.sol:VatLike", await manager.vat())
-        dai = await ethers.getContractAt("../artifacts/contracts/mainnet/common/interfaces.sol:TokenInterface", tokens.mainnet.dai.address)
+        dai = await ethers.getContractAt("../artifacts/contracts/mainnet/common/interfaces.sol:TokenInterface", tokens.dai.address)
 
         console.log("Connector address", connector.address)
     })

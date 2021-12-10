@@ -4,7 +4,7 @@ const { deploy } = deployments;
 
 async function main() {
   const deployer = (await getUnnamedAccounts())[0];
-  const connector = "ConnectV2InstaPoolV3Avalanche";
+  const connector = "// Add connector name over here Eg: ConnectV2InstaPoolV3Avalanche"
 
   const connectorInstance = await deploy(connector, {
     from: deployer,
