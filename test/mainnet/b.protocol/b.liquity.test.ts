@@ -7,7 +7,7 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-import { abis } from "../../../scripts/constant/abis";
+import abis from "../../../scripts/constant/abis";
 import { ConnectV2BLiquity__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
 import addresses from "../../../scripts/constant/addresses";

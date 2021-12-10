@@ -9,7 +9,7 @@ import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import addresses from "../../../scripts/constant/addresses"
-import { abis } from "../../../scripts/constant/abis"
+import abis from "../../../scripts/constant/abis"
 import type { Signer, Contract } from "ethers";
 
 import { ConnectV2BasicERC721__factory, IERC721__factory } from "../../../typechain";

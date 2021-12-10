@@ -1,6 +1,6 @@
 import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
-import { abis } from "../constant/abis";
+import abis from "../constant/abis";
 
 import hre from "hardhat";
 import type { Signer, Contract } from "ethers";

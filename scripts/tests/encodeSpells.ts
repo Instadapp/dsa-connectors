@@ -1,5 +1,5 @@
 import { web3 } from "hardhat";
-import { abis } from "../constant/abis";
+import abis from "../constant/abis";
 
 export function encodeSpells(spells: any[]) {
   const targets = spells.map((a) => a.connector);

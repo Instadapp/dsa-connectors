@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat";
 import { addresses } from "./mainnet/addresses";
 import { addresses as addressesPolygon } from "./polygon/addresses";
-import { abis } from "../constant/abis";
+import abis from "../constant/abis";
 
 function getAddress(network: string | undefined) {
   if (network === "polygon") return addressesPolygon.core.instaIndex;

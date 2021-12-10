@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre from "hardhat";
-import { abis } from "../../../scripts/constant/abis";
+import abis from "../../../scripts/constant/abis";
 import addresses from "../../../scripts/constant/addresses";
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
