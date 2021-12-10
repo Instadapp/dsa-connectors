@@ -34,16 +34,13 @@ if (!alchemyApiKey) {
   throw new Error("Please set your ALCHEMY_API_KEY in a .env file");
 }
 
-let PRIVATE_KEY;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const test = "test test test test test test test test test test test junk";
 const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
-const mnemonic = process.env.MNEMONIC;
-
-if(!mnemonic) {
-  PRIVATE_KEY = process.env.PRIVATE_KEY
-}
+const mnemonic = process.env.MNEMONIC ?? test;
 
 function createTestnetConfig(
   network: keyof typeof chainIds
@@ -122,15 +119,19 @@ const config: HardhatUserConfig = {
     ropsten: createTestnetConfig("ropsten"),
     mainnet: {
       url: getNetworkUrl("mainnet"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
     },
     polygon: {
       url: getNetworkUrl("polygon"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
     },
     avalanche: {
       url: getNetworkUrl("avalanche"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
     },
     arbitrum: {
       url: getNetworkUrl("arbiturm"),
+      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
     },
   },
   paths: {
