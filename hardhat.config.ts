@@ -35,12 +35,13 @@ if (!alchemyApiKey) {
 }
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const test = "test test test test test test test test test test test junk";
 const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
-const mnemonic = process.env.MNEMONIC ?? test;
+const mnemonic =
+  process.env.MNEMONIC ??
+  "test test test test test test test test test test test junk";
 
 function createTestnetConfig(
   network: keyof typeof chainIds
@@ -56,6 +57,13 @@ function createTestnetConfig(
     },
     chainId: chainIds[network],
     url,
+  };
+}
+
+function createCofig(network: string) {
+  return {
+    url: getNetworkUrl(network),
+    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
   };
 }
 
@@ -113,26 +121,14 @@ const config: HardhatUserConfig = {
         url: String(getNetworkUrl(String(process.env.networkType))),
       },
     },
+    mainnet: createCofig("mainnet"),
+    polygon: createCofig("polygon"),
+    avalanche: createCofig("avalanche"),
+    arbitrum: createCofig("arbitrum"),
     goerli: createTestnetConfig("goerli"),
     kovan: createTestnetConfig("kovan"),
     rinkeby: createTestnetConfig("rinkeby"),
     ropsten: createTestnetConfig("ropsten"),
-    mainnet: {
-      url: getNetworkUrl("mainnet"),
-      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    },
-    polygon: {
-      url: getNetworkUrl("polygon"),
-      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    },
-    avalanche: {
-      url: getNetworkUrl("avalanche"),
-      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    },
-    arbitrum: {
-      url: getNetworkUrl("arbiturm"),
-      accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    },
   },
   paths: {
     artifacts: "./artifacts",
