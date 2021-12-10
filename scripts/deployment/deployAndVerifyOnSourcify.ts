@@ -1,4 +1,4 @@
-import * as hre from "hardhat";
+import hre from "hardhat";
 const { ethers, deployments, getUnnamedAccounts } = hre;
 const { deploy } = deployments;
 

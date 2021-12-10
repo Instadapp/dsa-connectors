@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as hre from "hardhat"
+import fs from "fs";
+import hre from "hardhat"
 const { ethers, network, config } = hre;
 
 let args = process.argv;
@@ -30,7 +30,7 @@ if (!params.hasOwnProperty("gasPrice")) {
   process.exit(-1);
 }
 
-let privateKey = process.env.PRIVATE_KEY;
+let privateKey = String(process.env.PRIVATE_KEY);
 let provider = new ethers.providers.JsonRpcProvider(
   config.networks[params["network"]].url
 );
