@@ -1,4 +1,4 @@
-import * as hre from "hardhat";
+import hre from "hardhat";
 const { ethers } = hre;
 async function main() {
   const CONNECTORS_V2 = "0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11";
