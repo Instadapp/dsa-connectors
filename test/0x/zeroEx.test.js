@@ -30,17 +30,17 @@ describe("ZeroEx", function() {
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
 
   before(async () => {
-    // await hre.network.provider.request({
-    //   method: "hardhat_reset",
-    //   params: [
-    //     {
-    //       forking: {
-    //         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-    //         blockNumber: 13300000,
-    //       },
-    //     },
-    //   ],
-    // });
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 13300000,
+          },
+        },
+      ],
+    });
     masterSigner = await getMasterSigner(wallet3);
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
@@ -67,7 +67,7 @@ describe("ZeroEx", function() {
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH and DAI into DSA wallet", async function() {
+    it("Deposit ETH into DSA wallet", async function() {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10"),
@@ -76,13 +76,6 @@ describe("ZeroEx", function() {
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
         ethers.utils.parseEther("10")
       );
-
-      // await addLiquidity(
-      //     "dai",
-      //     dsaWallet0.address,
-      //     ethers.utils.parseUnits("100000", 18)
-      // );
-      // expect(await ether  s.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseUnits("100000", 18));
     });
   });
 
@@ -91,11 +84,11 @@ describe("ZeroEx", function() {
       async function getArg() {
         const slippage = 0.5;
 
-        /* MATIC -> USDT */
-        const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Matic,  decimals 18
+        /* Eth -> dai */
+        const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // eth,  decimals 18
         const sellTokenDecimals = 18;
-        const buyTokenAddress = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"; // USDT, decimals 6
-        const buyTokenDecimals = 6;
+        const buyTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; // dai, decimals 18
+        const buyTokenDecimals = 18;
         const amount = 1;
 
         const srcAmount = new BigNumber(amount)
