@@ -11,7 +11,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 
 import addresses from "../../../scripts/constant/addresses";
-import { abis } from "../../../scripts/constant/abis";
+import abis from "../../../scripts/constant/abis";
 import { tokens } from "../../../scripts/constant/tokens";
 import type { Signer, Contract } from "ethers";
 

@@ -10,7 +10,7 @@ import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 
 // Instadapp instadappAddresses/ABIs
 import instadappAddresses from "../../../scripts/constant/addresses";
-import { abis } from "../../../scripts/constant/abis";
+import abis from "../../../scripts/constant/abis";
 
 // Instadapp Liquity Connector artifacts
 import { ConnectV2Liquity__factory, ConnectV2Basic__factory } from "../../../typechain";

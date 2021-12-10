@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
-import { abis } from "../constant/abis";
+import abis from "../constant/abis";
 import { abi } from "../../deployements/mainnet/Implementation_m1.sol/InstaImplementationM1.json";
 
 function getAddress(network: string | undefined) {
