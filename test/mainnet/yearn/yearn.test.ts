@@ -8,8 +8,8 @@ import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 
-import addresses from "../../../scripts/tests/mainnet/addresses";
-import abis from "../../../scripts/constant/abis";
+import { addresses } from "../../../scripts/tests/mainnet/addresses";
+import { abis } from "../../../scripts/constant/abis";
 import { tokens } from "../../../scripts/tests/mainnet/tokens";
 import { Signer, Contract, BigNumber } from "ethers";
 

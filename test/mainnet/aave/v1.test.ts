@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import { expect } from "chai";
-import abis from "../../../scripts/constant/abis";
-import addresses from "../../../scripts/tests/mainnet/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
@@ -17,8 +17,8 @@ import type { Signer, Contract } from "ethers";
 describe("Aave V1", function () {
   const connectorName = "AAVEV1-TEST-A";
 
-  let wallet0: any, wallet1: any;
-  let dsaWallet0: any;
+  let wallet0: Signer, wallet1: Signer;
+  let dsaWallet0: Contract;
   let instaConnectorsV2: Contract;
   let connector: any;
   let masterSigner: Signer;
@@ -63,7 +63,7 @@ describe("Aave V1", function () {
 
   describe("DSA wallet setup", function () {
     it("Should build DSA v2", async function () {
-      dsaWallet0 = await buildDSAv2(wallet0.address);
+      dsaWallet0 = await buildDSAv2(wallet0.getAddress());
       expect(!!dsaWallet0.address).to.be.true;
     });
 
@@ -91,7 +91,7 @@ describe("Aave V1", function () {
 
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), wallet1.getAddress());
 
       await tx.wait();
 
@@ -122,7 +122,7 @@ describe("Aave V1", function () {
 
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), wallet1.getAddress());
       await tx.wait();
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("9")
@@ -140,7 +140,7 @@ describe("Aave V1", function () {
 
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), wallet1.getAddress());
       await tx.wait();
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("0")
@@ -158,7 +158,7 @@ describe("Aave V1", function () {
 
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), wallet1.getAddress());
       await tx.wait();
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
         ethers.utils.parseEther("10")
