@@ -43,24 +43,7 @@ const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
 
-function createTestnetConfig(
-  network: keyof typeof chainIds
-): NetworkUserConfig {
-  const url: string =
-    "https://eth-" + network + ".alchemyapi.io/v2/" + alchemyApiKey;
-  return {
-    accounts: {
-      count: 10,
-      initialIndex: 0,
-      mnemonic,
-      path: "m/44'/60'/0'/0",
-    },
-    chainId: chainIds[network],
-    url,
-  };
-}
-
-function createCofig(network: string) {
+function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
@@ -121,14 +104,10 @@ const config: HardhatUserConfig = {
         url: String(getNetworkUrl(String(process.env.networkType))),
       },
     },
-    mainnet: createCofig("mainnet"),
-    polygon: createCofig("polygon"),
-    avalanche: createCofig("avalanche"),
-    arbitrum: createCofig("arbitrum"),
-    goerli: createTestnetConfig("goerli"),
-    kovan: createTestnetConfig("kovan"),
-    rinkeby: createTestnetConfig("rinkeby"),
-    ropsten: createTestnetConfig("ropsten"),
+    mainnet: createConfig("mainnet"),
+    polygon: createConfig("polygon"),
+    avalanche: createConfig("avalanche"),
+    arbitrum: createConfig("arbitrum"),
   },
   paths: {
     artifacts: "./artifacts",
