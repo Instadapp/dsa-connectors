@@ -8,8 +8,8 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-import addresses from "../../../scripts/tests/mainnet/addresses"
-import abis from "../../../scripts/constant/abis"
+import { addresses } from "../../../scripts/tests/mainnet/addresses"
+import { abis } from "../../../scripts/constant/abis"
 import type { Signer, Contract } from "ethers";
 
 import { ConnectV2BasicERC1155__factory, IERC1155__factory } from "../../../typechain";
@@ -26,8 +26,8 @@ describe("BASIC-ERC1155", function () {
     let dsaWallet0: any;
     let masterSigner: Signer;
     let instaConnectorsV2: Contract;
-    let connector: any;
-    let nftContract: any;
+    let connector: Contract;
+    let nftContract: Contract;
     let tokenOwner: any;
     let instaImplementationsMapping: any;
     let InstaAccountV2DefaultImpl: any;

@@ -9,8 +9,8 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-import addresses from "../../../scripts/tests/mainnet/addresses";
-import abis from "../../../scripts/constant/abis";
+import { addresses } from "../../../scripts/tests/mainnet/addresses";
+import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
 import { ConnectV2Compound__factory } from "../../../typechain";
 

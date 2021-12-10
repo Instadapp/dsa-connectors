@@ -7,10 +7,10 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-import abis from "../../../scripts/constant/abis";
+import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2BLiquity__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
-import addresses from "../../../scripts/tests/mainnet/addresses";
+import { addresses } from "../../../scripts/tests/mainnet/addresses";
 
 const LUSD_WHALE = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb" // stability pool
 const BAMM_ADDRESS = "0x0d3AbAA7E088C2c82f54B2f47613DA438ea8C598"
@@ -19,15 +19,15 @@ describe("B.Liquity", function () {
   const connectorName = "B.LIQUITY-TEST-A"
 
   let dsaWallet0: any;
-  let dsaWallet1: any
+  let dsaWallet1: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
-  let connector: any;
-  let manager: any;
-  let vat: any;
-  let lusd: any;
-  let bammToken: any;
-  let stabilityPool: any;
+  let connector: Contract;
+  let manager: Contract;
+  let vat: Contract;
+  let lusd: Contract;
+  let bammToken: Contract;
+  let stabilityPool: Contract;
 
   const wallets = provider.getWallets()
   const [wallet0, wallet1, wallet2, wallet3] = wallets

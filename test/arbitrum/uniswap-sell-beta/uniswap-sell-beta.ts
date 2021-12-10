@@ -10,7 +10,7 @@ const WETH_ADDR = "0x82af49447d8a07e3bd95bd0d56f35241523fbab1";
 describe("Uniswap-sell-beta", function () {
   let UniswapSellBeta, uniswapSellBeta: Contract;
 
-  async function setBalance(address: any) {
+  async function setBalance(address: string) {
     await hre.network.provider.send("hardhat_setBalance", [
       address,
       ethers.utils.parseEther("10.0").toHexString(),
