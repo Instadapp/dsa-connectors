@@ -5,8 +5,6 @@ const { web3, deployments, waffle, ethers } = hre;
 const { provider, deployContract } = waffle;
 const BigNumber = require("bignumber.js");
 
-// import axpi from "./api";
-
 const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js");
 const buildDSAv2 = require("../../scripts/buildDSAv2");
 const encodeSpells = require("../../scripts/encodeSpells.js");
