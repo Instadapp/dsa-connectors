@@ -82,6 +82,19 @@ describe("PoolTogether", function() {
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
   before(async () => {
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            // @ts-ignore
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 12696000,
+          },
+        },
+      ],
+    });
+    
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,

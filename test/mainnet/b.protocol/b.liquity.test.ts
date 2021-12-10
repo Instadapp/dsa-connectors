@@ -7,10 +7,10 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
-import { addresses } from "../../../scripts/constant/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2BLiquity__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
+import addresses from "../../../scripts/constant/addresses";
 
 const LUSD_WHALE = "0x66017D22b0f8556afDd19FC67041899Eb65a21bb" // stability pool
 const BAMM_ADDRESS = "0x0d3AbAA7E088C2c82f54B2f47613DA438ea8C598"
