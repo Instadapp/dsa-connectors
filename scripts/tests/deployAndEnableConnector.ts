@@ -1,6 +1,8 @@
 import { addresses as addressesPolygon } from "./polygon/addresses";
 import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";
+import { addresses as addressesArbitrum } from "./arbitrum/addresses";
+import { addresses as addressesAvalanche } from "./avalanche/addresses";
 
 import hre from "hardhat";
 import type { Signer, Contract } from "ethers";
@@ -18,8 +20,8 @@ interface DeployInterface {
 
 function getAddress(network: string | undefined) {
   if (network === "polygon") return addressesPolygon;
-  // else if (network === "arbitrum") return addressesPolygon;
-  // else if (network === "avalanche") return addressesPolygon;
+  else if (network === "arbitrum") return addressesArbitrum;
+  else if (network === "avalanche") return addressesAvalanche;
   else return addresses;
 }
 
