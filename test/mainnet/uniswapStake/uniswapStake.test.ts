@@ -9,7 +9,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 
-import addresses from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/tests/mainnet/addresses";
 import abis from "../../../scripts/constant/abis";
 import { abi } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json"
 import type { Signer, Contract } from "ethers";
@@ -62,7 +62,7 @@ describe("UniswapV3", function () {
             ],
         });
         masterSigner = await getMasterSigner()
-        instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.mainnet.core.connectorsV2);
+        instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         nftManager = await ethers.getContractAt(abi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
         connector = await deployAndEnableConnector({
             connectorName: connectorStaker,

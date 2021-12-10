@@ -7,8 +7,8 @@ import { abi } from "../../deployements/mainnet/Implementation_m1.sol/InstaImple
 
 function getAddress(network: string | undefined) {
   if (network === "polygon") return addressesPolygon.core.instaIndex;
-  // else if (network === "arbitrum") return addressesPolygon.core.instaIndex;
-  // else if (network === "avalanche") return addressesPolygon.core.instaIndex;
+  else if (network === "arbitrum") return addressesPolygon.core.instaIndex;
+  else if (network === "avalanche") return addressesPolygon.core.instaIndex;
   else return addresses.core.instaIndex;
 }
 

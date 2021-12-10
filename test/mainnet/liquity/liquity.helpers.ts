@@ -9,7 +9,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 
 // Instadapp instadappAddresses/ABIs
-import instadappAddresses from "../../../scripts/constant/addresses";
+import instadappAddresses from "../../../scripts/tests/mainnet/addresses";
 import abis from "../../../scripts/constant/abis";
 
 // Instadapp Liquity Connector artifacts
@@ -138,7 +138,7 @@ const deployAndConnect = async (contracts: any, isDebug = false) => {
   const masterSigner = await getMasterSigner();
   const instaConnectorsV2 = await ethers.getContractAt(
     abis.core.connectorsV2,
-    instadappAddresses.mainnet.core.connectorsV2
+    instadappAddresses.core.connectorsV2
   );
   const connector = await deployAndEnableConnector({
     connectorName: LIQUITY_CONNECTOR,

@@ -8,10 +8,10 @@ import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 
-import addresses from "../../../scripts/constant/addresses";
+import addresses from "../../../scripts/tests/mainnet/addresses";
 import abis from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
-import { tokens } from "../../../scripts/constant/tokens";
+import { tokens } from "../../../scripts/tests/mainnet/tokens";
 import type { Signer, Contract } from "ethers";
 
 import {
@@ -20,7 +20,7 @@ import {
   ConnectV2UniswapV2__factory,
 } from "../../../typechain";
 
-const DAI_TOKEN_ADDR = tokens.mainnet.dai.address; // DAI Token
+const DAI_TOKEN_ADDR = tokens.dai.address; // DAI Token
 
 // PoolTogether Address: https://docs.pooltogether.com/resources/networks/ethereum
 const DAI_PRIZE_POOL_ADDR = "0xEBfb47A7ad0FD6e57323C8A42B2E5A6a4F68fc1a"; // DAI Prize Pool
@@ -98,7 +98,7 @@ describe("PoolTogether", function() {
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
-      addresses.mainnet.core.connectorsV2
+      addresses.core.connectorsV2
     );
 
     // Deploy and enable Compound Connector
@@ -770,7 +770,7 @@ describe("PoolTogether", function() {
           method: "buy",
           args: [
             POOL_TOKEN_ADDRESS,
-            tokens.mainnet.eth.address,
+            tokens.eth.address,
             amount,
             unitAmount,
             0,
@@ -782,7 +782,7 @@ describe("PoolTogether", function() {
           method: "deposit",
           args: [
             POOL_TOKEN_ADDRESS,
-            tokens.mainnet.eth.address,
+            tokens.eth.address,
             amount,
             unitAmount,
             slippage,
