@@ -18,7 +18,6 @@ import { ConnectV2Liquity__factory, ConnectV2Basic__factory } from "../../../typ
 // Instadapp uses a fake address to represent native ETH
 import { constants } from "../../../scripts/constant/constant";
 import type { Signer, Contract, BigNumber } from "ethers";
-
 const LIQUITY_CONNECTOR = "LIQUITY-v1-TEST";
 const LUSD_GAS_COMPENSATION = hre.ethers.utils.parseUnits("200", 18); // 200 LUSD gas compensation repaid after loan repayment
 const LIQUIDATABLE_TROVES_BLOCK_NUMBER = 12478159; // Deterministic block number for tests to run against, if you change this, tests will break.
@@ -92,9 +91,7 @@ const sendToken = async (token: any, amount: any, from: any, to: any) => {
   });
   const signer = hre.ethers.provider.getSigner(from);
 
-  return await token.connect(signer).transfer(to, amount, {
-    gasPrice: 0,
-  });
+  return await token.connect(signer).transfer(to, amount);
 };
 
 const resetInitialState = async (walletAddress: any, contracts: any, isDebug = false) => {
