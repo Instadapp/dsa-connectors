@@ -79,7 +79,7 @@ describe("Paraswap", function() {
     });
   });
   describe("Main", function() {
-    it("it should swap tokens", async function() {
+    it("should swap successfully", async function() {
       async function getArg() {
         const slippage = 1;
         /* eth -> USDT */
