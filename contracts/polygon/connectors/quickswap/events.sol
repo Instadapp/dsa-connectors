@@ -20,11 +20,7 @@ contract Events {
         uint256 getId,
         uint256[] setId
     );
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> d9a7bfba85acceb302ac1d1dd854e9b380976557
     event LogBuy(
         address indexed buyToken,
         address indexed sellToken,
@@ -42,8 +38,4 @@ contract Events {
         uint256 getId,
         uint256 setId
     );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d9a7bfba85acceb302ac1d1dd854e9b380976557
