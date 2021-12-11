@@ -1,19 +1,19 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
+import { expect } from "chai";
+import hre from "hardhat";
 const { waffle, ethers } = hre;
 const { provider } = waffle
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js")
-const buildDSAv2 = require("../../scripts/buildDSAv2")
-const encodeSpells = require("../../scripts/encodeSpells.js")
-const getMasterSigner = require("../../scripts/getMasterSigner")
-const addLiquidity = require("../../scripts/addLiquidity");
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
+import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells";
+import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
+import { addLiquidity } from "../../../scripts/tests/addLiquidity";
+import { addresses } from "../../../scripts/tests/mainnet/addresses";
+import { abis } from "../../../scripts/constant/abis";
+import type { Signer, Contract } from "ethers";
 
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
+import {ConnectV2Sushiswap, ConnectV2Sushiswap__factory, ConnectV2SushiswapIncentive, ConnectV2SushiswapIncentive__factory} from "../../../typechain";
 
-const connectV2SushiswapArtifacts = require("../../artifacts/contracts/mainnet/connectors/sushiswap/main.sol/ConnectV2Sushiswap.json");
-const connectV2SushiswapIncentiveArtifacts = require("../../artifacts/contracts/mainnet/connectors/sushi-incentive/main.sol/ConnectV2SushiswapIncentive.json");
 
 const DAI_ADDR = "0x6b175474e89094c44da98b954eedeac495271d0f"
 const WETH_ADDR = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
@@ -22,10 +22,10 @@ describe("Sushiswap", function () {
     const connectorName = "Sushiswap-v1"
     const incentiveConnectorName = "Sushiswp-Incentive-v1"
 
-    let dsaWallet0
-    let masterSigner;
-    let instaConnectorsV2;
-    let connector, connectorIncentive;
+    let dsaWallet0: Contract;
+    let masterSigner: Signer;
+    let instaConnectorsV2: Contract;
+    let connector: Contract, connectorIncentive;
 
     const wallets = provider.getWallets()
     const [wallet0, wallet1, wallet2, wallet3] = wallets
@@ -35,17 +35,18 @@ describe("Sushiswap", function () {
             params: [
                 {
                     forking: {
+                        // @ts-ignore
                         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
                         blockNumber: 13005785,
                     },
                 },
             ],
         });
-        masterSigner = await getMasterSigner(wallet3)
+        masterSigner = await getMasterSigner()
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
         connector = await deployAndEnableConnector({
             connectorName,
-            contractArtifact: connectV2SushiswapArtifacts,
+            contractArtifact: ConnectV2Sushiswap__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
@@ -53,7 +54,7 @@ describe("Sushiswap", function () {
 
         connectorIncentive = await deployAndEnableConnector({
             connectorName: incentiveConnectorName,
-            contractArtifact: connectV2SushiswapIncentiveArtifacts,
+            contractArtifact: ConnectV2SushiswapIncentive__factory,
             signer: masterSigner,
             connectors: instaConnectorsV2
         })
@@ -63,7 +64,7 @@ describe("Sushiswap", function () {
     it("Should have contracts deployed.", async function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!connector.address).to.be.true;
-        expect(!!masterSigner.address).to.be.true;
+    expect(!!(await masterSigner.getAddress())).to.be.true;
     });
 
     describe("DSA wallet setup", function () {
@@ -78,7 +79,6 @@ describe("Sushiswap", function () {
                 value: ethers.utils.parseEther("10")
             });
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
-
             await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("100000"));
         });
 
@@ -88,17 +88,15 @@ describe("Sushiswap", function () {
                 value: ethers.utils.parseEther("10")
             });
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
-
             await addLiquidity("usdt", dsaWallet0.address, ethers.utils.parseEther("100000"));
         });
     });
 
     describe("Main", function () {
-
         it("Should deposit successfully", async function () {
             const ethAmount = ethers.utils.parseEther("2") // 1 ETH
             const daiUnitAmount = ethers.utils.parseEther("4000") // 1 ETH
-            const usdtAmount = ethers.utils.parseEther("400") / Math.pow(10, 12) // 1 ETH
+            const usdtAmount = Number(ethers.utils.parseEther("400")) / Math.pow(10, 12) // 1 ETH
             const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 
             const getId = "0"
