@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre from "hardhat";
 const { web3, deployments, waffle, ethers } = hre; //check
-const { provider, deployContract } = waffle
+const { provider, deployContract } = waffle;
 import axios from "axios";
 import { BigNumber } from "bignumber.js";
 import { ConnectV2ZeroEx, ConnectV2ZeroEx__factory } from "../../../typechain";
@@ -17,31 +17,32 @@ import { abis } from "../../../scripts/constant/abis";
 import { tokens } from "../../../scripts/tests/mainnet/tokens";
 import { constants } from "../../../scripts/constant/constant";
 
+import er20abi from "../../../scripts/constant/abi/basics/erc20.json";
 
 describe("ZeroEx", function() {
   const connectorName = "zeroEx-test";
 
-  let dsaWallet0 : any;
-  let masterSigner:any;
-  let instaConnectorsV2 : any;
-  let connector:any;
+  let dsaWallet0: any;
+  let masterSigner: any;
+  let instaConnectorsV2: any;
+  let connector: any;
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
 
   before(async () => {
-    await hre.network.provider.request({
-      method: "hardhat_reset",
-      params: [
-        {
-          forking: {
-            // @ts-ignore
-            jsonRpcUrl: hre.config.networks.forking.url,
-            blockNumber: 13300000,
-          },
-        },
-      ],
-    });
+    // await hre.network.provider.request({
+    //   method: "hardhat_reset",
+    //   params: [
+    //     {
+    //       forking: {
+    //         // @ts-ignore
+    //         jsonRpcUrl: hre.config.networks.forking.url,
+    //         blockNumber: 13300000,
+    //       },
+    //     },
+    //   ],
+    // });
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
@@ -53,7 +54,7 @@ describe("ZeroEx", function() {
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
-    console.log("Connector address", connector.address);
+    // console.log("Connector address", connector.address);
   });
 
   it("Should have contracts deployed.", async function() {
@@ -73,7 +74,7 @@ describe("ZeroEx", function() {
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10"),
       });
-      console.log(dsaWallet0.address);
+      // console.log(dsaWallet0.address);
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
         ethers.utils.parseEther("10")
       );
@@ -81,9 +82,10 @@ describe("ZeroEx", function() {
   });
 
   describe("Main", function() {
-    it("should swap", async function() {
+    it("should swap the tokens", async function() {
+      let buyTokenAmount: any;
       async function getArg() {
-        const slippage = 0.5;
+        // const slippage = 0.5;
 
         /* Eth -> dai */
         const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // eth,  decimals 18
@@ -95,7 +97,7 @@ describe("ZeroEx", function() {
         const srcAmount = new BigNumber(amount)
           .times(new BigNumber(10).pow(sellTokenDecimals))
           .toFixed(0);
-        console.log(srcAmount);
+        // console.log(srcAmount);
 
         const fromAddress = dsaWallet0.address;
 
@@ -107,15 +109,15 @@ describe("ZeroEx", function() {
           sellAmount: "1000000000000000000", // Always denominated in wei
         };
 
-        const buyTokenAmount = await axios
+        const response = await axios
           .get(url, { params: params })
-          .then((data:any) => data.data.buyAmount);
+          .then((data: any) => data);
 
-        const calldata = await axios
-          .get(url, { params: params })
-          .then((data:any) => data.data.data);
+        buyTokenAmount = response.data.buyAmount;
+        const calldata = response.data.data;
 
-        console.log(calldata);
+        // console.log("calldata ", calldata);
+        // console.log("buyTokenAmount ", buyTokenAmount);
 
         let caculateUnitAmt = () => {
           const buyTokenAmountRes = new BigNumber(buyTokenAmount)
@@ -132,7 +134,7 @@ describe("ZeroEx", function() {
         };
         let unitAmt = caculateUnitAmt();
 
-        console.log("unitAmt - " + unitAmt);
+        // console.log("unitAmt - " + unitAmt);
 
         return [
           buyTokenAddress,
@@ -156,7 +158,16 @@ describe("ZeroEx", function() {
         .connect(wallet0)
         .cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      console.log(receipt);
+      // console.log(receipt);
+
+      const idai = await ethers.getContractAt(
+        er20abi,
+        "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
+      );
+
+      expect(await idai.balanceOf(dsaWallet0.address)).to.be.gte(
+        buyTokenAmount
+      );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("9")
       );
