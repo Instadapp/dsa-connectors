@@ -169,6 +169,9 @@ describe("ZeroEx", function() {
         "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
       );
 
+      expect(await idai.balanceOf(dsaWallet0.address)).to.be.gte(
+        buyTokenAmount
+      );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("9")
       );
