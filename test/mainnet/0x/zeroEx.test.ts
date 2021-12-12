@@ -58,7 +58,7 @@ describe("ZeroEx", function() {
 
   describe("DSA wallet setup", function() {
     it("Should build DSA v2", async function() {
-      dsaWallet0 = await buildDSAv2(wallet0.getAddress());
+      dsaWallet0 = await buildDSAv2(await wallet0.getAddress());
       expect(!!dsaWallet0.address).to.be.true;
     });
 
@@ -146,7 +146,7 @@ describe("ZeroEx", function() {
       ];
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.getAddress());
+        .cast(...encodeSpells(spells), await wallet1.getAddress());
       const receipt = await tx.wait();
 
       const daiToken = await ethers.getContractAt(
