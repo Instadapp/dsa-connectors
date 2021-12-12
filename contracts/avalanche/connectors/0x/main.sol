@@ -15,9 +15,9 @@ import {Events} from "./events.sol";
 abstract contract ZeroEx is Helpers {
     /**
      * @notice Swap tokens on 0x
-     * @dev Sell matic/ERC20_Token using 0x.
-     * @param buyAddr The address of the token to buy.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @dev Sell Avax/ERC20_Token using 0x.
+     * @param buyAddr The address of the token to buy.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
      * @param callData Data from 0x API.
@@ -59,6 +59,6 @@ abstract contract ZeroEx is Helpers {
     }
 }
 
-contract ConnectV2ZeroExPolygon is ZeroEx {
+contract ConnectV2ZeroExAvalanche is ZeroEx {
     string public name = "0x-V4";
 }
