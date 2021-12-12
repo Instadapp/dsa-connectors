@@ -71,10 +71,6 @@ describe("ZeroEx", function() {
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
         ethers.utils.parseEther("10")
       );
-      const idai = await ethers.getContractAt(
-        er20abi,
-        "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
-      );
     });
   });
 
