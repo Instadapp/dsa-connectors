@@ -1,35 +1,26 @@
-import { expect } from "chai";
 import hre from "hardhat";
-const { web3, deployments, waffle, ethers } = hre; //check
-const { provider, deployContract } = waffle;
 import axios from "axios";
+import { expect } from "chai";
+const { ethers } = hre; //check
 import { BigNumber } from "bignumber.js";
-import {
-  ConnectV2ZeroExPolygon,
-  ConnectV2ZeroExPolygon__factory,
-} from "../../../typechain";
-
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
-import { addLiquidity } from "../../../scripts/tests/addLiquidity";
-
-import { addresses } from "../../../scripts/tests/polygon/addresses";
+import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { abis } from "../../../scripts/constant/abis";
-
+import { ConnectV2ZeroExPolygon, ConnectV2ZeroExPolygon__factory } from "../../../typechain";
 import er20abi from "../../../scripts/constant/abi/basics/erc20.json";
+import type { Signer, Contract } from "ethers";
 
 describe("ZeroEx", function() {
   const connectorName = "zeroEx-test";
 
-  let dsaWallet0: any;
-  let masterSigner: any;
+  let dsaWallet0: Contract;
+  let wallet0: Signer, wallet1: Signer;
+  let masterSigner: Signer;
   let instaConnectorsV2: any;
   let connector: any;
-
-  const wallets = provider.getWallets();
-  const [wallet0, wallet1, wallet2, wallet3] = wallets;
 
   before(async () => {
     //   await hre.network.provider.request({
@@ -55,18 +46,18 @@ describe("ZeroEx", function() {
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
-    // console.log("Connector address", connector.address);
+    console.log("Connector address", connector.address);
   });
 
   it("Should have contracts deployed.", async function() {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
+    expect(!!masterSigner.getAddress()).to.be.true;
   });
 
   describe("DSA wallet setup", function() {
     it("Should build DSA v2", async function() {
-      dsaWallet0 = await buildDSAv2(wallet0.address);
+      dsaWallet0 = await buildDSAv2(wallet0.getAddress());
       expect(!!dsaWallet0.address).to.be.true;
     });
 
@@ -98,7 +89,6 @@ describe("ZeroEx", function() {
         const srcAmount = new BigNumber(amount)
           .times(new BigNumber(10).pow(sellTokenDecimals))
           .toFixed(0);
-        // console.log(srcAmount);
 
         const fromAddress = dsaWallet0.address;
 
@@ -117,9 +107,6 @@ describe("ZeroEx", function() {
         buyTokenAmount = response.data.buyAmount;
         const calldata = response.data.data;
 
-        // console.log("calldata ", calldata);
-        // console.log("buyTokenAmount ", buyTokenAmount);
-
         let caculateUnitAmt = () => {
           const buyTokenAmountRes = new BigNumber(buyTokenAmount)
             .dividedBy(new BigNumber(10).pow(buyTokenDecimals))
@@ -135,7 +122,6 @@ describe("ZeroEx", function() {
         };
         let unitAmt = caculateUnitAmt();
 
-        // console.log("unitAmt - " + unitAmt);
 
         return [
           buyTokenAddress,
@@ -157,18 +143,18 @@ describe("ZeroEx", function() {
       ];
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), wallet1.getAddress());
       const receipt = await tx.wait();
-      // console.log(receipt);
+    
 
       const idai = await ethers.getContractAt(
         er20abi,
-        "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
+        "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063" // dai address
       );
 
-      //   expect(await idai.balanceOf(dsaWallet0.address)).to.be.gte(
-      //     buyTokenAmount
-      //   );
+        expect(await idai.balanceOf(dsaWallet0.address)).to.be.gte(
+          buyTokenAmount
+        );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("9")
       );
