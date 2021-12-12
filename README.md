@@ -8,6 +8,47 @@ You can create a PR to request a support for specific protocol or external contr
 
 List of all the mainnet connector for referrence is [here](https://github.com/Instadapp/dsa-connectors/tree/main/contracts/mainnet/connectors)
 
+## Usage
+
+### Pre Requisites
+
+Before running any command, make sure to install dependencies:
+
+```sh
+$ npm install
+```
+
+### Compile
+
+Compile the smart contracts with Hardhat:
+
+```sh
+$ npm run compile
+```
+
+### TypeChain
+
+Compile the smart contracts and generate TypeChain artifacts:
+
+```sh
+$ npm run typechain
+```
+
+### Test
+
+Run tests using interactive CLI
+
+```sh
+$ npm run test:runner
+```
+
+Run all the tests:
+
+```sh
+$ npm run test
+```
+(Striclty use this envirnment to test, or otherwise make suitable changes in config file before testing).
+
 ## How to add a new connector
 
 You can create a new PR to add a new connector. To get the PR merged, certain requirements needs to be met which will be explained here.
