@@ -30,7 +30,7 @@ describe("ZeroEx", function() {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 12796965,
+            // blockNumber: 12796965,
           },
         },
       ],
