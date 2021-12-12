@@ -19,8 +19,8 @@ describe("ZeroEx", function() {
   let dsaWallet0: Contract;
   let wallet0: Signer, wallet1: Signer;
   let masterSigner: Signer;
-  let instaConnectorsV2: any;
-  let connector: any;
+  let instaConnectorsV2: Contract;
+  let connector: Contract;
 
   before(async () => {
     await hre.network.provider.request({
@@ -30,7 +30,6 @@ describe("ZeroEx", function() {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            // blockNumber: 12796965,
           },
         },
       ],
@@ -84,7 +83,6 @@ describe("ZeroEx", function() {
       let buyTokenAmount: any;
       async function getArg() {
         // const slippage = 0.5;
-
         /* Eth -> dai */
         const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // eth,  decimals 18
         const sellTokenDecimals = 18;
@@ -95,7 +93,6 @@ describe("ZeroEx", function() {
         const srcAmount = new BigNumber(amount)
           .times(new BigNumber(10).pow(sellTokenDecimals))
           .toFixed(0);
-        // console.log(srcAmount);
 
         const fromAddress = dsaWallet0.address;
 
@@ -114,9 +111,6 @@ describe("ZeroEx", function() {
         buyTokenAmount = response.data.buyAmount;
         const calldata = response.data.data;
 
-        // console.log("calldata ", calldata);
-        // console.log("buyTokenAmount ", buyTokenAmount);
-
         let caculateUnitAmt = () => {
           const buyTokenAmountRes = new BigNumber(buyTokenAmount)
             .dividedBy(new BigNumber(10).pow(buyTokenDecimals))
@@ -131,8 +125,6 @@ describe("ZeroEx", function() {
           return unitAmt;
         };
         let unitAmt = caculateUnitAmt();
-
-        // console.log("unitAmt - " + unitAmt);
 
         return [
           buyTokenAddress,
@@ -156,14 +148,13 @@ describe("ZeroEx", function() {
         .connect(wallet0)
         .cast(...encodeSpells(spells), wallet1.getAddress());
       const receipt = await tx.wait();
-      // console.log(receipt);
 
-      const idai = await ethers.getContractAt(
+      const daiToken = await ethers.getContractAt(
         er20abi,
         "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
       );
 
-      expect(await idai.balanceOf(dsaWallet0.address)).to.be.gte(
+      expect(await daiToken.balanceOf(dsaWallet0.address)).to.be.gte(
         buyTokenAmount
       );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
