@@ -31,17 +31,17 @@ describe("ZeroEx", function() {
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
 
   before(async () => {
-    // await hre.network.provider.request({
-    //   method: "hardhat_reset",
-    //   params: [
-    //     {
-    //       forking: {
-    //         // @ts-ignore
-    //         jsonRpcUrl: hre.config.networks.forking.url,
-    //         blockNumber: 13300000,
+    //   await hre.network.provider.request({
+    //     method: "hardhat_reset",
+    //     params: [
+    //       {
+    //         forking: {
+    //           // @ts-ignore
+    //           jsonRpcUrl: hre.config.networks.forking.url,
+    //           blockNumber: 13300000,
+    //         },
     //       },
-    //     },
-    //   ],
+    //     ],
     // });
     masterSigner = await getMasterSigner();
     instaConnectorsV2 = await ethers.getContractAt(
@@ -77,6 +77,10 @@ describe("ZeroEx", function() {
       // console.log(dsaWallet0.address);
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
         ethers.utils.parseEther("10")
+      );
+      const idai = await ethers.getContractAt(
+        er20abi,
+        "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
       );
     });
   });
@@ -165,9 +169,6 @@ describe("ZeroEx", function() {
         "0x6b175474e89094c44da98b954eedeac495271d0f" // dai address
       );
 
-      expect(await idai.balanceOf(dsaWallet0.address)).to.be.gte(
-        buyTokenAmount
-      );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("9")
       );
