@@ -1,12 +1,13 @@
-const hre = require("hardhat");
-const hardhatConfig = require("../../hardhat.config");
+import hre, { ethers, network } from "hardhat";
+import hardhatConfig from "../../../hardhat.config";
 
-async function forkReset(blockNumber) {
+export async function forkReset(blockNumber: any) {
   await hre.network.provider.request({
     method: "hardhat_reset",
     params: [
       {
         forking: {
+          // @ts-ignore
           jsonRpcUrl: hardhatConfig.networks.hardhat.forking.url,
           blockNumber
         }
@@ -15,28 +16,28 @@ async function forkReset(blockNumber) {
   });
 }
 
-async function mineBlock(timestamp) {
+export async function mineBlock(timestamp: any) {
   await network.provider.request({
     method: "evm_mine",
     params: [timestamp]
   });
 }
 
-async function sendEth(from, to, amount) {
+export async function sendEth(from: any, to: any, amount: any) {
   await from.sendTransaction({
     to: to,
     value: ethers.BigNumber.from(10).pow(18).mul(amount)
   });
 }
 
-async function mineNBlock(blockCount, secondsBetweenBlock) {
+export async function mineNBlock(blockCount: any, secondsBetweenBlock: any) {
   const blockBefore = await ethers.provider.getBlock("latest");
   const maxMinedBlockPerBatch = 1000;
   let blockToMine = blockCount;
   let blockTime = blockBefore.timestamp;
   while (blockToMine > maxMinedBlockPerBatch) {
     // eslint-disable-next-line @typescript-eslint/no-loop-func
-    const minings = [...Array(maxMinedBlockPerBatch).keys()].map((_v, i) => {
+    const minings: any = [maxMinedBlockPerBatch].map((_v, i) => {
       const newTs = blockTime + i + (secondsBetweenBlock || 1);
       return mineBlock(newTs);
     });
@@ -45,12 +46,10 @@ async function mineNBlock(blockCount, secondsBetweenBlock) {
     blockToMine -= maxMinedBlockPerBatch;
     blockTime = blockTime + maxMinedBlockPerBatch - 1 + maxMinedBlockPerBatch * (secondsBetweenBlock || 1);
   }
-  const minings = [...Array(blockToMine).keys()].map((_v, i) => {
+  const minings = [blockToMine].map((_v, i) => {
     const newTs = blockTime + i + (secondsBetweenBlock || 1);
     return mineBlock(newTs);
   });
   // eslint-disable-next-line no-await-in-loop
   await Promise.all(minings);
 }
-
-module.exports = { forkReset, sendEth, mineNBlock };

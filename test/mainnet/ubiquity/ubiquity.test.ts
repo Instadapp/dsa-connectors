@@ -1,20 +1,20 @@
-const { expect } = require("chai");
-const hre = require("hardhat");
+import { expect } from "chai";
+import hre from "hardhat";
 const { waffle, ethers } = hre;
 const { provider } = waffle;
 const { BigNumber, utils } = ethers;
 
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector.js");
-const buildDSAv2 = require("../../scripts/buildDSAv2");
-const encodeSpells = require("../../scripts/encodeSpells");
-const addresses = require("../../scripts/constant/addresses");
-const abis = require("../../scripts/constant/abis");
-const impersonate = require("../../scripts/impersonate");
-const { forkReset, sendEth, mineNBlock } = require("./utils");
+import {deployAndEnableConnector} from "../../../scripts/tests/deployAndEnableConnector";
+import {buildDSAv2} from "../../../scripts/tests/buildDSAv2";
+import {encodeSpells} from "../../../scripts/tests/encodeSpells";
+import {addresses} from "../../../scripts/tests/mainnet/addresses";
+import {abis} from "../../../scripts/constant/abis";
+import {impersonateAccounts} from "../../../scripts/tests/impersonate";
+import type { Signer, Contract, BigNumberish } from "ethers";
+import {forkReset, sendEth, mineNBlock} from "./utils";
+import { ConnectV2Ubiquity__factory } from "../../../typechain";
 
-const connectV2UbiquityArtifacts = require("../../artifacts/contracts/mainnet/connectors/ubiquity/main.sol/ConnectV2Ubiquity.json");
-
-const { abi: implementationsABI } = require("../../scripts/constant/abi/core/InstaImplementations.json");
+import { abi as implementationsABI } from "../../../scripts/constant/abi/core/InstaImplementations.json";
 const implementationsMappingAddr = "0xCBA828153d3a85b30B5b912e1f2daCac5816aE9D";
 
 describe("Ubiquity", function () {
@@ -45,24 +45,24 @@ describe("Ubiquity", function () {
     "function holderTokens(address) view returns (uint256[])",
     "function getBond(uint256) view returns (tuple(address,uint256,uint256,uint256,uint256,uint256))"
   ];
-  let dsa;
-  let POOL3Contract;
-  let CRV3Contract;
-  let uAD3CRVfContract;
-  let uADContract;
-  let DAIContract;
-  let USDCContract;
-  let USDTContract;
-  let BONDContract;
-  let instaIndex;
-  let instaConnectorsV2;
-  let connector;
+  let dsa: Contract;
+  let POOL3Contract: Contract;
+  let CRV3Contract: Contract;
+  let uAD3CRVfContract: Contract;
+  let uADContract: Contract;
+  let DAIContract: Contract;
+  let USDCContract: Contract;
+  let USDTContract: Contract;
+  let BONDContract: Contract;
+  let instaIndex: Contract;
+  let instaConnectorsV2: Contract;
+  let connector: Contract;
   let instaImplementationsMapping;
   let InstaAccountV2DefaultImpl;
 
   let uadWhale;
 
-  const bondingShare = async function (address) {
+  const bondingShare = async function (address: any) {
     let lpAmount = BigNumber.from(0);
     let lpAmountTotal = BigNumber.from(0);
     let bondId = -1;
@@ -71,8 +71,8 @@ describe("Ubiquity", function () {
     const bondN = bondIds?.length || 0;
 
     if (bondN) {
-      for await (_bondId of bondIds) {
-        lpAmountTotal = lpAmountTotal.add((await BONDContract.getBond(_bondId))[5]);
+      for await (bondId of bondIds) {
+        lpAmountTotal = lpAmountTotal.add((await BONDContract.getBond(bondId))[5]);
       }
       bondId = Number(bondIds[bondN - 1]);
       lpAmount = (await BONDContract.getBond(bondId))[5];
@@ -96,9 +96,20 @@ describe("Ubiquity", function () {
 
   before(async () => {
     // await forkReset(blockFork);
-
-    [uadWhale] = await impersonate([uadWhaleAddress]);
-    const [ethWhale] = await impersonate([ethWhaleAddress]);
+    await hre.network.provider.request({
+      method: "hardhat_reset",
+      params: [
+        {
+          forking: {
+            // @ts-ignore
+            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+            blockNumber: 13097100,
+          },
+        },
+      ],
+    });
+    [uadWhale] = await impersonateAccounts([uadWhaleAddress]);
+    const [ethWhale] = await impersonateAccounts([ethWhaleAddress]);
 
     await sendEth(ethWhale, uadWhaleAddress, 100);
     POOL3Contract = new ethers.Contract(POOL3, ABI, uadWhale);
@@ -116,22 +127,22 @@ describe("Ubiquity", function () {
     instaIndex = new ethers.Contract(addresses.core.instaIndex, abis.core.instaIndex, ethWhale);
 
     const masterAddress = await instaIndex.master();
-    const [master] = await impersonate([masterAddress]);
+    const [master] = await impersonateAccounts([masterAddress]);
     await sendEth(ethWhale, masterAddress, 100);
 
     instaConnectorsV2 = new ethers.Contract(addresses.core.connectorsV2, abis.core.connectorsV2);
 
     instaImplementationsMapping = await ethers.getContractAt(implementationsABI, implementationsMappingAddr);
     InstaAccountV2DefaultImpl = await ethers.getContractFactory("InstaDefaultImplementation");
-    instaAccountV2DefaultImpl = await InstaAccountV2DefaultImpl.deploy(addresses.core.instaIndex);
-    await instaAccountV2DefaultImpl.deployed();
+    InstaAccountV2DefaultImpl = await InstaAccountV2DefaultImpl.deploy(addresses.core.instaIndex);
+    await InstaAccountV2DefaultImpl.deployed();
     await (
-      await instaImplementationsMapping.connect(master).setDefaultImplementation(instaAccountV2DefaultImpl.address)
+      await instaImplementationsMapping.connect(master).setDefaultImplementation(InstaAccountV2DefaultImpl.address)
     ).wait();
 
     connector = await deployAndEnableConnector({
       connectorName: ubiquityTest,
-      contractArtifact: connectV2UbiquityArtifacts,
+      contractArtifact: ConnectV2Ubiquity__factory,
       signer: master,
       connectors: instaConnectorsV2
     });
@@ -152,21 +163,21 @@ describe("Ubiquity", function () {
 
   afterEach(logAll);
 
-  const dsaDepositUAD3CRVf = async (amount) => {
+  const dsaDepositUAD3CRVf = async (amount: BigNumberish) => {
     await uAD3CRVfContract.transfer(dsa.address, one.mul(amount));
   };
 
-  const dsaDepositUAD = async (amount) => {
+  const dsaDepositUAD = async (amount: BigNumberish) => {
     await uAD3CRVfContract.remove_liquidity_one_coin(one.mul(amount).mul(110).div(100), 0, one.mul(amount));
     await uADContract.transfer(dsa.address, one.mul(amount));
   };
 
-  const dsaDepositCRV3 = async (amount) => {
+  const dsaDepositCRV3 = async (amount: BigNumberish) => {
     await uAD3CRVfContract.remove_liquidity_one_coin(one.mul(amount).mul(110).div(100), 1, one.mul(amount));
     await CRV3Contract.transfer(dsa.address, one.mul(amount));
   };
 
-  const dsaDepositDAI = async (amount) => {
+  const dsaDepositDAI = async (amount: BigNumberish) => {
     await uAD3CRVfContract.remove_liquidity_one_coin(
       one.mul(amount).mul(120).div(100),
       1,
@@ -175,7 +186,7 @@ describe("Ubiquity", function () {
     await POOL3Contract.remove_liquidity_one_coin(one.mul(amount).mul(110).div(100), 0, one.mul(amount));
     await DAIContract.transfer(dsa.address, one.mul(amount));
   };
-  const dsaDepositUSDC = async (amount) => {
+  const dsaDepositUSDC = async (amount: BigNumberish) => {
     await uAD3CRVfContract.remove_liquidity_one_coin(
       one.mul(amount).mul(120).div(100),
       1,
@@ -184,7 +195,7 @@ describe("Ubiquity", function () {
     await POOL3Contract.remove_liquidity_one_coin(one.mul(amount).mul(110).div(100), 1, onep.mul(amount));
     await USDCContract.transfer(dsa.address, onep.mul(amount));
   };
-  const dsaDepositUSDT = async (amount) => {
+  const dsaDepositUSDT = async (amount: BigNumberish) => {
     await uAD3CRVfContract.remove_liquidity_one_coin(
       one.mul(amount).mul(120).div(100),
       1,
@@ -314,7 +325,7 @@ describe("Ubiquity", function () {
 
       await logAll();
       console.log("Mining 50 000 blocks for more than one week, please wait...");
-      await mineNBlock(50000);
+      await mineNBlock(50000, 1);
     });
 
     it("Should deposit and withdraw DAI", async function () {
