@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 
 export const deployConnector = async (connectorName: string) => {
   const Connector = await ethers.getContractFactory(connectorName);
@@ -6,5 +6,17 @@ export const deployConnector = async (connectorName: string) => {
   await connector.deployed();
 
   console.log(`${connectorName} Deployed: ${connector.address}`);
+
+  try {
+        await hre.run("verify:verify", {
+            address: connector.address,
+            constructorArguments: []
+          }
+        )
+    } catch (error) {
+        console.log(`Failed to verify: ${connectorName}@${connector.address}`)
+        console.log(error)
+        console.log()
+    }
   return connector.address;
 };
