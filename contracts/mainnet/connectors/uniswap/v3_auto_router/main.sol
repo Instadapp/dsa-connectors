@@ -12,33 +12,65 @@ import {Events} from "./events.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
     function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        bytes path,
-        address to,
-        uint deadline
-    ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
-            path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
-        );
-        _swap(amounts, path, to);
-    }
+        address tokenIn,
+        address tokenOut,
+        address recipient,
+        uint256 deadline,
+        uint24 fee,
+        uint256 amountIn,
+        uint256 amountOutMinimum
+    ) 
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        address poolAddr = getPoolAddress(tokenIn, tokenOut, fee);
+        uint256 maxPrice = 0;
+        uint pathIndex = 0;
 
-    function swapTokensForExactTokens(
-        uint amountOut,
-        uint amountInMax,
-        bytes path,
-        address to,
-        uint deadline
-    ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
-        require(amounts[0] <= amountInMax, 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
-            path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
+        for (uint i = 0; i < COMMON_ADDRESSES.length; i++) {
+            uint256 price1 = getPrice(tokenIn, COMMON_ADDRESSES[i], fee);
+            uint256 price2 = getPrice(COMMON_ADDRESSES[i], tokenOut, fee);
+            uint256 price = (price1 + price2) / 2;
+
+            if (maxPrice < price) {
+                maxPrice = price;
+                pathIndex = i;
+            }
+        }
+
+        if (poolAddr != address(0)) {
+            uint256 price = getPrice(tokenIn, tokenOut, fee);
+
+            if (maxPrice < price) {
+                maxPrice = price;
+            }
+        }
+
+        IERC20(tokenIn).safeApprove(address(swapRouter), amountIn);
+        uint256 amountOut1 = swapSingleInput(
+            getParams(
+                tokenIn,
+                COMMON_ADDRESSES[pathIndex],
+                recipient,
+                fee,
+                amountIn,
+                amountOutMinimum
+            )
         );
-        _swap(amounts, path, to);
+        uint256 amountOut = swapSingleInput(
+            getParams(
+                COMMON_ADDRESSES[pathIndex],
+                tokenOut
+                recipient,
+                fee,
+                amountOut1,
+                amountOutMinimum
+            )
+        );
+
+        _eventName = "LogSwapExactTokensForTokens(uint256)";
+        _eventParam = abi.encode(amountOut);
     }
 }
 

@@ -16,8 +16,17 @@ abstract contract Helpers is DSMath, Basic {
      */
     INonfungiblePositionManager constant nftManager =
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
-    ISwapRouter constant swapRouter =
+    ISwapRouter internal constant swapRouter =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+    bytes32 internal constant POOL_INIT_CODE_HASH =
+        0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54;
+    
+    address constant COMMON_ADDRESSES = [
+        0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2, // WETH
+        0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48, // USDC
+        0xdAC17F958D2ee523a2206206994597C13D831ec7, // USDT
+        0x6b175474e89094c44da98b954eedeac495271d0f, // DAI
+    ]
 
     struct MintParams {
         address tokenA;
@@ -41,6 +50,85 @@ abstract contract Helpers is DSMath, Basic {
     {
         uint256 len = nftManager.balanceOf(user);
         tokenId = nftManager.tokenOfOwnerByIndex(user, len - 1);
+    }
+
+    function getPrice(address tokenIn, address tokenOut, uint24 fee)
+        external
+        view
+        returns (uint256 price)
+    {
+        IUniswapV3Pool pool = IUniswapV3Pool(factory.getPool(tokenIn, tokenOut, fee);
+        (uint160 sqrtPriceX96,,,,,,) =  pool.slot0();
+        return uint(sqrtPriceX96).mul(uint(sqrtPriceX96)).mul(1e18) >> (96 * 2);
+    }
+
+    function getPoolAddress(
+        address tokenA,
+        address tokenB,
+        uint24 fee
+    ) internal pure returns (address pool) {
+        if (tokenA > tokenB) (tokenA, tokenB) = (tokenB, tokenA);
+        return
+            computeAddress(
+                0x1F98431c8aD98523631AE4a59f267346ea31F984,
+                PoolKey({token0: tokenA, token1: tokenB, fee: fee})
+            );
+    }
+
+    function computeAddress(address factory, PoolKey memory key)
+        internal
+        pure
+        returns (address pool)
+    {
+        require(key.token0 < key.token1);
+        pool = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            factory,
+                            keccak256(
+                                abi.encode(key.token0, key.token1, key.fee)
+                            ),
+                            POOL_INIT_CODE_HASH
+                        )
+                    )
+                )
+            )
+        );
+    }
+    function getParams(
+        address tokenIn,
+        address tokenOut,
+        address recipient,
+        uint24 fee,
+        uint256 amountIn,
+        uint256 amountOutMinimum
+    ) internal view returns (ISwapRouter.ExactInputSingleParams memory params) {
+        params = ISwapRouter.ExactInputSingleParams({
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+            fee: fee,
+            recipient: recipient,
+            deadline: block.timestamp + 1,
+            amountIn: amountIn,
+            amountOutMinimum: amountOutMinimum,
+            sqrtPriceLimitX96: getPriceLimit(
+                amountIn,
+                tokenIn < tokenOut,
+                tokenIn,
+                tokenOut,
+                fee
+            )
+        });
+    }
+
+    function swapSingleInput(ISwapRouter.ExactInputSingleParams memory params)
+        internal
+        returns (uint256)
+    {
+        return (uint256(swapRouter.exactInputSingle(params)));
     }
 
     function getMinAmount(
