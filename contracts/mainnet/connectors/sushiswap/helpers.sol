@@ -102,7 +102,7 @@ abstract contract Helpers is DSMath, Basic {
             _amtA,
             _amtB,
             minAmtA,
-            minAmtA,
+            minAmtB,
             address(this),
             block.timestamp + 1
         );
