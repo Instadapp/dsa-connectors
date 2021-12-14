@@ -1,5 +1,6 @@
 import {Contract, Signer} from "ethers";
 
+
 const { expect } = require("chai");
 const hre = require("hardhat");
 const { abis } = require("../../../scripts/constant/abis");
@@ -8,20 +9,20 @@ const { tokens }  = require("../../../scripts/tests/polygon/tokens");
 const { deployAndEnableConnector } = require("../../../scripts/tests/deployAndEnableConnector");
 const { getMasterSigner } = require("../../../scripts/tests/getMasterSigner");
 const { buildDSAv2 } = require("../../../scripts/tests/buildDSAv2");
-const ConnectV2QiDaoPolygon = require("../../../artifacts/contracts/polygon/connectors/qidao/main.sol/ConnectV2QiDaoPolygon.json");
+import {ConnectV2QiDaoPolygon__factory} from "../../../typechain";
 const { parseEther } = require("@ethersproject/units");
 const { encodeSpells } = require("../../../scripts/tests/encodeSpells");
-const { vaults } = require("../../../scripts/constant/qidao/vaults");
+const { vaults } = require("./vaults");
 const { addLiquidity } = require("../../../scripts/tests/addLiquidity");
 const { ethers } = hre;
 
 describe("QiDao", function() {
   const connectorName = "QIDAO-TEST-A";
 
-  let wallet0: any, wallet1: any;
-  let dsaWallet0: any;
+  let wallet0: Signer, wallet1: Signer;
+  let dsaWallet0: Contract;
   let instaConnectorsV2: Contract;
-  let connector: any;
+  let connector: Contract;
   let masterSigner: Signer;
 
   before(async () => {
@@ -30,6 +31,7 @@ describe("QiDao", function() {
       params: [
         {
           forking: {
+            // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
           },
         },
@@ -43,7 +45,7 @@ describe("QiDao", function() {
     );
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2QiDaoPolygon,
+      contractArtifact: ConnectV2QiDaoPolygon__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
@@ -57,7 +59,7 @@ describe("QiDao", function() {
 
   describe("DSA wallet setup", function() {
     it("Should build DSA v2", async function() {
-      dsaWallet0 = await buildDSAv2(wallet0.address);
+      dsaWallet0 = await buildDSAv2(await wallet0.getAddress());
       expect(!!dsaWallet0.address).to.be.true;
     });
 
@@ -71,7 +73,7 @@ describe("QiDao", function() {
       );
     });
     it("Deposit LINK into DSA wallet", async function() {
-      await addLiquidity("link", dsaWallet0.address, parseEther("100"), "polygon")
+      await addLiquidity("link", dsaWallet0.address, parseEther("100"));
     })
   });
 
@@ -110,7 +112,7 @@ describe("QiDao", function() {
 
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), await wallet1.getAddress());
 
       await tx.wait();
 
@@ -154,7 +156,7 @@ describe("QiDao", function() {
 
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+        .cast(...encodeSpells(spells), await wallet1.getAddress());
 
       await tx.wait();
 

@@ -8,7 +8,7 @@ const mineTx = async (tx: any) => {
 };
 
 const tokenMapping: Record<string, any> = {
-  eth:{
+  mainnet:{
     usdc: {
       impersonateSigner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
       address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -76,9 +76,9 @@ const tokenMapping: Record<string, any> = {
   }
 };
 
-export async function addLiquidity(tokenName: string, address: any, amt: any, chain: string) {
+export async function addLiquidity(tokenName: string, address: any, amt: any) {
   const [signer] = await ethers.getSigners();
-  const _chain = chain ? chain : 'eth';
+  const _chain = String(process.env.networkType);
   tokenName = tokenName.toLowerCase();
   if (!tokenMapping[_chain][tokenName]) {
     throw new Error(
