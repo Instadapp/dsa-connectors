@@ -35,7 +35,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
         amount = getUint(getId, amount);
-        if(data.poolId == uint256(-1)|| data.version < 0 || data.lpToken == address(0)){
+        if(data.poolId == uint256(-1)|| data.version <= 0 || data.lpToken == address(0)){
             data = _getPoolId(
                 token1,
                 token2
@@ -74,7 +74,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
         amount = getUint(getId, amount);
-        if(data.poolId == uint256(-1)|| data.version < 0){
+        if(data.poolId == uint256(-1)|| data.version <= 0){
             data = _getPoolId(
                 token1,
                 token2
@@ -106,7 +106,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
     {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
-        if(data.poolId == uint256(-1)|| data.version < 0 ){
+        if(data.poolId == uint256(-1)|| data.version <= 0 ){
             data = _getPoolId(
                 token1,
                 token2
@@ -145,7 +145,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
         amount = getUint(getId, amount);
-        if(data.poolId == uint256(-1)|| data.version < 0){
+        if(data.poolId == uint256(-1)|| data.version <= 0){
             data = _getPoolId(
                 token1,
                 token2
@@ -178,7 +178,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
     {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
-        if(data.poolId == uint256(-1)|| data.version < 0 ){
+        if(data.poolId == uint256(-1)|| data.version <= 0 ){
             data = _getPoolId(
                 token1,
                 token2
