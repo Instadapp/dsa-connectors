@@ -27,6 +27,7 @@ abstract contract Helpers is DSMath, Basic {
         erc20StablecoinInterface vault = erc20StablecoinInterface(vaultAddress);
         uint256 _vaultId = getUint(getId, vaultId);
         vault.destroyVault(_vaultId);
+        return _vaultId;
     }
 
     function _deposit(
@@ -35,9 +36,9 @@ abstract contract Helpers is DSMath, Basic {
         uint256 vaultId,
         uint256 amt
     ) public {
-        bool isEth = token == maticAddr;
+        bool isMatic = token == maticAddr;
 
-        if (isEth) {
+        if (isMatic) {
             maticStablecoinInterface vault = maticStablecoinInterface(
                 vaultAddress
             );
@@ -58,9 +59,9 @@ abstract contract Helpers is DSMath, Basic {
         uint256 vaultId,
         uint256 amt
     ) public returns (uint256 initialBal, uint256 finalBal) {
-        bool isEth = token == maticAddr;
+        bool isMatic = token == maticAddr;
 
-        if (isEth) {
+        if (isMatic) {
             initialBal = address(this).balance;
             maticStablecoinInterface vault = maticStablecoinInterface(
                 vaultAddress

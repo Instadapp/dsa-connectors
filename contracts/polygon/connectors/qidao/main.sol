@@ -23,7 +23,7 @@ abstract contract QiDaoResolver is Events, Helpers {
         returns (string memory _eventName, bytes memory _eventParam)
     {
         uint256 _vaultId = getVaultId(vaultAddress, setId);
-        _eventName = "LogCreateVault(uint256, address)";
+        _eventName = "LogCreateVault(uint256,address)";
         _eventParam = abi.encode(_vaultId, address(this));
     }
 
@@ -44,7 +44,7 @@ abstract contract QiDaoResolver is Events, Helpers {
         returns (string memory _eventName, bytes memory _eventParam)
     {
         uint256 _vaultId = _destroyVault(vaultAddress, vaultId, getId);
-        _eventName = "LogDestroyVault(uint256, address)";
+        _eventName = "LogDestroyVault(uint256,address)";
         _eventParam = abi.encode(_vaultId, address(this));
     }
 
@@ -82,7 +82,7 @@ abstract contract QiDaoResolver is Events, Helpers {
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
 
-        _eventName = "LogDepositCollateral(uint256, uint256, uint256, uint256, uint256, uint256)";
+        _eventName = "LogDepositCollateral(uint256,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
@@ -128,7 +128,7 @@ abstract contract QiDaoResolver is Events, Helpers {
 
         setUint(setAmtId, _amt);
 
-        _eventName = "LogWithdrawCollateral(uint256, uint256, uint256, uint256, uint256, uint256)";
+        _eventName = "LogWithdrawCollateral(uint256,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
@@ -172,7 +172,7 @@ abstract contract QiDaoResolver is Events, Helpers {
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
 
-        _eventName = "LogBorrow(uint256, uint256, uint256, uint256, uint256, uint256);";
+        _eventName = "LogBorrow(uint256,uint256,uint256,uint256,uint256,uint256);";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
@@ -215,7 +215,7 @@ abstract contract QiDaoResolver is Events, Helpers {
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
 
-        _eventName = "LogPayBack(uint256, uint256, uint256, uint256, uint256, uint256)";
+        _eventName = "LogPayBack(uint256,uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
