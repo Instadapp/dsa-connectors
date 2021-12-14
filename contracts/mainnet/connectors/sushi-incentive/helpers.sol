@@ -15,74 +15,80 @@ contract Helpers is DSMath, Basic {
     ISushiSwapFactory immutable factory =
         ISushiSwapFactory(0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac);
 
-    function _deposit(uint256 _pid, uint256 _amount, uint256 _version) internal {
-        if(_version == 2)
-            masterChefV2.deposit(_pid, _amount, address(this));
+    struct Metadata {
+        uint256 poolId;
+        uint256 version;
+        address lpToken;
+    }
+
+    function _deposit(Metadata memory data, uint256 _amount) internal {
+        if(data.version == 2)
+            masterChefV2.deposit(data.poolId, _amount, address(this));
         else
-            masterChef.deposit(_pid, _amount);
+            masterChef.deposit(data.poolId, _amount);
     }
 
-    function _withdraw(uint256 _pid, uint256 _amount, uint256 _version) internal {
-        if(_version == 2)
-            masterChefV2.withdraw(_pid, _amount, address(this));
+    function _withdraw(Metadata memory data, uint256 _amount) internal {
+        if(data.version == 2)
+            masterChefV2.withdraw(data.poolId, _amount, address(this));
         else
-            masterChef.withdraw(_pid, _amount);
+            masterChef.withdraw(data.poolId, _amount);
     }
 
-    function _harvest(uint256 _pid) internal {
-        masterChefV2.harvest(_pid, address(this));
+    function _harvest(Metadata memory data) internal {
+        masterChefV2.harvest(data.poolId, address(this));
     }
 
-    function _withdrawAndHarvest(uint256 _pid, uint256 _amount, uint256 _version) internal {
-        if(_version == 2)
-            masterChefV2.withdrawAndHarvest(_pid, _amount, address(this));
-        else _withdraw(_pid, _amount, _version);
+    function _withdrawAndHarvest(Metadata memory data, uint256 _amount) internal {
+        if(data.version == 2)
+            masterChefV2.withdrawAndHarvest(data.poolId, _amount, address(this));
+        else _withdraw(data, _amount);
     }
 
-    function _emergencyWithdraw(uint256 _pid, uint256 _version) internal {
-        if(_version == 2)
-            masterChefV2.emergencyWithdraw(_pid, address(this));
+    function _emergencyWithdraw(Metadata memory data) internal {
+        if(data.version == 2)
+            masterChefV2.emergencyWithdraw(data.poolId, address(this));
         else 
-            masterChef.emergencyWithdraw(_pid, address(this));
+            masterChef.emergencyWithdraw(data.poolId, address(this));
     }
 
     function _getPoolId(address tokenA, address tokenB)
         internal
         view
-        returns (uint256 poolId, uint256 version, address lpToken)
+        returns (Metadata memory data)
     {
         address pair = factory.getPair(tokenA, tokenB);
         uint256 length = masterChefV2.poolLength();
-        version = 2;
-        poolId = uint256(-1);
+        data.version = 2;
+        data.poolId = uint256(-1);
 
         for (uint256 i = 0; i < length; i++) {
-            lpToken = masterChefV2.lpToken(i);
-            if (pair == lpToken) {
-                poolId = i;
+            data.lpToken = masterChefV2.lpToken(i);
+            if (pair == data.lpToken) {
+                data.poolId = i;
                 break;
             }
         }
 
         uint256 lengthV1 = masterChef.poolLength();
         for (uint256 i = 0; i < lengthV1; i++) {
-            (lpToken, , , ) = masterChef.poolInfo(i);
-            if (pair == lpToken) {
-                poolId = i;
-                version = 1;
+            (data.lpToken, , , ) = masterChef.poolInfo(i);
+            if (pair == data.lpToken) {
+                data.poolId = i;
+                data.version = 1;
                 break;
             }
         }
     }
 
-    function _getUserInfo(uint256 _pid, uint256 _version)
+    function _getUserInfo(Metadata memory data)
         internal
         view
         returns (uint256 lpAmount, uint256 rewardsAmount)
     {
-        if(_version == 2)
-            (lpAmount, rewardsAmount) = masterChefV2.userInfo(_pid, address(this));
+        if(data.version == 2)
+            (lpAmount, rewardsAmount) = masterChefV2.userInfo(data.poolId, address(this));
         else 
-            (lpAmount, rewardsAmount) = masterChef.userInfo(_pid, address(this));
+            (lpAmount, rewardsAmount) = masterChef.userInfo(data.poolId, address(this));
     }
 }

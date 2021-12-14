@@ -25,7 +25,8 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         address token2,
         uint256 amount,
         uint256 getId,
-        uint256 setId
+        uint256 setId,
+        Metadata memory data
     )
         external
         payable
@@ -34,17 +35,19 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
         amount = getUint(getId, amount);
-        (uint256 _pid, uint256 _version, address lpTokenAddr) = _getPoolId(
-            token1,
-            token2
-        );
-        setUint(setId, _pid);
-        require(_pid != uint256(-1), "pool-does-not-exist");
-        TokenInterface lpToken = TokenInterface(lpTokenAddr);
+        if(data.poolId == uint256(-1)|| data.version < 0 || data.lpToken == address(0)){
+            data = _getPoolId(
+                token1,
+                token2
+            );
+        }
+        setUint(setId, data.poolId);
+        require(data.poolId != uint256(-1), "pool-does-not-exist");
+        TokenInterface lpToken = TokenInterface(data.lpToken);
         lpToken.approve(address(masterChef), amount);
-        _deposit(_pid, amount, _version);
+        _deposit(data, amount);
         _eventName = "LogDeposit(uint256,uint256,uint256)";
-        _eventParam = abi.encode(_pid, _version, amount);
+        _eventParam = abi.encode(data.poolId, data.version, amount);
     }
 
     /**
@@ -61,7 +64,8 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         address token2,
         uint256 amount,
         uint256 getId,
-        uint256 setId
+        uint256 setId,
+        Metadata memory data
     )
         external
         payable
@@ -70,12 +74,17 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
         amount = getUint(getId, amount);
-        (uint256 _pid, uint256 _version, ) = _getPoolId(token1, token2);
-        setUint(setId, _pid);
-        require(_pid != uint256(-1), "pool-does-not-exist");
-        _withdraw(_pid, amount, _version);
+        if(data.poolId == uint256(-1)|| data.version < 0){
+            data = _getPoolId(
+                token1,
+                token2
+            );
+        }
+        setUint(setId, data.poolId);
+        require(data.poolId != uint256(-1), "pool-does-not-exist");
+        _withdraw(data, amount);
         _eventName = "LogWithdraw(uint256,uint256,uint256)";
-        _eventParam = abi.encode(_pid, _version, amount);
+        _eventParam = abi.encode(data.poolId, data.version, amount);
     }
 
     /**
@@ -88,7 +97,8 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
     function harvest(
         address token1,
         address token2,
-        uint256 setId
+        uint256 setId,
+        Metadata memory data
     )
         external
         payable
@@ -96,14 +106,19 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
     {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
-        (uint256 _pid, uint256 _version, ) = _getPoolId(token1, token2);
-        setUint(setId, _pid);
-        require(_pid != uint256(-1), "pool-does-not-exist");
-        (, uint256 rewardsAmount) = _getUserInfo(_pid, _version);
-        if (_version == 2) _harvest(_pid);
-        else _withdraw(_pid, 0, _version);
+        if(data.poolId == uint256(-1)|| data.version < 0 ){
+            data = _getPoolId(
+                token1,
+                token2
+            );
+        }
+        setUint(setId, data.poolId);
+        require(data.poolId != uint256(-1), "pool-does-not-exist");
+        (, uint256 rewardsAmount) = _getUserInfo(data);
+        if (data.version == 2) _harvest(data);
+        else _withdraw(data, 0);
         _eventName = "LogHarvest(uint256,uint256,uint256)";
-        _eventParam = abi.encode(_pid, _version, rewardsAmount);
+        _eventParam = abi.encode(data.poolId, data.version, rewardsAmount);
     }
 
     /**
@@ -120,7 +135,8 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         address token2,
         uint256 amount,
         uint256 getId,
-        uint256 setId
+        uint256 setId,
+        Metadata memory data
     )
         external
         payable
@@ -129,13 +145,18 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
         amount = getUint(getId, amount);
-        (uint256 _pid, uint256 _version, ) = _getPoolId(token1, token2);
-        setUint(setId, _pid);
-        require(_pid != uint256(-1), "pool-does-not-exist");
-        (, uint256 rewardsAmount) = _getUserInfo(_pid, _version);
-        _withdrawAndHarvest(_pid, amount, _version);
+        if(data.poolId == uint256(-1)|| data.version < 0){
+            data = _getPoolId(
+                token1,
+                token2
+            );
+        }
+        setUint(setId, data.poolId);
+        require(data.poolId != uint256(-1), "pool-does-not-exist");
+        (, uint256 rewardsAmount) = _getUserInfo(data);
+        _withdrawAndHarvest(data, amount);
         _eventName = "LogWithdrawAndHarvest(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_pid, _version, amount, rewardsAmount);
+        _eventParam = abi.encode(data.poolId, data.version, amount, rewardsAmount);
     }
 
     /**
@@ -148,7 +169,8 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
     function emergencyWithdraw(
         address token1,
         address token2,
-        uint256 setId
+        uint256 setId,
+        Metadata memory data
     )
         external
         payable
@@ -156,16 +178,18 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
     {
         token1 = changeEthAddrToWethAddr(token1);
         token2 = changeEthAddrToWethAddr(token2);
-        (uint256 _pid, uint256 _version, ) = _getPoolId(token1, token2);
-        setUint(setId, _pid);
-        require(_pid != uint256(-1), "pool-does-not-exist");
-        (uint256 lpAmount, uint256 rewardsAmount) = _getUserInfo(
-            _pid,
-            _version
-        );
-        _emergencyWithdraw(_pid, _version);
+        if(data.poolId == uint256(-1)|| data.version < 0 ){
+            data = _getPoolId(
+                token1,
+                token2
+            );
+        }
+        setUint(setId, data.poolId);
+        require(data.poolId != uint256(-1), "pool-does-not-exist");
+        (uint256 lpAmount, uint256 rewardsAmount) = _getUserInfo(data);
+        _emergencyWithdraw(data);
         _eventName = "LogEmergencyWithdraw(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_pid, _version, lpAmount, rewardsAmount);
+        _eventParam = abi.encode(data.poolId, data.version, lpAmount, rewardsAmount);
     }
 }
 
