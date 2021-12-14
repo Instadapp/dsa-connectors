@@ -1,27 +1,28 @@
+import {Contract, Signer} from "ethers";
+
 const { expect } = require("chai");
 const hre = require("hardhat");
-const abis = require("../../scripts/constant/abis");
-const addresses = require("../../scripts/constant/addresses");
-const deployAndEnableConnector = require("../../scripts/deployAndEnableConnector");
-const getMasterSigner = require("../../scripts/getMasterSigner");
-const buildDSAv2 = require("../../scripts/buildDSAv2");
-const ConnectV2QiDaoPolygon = require("../../artifacts/contracts/polygon/connectors/qidao/main.sol/ConnectV2QiDaoPolygon.json");
+const { abis } = require("../../../scripts/constant/abis");
+const { addresses } = require("../../../scripts/tests/polygon/addresses");
+const { tokens }  = require("../../../scripts/tests/polygon/tokens");
+const { deployAndEnableConnector } = require("../../../scripts/tests/deployAndEnableConnector");
+const { getMasterSigner } = require("../../../scripts/tests/getMasterSigner");
+const { buildDSAv2 } = require("../../../scripts/tests/buildDSAv2");
+const ConnectV2QiDaoPolygon = require("../../../artifacts/contracts/polygon/connectors/qidao/main.sol/ConnectV2QiDaoPolygon.json");
 const { parseEther } = require("@ethersproject/units");
-const encodeSpells = require("../../scripts/encodeSpells");
-const polygonTokens = require("../../scripts/constant/qidao/polygonTokens");
-const vaults = require("../../scripts/constant/qidao/vaults");
-const constants = require("../../scripts/constant/constant");
-const addLiquidity = require("../../scripts/addLiquidity");
+const { encodeSpells } = require("../../../scripts/tests/encodeSpells");
+const { vaults } = require("../../../scripts/constant/qidao/vaults");
+const { addLiquidity } = require("../../../scripts/tests/addLiquidity");
 const { ethers } = hre;
 
 describe("QiDao", function() {
   const connectorName = "QIDAO-TEST-A";
 
-  let wallet0, wallet1;
-  let dsaWallet0;
-  let instaConnectorsV2;
-  let connector;
-  let masterSigner;
+  let wallet0: any, wallet1: any;
+  let dsaWallet0: any;
+  let instaConnectorsV2: Contract;
+  let connector: any;
+  let masterSigner: Signer;
 
   before(async () => {
     await hre.network.provider.request({
@@ -51,7 +52,7 @@ describe("QiDao", function() {
   it("should have contracts deployed", async () => {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
+    expect(!!await masterSigner.getAddress()).to.be.true;
   });
 
   describe("DSA wallet setup", function() {
@@ -88,7 +89,7 @@ describe("QiDao", function() {
         {
           connector: connectorName,
           method: "deposit",
-          args: [polygonTokens.matic.address, vaults.matic.address, 0, amt, setVaultId, 0, 0, 0],
+          args: [tokens.matic.address, vaults.matic.address, 0, amt, setVaultId, 0, 0, 0],
         },
         {
           connector: connectorName,
@@ -103,7 +104,7 @@ describe("QiDao", function() {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [polygonTokens.matic.address, vaults.matic.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
+          args: [tokens.matic.address, vaults.matic.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
         },
       ];
 
@@ -132,7 +133,7 @@ describe("QiDao", function() {
         {
           connector: connectorName,
           method: "deposit",
-          args: [polygonTokens.link.address, vaults.link.address, 0, amt, setVaultId, 0, 0, 0],
+          args: [tokens.link.address, vaults.link.address, 0, amt, setVaultId, 0, 0, 0],
         },
         {
           connector: connectorName,
@@ -147,7 +148,7 @@ describe("QiDao", function() {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [polygonTokens.link.address, vaults.link.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
+          args: [tokens.link.address, vaults.link.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
         },
       ];
 

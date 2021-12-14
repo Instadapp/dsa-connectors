@@ -65,10 +65,10 @@ const tokenMapping: Record<string, any> = {
   },
   polygon: {
     link: {
-      impersonateSigner: "0x7d3a61907f6e2ef5ed901b6d9e5baf36827625af",
+      impersonateSigner: "0x54fa8b5918b00f0e5024a2e5255af61bd8ba7b95",
       abi: ["function transfer(address to, uint value)"],
       address: "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
-      process: async function (owner, to, amt) {
+      process: async function (owner: Signer | Provider, to: any, amt: any) {
         const contract = new ethers.Contract(this.address, this.abi, owner);
         await mineTx(contract.transfer(to, amt));
       },

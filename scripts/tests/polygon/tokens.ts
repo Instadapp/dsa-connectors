@@ -27,4 +27,11 @@ export const tokens = {
     address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
     decimals: 6,
   },
+  link: {
+    type: "token",
+    symbol: "LINK",
+    name: "ChainLink Token",
+    address: "0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39",
+    decimals: 18
+  },
 };
