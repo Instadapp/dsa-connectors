@@ -11,7 +11,7 @@ import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 
 import { addresses } from "../../../scripts/tests/polygon/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { ConnectV2Quickswap__factory, ConnectV2Quickswap } from "../../../typechain";
+import { ConnectV2QuickswapPolygon__factory, ConnectV2QuickswapPolygon } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
 
 const DAI_ADDR = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
@@ -44,7 +44,7 @@ describe("Quickswap", function () {
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2Quickswap__factory,
+      contractArtifact: ConnectV2QuickswapPolygon__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
     });

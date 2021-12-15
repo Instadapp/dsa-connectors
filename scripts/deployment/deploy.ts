@@ -18,6 +18,7 @@ async function main() {
     "GELATO-A": "ConnectV2Gelato",
     "MAKERDAO-A": "ConnectV2Maker",
     "UNISWAP-A": "ConnectV2UniswapV2",
+    "QUICKSWAP-A": "ConnectV2QuickswapPolygon"
   };
 
   const addressMapping: Record<string, string> = {};
