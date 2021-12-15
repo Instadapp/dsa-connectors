@@ -4,13 +4,16 @@ pragma abicoder v2;
 import {TokenInterface} from "../../../common/interfaces.sol";
 import {DSMath} from "../../../common/math.sol";
 import {Basic} from "../../../common/basic.sol";
+import {SqrtPriceMath} from "../../../../arbitrum/connectors/uniswap-sell-beta/libraries/SqrtPriceMath.sol";
 import "./interface.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 abstract contract Helpers is DSMath, Basic {
+    using SafeMath for uint;
     /**
      * @dev uniswap v3 NFT Position Manager & Swap Router
      */
@@ -18,15 +21,23 @@ abstract contract Helpers is DSMath, Basic {
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
     ISwapRouter internal constant swapRouter =
         ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+    IUniswapV3Factory internal constant factory =
+        IUniswapV3Factory(0x1F98431c8aD98523631AE4a59f267346ea31F984);
     bytes32 internal constant POOL_INIT_CODE_HASH =
         0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54;
     
-    address constant COMMON_ADDRESSES = [
+    address[] COMMON_ADDRESSES = [
         0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2, // WETH
-        0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48, // USDC
+        0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, // USDC
         0xdAC17F958D2ee523a2206206994597C13D831ec7, // USDT
-        0x6b175474e89094c44da98b954eedeac495271d0f, // DAI
-    ]
+        0x6B175474E89094C44Da98b954EedeAC495271d0F // DAI
+    ];
+
+    struct PoolKey {
+        address token0;
+        address token1;
+        uint24 fee;
+    }
 
     struct MintParams {
         address tokenA;
@@ -53,11 +64,11 @@ abstract contract Helpers is DSMath, Basic {
     }
 
     function getPrice(address tokenIn, address tokenOut, uint24 fee)
-        external
+        internal
         view
         returns (uint256 price)
     {
-        IUniswapV3Pool pool = IUniswapV3Pool(factory.getPool(tokenIn, tokenOut, fee);
+        IUniswapV3Pool pool = IUniswapV3Pool(factory.getPool(tokenIn, tokenOut, fee));
         (uint160 sqrtPriceX96,,,,,,) =  pool.slot0();
         return uint(sqrtPriceX96).mul(uint(sqrtPriceX96)).mul(1e18) >> (96 * 2);
     }
@@ -98,6 +109,28 @@ abstract contract Helpers is DSMath, Basic {
             )
         );
     }
+
+    function getPriceLimit(
+        uint256 amountIn,
+        bool zeroForOne,
+        address tokenA,
+        address tokenB,
+        uint24 fee
+    ) internal view returns (uint160) {
+        UniswapV3Pool state = UniswapV3Pool(
+            getPoolAddress(tokenA, tokenB, fee)
+        );
+
+        return (
+            SqrtPriceMath.getNextSqrtPriceFromInput(
+                state.slot0().sqrtPriceX96,
+                state.liquidity(),
+                amountIn,
+                zeroForOne
+            )
+        );
+    }
+
     function getParams(
         address tokenIn,
         address tokenOut,

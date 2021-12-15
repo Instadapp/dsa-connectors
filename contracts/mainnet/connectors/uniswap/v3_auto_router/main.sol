@@ -9,8 +9,12 @@ pragma abicoder v2;
 import {TokenInterface} from "../../../common/interfaces.sol";
 import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
+    using SafeERC20 for IERC20;
+
     function swapExactTokensForTokens(
         address tokenIn,
         address tokenOut,
@@ -61,7 +65,7 @@ abstract contract UniswapResolver is Helpers, Events {
         uint256 amountOut = swapSingleInput(
             getParams(
                 COMMON_ADDRESSES[pathIndex],
-                tokenOut
+                tokenOut,
                 recipient,
                 fee,
                 amountOut1,
