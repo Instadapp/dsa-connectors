@@ -66,7 +66,6 @@ abstract contract QiDaoResolver is Events, Helpers {
         uint256 vaultId,
         uint256 amt,
         uint256 getVaultId,
-        uint256 setVaultId,
         uint256 getAmtId,
         uint256 setAmtId
     )
@@ -82,12 +81,11 @@ abstract contract QiDaoResolver is Events, Helpers {
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
 
-        _eventName = "LogDepositCollateral(uint256,uint256,uint256,uint256,uint256,uint256)";
+        _eventName = "LogDepositCollateral(uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
             getVaultId,
-            setVaultId,
             getAmtId,
             setAmtId
         );
@@ -111,7 +109,6 @@ abstract contract QiDaoResolver is Events, Helpers {
         uint256 vaultId,
         uint256 amt,
         uint256 getVaultId,
-        uint256 setVaultId,
         uint256 getAmtId,
         uint256 setAmtId
     )
@@ -128,12 +125,11 @@ abstract contract QiDaoResolver is Events, Helpers {
 
         setUint(setAmtId, _amt);
 
-        _eventName = "LogWithdrawCollateral(uint256,uint256,uint256,uint256,uint256,uint256)";
+        _eventName = "LogWithdrawCollateral(uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
             getVaultId,
-            setVaultId,
             getAmtId,
             setAmtId
         );
@@ -156,7 +152,6 @@ abstract contract QiDaoResolver is Events, Helpers {
         uint256 vaultId,
         uint256 amt,
         uint256 getVaultId,
-        uint256 setVaultId,
         uint256 getAmtId,
         uint256 setAmtId
     )
@@ -172,12 +167,11 @@ abstract contract QiDaoResolver is Events, Helpers {
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
 
-        _eventName = "LogBorrow(uint256,uint256,uint256,uint256,uint256,uint256);";
+        _eventName = "LogBorrow(uint256,uint256,uint256,uint256,uint256);";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
             getVaultId,
-            setVaultId,
             getAmtId,
             setAmtId
         );
@@ -199,7 +193,6 @@ abstract contract QiDaoResolver is Events, Helpers {
         uint256 vaultId,
         uint256 amt,
         uint256 getVaultId,
-        uint256 setVaultId,
         uint256 getAmtId,
         uint256 setAmtId
     )
@@ -215,12 +208,11 @@ abstract contract QiDaoResolver is Events, Helpers {
         setUint(setAmtId, _amt);
         setUint(getVaultId, _vaultId);
 
-        _eventName = "LogPayBack(uint256,uint256,uint256,uint256,uint256,uint256)";
+        _eventName = "LogPayBack(uint256,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(
             _vaultId,
             _amt,
             getVaultId,
-            setVaultId,
             getAmtId,
             setAmtId
         );
