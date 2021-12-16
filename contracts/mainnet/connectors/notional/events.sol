@@ -1,5 +1,95 @@
 pragma solidity ^0.7.6;
 
 contract Events {
+    event LogDepositCollateral(
+        address indexed account,
+        uint16 currencyId,
+        bool isUnderlying,
+        uint256 depositAmount,
+        uint256 assetCashDeposited
+    );
 
+    event LogWithdrawCollateral(
+        address indexed account,
+        uint16 currencyId,
+        bool isUnderlying,
+        uint256 amountWithdrawn
+    );
+
+    event LogClaimNOTE(address indexed account, uint256 notesClaimed);
+
+    event LogRedeemNTokenRaw(
+        address indexed account,
+        uint16 currencyId,
+        bool sellTokenAssets,
+        uint96 tokensToRedeem,
+        int256 assetCashChange
+    );
+
+    event LogRedeemNTokenWithdraw(
+        address indexed account,
+        uint16 currencyId,
+        uint96 tokensToRedeem,
+        uint256 amountToWithdraw,
+        bool redeemToUnderlying
+    );
+
+    event LogRedeemNTokenAndDeleverage(
+        address indexed account,
+        uint16 currencyId,
+        uint96 tokensToRedeem,
+        uint8 marketIndex,
+        uint88 fCashAmount
+    );
+
+    event LogDepositAndMintNToken(
+        address indexed account,
+        uint16 currencyId,
+        bool isUnderlying,
+        uint256 depositAmount,
+        int256 nTokenBalanceChange
+    );
+
+    event LogMintNTokenFromCash(
+        address indexed account,
+        uint16 currencyId,
+        uint256 cashBalanceToMint,
+        int256 nTokenBalanceChange
+    );
+
+    event LogDepositAndLend(
+        address indexed account,
+        uint16 currencyId,
+        bool isUnderlying,
+        uint256 depositAmount,
+        uint8 marketIndex,
+        uint88 fCashAmount,
+        uint32 minLendRate
+    );
+
+    event LogDepositCollateralBorrowAndWithdraw(
+        bool useUnderlying,
+        uint256 depositAmount,
+        uint16 borrowCurrencyId,
+        uint8 marketIndex,
+        uint88 fCashAmount,
+        uint32 maxBorrowRate,
+        bool redeemToUnderlying
+    );
+
+    event LogWithdrawLend(
+        uint16 currencyId,
+        uint8 marketIndex,
+        uint88 fCashAmount,
+        uint32 maxBorrowRate
+    );
+
+    event LogRepayBorrow(
+        uint16 currencyId,
+        uint8 marketIndex,
+        int88 netCashToAccount,
+        uint32 minLendRate
+    );
+
+    event LogBatchActionRaw(address indexed account);
 }

@@ -1,16 +1,18 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import { Helpers } from "./helpers.sol";
-import { Events } from "./events.sol";
-import { DepositActionType, BalanceActionWithTrades, BalanceAction } from "./interface.sol";
-import { TokenInterface } from "../../common/interfaces.sol";
+import {Helpers} from "./helpers.sol";
+import {SafeInt256} from "./SafeInt256.sol";
+import {Events} from "./events.sol";
+import {DepositActionType, BalanceActionWithTrades, BalanceAction} from "./interface.sol";
+import {TokenInterface} from "../../common/interfaces.sol";
 
 /**
  * @title Notional
  * @notice Fixed Rate Lending and Borrowing
  */
 abstract contract NotionalResolver is Events, Helpers {
+    using SafeInt256 for int256;
 
     /**
      * @notice Deposit collateral into Notional
@@ -24,29 +26,50 @@ abstract contract NotionalResolver is Events, Helpers {
     function depositCollateral(
         uint16 currencyId,
         bool useUnderlying,
-        uint depositAmount,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint assetCashDeposited;
-        address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
-        depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
+        uint256 depositAmount,
+        uint256 getId,
+        uint256 setId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        depositAmount = getDepositAmountAndSetApproval(
+            getId,
+            currencyId,
+            useUnderlying,
+            depositAmount
+        );
 
-        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
-
+        uint256 assetCashDeposited;
         if (useUnderlying && currencyId == ETH_CURRENCY_ID) {
-            assetCashDeposited = notional.depositUnderlyingToken{value: depositAmount}(address(this), currencyId, depositAmount);
+            assetCashDeposited = notional.depositUnderlyingToken{
+                value: depositAmount
+            }(address(this), currencyId, depositAmount);
         } else if (useUnderlying) {
-            assetCashDeposited = notional.depositUnderlyingToken{value: depositAmount}(address(this), currencyId, depositAmount);
+            assetCashDeposited = notional.depositUnderlyingToken(
+                address(this),
+                currencyId,
+                depositAmount
+            );
         } else {
-            assetCashDeposited = notional.depositAssetToken(address(this), currencyId, depositAmount);
+            assetCashDeposited = notional.depositAssetToken(
+                address(this),
+                currencyId,
+                depositAmount
+            );
         }
 
         setUint(setId, assetCashDeposited);
 
         _eventName = "LogDepositCollateral(uint16,bool,uint256,uint256)";
-        _eventParam = abi.encode(address(this), currencyId, useUnderlying, depositAmount, assetCashDeposited);
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            useUnderlying,
+            depositAmount,
+            assetCashDeposited
+        );
     }
 
     /**
@@ -62,31 +85,42 @@ abstract contract NotionalResolver is Events, Helpers {
     function withdrawCollateral(
         uint16 currencyId,
         bool redeemToUnderlying,
-        uint withdrawAmount,
-        uint getId,
-        uint setId
+        uint256 withdrawAmount,
+        uint256 getId,
+        uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         withdrawAmount = getUint(getId, withdrawAmount);
-        uint88 amountInternalPrecision = withdrawAmount == uint(-1) ?
-            uint88(getCashBalance(currencyId)) :
-            uint88(convertToInternal(currencyId, int256(withdrawAmount)));
+        uint88 amountInternalPrecision = withdrawAmount == uint256(-1)
+            ? uint88(getCashBalance(currencyId))
+            : uint88(convertToInternal(currencyId, int256(withdrawAmount)));
 
-        uint amountWithdrawn = notional.withdraw(currencyId, amountInternalPrecision, redeemToUnderlying);
+        uint256 amountWithdrawn = notional.withdraw(
+            currencyId,
+            amountInternalPrecision,
+            redeemToUnderlying
+        );
         // Sets the amount of tokens withdrawn to address(this)
         setUint(setId, amountWithdrawn);
 
         _eventName = "LogWithdrawCollateral(address,uint16,bool,uint256)";
-        _eventParam = abi.encode(address(this), currencyId, redeemToUnderlying, amountWithdrawn);
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            redeemToUnderlying,
+            amountWithdrawn
+        );
     }
 
     /**
      * @dev Claims NOTE tokens and transfers to the address
      * @param setId the id to set the balance of NOTE tokens claimed
      */
-    function claimNOTE(
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint notesClaimed = notional.nTokenClaimIncentives();
+    function claimNOTE(uint256 setId)
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        uint256 notesClaimed = notional.nTokenClaimIncentives();
         setUint(setId, notesClaimed);
 
         _eventName = "LogClaimNOTE(address,uint256)";
@@ -108,21 +142,35 @@ abstract contract NotionalResolver is Events, Helpers {
         uint16 currencyId,
         bool sellTokenAssets,
         uint96 tokensToRedeem,
-        uint getId,
-        uint setId
+        uint256 getId,
+        uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         tokensToRedeem = uint96(getUint(getId, tokensToRedeem));
-        if (tokensToRedeem == uint96(-1)) tokensToRedeem = uint96(getNTokenBalance(currencyId));
-        int _assetCashChange = notional.nTokenRedeem(address(this), currencyId, tokensToRedeem, sellTokenAssets);
+        if (tokensToRedeem == uint96(-1))
+            tokensToRedeem = uint96(getNTokenBalance(currencyId));
+        int256 _assetCashChange = notional.nTokenRedeem(
+            address(this),
+            currencyId,
+            tokensToRedeem,
+            sellTokenAssets
+        );
 
         // Floor asset cash change at zero in order to properly set the uint. If the asset cash change is negative
         // (this will almost certainly never happen), then no withdraw is possible.
-        uint assetCashChange = _assetCashChange > 0 ? uint(_assetCashChange) : 0;
+        uint256 assetCashChange = _assetCashChange > 0
+            ? uint256(_assetCashChange)
+            : 0;
 
         setUint(setId, assetCashChange);
 
-        _eventName = "LogRedeemNTokenRaw(address,uint16,bool,uint,uint)";
-        _eventParam = abi.encode(address(this), currencyId, sellTokenAssets, tokensToRedeem, assetCashChange);
+        _eventName = "LogRedeemNTokenRaw(address,uint16,bool,uint96,int256)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            sellTokenAssets,
+            tokensToRedeem,
+            assetCashChange
+        );
     }
 
     /**
@@ -139,49 +187,43 @@ abstract contract NotionalResolver is Events, Helpers {
      */
     function redeemNTokenAndWithdraw(
         uint16 currencyId,
-        uint tokensToRedeem,
-        uint amountToWithdraw,
+        uint96 tokensToRedeem,
+        uint256 amountToWithdraw,
         bool redeemToUnderlying,
-        uint getId,
-        uint setId
+        uint256 getId,
+        uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = getUint(getId, tokensToRedeem);
-        if (tokensToRedeem == uint(-1)) tokensToRedeem = uint(getNTokenBalance(currencyId));
+        tokensToRedeem = uint96(getUint(getId, uint256(tokensToRedeem)));
+        if (tokensToRedeem == uint96(-1))
+            tokensToRedeem = uint96(getNTokenBalance(currencyId));
 
         BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = DepositActionType.RedeemNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = tokensToRedeem;
         action[0].redeemToUnderlying = redeemToUnderlying;
-        if (amountToWithdraw == uint(-1)) {
+        if (amountToWithdraw == uint256(-1)) {
             action[0].withdrawEntireCashBalance = true;
         } else {
             action[0].withdrawAmountInternalPrecision = amountToWithdraw;
         }
 
-        uint balanceBefore;
-        address tokenAddress;
-        if (setId != 0) {
-            // Only run this if we are going to use the balance change
-            address tokenAddress = redeemToUnderlying ? 
-                getUnderlyingToken(currencyId) :
-                getAssetToken(currencyId);
-            
-            // TODO: handle ETH
-            balanceBefore = TokenInterface(tokenAddress).balanceOf(address(this));
-        }
+        executeActionWithBalanceChange(
+            action,
+            0,
+            currencyId,
+            redeemToUnderlying,
+            setId
+        );
 
-        notional.batchBalanceAction(address(this), action);
-
-        if (setId != 0) {
-            // TODO: handle ETH
-            uint netBalance = sub(balanceBefore, TokenInterface(tokenAddress).balanceOf(address(this)));
-            // This can be used to determine the exact amount withdrawn
-            setUint(setId, netBalance);
-        }
-
-        _eventName = "LogRedeemNTokenWithdraw(address,uint16,uint,uint,bool)";
-        _eventParam = abi.encode(address(this), currencyId, tokensToRedeem, amountToWithdraw, redeemToUnderlying);
+        _eventName = "LogRedeemNTokenWithdraw(address,uint16,uint96,uint256,bool)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            tokensToRedeem,
+            amountToWithdraw,
+            redeemToUnderlying
+        );
     }
 
     /**
@@ -203,13 +245,15 @@ abstract contract NotionalResolver is Events, Helpers {
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 minLendRate,
-        uint getId
+        uint256 getId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         tokensToRedeem = uint96(getUint(getId, tokensToRedeem));
-        if (tokensToRedeem == uint96(-1)) tokensToRedeem = uint96(getNTokenBalance(currencyId));
-        notional.nTokenRedeem(address(this), currencyId, tokensToRedeem, true);
+        if (tokensToRedeem == uint96(-1))
+            tokensToRedeem = uint96(getNTokenBalance(currencyId));
 
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](1);
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
+            1
+        );
         action[0].actionType = DepositActionType.RedeemNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = tokensToRedeem;
@@ -221,10 +265,15 @@ abstract contract NotionalResolver is Events, Helpers {
 
         notional.batchBalanceAndTradeAction(address(this), action);
 
-        _eventName = "LogRedeemNTokenAndDeleverage(address,uint16,uint,uint8,uint)";
-        _eventParam = abi.encode(address(this), currencyId, tokensToRedeem, marketIndex, fCashAmount);
+        _eventName = "LogRedeemNTokenAndDeleverage(address,uint16,uint96,uint8,uint88)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            tokensToRedeem,
+            marketIndex,
+            fCashAmount
+        );
     }
-    
 
     /**
      * @notice Deposit asset or underlying tokens and mint nTokens in a single transaction
@@ -237,46 +286,70 @@ abstract contract NotionalResolver is Events, Helpers {
      */
     function depositAndMintNToken(
         uint16 currencyId,
-        uint depositAmount,
+        uint256 depositAmount,
         bool useUnderlying,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
-        depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
+        uint256 getId,
+        uint256 setId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        depositAmount = getDepositAmountAndSetApproval(
+            getId,
+            currencyId,
+            useUnderlying,
+            depositAmount
+        );
 
-        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
         BalanceAction[] memory action = new BalanceAction[](1);
-        action[0].actionType = useUnderlying ? DepositActionType.DepositUnderlyingAndMintNToken : DepositActionType.DepositAssetAndMintNToken;
+        action[0].actionType = useUnderlying
+            ? DepositActionType.DepositUnderlyingAndMintNToken
+            : DepositActionType.DepositAssetAndMintNToken;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = depositAmount;
         // withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
-        int256 nTokenBefore;
-        if (setId != 0) {
-            nTokenBefore = getNTokenBalance(currencyId);
-        }
+        int256 nTokenBefore = getNTokenBalance(currencyId);
 
-        uint msgValue = currencyId == ETH_CURRENCY_ID ? depositAmount : 0;
+        uint256 msgValue = 0;
+        if (currencyId == ETH_CURRENCY_ID && useUnderlying)
+            msgValue = depositAmount;
+
         notional.batchBalanceAction{value: msgValue}(address(this), action);
+
+        int256 nTokenBalanceChange = getNTokenBalance(currencyId).sub(
+            nTokenBefore
+        );
 
         if (setId != 0) {
             // Set the amount of nTokens minted
-            setUint(setId, uint(sub(getNTokenBalance(currencyId), nTokenBefore)));
+            setUint(setId, uint256(nTokenBalanceChange));
         }
 
-        // todo: events
+        _eventName = "LogDepositAndMintNToken(address,uint16,bool,uint256,int256)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            useUnderlying,
+            depositAmount,
+            nTokenBalanceChange
+        );
     }
 
     function mintNTokenFromCash(
         uint16 currencyId,
-        uint cashBalanceToMint,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint256 cashBalanceToMint,
+        uint256 getId,
+        uint256 setId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
         cashBalanceToMint = getUint(getId, cashBalanceToMint);
-        if (cashBalanceToMint == uint(-1)) cashBalanceToMint = uint(getCashBalance(currencyId));
+        if (cashBalanceToMint == uint256(-1))
+            cashBalanceToMint = uint256(getCashBalance(currencyId));
 
         BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = DepositActionType.ConvertCashToNToken;
@@ -284,73 +357,97 @@ abstract contract NotionalResolver is Events, Helpers {
         action[0].depositActionAmount = cashBalanceToMint;
         // NOTE: withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
-        int256 nTokenBefore;
-        if (setId != 0) {
-            nTokenBefore = getNTokenBalance(currencyId);
-        }
+        int256 nTokenBefore = getNTokenBalance(currencyId);
 
         notional.batchBalanceAction(address(this), action);
 
+        int256 nTokenBalanceChange = getNTokenBalance(currencyId).sub(
+            nTokenBefore
+        );
+
         if (setId != 0) {
             // Set the amount of nTokens minted
-            setUint(setId, uint(sub(getNTokenBalance(currencyId), nTokenBefore)));
+            setUint(setId, uint256(nTokenBalanceChange));
         }
 
-        // todo: events
+        _eventName = "LogMintNTokenFromCash(address,uint16,uint256,int256)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            cashBalanceToMint,
+            nTokenBalanceChange
+        );
     }
 
     function depositAndLend(
         uint16 currencyId,
-        uint depositAmount,
+        uint256 depositAmount,
         bool useUnderlying,
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 minLendRate,
-        uint getId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
-        depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
+        uint256 getId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        depositAmount = getDepositAmountAndSetApproval(
+            getId,
+            currencyId,
+            useUnderlying,
+            depositAmount
+        );
 
-        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](1);
-        action[0].actionType = useUnderlying ? DepositActionType.DepositUnderlying : DepositActionType.DepositAsset;
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
+            1
+        );
+        action[0].actionType = useUnderlying
+            ? DepositActionType.DepositUnderlying
+            : DepositActionType.DepositAsset;
         action[0].currencyId = currencyId;
         action[0].depositActionAmount = depositAmount;
         // Withdraw any residual cash from lending back to the token that was used
         action[0].withdrawEntireCashBalance = true;
-        // TODO: will redeem underlying work with ETH?
         action[0].redeemToUnderlying = useUnderlying;
 
         bytes32[] memory trades = new bytes32[](1);
         trades[0] = encodeLendTrade(marketIndex, fCashAmount, minLendRate);
         action[0].trades = trades;
 
-        uint msgValue = currencyId == ETH_CURRENCY_ID ? depositAmount : 0;
-        notional.batchBalanceAndTradeAction{value: msgValue}(address(this), action);
+        uint256 msgValue = 0;
+        if (currencyId == ETH_CURRENCY_ID && useUnderlying)
+            msgValue = depositAmount;
 
-        // todo: events
+        notional.batchBalanceAndTradeAction{value: msgValue}(
+            address(this),
+            action
+        );
+
+        _eventName = "LogDepositAndLend(address,uint16,bool,uint256,uint8,uint88,uint32)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            useUnderlying,
+            depositAmount,
+            marketIndex,
+            fCashAmount,
+            minLendRate
+        );
     }
 
-    function depositCollateralBorrowAndWithdraw(
+    function getDepositCollateralBorrowAndWithdrawActions(
         uint16 depositCurrencyId,
         bool useUnderlying,
-        uint depositAmount,
+        uint256 depositAmount,
         uint16 borrowCurrencyId,
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 maxBorrowRate,
-        bool redeemToUnderlying,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        require(depositCurrencyId != borrowCurrencyId);
-        address tokenAddress = useUnderlying ? getUnderlyingToken(depositCurrencyId) : getAssetToken(depositCurrencyId);
-        depositAmount = getUint(getId, depositAmount);
-        if (depositAmount == uint(-1)) depositAmount = TokenInterface(tokenAddress).balanceOf(address(this));
-
-        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](2);
+        bool redeemToUnderlying
+    ) internal returns (BalanceActionWithTrades[] memory action) {
+        BalanceActionWithTrades[]
+            memory actions = new BalanceActionWithTrades[](2);
 
         uint256 depositIndex;
         uint256 borrowIndex;
@@ -362,36 +459,85 @@ abstract contract NotionalResolver is Events, Helpers {
             borrowIndex = 0;
         }
 
-        action[depositIndex].actionType = useUnderlying ? DepositActionType.DepositUnderlying : DepositActionType.DepositAsset;
-        action[depositIndex].currencyId = depositCurrencyId;
-        action[depositIndex].depositActionAmount = depositAmount;
-        uint msgValue = depositCurrencyId == ETH_CURRENCY_ID ? depositAmount : 0;
+        actions[depositIndex].actionType = useUnderlying
+            ? DepositActionType.DepositUnderlying
+            : DepositActionType.DepositAsset;
+        actions[depositIndex].currencyId = depositCurrencyId;
+        actions[depositIndex].depositActionAmount = depositAmount;
 
-        action[borrowIndex].actionType = DepositActionType.None;
-        action[borrowIndex].currencyId = borrowCurrencyId;
+        actions[borrowIndex].actionType = DepositActionType.None;
+        actions[borrowIndex].currencyId = borrowCurrencyId;
         // Withdraw borrowed amount to wallet
-        action[borrowIndex].withdrawEntireCashBalance = true;
-        // TODO: will redeem underlying work with ETH?
-        action[borrowIndex].redeemToUnderlying = useUnderlying;
+        actions[borrowIndex].withdrawEntireCashBalance = true;
+        actions[borrowIndex].redeemToUnderlying = redeemToUnderlying;
 
         bytes32[] memory trades = new bytes32[](1);
-        trades[borrowIndex] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
-        action[borrowIndex].trades = trades;
+        trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
+        actions[borrowIndex].trades = trades;
 
-        address borrowToken;
-        uint balanceBefore;
-        if (setId != 0) {
-            address borrowToken = useUnderlying ? getUnderlyingToken(borrowCurrencyId) : getAssetToken(borrowCurrencyId);
-            balanceBefore = TokenInterface(borrowToken).balanceOf(address(this));
-        }
+        return actions;
+    }
 
-        notional.batchBalanceAndTradeAction{value: msgValue}(address(this), action);
+    function depositCollateralBorrowAndWithdraw(
+        uint16 depositCurrencyId,
+        bool useUnderlying,
+        uint256 depositAmount,
+        uint16 borrowCurrencyId,
+        uint8 marketIndex,
+        uint88 fCashAmount,
+        uint32 maxBorrowRate,
+        bool redeemToUnderlying,
+        uint256 getId,
+        uint256 setId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        require(depositCurrencyId != borrowCurrencyId);
 
-        if (setId != 0) {
-            setUint(setId, sub(TokenInterface(borrowToken).balanceOf(address(this)), balanceBefore));
-        }
+        depositAmount = getDepositAmountAndSetApproval(
+            getId,
+            depositCurrencyId,
+            useUnderlying,
+            depositAmount
+        );
 
-        // todo: events
+        BalanceActionWithTrades[]
+            memory actions = getDepositCollateralBorrowAndWithdrawActions(
+                depositCurrencyId,
+                useUnderlying,
+                depositAmount,
+                borrowCurrencyId,
+                marketIndex,
+                fCashAmount,
+                maxBorrowRate,
+                redeemToUnderlying
+            );
+
+        uint256 msgValue = 0;
+        if (depositCurrencyId == ETH_CURRENCY_ID && useUnderlying)
+            msgValue = depositAmount;
+
+        executeTradeActionWithBalanceChange(
+            actions,
+            msgValue,
+            borrowCurrencyId,
+            redeemToUnderlying,
+            setId
+        );
+
+        _eventName = "LogDepositCollateralBorrowAndWithdraw(address,bool,uint256,uint16,uint8,uint88,uint32,bool)";
+        _eventParam = abi.encode(
+            address(this),
+            useUnderlying,
+            depositAmount,
+            borrowCurrencyId,
+            marketIndex,
+            fCashAmount,
+            maxBorrowRate,
+            redeemToUnderlying
+        );
     }
 
     function withdrawLend(
@@ -399,44 +545,96 @@ abstract contract NotionalResolver is Events, Helpers {
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 maxBorrowRate,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint256 setId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
         bool useUnderlying = currencyId != ETH_CURRENCY_ID;
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](1);
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
+            1
+        );
         action[0].actionType = DepositActionType.None;
         action[0].currencyId = currencyId;
         // Withdraw borrowed amount to wallet
         action[0].withdrawEntireCashBalance = true;
-        // TODO: will redeem underlying work with ETH?
         action[0].redeemToUnderlying = useUnderlying;
 
         bytes32[] memory trades = new bytes32[](1);
         trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
         action[0].trades = trades;
 
-        address tokenAddress;
-        uint balanceBefore;
-        if (setId != 0) {
-            address tokenAddress = useUnderlying ? getUnderlyingToken(currencyId) : getAssetToken(currencyId);
-            balanceBefore = TokenInterface(tokenAddress).balanceOf(address(this));
-        }
-        notional.batchBalanceAndTradeAction(address(this), action);
+        executeTradeActionWithBalanceChange(
+            action,
+            0,
+            currencyId,
+            useUnderlying,
+            setId
+        );
 
-        if (setId != 0) {
-            setUint(setId, sub(TokenInterface(tokenAddress).balanceOf(address(this)), balanceBefore));
-        }
+        _eventName = "LogWithdrawLend(address,uint16,uint8,uint88,uint32)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            marketIndex,
+            fCashAmount,
+            maxBorrowRate
+        );
     }
 
     function repayBorrow(
         uint16 currencyId,
         uint8 marketIndex,
-        uint fCashAmount,
-        uint minLendRate,
-        uint getId,
-        uint setId
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        // might want to use getfCashAmountGivenCashAmount
+        int88 netCashToAccount,
+        uint32 minLendRate,
+        uint256 setId
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        int256 fCashAmount = notional.getfCashAmountGivenCashAmount(
+            currencyId,
+            int88(int256(netCashToAccount).neg()),
+            marketIndex,
+            block.timestamp
+        );
+
+        bool useUnderlying = currencyId != ETH_CURRENCY_ID;
+        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
+            1
+        );
+        action[0].actionType = DepositActionType.None;
+        action[0].currencyId = currencyId;
+        // Withdraw borrowed amount to wallet
+        action[0].withdrawEntireCashBalance = true;
+        action[0].redeemToUnderlying = useUnderlying;
+
+        bytes32[] memory trades = new bytes32[](1);
+        trades[0] = encodeLendTrade(
+            marketIndex,
+            uint88(fCashAmount),
+            minLendRate
+        );
+        action[0].trades = trades;
+
+        executeTradeActionWithBalanceChange(
+            action,
+            0,
+            currencyId,
+            useUnderlying,
+            setId
+        );
+
+        _eventName = "LogRepayBorrow(address,uint16,uint8,uint88,uint32)";
+        _eventParam = abi.encode(
+            address(this),
+            currencyId,
+            marketIndex,
+            netCashToAccount,
+            minLendRate
+        );
     }
 
     /**
@@ -445,11 +643,18 @@ abstract contract NotionalResolver is Events, Helpers {
      * getId or setId integration. This can be used to roll lends and borrows forward.
      * @param actions a set of BatchActionWithTrades that will be executed for this account
      */
-    function batchActionRaw(
-        BalanceActionWithTrades[] memory actions
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+    function batchActionRaw(BalanceActionWithTrades[] memory actions)
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
         notional.batchBalanceAndTradeAction(address(this), actions);
 
-        // todo: events
+        _eventName = "LogBatchActionRaw(address)";
+        _eventParam = abi.encode(address(this));
     }
+}
+
+contract ConnectV2Notional is NotionalResolver {
+    string public name = "Notional-v1.1";
 }

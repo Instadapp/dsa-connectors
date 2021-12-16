@@ -1,15 +1,19 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {Token, NotionalInterface} from "./interface.sol";
+import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import {Token, NotionalInterface, BalanceAction, BalanceActionWithTrades} from "./interface.sol";
+import {SafeInt256} from "./SafeInt256.sol";
 import {Basic} from "../../common/basic.sol";
+import {TokenInterface} from "../../common/interfaces.sol";
 
 contract Helpers is Basic {
+    using SafeMath for uint256;
+    using SafeInt256 for int256;
     uint8 internal constant LEND_TRADE = 0;
     uint8 internal constant BORROW_TRADE = 1;
     int256 internal constant INTERNAL_TOKEN_PRECISION = 1e8;
     uint256 internal constant ETH_CURRENCY_ID = 1;
-    int256 private constant _INT256_MIN = type(int256).min;
 
     NotionalInterface internal constant notional =
         NotionalInterface(0x1344A36A1B56144C3Bc62E7757377D288fDE0369);
@@ -54,7 +58,7 @@ contract Helpers is Basic {
         // end of amount and will not result in dust.
         (Token memory assetToken, ) = notional.getCurrency(currencyId);
         if (assetToken.decimals == INTERNAL_TOKEN_PRECISION) return amount;
-        return div(mul(amount, INTERNAL_TOKEN_PRECISION), assetToken.decimals);
+        return amount.mul(INTERNAL_TOKEN_PRECISION).div(assetToken.decimals);
     }
 
     function encodeLendTrade(
@@ -81,24 +85,97 @@ contract Helpers is Basic {
             (bytes32(uint256(maxBorrowRate)) << 120);
     }
 
-    function mul(int256 a, int256 b) internal pure returns (int256 c) {
-        c = a * b;
-        if (a == -1) require(b == 0 || c / b == a);
-        else require(a == 0 || c / a == b);
+    function getDepositAmountAndSetApproval(
+        uint256 getId,
+        uint16 currencyId,
+        bool useUnderlying,
+        uint256 depositAmount
+    ) internal returns (uint256) {
+        depositAmount = getUint(getId, depositAmount);
+        if (currencyId == ETH_CURRENCY_ID && useUnderlying)
+            return
+                depositAmount == uint256(-1)
+                    ? address(this).balance
+                    : depositAmount;
+
+        address tokenAddress = useUnderlying
+            ? getUnderlyingToken(currencyId)
+            : getAssetToken(currencyId);
+        if (depositAmount == uint256(-1)) {
+            depositAmount = TokenInterface(tokenAddress).balanceOf(
+                address(this)
+            );
+        }
+        approve(TokenInterface(tokenAddress), address(notional), depositAmount);
+        return depositAmount;
     }
 
-    function div(int256 a, int256 b) internal pure returns (int256 c) {
-        require(!(b == -1 && a == _INT256_MIN)); // dev: int256 div overflow
-        // NOTE: solidity will automatically revert on divide by zero
-        c = a / b;
+    function getBalance(address addr) internal returns (uint256) {
+        if (addr == ethAddr) {
+            return address(this).balance;
+        }
+
+        return TokenInterface(addr).balanceOf(address(this));
     }
 
-    function sub(int256 x, int256 y) internal pure returns (int256 z) {
-        //  taken from uniswap v3
-        require((z = x - y) <= x == (y >= 0));
+    function getAddress(uint16 currencyId, bool useUnderlying)
+        internal
+        returns (address)
+    {
+        if (currencyId == ETH_CURRENCY_ID && useUnderlying) {
+            return ethAddr;
+        }
+
+        return
+            useUnderlying
+                ? getUnderlyingToken(currencyId)
+                : getAssetToken(currencyId);
     }
 
-    //function getDepositAmountAndSetApproval(uint16 currencyId) internal;
+    function executeTradeActionWithBalanceChange(
+        BalanceActionWithTrades[] memory action,
+        uint256 msgValue,
+        uint16 currencyId,
+        bool useUnderlying,
+        uint256 setId
+    ) internal {
+        address tokenAddress;
+        uint256 balanceBefore;
+        if (setId != 0) {
+            tokenAddress = getAddress(currencyId, useUnderlying);
+            balanceBefore = getBalance(tokenAddress);
+        }
 
-    //function executeActionWithBalanceChange(uint16 currencyId) internal;
+        notional.batchBalanceAndTradeAction{value: msgValue}(
+            address(this),
+            action
+        );
+
+        if (setId != 0) {
+            uint256 balanceAfter = getBalance(tokenAddress);
+            setUint(setId, balanceAfter.sub(balanceBefore));
+        }
+    }
+
+    function executeActionWithBalanceChange(
+        BalanceAction[] memory action,
+        uint256 msgValue,
+        uint16 currencyId,
+        bool useUnderlying,
+        uint256 setId
+    ) internal {
+        address tokenAddress;
+        uint256 balanceBefore;
+        if (setId != 0) {
+            tokenAddress = getAddress(currencyId, useUnderlying);
+            balanceBefore = getBalance(tokenAddress);
+        }
+
+        notional.batchBalanceAction{value: msgValue}(address(this), action);
+
+        if (setId != 0) {
+            uint256 balanceAfter = getBalance(tokenAddress);
+            setUint(setId, balanceAfter.sub(balanceBefore));
+        }
+    }
 }
