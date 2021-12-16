@@ -202,7 +202,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 		require(data.poolId != uint256(-1), "pool-does-not-exist");
 		(uint256 lpAmount, uint256 rewardsAmount) = _getUserInfo(data);
 		_emergencyWithdraw(data);
-		_eventName = "LogEmergencyWithdraw(address,addressuint256,uint256,uint256,uint256)";
+		_eventName = "LogEmergencyWithdraw(address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			token1,
 			token2,
