@@ -213,7 +213,7 @@ contract Helpers is Basic {
 
     function getDepositCollateralBorrowAndWithdrawActions(
         uint16 depositCurrencyId,
-        bool useUnderlying,
+        DepositActionType depositAction,
         uint256 depositAmount,
         uint16 borrowCurrencyId,
         uint8 marketIndex,
@@ -221,9 +221,29 @@ contract Helpers is Basic {
         uint32 maxBorrowRate,
         bool redeemToUnderlying
     ) internal returns (BalanceActionWithTrades[] memory action) {
-        // TODO: allow minting nTokens here....
-        BalanceActionWithTrades[]
-            memory actions = new BalanceActionWithTrades[](2);
+        BalanceActionWithTrades[] memory actions;
+        bytes32[] memory trades = new bytes32[](1);
+        trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
+
+        if (depositCurrencyId == borrowCurrencyId) {
+            // In this case the account is likely borrowing against newly minted nTokens
+            // in the same currency. Technically the other deposit actions may work but
+            // there's no good reason to borrow against cToken collateral
+            actions = new BalanceActionWithTrades[](1);
+            actions[0].actionType = depositAction;
+            actions[0].currencyId = depositCurrencyId;
+            actions[0].depositActionAmount = depositAmount;
+            // Withdraw borrowed amount to wallet
+            actions[0].withdrawEntireCashBalance = true;
+            actions[0].redeemToUnderlying = redeemToUnderlying;
+            actions[0].trades = trades;
+
+            return actions;
+        }
+
+        // This is the more common case that the account is borrowing against
+        // collateral in a different currency
+        actions = new BalanceActionWithTrades[](2);
 
         uint256 depositIndex;
         uint256 borrowIndex;
@@ -236,9 +256,7 @@ contract Helpers is Basic {
             borrowIndex = 0;
         }
 
-        actions[depositIndex].actionType = useUnderlying
-            ? DepositActionType.DepositUnderlying
-            : DepositActionType.DepositAsset;
+        actions[depositIndex].actionType = depositAction;
         actions[depositIndex].currencyId = depositCurrencyId;
         actions[depositIndex].depositActionAmount = depositAmount;
 
@@ -247,12 +265,8 @@ contract Helpers is Basic {
         // Withdraw borrowed amount to wallet
         actions[borrowIndex].withdrawEntireCashBalance = true;
         actions[borrowIndex].redeemToUnderlying = redeemToUnderlying;
-
-        bytes32[] memory trades = new bytes32[](1);
-        trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
         actions[borrowIndex].trades = trades;
 
         return actions;
     }
-
 }

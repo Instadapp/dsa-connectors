@@ -455,14 +455,25 @@ abstract contract NotionalResolver is Events, Helpers {
     }
 
     /**
-     * @notice Deposits some amount of tokens as collateral and borrows
+     * @notice Deposits some amount of tokens as collateral and borrows. This can be achieved by combining multiple spells but this
+     * method is more gas efficient by only making a single call to Notional.
      * @dev Setting the fCash amount and maxBorrowRate are best calculated using the Notional SDK off chain. The amount of fCash
      * when borrowing is more forgiving compared to lending since generally accounts will over collateralize and dust amounts are
      * less likely to cause reverts. The Notional SDK will also provide calculations to tell the user what their LTV is for a given
      * borrowing action.
      * @param depositCurrencyId notional defined currency id of the collateral to deposit
-     * @param useUnderlying if true, will accept a deposit collateralin the underlying currency (i.e DAI), if false
-     * will use the asset currency (i.e. cDAI)
+     * @param depositAction one of the following values which will define how the collateral is deposited:
+     *  - None: no collateral will be deposited
+     *  - DepositAsset: deposit amount will be specified in asset tokens (i.e. cTokens)
+     *  - DepositUnderlying: deposit amount will be specified in underlying tokens (i.e. DAI)
+     *  - DepositAssetAndMintNToken: deposit amount will be converted to nTokens
+     *  - DepositUnderlyingAndMintNToken: deposit amount will be converted to nTokens
+     *
+     *  Technically these two deposit types can be used, but there is not a clear reason why they would be used in combination
+     *  with borrowing:
+     *  - RedeemNToken
+     *  - ConvertCashToNToken
+     *
      * @param depositAmount amount of cash to deposit as collateral
      * @param borrowCurrencyId id of the currency to borrow
      * @param marketIndex the market index to borrow from. This is a number from 1 to 7 which corresponds to the tenor
@@ -478,7 +489,7 @@ abstract contract NotionalResolver is Events, Helpers {
      */
     function depositCollateralBorrowAndWithdraw(
         uint16 depositCurrencyId,
-        bool useUnderlying,
+        DepositActionType depositAction,
         uint256 depositAmount,
         uint16 borrowCurrencyId,
         uint8 marketIndex,
@@ -492,7 +503,10 @@ abstract contract NotionalResolver is Events, Helpers {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        require(depositCurrencyId != borrowCurrencyId);
+        bool useUnderlying = (
+            depositAction == DepositActionType.DepositUnderlying || 
+            depositAction == DepositActionType.DepositUnderlyingAndMintNToken
+        );
 
         depositAmount = getDepositAmountAndSetApproval(
             getId,
@@ -504,7 +518,7 @@ abstract contract NotionalResolver is Events, Helpers {
         BalanceActionWithTrades[]
             memory actions = getDepositCollateralBorrowAndWithdrawActions(
                 depositCurrencyId,
-                useUnderlying,
+                depositAction,
                 depositAmount,
                 borrowCurrencyId,
                 marketIndex,
@@ -513,9 +527,10 @@ abstract contract NotionalResolver is Events, Helpers {
                 redeemToUnderlying
             );
 
+        uint256 msgValue = getMsgValue(depositCurrencyId, useUnderlying, depositAmount);
         executeTradeActionWithBalanceChange(
             actions,
-            getMsgValue(depositCurrencyId, useUnderlying, depositAmount),
+            msgValue,
             borrowCurrencyId,
             redeemToUnderlying,
             setId
