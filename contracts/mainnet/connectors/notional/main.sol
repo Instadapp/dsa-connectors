@@ -15,7 +15,9 @@ abstract contract NotionalResolver is Events, Helpers {
     using SafeInt256 for int256;
 
     /**
-     * @notice Deposit collateral into Notional
+     * @notice Deposit collateral into Notional, this should only be used for reducing risk of
+     * liquidation. Deposits into Notional are not earning fixed rates, they are earning the cToken
+     * lending rate. In order to lend at fixed rates use `depositAndLend`
      * @param currencyId notional defined currency id to deposit
      * @param useUnderlying if true, will accept a deposit in the underlying currency (i.e DAI), if false
      * will use the asset currency (i.e. cDAI)
@@ -92,14 +94,15 @@ abstract contract NotionalResolver is Events, Helpers {
         withdrawAmount = getUint(getId, withdrawAmount);
         uint88 amountInternalPrecision = withdrawAmount == uint256(-1)
             ? uint88(getCashBalance(currencyId))
-            : uint88(convertToInternal(currencyId, int256(withdrawAmount)));
+            : uint88(convertToInternal(currencyId, SafeInt256.toInt(withdrawAmount)));
 
         uint256 amountWithdrawn = notional.withdraw(
             currencyId,
             amountInternalPrecision,
             redeemToUnderlying
         );
-        // Sets the amount of tokens withdrawn to address(this)
+        // Sets the amount of tokens withdrawn to address(this), Notional returns this value
+        // in the native precision of the token that was withdrawn
         setUint(setId, amountWithdrawn);
 
         _eventName = "LogWithdrawCollateral(address,uint16,bool,uint256)";
@@ -117,7 +120,6 @@ abstract contract NotionalResolver is Events, Helpers {
      */
     function claimNOTE(uint256 setId)
         external
-        payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
         uint256 notesClaimed = notional.nTokenClaimIncentives();
@@ -145,9 +147,8 @@ abstract contract NotionalResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = uint96(getUint(getId, tokensToRedeem));
-        if (tokensToRedeem == uint96(-1))
-            tokensToRedeem = uint96(getNTokenBalance(currencyId));
+        tokensToRedeem = getNTokenRedeemAmount(currencyId, tokensToRedeem, getId);
+
         int256 _assetCashChange = notional.nTokenRedeem(
             address(this),
             currencyId,
@@ -193,9 +194,7 @@ abstract contract NotionalResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = uint96(getUint(getId, uint256(tokensToRedeem)));
-        if (tokensToRedeem == uint96(-1))
-            tokensToRedeem = uint96(getNTokenBalance(currencyId));
+        tokensToRedeem = getNTokenRedeemAmount(currencyId, tokensToRedeem, getId);
 
         BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = DepositActionType.RedeemNToken;
@@ -203,6 +202,7 @@ abstract contract NotionalResolver is Events, Helpers {
         action[0].depositActionAmount = tokensToRedeem;
         action[0].redeemToUnderlying = redeemToUnderlying;
         if (amountToWithdraw == uint256(-1)) {
+            // This setting will override the withdrawAmountInternalPrecision
             action[0].withdrawEntireCashBalance = true;
         } else {
             action[0].withdrawAmountInternalPrecision = amountToWithdraw;
@@ -234,8 +234,9 @@ abstract contract NotionalResolver is Events, Helpers {
      * @param currencyId notional defined currency id of nToken
      * @param tokensToRedeem amount of nTokens to redeem
      * @param marketIndex the market index that references where the account will lend
-     * @param fCashAmount amount of fCash to lend into the market, the corresponding amount of cash will
-     * be taken from the account after redeeming nTokens
+     * @param fCashAmount amount of fCash to lend into the market (this has the effect or repaying
+     * the borrowed cash at current market rates), the corresponding amount of cash will be taken
+     * from the account after redeeming nTokens.
      * @param minLendRate minimum rate where the user will lend, if the rate is lower will revert
      * @param getId id of amount of tokens to redeem
      */
@@ -247,9 +248,7 @@ abstract contract NotionalResolver is Events, Helpers {
         uint32 minLendRate,
         uint256 getId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = uint96(getUint(getId, tokensToRedeem));
-        if (tokensToRedeem == uint96(-1))
-            tokensToRedeem = uint96(getNTokenBalance(currencyId));
+        tokensToRedeem = getNTokenRedeemAmount(currencyId, tokensToRedeem, getId);
 
         BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
             1
@@ -282,7 +281,7 @@ abstract contract NotionalResolver is Events, Helpers {
      * @param useUnderlying if true, will accept a deposit in the underlying currency (i.e DAI), if false
      * will use the asset currency (i.e. cDAI)
      * @param getId id of depositAmount
-     * @param setId id to set the value of notional cash deposit increase (denominated in asset cash, i.e. cDAI)
+     * @param setId id to set the value of nToken balance change
      */
     function depositAndMintNToken(
         uint16 currencyId,
@@ -311,10 +310,7 @@ abstract contract NotionalResolver is Events, Helpers {
         // withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
         int256 nTokenBefore = getNTokenBalance(currencyId);
-
-        uint256 msgValue = 0;
-        if (currencyId == ETH_CURRENCY_ID && useUnderlying)
-            msgValue = depositAmount;
+        uint256 msgValue = getMsgValue(currencyId, useUnderlying, depositAmount);
 
         notional.batchBalanceAction{value: msgValue}(address(this), action);
 
@@ -337,6 +333,14 @@ abstract contract NotionalResolver is Events, Helpers {
         );
     }
 
+    /**
+     * @notice Uses existing Notional cash balance (deposits in Notional held as cTokens) and uses them to mint
+     * nTokens.
+     * @param currencyId notional defined currency id of the cash balance
+     * @param cashBalanceToMint amount of account's cash balance to convert to nTokens
+     * @param getId id of cash balance
+     * @param setId id to set the value of nToken increase
+     */
     function mintNTokenFromCash(
         uint16 currencyId,
         uint256 cashBalanceToMint,
@@ -344,7 +348,6 @@ abstract contract NotionalResolver is Events, Helpers {
         uint256 setId
     )
         external
-        payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
         cashBalanceToMint = getUint(getId, cashBalanceToMint);
@@ -379,6 +382,24 @@ abstract contract NotionalResolver is Events, Helpers {
         );
     }
 
+    /**
+     * @notice Deposits some amount of tokens and lends them in the specified market
+     * @dev Setting the fCash amount and minLendRate are best calculated using the Notional SDK off chain. They can
+     * be calculated on chain but there is a significant gas cost to doing so. If there is insufficient depositAmount for the
+     * fCashAmount specified Notional will revert. In most cases there will be some dust amount of cash left after lending and
+     * this method will withdraw that dust back to the account.
+     * @param currencyId notional defined currency id to lend
+     * @param depositAmount amount of cash to deposit to lend
+     * @param useUnderlying if true, will accept a deposit in the underlying currency (i.e DAI), if false
+     * will use the asset currency (i.e. cDAI)
+     * @param marketIndex the market index to lend to. This is a number from 1 to 7 which corresponds to the tenor
+     * of the fCash asset to lend. Tenors are described here: https://docs.notional.finance/notional-v2/quarterly-rolls/tenors
+     * @param fCashAmount amount of fCash for the account to receive, this is equal to how much the account will receive
+     * at maturity (principal plus interest).
+     * @param minLendRate the minimum interest rate that the account is willing to lend at, if set to zero the account will accept
+     * any lending rate
+     * @param getId returns the deposit amount
+     */
     function depositAndLend(
         uint16 currencyId,
         uint256 depositAmount,
@@ -415,10 +436,7 @@ abstract contract NotionalResolver is Events, Helpers {
         trades[0] = encodeLendTrade(marketIndex, fCashAmount, minLendRate);
         action[0].trades = trades;
 
-        uint256 msgValue = 0;
-        if (currencyId == ETH_CURRENCY_ID && useUnderlying)
-            msgValue = depositAmount;
-
+        uint256 msgValue = getMsgValue(currencyId, useUnderlying, depositAmount);
         notional.batchBalanceAndTradeAction{value: msgValue}(
             address(this),
             action
@@ -436,48 +454,28 @@ abstract contract NotionalResolver is Events, Helpers {
         );
     }
 
-    function getDepositCollateralBorrowAndWithdrawActions(
-        uint16 depositCurrencyId,
-        bool useUnderlying,
-        uint256 depositAmount,
-        uint16 borrowCurrencyId,
-        uint8 marketIndex,
-        uint88 fCashAmount,
-        uint32 maxBorrowRate,
-        bool redeemToUnderlying
-    ) internal returns (BalanceActionWithTrades[] memory action) {
-        BalanceActionWithTrades[]
-            memory actions = new BalanceActionWithTrades[](2);
-
-        uint256 depositIndex;
-        uint256 borrowIndex;
-        if (depositCurrencyId < borrowCurrencyId) {
-            depositIndex = 0;
-            borrowIndex = 1;
-        } else {
-            depositIndex = 1;
-            borrowIndex = 0;
-        }
-
-        actions[depositIndex].actionType = useUnderlying
-            ? DepositActionType.DepositUnderlying
-            : DepositActionType.DepositAsset;
-        actions[depositIndex].currencyId = depositCurrencyId;
-        actions[depositIndex].depositActionAmount = depositAmount;
-
-        actions[borrowIndex].actionType = DepositActionType.None;
-        actions[borrowIndex].currencyId = borrowCurrencyId;
-        // Withdraw borrowed amount to wallet
-        actions[borrowIndex].withdrawEntireCashBalance = true;
-        actions[borrowIndex].redeemToUnderlying = redeemToUnderlying;
-
-        bytes32[] memory trades = new bytes32[](1);
-        trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
-        actions[borrowIndex].trades = trades;
-
-        return actions;
-    }
-
+    /**
+     * @notice Deposits some amount of tokens as collateral and borrows
+     * @dev Setting the fCash amount and maxBorrowRate are best calculated using the Notional SDK off chain. The amount of fCash
+     * when borrowing is more forgiving compared to lending since generally accounts will over collateralize and dust amounts are
+     * less likely to cause reverts. The Notional SDK will also provide calculations to tell the user what their LTV is for a given
+     * borrowing action.
+     * @param depositCurrencyId notional defined currency id of the collateral to deposit
+     * @param useUnderlying if true, will accept a deposit collateralin the underlying currency (i.e DAI), if false
+     * will use the asset currency (i.e. cDAI)
+     * @param depositAmount amount of cash to deposit as collateral
+     * @param borrowCurrencyId id of the currency to borrow
+     * @param marketIndex the market index to borrow from. This is a number from 1 to 7 which corresponds to the tenor
+     * of the fCash asset to borrow. Tenors are described here: https://docs.notional.finance/notional-v2/quarterly-rolls/tenors
+     * @param fCashAmount amount of fCash for the account to borrow, this is equal to how much the account must pay 
+     * at maturity (principal plus interest).
+     * @param maxBorrowRate the maximum interest rate that the account is willing to borrow at, if set to zero the account will accept
+     * any borrowing rate
+     * @param redeemToUnderlying if true, redeems the borrowed balance from cTokens down to the underlying token before transferring
+     * to the account
+     * @param getId returns the collateral deposit amount
+     * @param setId sets the amount that the account borrowed (i.e. how much of borrowCurrencyId it has received)
+     */
     function depositCollateralBorrowAndWithdraw(
         uint16 depositCurrencyId,
         bool useUnderlying,
@@ -515,13 +513,9 @@ abstract contract NotionalResolver is Events, Helpers {
                 redeemToUnderlying
             );
 
-        uint256 msgValue = 0;
-        if (depositCurrencyId == ETH_CURRENCY_ID && useUnderlying)
-            msgValue = depositAmount;
-
         executeTradeActionWithBalanceChange(
             actions,
-            msgValue,
+            getMsgValue(depositCurrencyId, useUnderlying, depositAmount),
             borrowCurrencyId,
             redeemToUnderlying,
             setId
@@ -540,6 +534,19 @@ abstract contract NotionalResolver is Events, Helpers {
         );
     }
 
+    /**
+     * @notice Allows an account to withdraw from a fixed rate lend by selling the fCash back to the market. Equivalent to
+     * borrowing from the Notional perspective.
+     * @dev Setting the fCash amount and maxBorrowRate are best calculated using the Notional SDK off chain. Similar to borrowing,
+     * setting these amounts are a bit more forgiving since there is no change of reverts due to dust amounts.
+     * @param currencyId notional defined currency id of the lend asset to withdraw
+     * @param marketIndex the market index of the fCash asset. This is a number from 1 to 7 which corresponds to the tenor
+     * of the fCash asset. Tenors are described here: https://docs.notional.finance/notional-v2/quarterly-rolls/tenors
+     * @param fCashAmount amount of fCash at the marketIndex that should be sold
+     * @param maxBorrowRate the maximum interest rate that the account is willing to sell fCash at at, if set to zero the
+     * account will accept any rate
+     * @param setId sets the amount that the account has received when withdrawing its lend
+     */
     function withdrawLend(
         uint16 currencyId,
         uint8 marketIndex,
@@ -583,6 +590,19 @@ abstract contract NotionalResolver is Events, Helpers {
         );
     }
 
+    /**
+     * @notice Allows an account to repay a borrow before maturity at current market rates. Equivalent to lending from the Notional
+     * perspective.
+     * @dev Setting the fCash amount and minLendRate are best calculated using the Notional SDK off chain. Similar to lending,
+     * setting these amounts 
+     * @param currencyId notional defined currency id of the lend asset to withdraw
+     * @param marketIndex the market index of the fCash asset. This is a number from 1 to 7 which corresponds to the tenor
+     * of the fCash asset. Tenors are described here: https://docs.notional.finance/notional-v2/quarterly-rolls/tenors
+     * @param netCashToAccount amount of fCash at the marketIndex that should be sold
+     * @param minLendRate the maximum interest rate that the account is willing to repay fCash at at, if set to zero the
+     * account will accept any rate
+     * @param setId sets the amount that the account has received when withdrawing its lend
+     */
     function repayBorrow(
         uint16 currencyId,
         uint8 marketIndex,
@@ -594,8 +614,10 @@ abstract contract NotionalResolver is Events, Helpers {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        // TODO: test this a bit more, will this cause issues?
         int256 fCashAmount = notional.getfCashAmountGivenCashAmount(
             currencyId,
+            // NOTE: no chance of overflow here
             int88(int256(netCashToAccount).neg()),
             marketIndex,
             block.timestamp

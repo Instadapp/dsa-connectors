@@ -23,4 +23,9 @@ library SafeInt256 {
     function neg(int256 x) internal pure returns (int256 y) {
         return mul(-1, x);
     }
+
+    function toInt(uint256 x) internal pure returns (int256 y) {
+        require(x <= uint256(type(int256).max));
+        return int256(x);
+    }
 }
