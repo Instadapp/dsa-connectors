@@ -66,10 +66,16 @@ struct BalanceAction {
 }
 
 struct Token {
+    // Address of the token
     address tokenAddress;
+    // True if the token has a transfer fee which is used internally to determine
+    // the proper balance change
     bool hasTransferFee;
+    // Decimal precision of the token as a power of 10
     int256 decimals;
+    // Type of token, enumerated above
     TokenType tokenType;
+    // Used internally for tokens that have a collateral cap, zero if there is no cap
     uint256 maxCollateralBalance;
 }
 
