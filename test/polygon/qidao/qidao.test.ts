@@ -81,32 +81,32 @@ describe("QiDao", function() {
     it("should create a MATIC vault in QiDao and deposit MATIC into that vault", async function() {
       const amt = parseEther("5");
       const brwAmt = parseEther("1");
-      const setVaultId = "13571113";
+      const vaultID = "13571113";
       const spells = [
         {
           connector: connectorName,
           method: "createVault",
-          args: [vaults.matic.address, setVaultId],
+          args: [vaults.matic.address, vaultID],
         },
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.matic.address, vaults.matic.address, 0, amt, setVaultId, 0, 0, 0],
+          args: [tokens.matic.address, vaults.matic.address, 0, amt, vaultID, 0, 0],
         },
         {
           connector: connectorName,
           method: "borrow",
-          args: [vaults.matic.address, 0, brwAmt, setVaultId, 0, 0 , 0]
+          args: [vaults.matic.address, 0, brwAmt, vaultID, 0, 0]
         },
         {
           connector: connectorName,
           method: "payback",
-          args: [vaults.matic.address, 0, brwAmt, setVaultId, 0, 0 , 0],
+          args: [vaults.matic.address, 0, brwAmt, vaultID, 0, 0],
         },
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokens.matic.address, vaults.matic.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
+          args: [tokens.matic.address, vaults.matic.address, 0, amt.mul(995).div(1000), vaultID, 0, 0],
         },
       ];
 
@@ -125,32 +125,40 @@ describe("QiDao", function() {
     it("should create a LINK vault in QiDao and deposit LINK into that vault", async function() {
       const amt = parseEther("50");
       const brwAmt = parseEther("10");
-      const setVaultId = "13571113";
+      const VaultId = "13571113";
+
+      let linkToken = await ethers.getContractAt(
+          abis.basic.erc20,
+          tokens.link.address);
+      let linkBalanceBefore = await linkToken.balanceOf(dsaWallet0.address);
+
+      expect(linkBalanceBefore).to.eq(ethers.utils.parseEther("100"));
+
       const spells = [
         {
           connector: connectorName,
           method: "createVault",
-          args: [vaults.link.address, setVaultId],
+          args: [vaults.link.address, VaultId],
         },
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.link.address, vaults.link.address, 0, amt, setVaultId, 0, 0, 0],
+          args: [tokens.link.address, vaults.link.address, 0, amt, VaultId, 0, 0],
         },
         {
           connector: connectorName,
           method: "borrow",
-          args: [vaults.link.address, 0, brwAmt, setVaultId, 0, 0 , 0]
+          args: [vaults.link.address, 0, brwAmt, VaultId, 0, 0]
         },
         {
           connector: connectorName,
           method: "payback",
-          args: [vaults.link.address, 0, brwAmt, setVaultId, 0, 0 , 0],
+          args: [vaults.link.address, 0, brwAmt, VaultId, 0, 0],
         },
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokens.link.address, vaults.link.address, 0, amt.mul(995).div(1000), setVaultId, 0, 0, 0],
+          args: [tokens.link.address, vaults.link.address, 0, amt.mul(995).div(1000), VaultId, 0, 0],
         },
       ];
 
@@ -160,9 +168,9 @@ describe("QiDao", function() {
 
       await tx.wait();
 
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.eq(
-        parseEther("9.975")
-      );
+      let linkBalanceAfter = await linkToken.balanceOf(dsaWallet0.address);
+      expect(linkBalanceAfter).to.eq(ethers.utils.parseEther("99.75"));
+
     });
   });
 });

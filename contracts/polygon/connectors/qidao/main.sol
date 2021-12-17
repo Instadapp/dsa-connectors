@@ -56,7 +56,6 @@ abstract contract QiDaoResolver is Events, Helpers {
      * @param vaultId The NFT ID which identifies the vault to be interacted with
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getVaultId ID to retrieve vaultId.
-     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
      * @param setAmtId ID stores the amount of tokens withdrawn.
      */
@@ -99,7 +98,6 @@ abstract contract QiDaoResolver is Events, Helpers {
      * @param vaultId The NFT ID which identifies the vault to be interacted with
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getVaultId ID to retrieve vaultId.
-     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
      * @param setAmtId ID stores the amount of tokens withdrawn.
      */
@@ -143,7 +141,6 @@ abstract contract QiDaoResolver is Events, Helpers {
      * @param vaultId The NFT ID which identifies the vault to be interacted with
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getVaultId ID to retrieve vaultId.
-     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
      * @param setAmtId ID stores the amount of tokens withdrawn.
      */
@@ -184,7 +181,6 @@ abstract contract QiDaoResolver is Events, Helpers {
      * @param vaultId The NFT ID which identifies the vault to be interacted with
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getVaultId ID to retrieve vaultId.
-     * @param setVaultId ID stores the vault being interacted with.
      * @param getAmtId ID to retrieve amt.
      * @param setAmtId ID stores the amount of tokens withdrawn.
      */
