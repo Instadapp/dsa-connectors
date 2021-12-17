@@ -2,7 +2,7 @@ pragma solidity ^0.7.6;
 pragma abicoder v2;
 
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import {Token, NotionalInterface, BalanceAction, BalanceActionWithTrades} from "./interface.sol";
+import {Token, NotionalInterface, BalanceAction, BalanceActionWithTrades, DepositActionType} from "./interface.sol";
 import {SafeInt256} from "./SafeInt256.sol";
 import {Basic} from "../../common/basic.sol";
 import {TokenInterface} from "../../common/interfaces.sol";
@@ -21,7 +21,7 @@ contract Helpers is Basic {
         NotionalInterface(0x1344A36A1B56144C3Bc62E7757377D288fDE0369);
 
     /// @notice Returns the address of the underlying token for a given currency id, 
-    function getUnderlyingToken(uint16 currencyId) internal returns (address) {
+    function getUnderlyingToken(uint16 currencyId) internal view returns (address) {
         (
             /* Token memory assetToken */,
             Token memory underlyingToken
@@ -30,7 +30,7 @@ contract Helpers is Basic {
     }
 
     /// @notice Returns the address of the asset token for a given currency id
-    function getAssetToken(uint16 currencyId) internal returns (address) {
+    function getAssetToken(uint16 currencyId) internal view returns (address) {
         (
             Token memory assetToken,
             /* Token memory underlyingToken */
@@ -38,7 +38,7 @@ contract Helpers is Basic {
         return assetToken.tokenAddress;
     }
 
-    function getCashBalance(uint16 currencyId) internal returns (int256 cashBalance) {
+    function getCashBalance(uint16 currencyId) internal view returns (int256 cashBalance) {
         (
             cashBalance,
             /* int256 nTokenBalance */,
@@ -46,7 +46,7 @@ contract Helpers is Basic {
         ) = notional.getAccountBalance(currencyId, address(this));
     }
 
-    function getNTokenBalance(uint16 currencyId) internal returns (int256 nTokenBalance) {
+    function getNTokenBalance(uint16 currencyId) internal view returns (int256 nTokenBalance) {
         (
             /* int256 cashBalance */,
             nTokenBalance,
@@ -54,8 +54,27 @@ contract Helpers is Basic {
         ) = notional.getAccountBalance(currencyId, address(this));
     }
 
-    function convertToInternal(uint16 currencyId, int256 amount)
+    function getNTokenRedeemAmount(uint16 currencyId, uint96 _tokensToRedeem, uint256 getId)
         internal
+        returns (uint96 tokensToRedeem) {
+        tokensToRedeem = uint96(getUint(getId, _tokensToRedeem));
+        if (tokensToRedeem == uint96(-1)) {
+            tokensToRedeem = uint96(getNTokenBalance(currencyId));
+        }
+    }
+
+    function getMsgValue(
+        uint16 currencyId,
+        bool useUnderlying,
+        uint256 depositAmount
+    ) internal pure returns (uint256 msgValue) {
+        msgValue = (currencyId == ETH_CURRENCY_ID && useUnderlying)
+            ? depositAmount
+            : 0;
+    }
+
+    function convertToInternal(uint16 currencyId, int256 amount)
+        internal view
         returns (int256)
     {
         // If token decimals is greater than INTERNAL_TOKEN_PRECISION then this will truncate
@@ -71,7 +90,7 @@ contract Helpers is Basic {
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 minLendRate
-    ) internal returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return
             (bytes32(uint256(LEND_TRADE)) << 248) |
             (bytes32(uint256(marketIndex)) << 240) |
@@ -83,7 +102,7 @@ contract Helpers is Basic {
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 maxBorrowRate
-    ) internal returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return
             (bytes32(uint256(BORROW_TRADE)) << 248) |
             (bytes32(uint256(marketIndex)) << 240) |
@@ -120,7 +139,7 @@ contract Helpers is Basic {
         return depositAmount;
     }
 
-    function getBalance(address addr) internal returns (uint256) {
+    function getBalance(address addr) internal view returns (uint256) {
         if (addr == ethAddr) {
             return address(this).balance;
         }
@@ -130,6 +149,7 @@ contract Helpers is Basic {
 
     function getAddress(uint16 currencyId, bool useUnderlying)
         internal
+        view
         returns (address)
     {
         if (currencyId == ETH_CURRENCY_ID && useUnderlying) {
@@ -190,4 +210,49 @@ contract Helpers is Basic {
             setUint(setId, balanceAfter.sub(balanceBefore));
         }
     }
+
+    function getDepositCollateralBorrowAndWithdrawActions(
+        uint16 depositCurrencyId,
+        bool useUnderlying,
+        uint256 depositAmount,
+        uint16 borrowCurrencyId,
+        uint8 marketIndex,
+        uint88 fCashAmount,
+        uint32 maxBorrowRate,
+        bool redeemToUnderlying
+    ) internal returns (BalanceActionWithTrades[] memory action) {
+        // TODO: allow minting nTokens here....
+        BalanceActionWithTrades[]
+            memory actions = new BalanceActionWithTrades[](2);
+
+        uint256 depositIndex;
+        uint256 borrowIndex;
+        // Notional requires the batch actions to be ordered by currency id
+        if (depositCurrencyId < borrowCurrencyId) {
+            depositIndex = 0;
+            borrowIndex = 1;
+        } else {
+            depositIndex = 1;
+            borrowIndex = 0;
+        }
+
+        actions[depositIndex].actionType = useUnderlying
+            ? DepositActionType.DepositUnderlying
+            : DepositActionType.DepositAsset;
+        actions[depositIndex].currencyId = depositCurrencyId;
+        actions[depositIndex].depositActionAmount = depositAmount;
+
+        actions[borrowIndex].actionType = DepositActionType.None;
+        actions[borrowIndex].currencyId = borrowCurrencyId;
+        // Withdraw borrowed amount to wallet
+        actions[borrowIndex].withdrawEntireCashBalance = true;
+        actions[borrowIndex].redeemToUnderlying = redeemToUnderlying;
+
+        bytes32[] memory trades = new bytes32[](1);
+        trades[0] = encodeBorrowTrade(marketIndex, fCashAmount, maxBorrowRate);
+        actions[borrowIndex].trades = trades;
+
+        return actions;
+    }
+
 }
