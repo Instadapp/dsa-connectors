@@ -383,7 +383,8 @@ abstract contract NotionalResolver is Events, Helpers {
     }
 
     /**
-     * @notice Deposits some amount of tokens and lends them in the specified market
+     * @notice Deposits some amount of tokens and lends them in the specified market. This method can also be used to repay a
+     * borrow early by specifying the corresponding market index of an existing borrow.
      * @dev Setting the fCash amount and minLendRate are best calculated using the Notional SDK off chain. They can
      * be calculated on chain but there is a significant gas cost to doing so. If there is insufficient depositAmount for the
      * fCashAmount specified Notional will revert. In most cases there will be some dust amount of cash left after lending and
@@ -602,75 +603,6 @@ abstract contract NotionalResolver is Events, Helpers {
             marketIndex,
             fCashAmount,
             maxBorrowRate
-        );
-    }
-
-    /**
-     * @notice Allows an account to repay a borrow before maturity at current market rates. Equivalent to lending from the Notional
-     * perspective.
-     * @dev Setting the fCash amount and minLendRate are best calculated using the Notional SDK off chain. Similar to lending,
-     * setting these amounts 
-     * @param currencyId notional defined currency id of the lend asset to withdraw
-     * @param marketIndex the market index of the fCash asset. This is a number from 1 to 7 which corresponds to the tenor
-     * of the fCash asset. Tenors are described here: https://docs.notional.finance/notional-v2/quarterly-rolls/tenors
-     * @param netCashToAccount amount of fCash at the marketIndex that should be sold
-     * @param minLendRate the maximum interest rate that the account is willing to repay fCash at at, if set to zero the
-     * account will accept any rate
-     * @param setId sets the amount that the account has received when withdrawing its lend
-     */
-    function repayBorrow(
-        uint16 currencyId,
-        uint8 marketIndex,
-        int88 netCashToAccount,
-        uint32 minLendRate,
-        uint256 setId
-    )
-        external
-        payable
-        returns (string memory _eventName, bytes memory _eventParam)
-    {
-        // TODO: test this a bit more, will this cause issues?
-        int256 fCashAmount = notional.getfCashAmountGivenCashAmount(
-            currencyId,
-            // NOTE: no chance of overflow here
-            int88(int256(netCashToAccount).neg()),
-            marketIndex,
-            block.timestamp
-        );
-
-        bool useUnderlying = currencyId != ETH_CURRENCY_ID;
-        BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
-            1
-        );
-        action[0].actionType = DepositActionType.None;
-        action[0].currencyId = currencyId;
-        // Withdraw borrowed amount to wallet
-        action[0].withdrawEntireCashBalance = true;
-        action[0].redeemToUnderlying = useUnderlying;
-
-        bytes32[] memory trades = new bytes32[](1);
-        trades[0] = encodeLendTrade(
-            marketIndex,
-            uint88(fCashAmount),
-            minLendRate
-        );
-        action[0].trades = trades;
-
-        executeTradeActionWithBalanceChange(
-            action,
-            0,
-            currencyId,
-            useUnderlying,
-            setId
-        );
-
-        _eventName = "LogRepayBorrow(address,uint16,uint8,uint88,uint32)";
-        _eventParam = abi.encode(
-            address(this),
-            currencyId,
-            marketIndex,
-            netCashToAccount,
-            minLendRate
         );
     }
 

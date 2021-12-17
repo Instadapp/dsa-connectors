@@ -94,13 +94,6 @@ interface NotionalInterface {
             uint256 lastClaimTime
         );
 
-    function getfCashAmountGivenCashAmount(
-        uint16 currencyId,
-        int88 netCashToAccount,
-        uint256 marketIndex,
-        uint256 blockTime
-    ) external view returns (int256);
-
     function depositUnderlyingToken(
         address account,
         uint16 currencyId,
