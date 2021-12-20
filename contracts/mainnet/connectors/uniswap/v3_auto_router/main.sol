@@ -19,7 +19,6 @@ abstract contract UniswapResolver is Helpers, Events {
         address tokenIn,
         address tokenOut,
         address recipient,
-        uint256 deadline,
         uint24 fee,
         uint256 amountIn,
         uint256 amountOutMinimum
