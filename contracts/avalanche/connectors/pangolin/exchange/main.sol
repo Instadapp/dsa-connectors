@@ -16,7 +16,7 @@ abstract contract PangolinResolver is Helpers, Events {
      * @param tokenA The address of token A.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param tokenB The address of token B.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amtA The amount of A tokens to deposit.
-     * @param unitAmt The unit amount of of amtB/amtA with slippage.
+     * @param unitAmt The unit amount of amtB/amtA with slippage.
      * @param slippage Slippage amount.
      * @param getId ID to retrieve amtA.
      * @param setId ID stores the amount of pools tokens received.

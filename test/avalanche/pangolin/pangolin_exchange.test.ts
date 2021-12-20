@@ -1,17 +1,16 @@
 import { expect } from "chai";
 import hre from "hardhat";
 
-const { web3, deployments, waffle, ethers } = hre;
-const { provider, deployContract } = waffle;
+const { waffle, ethers } = hre;
+const { provider } = waffle;
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
-import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 import { addresses } from "../../../scripts/tests/avalanche/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import type { Signer, Contract } from "ethers";
+import { Signer, Contract } from "ethers";
 
 import { ConnectV2PngAvalanche__factory } from "../../../typechain";
 
@@ -22,13 +21,13 @@ const PNG_AVAX_LP_ADDRESS = "0xd7538cABBf8605BdE1f4901B47B8D42c61DE0367";
 describe("Pangolin DEX - Avalanche", function () {
     const pangolinConnectorName = "PANGOLIN-TEST-A"
     
-    let dsaWallet0: any;
-    let masterSigner: any;
-    let instaConnectorsV2: any;
-    let pangolinConnector: any;
+    let dsaWallet0: Contract;
+    let masterSigner: Signer;
+    let instaConnectorsV2: Contract;
+    let pangolinConnector: Contract;
     
     const wallets = provider.getWallets()
-    const [wallet0, wallet1, wallet2, wallet3] = wallets
+    const [wallet0, wallet1] = wallets
     before(async () => {
         await hre.network.provider.request({
             method: "hardhat_reset",
@@ -61,12 +60,12 @@ describe("Pangolin DEX - Avalanche", function () {
     it("Should have contracts deployed.", async function () {
         expect(!!instaConnectorsV2.address).to.be.true;
         expect(!!pangolinConnector.address).to.be.true;
-        expect(!!masterSigner.address).to.be.true;
+        expect(!!(await masterSigner.getAddress())).to.be.true;
       });
     
     describe("DSA wallet setup", function () {
         it("Should build DSA v2", async function () {
-            dsaWallet0 = await buildDSAv2(wallet0.address)
+            dsaWallet0 = await buildDSAv2(wallet0.getAddress())
             expect(!!dsaWallet0.address).to.be.true;
         });
 
