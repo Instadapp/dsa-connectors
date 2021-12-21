@@ -71,16 +71,16 @@ abstract contract Helpers is DSMath, Basic {
         uint24 fee,
         int24 initialTick
     ) internal returns (address pool) {
-        (tokenA, tokenB) =  sortTokenAddress(tokenA, tokenB);
-
-        (TokenInterface _token0, TokenInterface _token1) = changeMaticAddress(
+        (TokenInterface token0Contract_, TokenInterface token1Contract_) = changeMaticAddress(
             tokenA,
             tokenB
         );
+        
+        (address token0_, address token1_) =  sortTokenAddress(address(token0Contract_), address(token1Contract_));
 
         return nftManager.createAndInitializePoolIfNecessary(
-            address(_token0),
-            address(_token1),
+            token0_,
+            token1_,
             fee,
             TickMath.getSqrtRatioAtTick(initialTick)
         );
