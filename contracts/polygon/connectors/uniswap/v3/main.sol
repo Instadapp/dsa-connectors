@@ -11,6 +11,31 @@ import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
+
+    function createAndInitializePool (
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        int24 initialTick
+    ) { 
+
+        address pool = _createAndInitializePoolIfNecessary(
+            tokenA,
+            tokenB,
+            fee,
+            initialTick
+        );
+
+        _eventName = "LogcreateAndInitializePool(address,address,address,uint24,int24)";
+        _eventParam = abi.encode(
+            tokenA,
+            tokenB,
+            pool,
+            fee,
+            initialTick
+        );
+    }
+
     /**
      * @dev Mint New Position
      * @notice Mint New NFT LP Position

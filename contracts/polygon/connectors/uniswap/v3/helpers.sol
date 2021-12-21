@@ -1,9 +1,9 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {TokenInterface} from "../../../common/interfaces.sol";
-import {DSMath} from "../../../common/math.sol";
-import {Basic} from "../../../common/basic.sol";
+import { TokenInterface}  from "../../../common/interfaces.sol";
+import { DSMath } from "../../../common/math.sol";
+import { Basic } from "../../../common/basic.sol";
 import "./interface.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
@@ -63,6 +63,27 @@ abstract contract Helpers is DSMath, Basic {
         } else {
             (token0, token1) = (_token0, _token1);
         }
+    }
+
+    function _createAndInitializePoolIfNecessary (
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        int24 initialTick
+    ) internal returns (address pool) {
+        (tokenA, tokenB) =  sortTokenAddress(tokenA, tokenB);
+
+        (TokenInterface _token0, TokenInterface _token1) = changeMaticAddress(
+            tokenA,
+            tokenB
+        );
+
+        return nftManager.createAndInitializePoolIfNecessary(
+            address(_token0),
+            address(_tokenA),
+            fee,
+            TickMath.getSqrtRatioAtTick(initialTick)
+        );
     }
 
     /**
