@@ -80,7 +80,7 @@ abstract contract Helpers is DSMath, Basic {
 
         return nftManager.createAndInitializePoolIfNecessary(
             address(_token0),
-            address(_tokenA),
+            address(_token1),
             fee,
             TickMath.getSqrtRatioAtTick(initialTick)
         );

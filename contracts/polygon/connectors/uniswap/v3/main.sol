@@ -17,7 +17,11 @@ abstract contract UniswapResolver is Helpers, Events {
         address tokenB,
         uint24 fee,
         int24 initialTick
-    ) { 
+    ) 
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    { 
 
         address pool = _createAndInitializePoolIfNecessary(
             tokenA,
