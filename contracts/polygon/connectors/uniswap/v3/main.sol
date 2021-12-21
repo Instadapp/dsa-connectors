@@ -12,6 +12,14 @@ import {Events} from "./events.sol";
 
 abstract contract UniswapResolver is Helpers, Events {
 
+    /**
+     * @dev Create and Initialize pool
+     * @notice Create and Initialize new pool if required
+     * @param tokenA tokenA addreess
+     * @param tokenB tokenB addreess
+     * @param fee fee percentage
+     * @param initialTick Initial tick for the pool
+     */
     function createAndInitializePool (
         address tokenA,
         address tokenB,
