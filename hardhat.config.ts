@@ -39,15 +39,22 @@ const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
 
+const networkGasPriceConfig: Record<string, string> = {
+  "mainnet": "160",
+  "polygon": "50",
+  "avalanche": "50",
+  "arbitrum": "2"
+}
+
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+    gasPrice: utils.parseUnits(networkGasPriceConfig[network], "gwei").toNumber(),
   };
 }
 
 function getNetworkUrl(networkType: string) {
-  //console.log(process.env);
   if (networkType === "avalanche")
     return "https://api.avax.network/ext/bc/C/rpc";
   else if (networkType === "polygon")
@@ -112,7 +119,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   etherscan: {
-    apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
+    apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",
