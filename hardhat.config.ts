@@ -43,6 +43,7 @@ function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+    gasPrice:100000000000
   };
 }
 
@@ -112,7 +113,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   etherscan: {
-    apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
+    apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",
