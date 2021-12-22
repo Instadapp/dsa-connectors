@@ -87,22 +87,6 @@ describe("Lixir", function() {
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH & wBTC into DSA wallet", async function() {
-      await wallet0.sendTransaction({
-        to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10"),
-      });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseEther("10")
-      );
-
-      await addLiquidity(
-        "wbtc",
-        dsaWallet0.address,
-        ethers.utils.parseEther("100000")
-      );
-    });
-
     it("Deposit ETH & USDC into DSA wallet", async function() {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
@@ -115,268 +99,103 @@ describe("Lixir", function() {
       await addLiquidity(
         "usdc",
         dsaWallet0.address,
-        ethers.utils.parseEther("100000")
+        1000000 * 10**6 // USDC has 6 decimals
       );
     });
-
-    it("Should deposit USDC into DSA wallet", async function () {
-      await dsaDepositUSDC(100);
-      expect(await USDCContract.balanceOf(dsa.address)).to.be.gte(onep.mul(100));
-    });
-
-    // it("Deposit LUSD into DSA wallet", async function () {
-    //   await hre.network.provider.request({
-    //     method: "hardhat_impersonateAccount",
-    //     params: [LUSD_WHALE],
-    //   });
-
-    //   const signer = await hre.ethers.provider.getSigner(LUSD_WHALE);
-    //   await lusd.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseEther("100000"))
-
-    //   expect(await lusd.balanceOf(dsaWallet0.address)).to.equal(ethers.utils.parseEther("100000"));
-    // });
   });
 
-  // describe("Main", function() {
-  //   it("Should mint successfully", async function() {
-  //     const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
-  //     const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
-  //     const usdtAmount = Number(ethers.utils.parseEther("400")) / Math.pow(10, 12); // 1 ETH
-  //     const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+  describe("Main", function() {
+    it("Should deposit successfully", async function() {
+      const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
+      const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
 
-  //     const getIds = ["0", "0"];
-  //     const setId = "0";
+      const getIds = ["0", "0"];
+      const setId = "0";
 
-  //     const spells = [
-  //       {
-  //         connector: connectorName,
-  //         method: "mint",
-  //         args: [
-  //           ethAddress,
-  //           DAI_ADDR,
-  //           FeeAmount.MEDIUM,
-  //           getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //           getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //           ethAmount,
-  //           daiAmount,
-  //           "500000000000000000",
-  //           getIds,
-  //           setId,
-  //         ],
-  //       },
-  //       {
-  //         connector: connectorName,
-  //         method: "mint",
-  //         args: [
-  //           DAI_ADDR,
-  //           USDT_ADDR,
-  //           FeeAmount.MEDIUM,
-  //           getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //           getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //           daiAmount,
-  //           usdtAmount,
-  //           "300000000000000000",
-  //           getIds,
-  //           setId,
-  //         ],
-  //       },
-  //       {
-  //         connector: connectorName,
-  //         method: "mint",
-  //         args: [
-  //           ethAddress,
-  //           USDT_ADDR,
-  //           FeeAmount.MEDIUM,
-  //           getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //           getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //           ethAmount,
-  //           usdtAmount,
-  //           "300000000000000000",
-  //           getIds,
-  //           setId,
-  //         ],
-  //       },
-  //     ];
+      const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: [
+            tokenIds[0],
+            daiAmount,
+            ethAmount,
+            "500000000000000000",
+            getIds,
+            setId,
+          ],
+        },
+      ];
 
-  //     const tx = await dsaWallet0
-  //       .connect(wallet0)
-  //       .cast(...encodeSpells(spells), wallet1.address);
-  //     let receipt = await tx.wait();
-  //     let castEvent = new Promise((resolve, reject) => {
-  //       dsaWallet0.on(
-  //         "LogCast",
-  //         (
-  //           origin: any,
-  //           sender: any,
-  //           value: any,
-  //           targetNames: any,
-  //           targets: any,
-  //           eventNames: any,
-  //           eventParams: any,
-  //           event: any
-  //         ) => {
-  //           const params = abiCoder.decode(
-  //             ["uint256", "uint256", "uint256", "uint256", "int24", "int24"],
-  //             eventParams[0]
-  //           );
-  //           const params1 = abiCoder.decode(
-  //             ["uint256", "uint256", "uint256", "uint256", "int24", "int24"],
-  //             eventParams[2]
-  //           );
-  //           tokenIds.push(params[0]);
-  //           tokenIds.push(params1[0]);
-  //           liquidities.push(params[1]);
-  //           event.removeListener();
+      const tx = await dsaWallet0
+        .connect(wallet0)
+        .cast(...encodeSpells(spells), wallet1.address);
+      const receipt = await tx.wait();
 
-  //           resolve({
-  //             eventNames,
-  //           });
-  //         }
-  //       );
+      let castEvent = new Promise((resolve, reject) => {
+        dsaWallet0.on(
+          "LogCast",
+          (
+            origin: any,
+            sender: any,
+            value: any,
+            targetNames: any,
+            targets: any,
+            eventNames: any,
+            eventParams: any,
+            event: any
+          ) => {
+            const params = abiCoder.decode(
+              ["uint256", "uint256", "uint256", "uint256"],
+              eventParams[0]
+            );
+            liquidities[0] = liquidities[0].add(params[1]);
+            event.removeListener();
 
-  //       setTimeout(() => {
-  //         reject(new Error("timeout"));
-  //       }, 60000);
-  //     });
+            resolve({
+              eventNames,
+            });
+          }
+        );
 
-  //     let event = await castEvent;
+        setTimeout(() => {
+          reject(new Error("timeout"));
+        }, 60000);
+      });
 
-  //     const data = await nftManager.positions(tokenIds[0]);
+      let event = await castEvent;
 
-  //     expect(data.liquidity).to.be.equals(liquidities[0]);
-  //   }).timeout(10000000000);
+      const data = await nftManager.positions(tokenIds[0]);
+      expect(data.liquidity).to.be.equals(liquidities[0]);
+    });
 
-  //   it("Should deposit successfully", async function() {
-  //     const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
-  //     const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
+    it("Should withdraw successfully", async function() {
+      const getId = "0";
+      const setIds = ["0", "0"];
 
-  //     const getIds = ["0", "0"];
-  //     const setId = "0";
+      const data = await nftManager.positions(tokenIds[0]);
+      let data1 = await nftManager.positions(tokenIds[1]);
 
-  //     const spells = [
-  //       {
-  //         connector: connectorName,
-  //         method: "deposit",
-  //         args: [
-  //           tokenIds[0],
-  //           daiAmount,
-  //           ethAmount,
-  //           "500000000000000000",
-  //           getIds,
-  //           setId,
-  //         ],
-  //       },
-  //     ];
+      const spells = [
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [tokenIds[0], data.liquidity, 0, 0, getId, setIds],
+        },
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [0, data1.liquidity, 0, 0, getId, setIds],
+        },
+      ];
 
-  //     const tx = await dsaWallet0
-  //       .connect(wallet0)
-  //       .cast(...encodeSpells(spells), wallet1.address);
-  //     const receipt = await tx.wait();
+      const tx = await dsaWallet0
+        .connect(wallet0)
+        .cast(...encodeSpells(spells), wallet1.address);
+      const receipt = await tx.wait();
 
-  //     let castEvent = new Promise((resolve, reject) => {
-  //       dsaWallet0.on(
-  //         "LogCast",
-  //         (
-  //           origin: any,
-  //           sender: any,
-  //           value: any,
-  //           targetNames: any,
-  //           targets: any,
-  //           eventNames: any,
-  //           eventParams: any,
-  //           event: any
-  //         ) => {
-  //           const params = abiCoder.decode(
-  //             ["uint256", "uint256", "uint256", "uint256"],
-  //             eventParams[0]
-  //           );
-  //           liquidities[0] = liquidities[0].add(params[1]);
-  //           event.removeListener();
-
-  //           resolve({
-  //             eventNames,
-  //           });
-  //         }
-  //       );
-
-  //       setTimeout(() => {
-  //         reject(new Error("timeout"));
-  //       }, 60000);
-  //     });
-
-  //     let event = await castEvent;
-
-  //     const data = await nftManager.positions(tokenIds[0]);
-  //     expect(data.liquidity).to.be.equals(liquidities[0]);
-  //   });
-
-  //   it("Should withdraw successfully", async function() {
-  //     const getId = "0";
-  //     const setIds = ["0", "0"];
-
-  //     const data = await nftManager.positions(tokenIds[0]);
-  //     let data1 = await nftManager.positions(tokenIds[1]);
-
-  //     const spells = [
-  //       {
-  //         connector: connectorName,
-  //         method: "withdraw",
-  //         args: [tokenIds[0], data.liquidity, 0, 0, getId, setIds],
-  //       },
-  //       {
-  //         connector: connectorName,
-  //         method: "withdraw",
-  //         args: [0, data1.liquidity, 0, 0, getId, setIds],
-  //       },
-  //     ];
-
-  //     const tx = await dsaWallet0
-  //       .connect(wallet0)
-  //       .cast(...encodeSpells(spells), wallet1.address);
-  //     const receipt = await tx.wait();
-
-  //     data1 = await nftManager.positions(tokenIds[1]);
-  //     expect(data1.liquidity.toNumber()).to.be.equals(0);
-  //   });
-
-  //   it("Should collect successfully", async function() {
-  //     const ethAmount = ethers.utils.parseEther("0.2"); // 1 ETH
-  //     const daiAmount = ethers.utils.parseEther("800"); // 1 ETH
-  //     const getIds = ["0", "0"];
-  //     const setIds = ["0", "0"];
-
-  //     const spells = [
-  //       {
-  //         connector: connectorName,
-  //         method: "collect",
-  //         args: [tokenIds[0], daiAmount, ethAmount, getIds, setIds],
-  //       },
-  //     ];
-
-  //     const tx = await dsaWallet0
-  //       .connect(wallet0)
-  //       .cast(...encodeSpells(spells), wallet1.address);
-  //     const receipt = await tx.wait();
-  //   });
-
-  //   it("Should burn successfully", async function() {
-  //     const spells = [
-  //       {
-  //         connector: connectorName,
-  //         method: "burn",
-  //         args: [tokenIds[0]],
-  //       },
-  //     ];
-
-  //     const tx = await dsaWallet0
-  //       .connect(wallet0)
-  //       .cast(...encodeSpells(spells), wallet1.address);
-  //     const receipt = await tx.wait();
-  //   });
-  // });
+      data1 = await nftManager.positions(tokenIds[1]);
+      expect(data1.liquidity.toNumber()).to.be.equals(0);
+    });
+  });
 });
-
-const getMinTick = (tickSpacing: number) =>
-  Math.ceil(-887272 / tickSpacing) * tickSpacing;
-const getMaxTick = (tickSpacing: number) =>
-  Math.floor(887272 / tickSpacing) * tickSpacing;
