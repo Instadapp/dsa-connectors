@@ -43,7 +43,6 @@ function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    gasPrice:100000000000
   };
 }
 
