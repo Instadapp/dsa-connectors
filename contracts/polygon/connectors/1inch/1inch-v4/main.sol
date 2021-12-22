@@ -110,6 +110,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInchPolygon is OneInch {
+contract ConnectV2OneInchV4Polygon is OneInch {
     string public name = "1Inch-v4-v1";
 }
