@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title 1Inch.
+ * @title 1InchV3.
  * @dev On-chain DEX Aggregator.
  */
 
@@ -123,6 +123,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInchArbitrum is OneInch {
+contract ConnectV2OneInchV3Arbitrum is OneInch {
     string public name = "1Inch-v1.0";
 }
