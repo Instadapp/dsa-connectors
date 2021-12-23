@@ -16,6 +16,6 @@ contract Events {
         uint256 indexed recipient,
         uint256 shares,
         uint256 amount0Out,
-        uint256 amount1Out,
+        uint256 amount1Out
     );
 }

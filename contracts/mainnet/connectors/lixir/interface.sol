@@ -208,7 +208,7 @@ interface ILixirFactory { // is LixirBase // don't think we need this
     address token0,
     address token1,
     uint256 index
-  ) public view returns (address);
+  ) external view returns (address);
 
   function vaultsLengthForPair(address token0, address token1)
     external

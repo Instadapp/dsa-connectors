@@ -14,16 +14,18 @@ abstract contract LixirResolver is Helpers, Events {
     /**
      * @dev Add liqudity to the vault
      * @notice Mint Lixir Vault Tokens
-     * @param token0 token0 address
-     * @param token1 token1 address
-     * @param amount0 amount of tokenA
-     * @param amount1 amount of tokenB
+     * @param vault vault address
+     * @param amount0Desired amount of tokenA
+     * @param amount1Desired amount of tokenB
+     * @param amount0Min amount of tokenA
+     * @param amount1Min amount of tokenB
+     * @param recipient recipient of the Lixir Vault Tokens
+     * @param deadline unix timestamp
      * @param getIds ID to retrieve amtA
      * @param setId ID stores the amount of LP token
      */
-    function desosit(
-        address token0,
-        address token1,
+    function deposit(
+        address vault,
         uint256 amount0Desired,
         uint256 amount1Desired,
         uint256 amount0Min,
@@ -37,10 +39,39 @@ abstract contract LixirResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        // grab the correct vault from the factory
-
-        // check if one of these is ETH, you have to use depositETH, not deposit
-        
+        uint256 shares;
+        uint256 amount0In;
+        uint256 amount1In;
+    
+        if (msg.value > 0) {
+            (
+                shares,
+                amount0In,
+                amount1In
+            ) =  (0, 0, 0);
+            // _depositETH(
+            //     vaultAddress,
+            //     amountDesired,
+            //     amountEthMin,
+            //     amountMin,
+            //     recipient,
+            //     deadline
+            // );
+        } else {
+            (
+                shares,
+                amount0In,
+                amount1In
+            ) = _deposit(
+                vault,
+                amount0Desired,
+                amount1Desired,
+                amount0Min,
+                amount1Min,
+                recipient,
+                deadline
+            );
+        }
         // MintParams memory params;
         // {
         //     params = MintParams(
@@ -64,11 +95,14 @@ abstract contract LixirResolver is Helpers, Events {
         //     uint256 amountB
         // ) = _mint(params);
 
-        // setUint(setId, liquidity);
+        setUint(setId, shares);
 
-        _eventName = "LogDeposit(uint256,uint256,uint256,uint256,int24,int24)";
+        _eventName = "LogDeposit(address,uint256,uint256,uint256)";
         _eventParam = abi.encode(
-            vault
+            vault,
+            shares,
+            amount0In,
+            amount1In
         );
     }
 
@@ -80,6 +114,7 @@ abstract contract LixirResolver is Helpers, Events {
      * @param shares the amount of Lixir Vault Tokens to remove
      * @param amount0Min Min amount of token0.
      * @param amount1Min Min amount of token1.
+     * @param deadline unix timestamp
      * @param getId ID to retrieve LP token amounts
      * @param setIds stores the amount of output tokens
      */
