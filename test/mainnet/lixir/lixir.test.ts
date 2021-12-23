@@ -106,8 +106,8 @@ describe("Lixir", function() {
 
   describe("Main", function() {
     it("Should deposit successfully", async function() {
-      const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
-      const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
+      const usdcAmount = ethers.utils.parseEther("4000"); // 1 ETH
+      const ethAmount = ethers.utils.parseEther("1"); // 1 ETH
 
       const getIds = ["0", "0"];
       const setId = "0";
@@ -116,9 +116,9 @@ describe("Lixir", function() {
         {
           connector: connectorName,
           method: "deposit",
-          args: [
+          args: [ // get these right
             tokenIds[0],
-            daiAmount,
+            usdcAmount,
             ethAmount,
             "500000000000000000",
             getIds,
