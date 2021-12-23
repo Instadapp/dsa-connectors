@@ -2,13 +2,10 @@ pragma solidity ^0.7.0;
 
 contract Events {
     event LogDeposit(
-        address indexed depositor,
-        address indexed recipient,
+        address indexed vault,
         uint256 shares,
         uint256 amount0In,
-        uint256 amount1In,
-        uint256 total0,
-        uint256 total1
+        uint256 amount1In
     );
 
     event LogWithdraw(

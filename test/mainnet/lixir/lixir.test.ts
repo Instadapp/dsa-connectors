@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import hre from "hardhat";
-const { waffle, ethers } = hre;
+const { waffle, ethers, network } = hre;
 const { provider, deployContract } = waffle;
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
@@ -12,7 +12,7 @@ import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import type { Signer, Contract } from "ethers";
 
-import { ConnectV2Lixir__factory } from "../../../typechain";
+import { ConnectV2Lixir__factory, ILixirVault__factory } from "../../../typechain";
 
 const FeeAmount = {
   LOW: 500,
@@ -26,8 +26,7 @@ const TICK_SPACINGS: Record<number, number> = {
   10000: 200,
 };
 
-const USDT_ADDR = "0xdac17f958d2ee523a2206206994597c13d831ec7";
-const DAI_ADDR = "0x6b175474e89094c44da98b954eedeac495271d0f";
+const USDC_WETH_VAULT = "0x453A9f40a24DbE3CdB4edC988aF9bfE0F5602b15"
 
 let tokenIds: any[] = [];
 let liquidities: any[] = [];
@@ -40,12 +39,14 @@ describe("Lixir", function() {
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
   let connector: Contract;
-  let nftManager: Contract;
+  let vault: Contract;
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
   before(async () => {
-    await hre.network.provider.request({
+    await network.provider.send("evm_setAutomine", [false]);
+    await network.provider.send("evm_setIntervalMining", [3000]);
+    await network.provider.request({
       method: "hardhat_reset",
       params: [
         {
@@ -62,10 +63,12 @@ describe("Lixir", function() {
       abis.core.connectorsV2,
       addresses.core.connectorsV2
     );
-    // nftManager = await ethers.getContractAt(
-    //   abi,
-    //   "0xC36442b4a4522E871399CD717aBDD847Ab11FE88"
-    // );
+
+    vault = await ethers.getContractAt(
+      ILixirVault__factory.abi,
+      USDC_WETH_VAULT
+    );
+
     connector = await deployAndEnableConnector({
       connectorName,
       contractArtifact: ConnectV2Lixir__factory,
@@ -106,7 +109,7 @@ describe("Lixir", function() {
 
   describe("Main", function() {
     it("Should deposit successfully", async function() {
-      const usdcAmount = ethers.utils.parseEther("4000"); // 1 ETH
+      const usdcAmount = ethers.BigNumber.from(10**6).mul(4000); // ~1 ETH
       const ethAmount = ethers.utils.parseEther("1"); // 1 ETH
 
       const getIds = ["0", "0"];
@@ -117,10 +120,13 @@ describe("Lixir", function() {
           connector: connectorName,
           method: "deposit",
           args: [ // get these right
-            tokenIds[0],
+            USDC_WETH_VAULT,
             usdcAmount,
             ethAmount,
-            "500000000000000000",
+            usdcAmount.sub(1000), // adding some slippage
+            ethAmount.sub(1000), // adding some slippage
+            dsaWallet0.address,
+            1740297687, // high deadline
             getIds,
             setId,
           ],
@@ -132,70 +138,46 @@ describe("Lixir", function() {
         .cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
 
-      let castEvent = new Promise((resolve, reject) => {
-        dsaWallet0.on(
-          "LogCast",
-          (
-            origin: any,
-            sender: any,
-            value: any,
-            targetNames: any,
-            targets: any,
-            eventNames: any,
-            eventParams: any,
-            event: any
-          ) => {
-            const params = abiCoder.decode(
-              ["uint256", "uint256", "uint256", "uint256"],
-              eventParams[0]
-            );
-            liquidities[0] = liquidities[0].add(params[1]);
-            event.removeListener();
-
-            resolve({
-              eventNames,
-            });
-          }
-        );
-
-        setTimeout(() => {
-          reject(new Error("timeout"));
-        }, 60000);
-      });
-
-      let event = await castEvent;
-
-      const data = await nftManager.positions(tokenIds[0]);
-      expect(data.liquidity).to.be.equals(liquidities[0]);
+      console.log(dsaWallet0)
+      console.log(dsaWallet0.address)
+      console.log(await masterSigner.provider?.getCode(USDC_WETH_VAULT))
+      // idk why but any vault.function() calls are broken rn
+      const meme = await vault.token0();
+      
+      console.log(meme);
+      // console.log(await vault.balanceOf(wallet1.address));
+      // const dsaLvtBalance = await vault.balanceOf(dsaWallet0.address);
+      // console.log(dsaLvtBalance);
+      // expect(dsaLvtBalance).gte(0);
     });
 
-    it("Should withdraw successfully", async function() {
-      const getId = "0";
-      const setIds = ["0", "0"];
+    // it("Should withdraw successfully", async function() {
+    //   const getId = "0";
+    //   const setIds = ["0", "0"];
 
-      const data = await nftManager.positions(tokenIds[0]);
-      let data1 = await nftManager.positions(tokenIds[1]);
+    //   const data = await nftManager.positions(tokenIds[0]);
+    //   let data1 = await nftManager.positions(tokenIds[1]);
 
-      const spells = [
-        {
-          connector: connectorName,
-          method: "withdraw",
-          args: [tokenIds[0], data.liquidity, 0, 0, getId, setIds],
-        },
-        {
-          connector: connectorName,
-          method: "withdraw",
-          args: [0, data1.liquidity, 0, 0, getId, setIds],
-        },
-      ];
+    //   const spells = [
+    //     {
+    //       connector: connectorName,
+    //       method: "withdraw",
+    //       args: [tokenIds[0], data.liquidity, 0, 0, getId, setIds],
+    //     },
+    //     {
+    //       connector: connectorName,
+    //       method: "withdraw",
+    //       args: [0, data1.liquidity, 0, 0, getId, setIds],
+    //     },
+    //   ];
 
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
-      const receipt = await tx.wait();
+    //   const tx = await dsaWallet0
+    //     .connect(wallet0)
+    //     .cast(...encodeSpells(spells), wallet1.address);
+    //   const receipt = await tx.wait();
 
-      data1 = await nftManager.positions(tokenIds[1]);
-      expect(data1.liquidity.toNumber()).to.be.equals(0);
-    });
+    //   data1 = await nftManager.positions(tokenIds[1]);
+    //   expect(data1.liquidity.toNumber()).to.be.equals(0);
+    // });
   });
 });
