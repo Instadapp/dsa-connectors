@@ -14,17 +14,22 @@ abstract contract LixirResolver is Helpers, Events {
     /**
      * @dev Add liqudity to the vault
      * @notice Mint Lixir Vault Tokens
-     * @param vault vault address
+     * @param token0 token0 address
+     * @param token1 token1 address
      * @param amount0 amount of tokenA
      * @param amount1 amount of tokenB
      * @param getIds ID to retrieve amtA
      * @param setId ID stores the amount of LP token
      */
     function desosit(
-        address vault,
-        uint256 amount0,
-        uint256 amount1,
-        // split amount0/1 into amount0/1Desired and amount0/1Min?
+        address token0,
+        address token1,
+        uint256 amount0Desired,
+        uint256 amount1Desired,
+        uint256 amount0Min,
+        uint256 amount1Min,  
+        address recipient,
+        uint256 deadline,      
         uint256[] calldata getIds,
         uint256 setId
     )
@@ -32,7 +37,10 @@ abstract contract LixirResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
+        // grab the correct vault from the factory
 
+        // check if one of these is ETH, you have to use depositETH, not deposit
+        
         // MintParams memory params;
         // {
         //     params = MintParams(
@@ -67,18 +75,22 @@ abstract contract LixirResolver is Helpers, Events {
     /**
      * @dev Decrease Liquidity
      * @notice Withdraw Liquidity from Lixir Vault
-     * @param vault Lixir Vault address
-     * @param liquidity LP Token amount.
-     * @param amountAMin Min amount of tokenA.
-     * @param amountBMin Min amount of tokenB.
+     * @param vault Lixir vault address
+     * @param withdrawer the DSA account
+     * @param shares the amount of Lixir Vault Tokens to remove
+     * @param amount0Min Min amount of token0.
+     * @param amount1Min Min amount of token1.
      * @param getId ID to retrieve LP token amounts
      * @param setIds stores the amount of output tokens
      */
     function withdraw(
         address vault,
-        uint256 liquidity,
-        uint256 amountAMin,
-        uint256 amountBMin,
+        address withdrawer,
+        uint256 shares,
+        uint256 amount0Min,
+        uint256 amount1Min,
+        address recipient,
+        uint256 deadline,
         uint256 getId,
         uint256[] calldata setIds
     )
