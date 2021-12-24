@@ -1,6 +1,14 @@
 pragma solidity ^0.7.0;
 
 contract Events {
+    event LogcreateAndInitializePool (
+        address tokenA,
+        address tokenB,
+        address pool,
+        uint24 fee,
+        int24 initialTick
+    );
+
     event LogMint(
         uint256 indexed tokenId,
         uint256 liquidity,

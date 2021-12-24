@@ -39,6 +39,13 @@ const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
 
+const networkGasPriceConfig: Record<string, string> = {
+  "mainnet": "160",
+  "polygon": "50",
+  "avalanche": "50",
+  "arbitrum": "2"
+}
+
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
@@ -47,7 +54,6 @@ function createConfig(network: string) {
 }
 
 function getNetworkUrl(networkType: string) {
-  //console.log(process.env);
   if (networkType === "avalanche")
     return "https://api.avax.network/ext/bc/C/rpc";
   else if (networkType === "polygon")
