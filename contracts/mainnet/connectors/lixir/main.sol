@@ -6,9 +6,9 @@ pragma abicoder v2;
  * @dev Automated Liquidity Concentrator.
  */
 
-import {TokenInterface} from "../../common/interfaces.sol";
-import {Helpers} from "./helpers.sol";
-import {Events} from "./events.sol";
+import { TokenInterface } from "../../common/interfaces.sol";
+import { Helpers } from "./helpers.sol";
+import { Events } from "./events.sol";
 
 abstract contract LixirResolver is Helpers, Events {
     /**
@@ -80,8 +80,7 @@ abstract contract LixirResolver is Helpers, Events {
      * @param setIds stores the amount of output tokens
      */
     function withdraw(
-        address payable vault,
-        address withdrawer,
+        address vault,
         uint256 shares,
         uint256 amount0Min,
         uint256 amount1Min,
@@ -94,21 +93,22 @@ abstract contract LixirResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        // if (tokenId == 0) tokenId = _getLastNftId(address(this));
-        // uint128 _liquidity = uint128(getUint(getId, liquidity));
+        address vault = address(getUint(getId, uint256(vault)));
 
-        // (uint256 _amtA, uint256 _amtB) = _decreaseLiquidity(
-        //     tokenId,
-        //     _liquidity,
-        //     amountAMin,
-        //     amountBMin
-        // );
+        (uint256 amount0Out, uint256 amount1Out) = _withdraw(
+            vault,
+            shares,
+            amount0Min,
+            amount1Min,
+            recipient,
+            deadline
+        );
 
-        // setUint(setIds[0], _amtA);
-        // setUint(setIds[1], _amtB);
+        setUint(setIds[0], amount0Out);
+        setUint(setIds[1], amount1Out);
 
-        _eventName = "LogWithdraw(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(vault);
+        _eventName = "LogWithdraw(address,uint256,uint256)";
+        _eventParam = abi.encode(vault, amount0Out, amount1Out);
     }
 }
 

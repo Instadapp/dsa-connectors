@@ -202,17 +202,3 @@ interface ILixirVaultETH is ILixirVault {
 
   receive() external payable;
 }
-
-interface ILixirFactory { // is LixirBase // don't think we need this
-  function vault(
-    address token0,
-    address token1,
-    uint256 index
-  ) external view returns (address);
-
-  function vaultsLengthForPair(address token0, address token1)
-    external
-    view
-    returns (uint256);
-}
-

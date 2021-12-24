@@ -9,9 +9,7 @@ contract Events {
     );
 
     event LogWithdraw(
-        uint256 indexed withdrawer,
-        uint256 indexed recipient,
-        uint256 shares,
+        address indexed vault,
         uint256 amount0Out,
         uint256 amount1Out
     );
