@@ -71,7 +71,6 @@ abstract contract LixirResolver is Helpers, Events {
      * @dev Decrease Liquidity
      * @notice Withdraw Liquidity from Lixir Vault
      * @param vault Lixir vault address
-     * @param withdrawer the DSA account
      * @param shares the amount of Lixir Vault Tokens to remove
      * @param amount0Min Min amount of token0.
      * @param amount1Min Min amount of token1.
@@ -93,7 +92,7 @@ abstract contract LixirResolver is Helpers, Events {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        address vault = address(getUint(getId, uint256(vault)));
+        address vault = address(getUint(getId, uint256(vault))); // unsure of this...
 
         (uint256 amount0Out, uint256 amount1Out) = _withdraw(
             vault,

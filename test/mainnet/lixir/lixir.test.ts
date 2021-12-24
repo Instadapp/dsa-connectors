@@ -14,22 +14,8 @@ import type { Signer, Contract } from "ethers";
 
 import { ConnectV2Lixir__factory, ILixirVault__factory } from "../../../typechain";
 
-const FeeAmount = {
-  LOW: 500,
-  MEDIUM: 3000,
-  HIGH: 10000,
-};
-
-const TICK_SPACINGS: Record<number, number> = {
-  500: 10,
-  3000: 60,
-  10000: 200,
-};
-
 const USDC_WETH_VAULT = "0x453A9f40a24DbE3CdB4edC988aF9bfE0F5602b15"
 
-let tokenIds: any[] = [];
-let liquidities: any[] = [];
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe("Lixir", function() {
@@ -53,7 +39,7 @@ describe("Lixir", function() {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 13005785,
+            blockNumber: 13298611,
           },
         },
       ],
@@ -120,11 +106,11 @@ describe("Lixir", function() {
           connector: connectorName,
           method: "deposit",
           args: [ // get these right
-            USDC_WETH_VAULT,
+            vault.address,
             usdcAmount,
             ethAmount,
-            usdcAmount.sub(1000), // adding some slippage
-            ethAmount.sub(1000), // adding some slippage
+            0, // any slippage lol
+            0, // any slippage lol
             dsaWallet0.address,
             1740297687, // high deadline
             getIds,
@@ -138,14 +124,9 @@ describe("Lixir", function() {
         .cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
 
-      console.log(dsaWallet0)
-      console.log(dsaWallet0.address)
-      console.log(await masterSigner.provider?.getCode(USDC_WETH_VAULT))
-      // idk why but any vault.function() calls are broken rn
-      const meme = await vault.token0();
-      
-      console.log(meme);
-      // console.log(await vault.balanceOf(wallet1.address));
+
+      console.log(await vault.balanceOf(wallet1.address));
+      // console.log(await vault.balanceOf(dsaWallet0.address));
       // const dsaLvtBalance = await vault.balanceOf(dsaWallet0.address);
       // console.log(dsaLvtBalance);
       // expect(dsaLvtBalance).gte(0);
