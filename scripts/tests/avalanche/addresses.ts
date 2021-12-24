@@ -6,6 +6,10 @@ export const addresses: Record<string, any> = {
   },
   core: {
     connectorsV2: "0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14",
+<<<<<<< HEAD
     instaIndex: "	0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25",
+=======
+    instaIndex: "0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25",
+>>>>>>> 7dcd5072bc40856e46d14a8c58daea372a8b049b
   },
 };
