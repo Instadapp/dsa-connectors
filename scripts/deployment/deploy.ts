@@ -5,7 +5,7 @@ async function main() {
   const accounts = await ethers.getSigners();
 
   const connectMapping: Record<string, string> = {
-       "1INCH-A": "ConnectV2OneInch",
+    "1INCH-A": "ConnectV2OneInch",
     "1INCH-B": "ConnectV2OneProto",
     "AAVE-V1-A": "ConnectV2AaveV1",
     "AAVE-V2-A": "ConnectV2AaveV2",
@@ -18,9 +18,10 @@ async function main() {
     "GELATO-A": "ConnectV2Gelato",
     "MAKERDAO-A": "ConnectV2Maker",
     "UNISWAP-A": "ConnectV2UniswapV2",
-    "QUICKSWAP-A": "ConnectV2QuickswapPolygon"
+    "QUICKSWAP-A": "ConnectV2QuickswapPolygon",
     "UniswapV3-v1" : "ConnectV2UniswapV3Polygon", 
-    "Uniswap-V3-Staker-v1.1" : "ConnectV2UniswapV3StakerPolygon"
+    "Uniswap-V3-Staker-v1.1" : "ConnectV2UniswapV3StakerPolygon",
+    "1INCH-V4" : "ConnectV2OneInchV4Polygon",
   };
 
   const addressMapping: Record<string, string> = {};
