@@ -34,14 +34,13 @@ abstract contract Helpers is DSMath, Basic {
                 shares,
                 amount0In,
                 amount1In
-            ) = (0, 0, 0);
-            // ) = vault.depositETH(
-            //     amountDesired,
-            //     amountEthMin,
-            //     amountMin,
-            //     recipient,
-            //     deadline
-            // );
+            ) = vault.depositETH(
+                uint8(vault.WETH_TOKEN()) == 1 ? amount0Desired : amount1Desired,
+                uint8(vault.WETH_TOKEN()) == 1 ? amount0Min : amount1Min,
+                uint8(vault.WETH_TOKEN()) == 1 ? amount1Min : amount0Min,
+                recipient,
+                deadline
+            );
         } else {
             ILixirVault vault = ILixirVault(vaultAddress);
             (
