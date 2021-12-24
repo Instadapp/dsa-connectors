@@ -25,7 +25,7 @@ abstract contract LixirResolver is Helpers, Events {
      * @param setId ID stores the amount of LP token
      */
     function deposit(
-        address vault,
+        address payable vault,
         uint256 amount0Desired,
         uint256 amount1Desired,
         uint256 amount0Min,
@@ -38,62 +38,23 @@ abstract contract LixirResolver is Helpers, Events {
         external
         payable
         returns (string memory _eventName, bytes memory _eventParam)
-    {
-        uint256 shares;
-        uint256 amount0In;
-        uint256 amount1In;
+    {   
+        amount0Desired = getUint(getIds[0], amount0Desired);
+        amount1Desired = getUint(getIds[1], amount1Desired);
     
-        if (msg.value > 0) {
-            (
-                shares,
-                amount0In,
-                amount1In
-            ) =  (0, 0, 0);
-            // _depositETH(
-            //     vaultAddress,
-            //     amountDesired,
-            //     amountEthMin,
-            //     amountMin,
-            //     recipient,
-            //     deadline
-            // );
-        } else {
-            (
-                shares,
-                amount0In,
-                amount1In
-            ) = _deposit(
-                vault,
-                amount0Desired,
-                amount1Desired,
-                amount0Min,
-                amount1Min,
-                recipient,
-                deadline
-            );
-        }
-        // MintParams memory params;
-        // {
-        //     params = MintParams(
-        //         tokenA,
-        //         tokenB,
-        //         fee,
-        //         tickLower,
-        //         tickUpper,
-        //         amtA,
-        //         amtB,
-        //         slippage
-        //     );
-        // }
-        // params.amtA = getUint(getIds[0], params.amtA);
-        // params.amtB = getUint(getIds[1], params.amtB);
-
-        // (
-        //     uint256 _tokenId,
-        //     uint256 liquidity,
-        //     uint256 amountA,
-        //     uint256 amountB
-        // ) = _mint(params);
+        (
+            uint256 shares,
+            uint256 amount0In,
+            uint256 amount1In
+        ) = _deposit(
+            vault,
+            amount0Desired,
+            amount1Desired,
+            amount0Min,
+            amount1Min,
+            recipient,
+            deadline
+        );
 
         setUint(setId, shares);
 
@@ -119,7 +80,7 @@ abstract contract LixirResolver is Helpers, Events {
      * @param setIds stores the amount of output tokens
      */
     function withdraw(
-        address vault,
+        address payable vault,
         address withdrawer,
         uint256 shares,
         uint256 amount0Min,
