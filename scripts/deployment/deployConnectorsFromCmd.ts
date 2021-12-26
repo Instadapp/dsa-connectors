@@ -3,6 +3,8 @@ import inquirer from "inquirer";
 import { connectors, connectMapping } from "./connectors";
 import { join } from "path";
 
+let start: number, end: number;
+
 async function deployRunner() {
   const { chain } = await inquirer.prompt([
     {
@@ -23,7 +25,7 @@ async function deployRunner() {
   ]);
 
   connector = connectMapping[connector];
-
+  start = Date.now();
   await execScript({
     cmd: "npx",
     args: ["hardhat", "run", "scripts/deployment/deploy.ts"],
@@ -32,6 +34,7 @@ async function deployRunner() {
       networkType: chain,
     },
   });
+  end = Date.now();
 }
 
 // let args = process.argv;
@@ -138,7 +141,9 @@ async function deployRunner() {
 
 deployRunner()
   .then(() => {
-    console.log("Done successfully");
+    console.log(
+      `Done successfully, total time taken: ${(end - start) / 1000} sec`
+    );
     process.exit(0);
   })
   .catch((err) => {
