@@ -7,9 +7,9 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
-import { addresses } from "../../../scripts/tests/polygon/addresses";
+import { addresses } from "../../../scripts/tests/avalanche/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import {ConnectV2ZeroExPolygon__factory } from "../../../typechain";
+import {ConnectV2ZeroExAvalanche__factory } from "../../../typechain";
 import er20abi from "../../../scripts/constant/abi/basics/erc20.json";
 import type { Signer, Contract } from "ethers";
 
@@ -43,7 +43,7 @@ describe("ZeroEx", function() {
     );
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2ZeroExPolygon__factory,
+      contractArtifact: ConnectV2ZeroExAvalanche__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
@@ -90,18 +90,18 @@ describe("ZeroEx", function() {
           .times(new BigNumber(10).pow(sellTokenDecimals))
           .toFixed(0);
 
-        let url = `https://polygon.api.0x.org/swap/v1/quote`;
+        let url = `https://avalanche.api.0x.org/swap/v1/quote`;
 
         const params = {
           buyToken: "DAI",
-          sellToken: "MATIC",
+          sellToken: "AVAX",
           sellAmount: "1000000000000000000", // Always denominated in wei
         };
-
         const response = await axios
           .get(url, { params: params })
           .then((data: any) => data);
-
+          
+console.log(response);
         buyTokenAmount = response.data.buyAmount;
         const calldata = response.data.data;
 

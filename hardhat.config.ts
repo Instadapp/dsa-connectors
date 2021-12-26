@@ -99,6 +99,7 @@ const config: HardhatUserConfig = {
       forking: {
         url: String(getNetworkUrl(String(process.env.networkType))),
       },
+      gasPrice: 25000000000,
     },
     mainnet: createConfig("mainnet"),
     polygon: createConfig("polygon"),
@@ -112,7 +113,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   etherscan: {
-    apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
+    apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",

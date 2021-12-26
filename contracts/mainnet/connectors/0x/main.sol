@@ -8,7 +8,7 @@ pragma experimental ABIEncoderV2;
 
 import {TokenInterface, MemoryInterface} from "../../common/interfaces.sol";
 import {Stores} from "../../common/stores.sol";
-import {ZeroExData, zeroExInterface} from "./interface.sol";
+import {ZeroExData} from "./interface.sol";
 import {Helpers} from "./helpers.sol";
 import {Events} from "./events.sol";
 

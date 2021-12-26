@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 import {TokenInterface} from "../../common/interfaces.sol";
 import {DSMath} from "../../common/math.sol";
 import {Basic} from "../../common/basic.sol";
-import {ZeroExData, zeroExInterface} from "./interface.sol";
+import {ZeroExData} from "./interface.sol";
 
 contract Helpers is DSMath, Basic {
     /**
@@ -50,12 +50,9 @@ contract Helpers is DSMath, Basic {
         if (address(_sellAddr) == avaxAddr) {
             avaxAmt = zeroExData._sellAmt;
         } else {
-            address transformWallet = address(
-                zeroExInterface(zeroExAddr).getTransformWallet()
-            );
             approve(
                 TokenInterface(_sellAddr),
-                transformWallet,
+                zeroExAddr,
                 zeroExData._sellAmt
             );
         }
