@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
@@ -198,10 +199,12 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 		if (data.poolId == uint256(-1) || data.version == 0) {
 			data = _getPoolId(token1, token2);
 		}
-		setUint(setId, data.poolId);
+		uint256 currentBal = _balance(token1, token2);
 		require(data.poolId != uint256(-1), "pool-does-not-exist");
 		(uint256 lpAmount, uint256 rewardsAmount) = _getUserInfo(data);
 		_emergencyWithdraw(data);
+		uint256 finalBal = _balance(token1, token2);
+		setUint(setId, uint256(currentBal - finalBal));
 		_eventName = "LogEmergencyWithdraw(address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			token1,

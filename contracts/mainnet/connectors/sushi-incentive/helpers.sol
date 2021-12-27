@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
@@ -99,5 +98,9 @@ contract Helpers is DSMath, Basic {
 				data.poolId,
 				address(this)
 			);
+	}
+
+	function _balance(address token1, address token2) internal view returns (uint balance) {
+		balance = IERC20(token1).balanceOf(address(this)) + IERC20(token2).balanceOf(address(this));
 	}
 }
