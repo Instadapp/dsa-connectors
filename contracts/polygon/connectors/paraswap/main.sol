@@ -50,6 +50,6 @@ abstract contract ParaswapResolver is Helpers {
     }
 }
 
-contract ConnectV2Paraswap is ParaswapResolver {
+contract ConnectV2ParaswapV5Polygon is ParaswapResolver {
     string public name = "Paraswap-v1";
 }
