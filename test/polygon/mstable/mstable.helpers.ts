@@ -14,6 +14,10 @@ interface TokenData {
 
 const getToken = (tokenSymbol: string): TokenData => {
   switch (tokenSymbol) {
+    case "MTA":
+      return {
+        tokenAddress: "0xf501dd45a1198c2e1b5aef5314a68b9006d842e0"
+      };
     case "mUSD":
       return {
         tokenAddress: "0xe840b73e5287865eec17d250bfb1536704b43b21",
