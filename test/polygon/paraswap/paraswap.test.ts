@@ -11,13 +11,15 @@ import {
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import BigNumber from "bignumber.js";
 import axios from "axios";
+// import { Signer } from "ethers";
 const { waffle, ethers } = hre;
 const { provider, deployContract } = waffle;
+import type { Signer, Contract } from "ethers";
 describe("Paraswap", function() {
   const connectorName = "paraswap-test";
   let dsaWallet0: any;
-  let masterSigner: any;
-  let instaConnectorsV2: any;
+  let masterSigner: Signer;
+  let instaConnectorsV2: Contract;
   let connector: any;
   const wallets = provider.getWallets();
   const [wallet0, wallet1] = wallets;
@@ -29,7 +31,6 @@ describe("Paraswap", function() {
                 forking: {
                     // @ts-ignore
                     jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-                    
                 },
             },
         ],
@@ -50,7 +51,7 @@ describe("Paraswap", function() {
   it("Should have contracts deployed.", async function() {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
-    expect(!!masterSigner.address).to.be.true;
+    expect(!!masterSigner.getAddress()).to.be.true;
   });
   describe("DSA wallet setup", function() {
     it("Should build DSA v2", async function() {
@@ -93,9 +94,9 @@ describe("Paraswap", function() {
           network: 137,
         };
 
-        const priceRoute = await axios
-          .get(url, { params: params })
-          .then((data) => data.data.priceRoute);
+        const priceRoute = (await axios
+          .get(url, { params: params })).data.priceRoute
+    
 
         let buyTokenAmount = priceRoute.destAmount;
         let minAmount = new BigNumber(priceRoute.destAmount)
@@ -113,10 +114,8 @@ describe("Paraswap", function() {
           userAddress: fromAddress,
         };
         let url2 = "https://apiv5.paraswap.io/transactions/137?ignoreChecks=true";
-        const calldata = await axios
-          .post(url2, txConfig)
-          .then((data) => data.data.data);
-        // console.log(calldata);
+         const calldata = (await axios
+          .post(url2, txConfig)).data.data
 
         function caculateUnitAmt(
           buyAmount: any,
