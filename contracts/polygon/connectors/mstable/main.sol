@@ -22,6 +22,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @notice Deposits token supported by mStable to Save
 	 * @param _token Address of token to deposit
 	 * @param _amount Amount of token to deposit
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
 	function deposit(address _token, uint256 _amount)
@@ -37,6 +39,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @param _token Address of token to deposit
 	 * @param _amount Amount of token to deposit
 	 * @param _minOut Minimum amount of token to mint
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
 	function depositViaMint(
@@ -67,6 +71,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @param _amount Amount of token to deposit
 	 * @param _minOut Minimum amount of token to mint
 	 * @param _path Feeder Pool address for _token
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
 	function depositViaSwap(
@@ -96,6 +102,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @dev Withdraw from Save to mUSD
 	 * @notice Withdraws from Save Vault to mUSD
 	 * @param _credits Credits to withdraw
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 	function withdraw(uint256 _credits)
 		external
@@ -113,6 +121,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @param _token bAsset to withdraw to
 	 * @param _credits Credits to withdraw
 	 * @param _minOut Minimum amount of token to mint
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
 	function withdrawViaRedeem(
@@ -144,6 +154,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @param _credits Credits to withdraw
 	 * @param _minOut Minimum amount of token to mint
 	 * @param _path Feeder Pool address for _token
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
 	function withdrawViaSwap(
@@ -176,10 +188,41 @@ abstract contract mStableResolver is Events, Helpers {
 	/**
 	 * @dev Claims Rewards
 	 * @notice Claims accrued rewards from the Vault
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
-	function claimRewards() external {
+	function claimRewards()
+		external
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		(address rewardToken, address platformToken) = _getRewardTokens();
+		(uint256 rewardAmount, uint256 platformAmount) = _getRewardInternalBal(
+			rewardToken,
+			platformToken
+		);
+
 		IStakingRewardsWithPlatformToken(imUsdVault).claimReward();
+
+		(
+			uint256 rewardAmountUpdated,
+			uint256 platformAmountUpdated
+		) = _getRewardInternalBal(rewardToken, platformToken);
+
+		uint256 claimedRewardToken = sub(rewardAmountUpdated, rewardAmount);
+
+		uint256 claimedPlatformToken = sub(
+			platformAmountUpdated,
+			platformAmount
+		);
+
+		_eventName = "LogClaimRewards()";
+		_eventParam = abi.encode(
+			rewardToken,
+			claimedRewardToken,
+			platformToken,
+			claimedPlatformToken
+		);
 	}
 
 	/***************************************
@@ -192,6 +235,8 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @param _token Address of token to deposit
 	 * @param _amount Amount of token to deposit
 	 * @param _path Path to mint mUSD (only needed for Feeder Pool)
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
 	 */
 
 	function _deposit(
@@ -218,6 +263,7 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @dev Withdraws from Save
 	 * @notice Withdraws token supported by mStable from Save
 	 * @param _credits Credits to withdraw
+	 * @return amountWithdrawn Amount withdrawn in mUSD
 	 */
 
 	function _withdraw(uint256 _credits)
@@ -233,6 +279,41 @@ abstract contract mStableResolver is Events, Helpers {
 		amountWithdrawn = ISavingsContractV2(imUsdToken).redeemCredits(
 			_credits
 		);
+	}
+
+	/**
+	 * @dev Returns the reward tokens
+	 * @notice Gets the reward tokens from the vault contract
+	 * @return rewardToken Address of reward token
+	 * @return platformToken Address of platform token
+	 */
+
+	function _getRewardTokens()
+		internal
+		returns (address rewardToken, address platformToken)
+	{
+		rewardToken = IStakingRewardsWithPlatformToken(imUsdVault)
+			.getRewardToken();
+		platformToken = IStakingRewardsWithPlatformToken(imUsdVault)
+			.getPlatformToken();
+	}
+
+	/**
+	 * @dev Returns the internal balances of the rewardToken and platformToken
+	 * @notice Gets current balances of rewardToken and platformToken, used for calculating rewards accrued
+	 * @param _rewardToken Address of reward token
+	 * @param _platformToken Address of platform token
+	 * @return a Amount of reward token
+	 * @return b Amount of platform token
+	 */
+
+	function _getRewardInternalBal(address _rewardToken, address _platformToken)
+		internal
+		view
+		returns (uint256 a, uint256 b)
+	{
+		a = TokenInterface(_rewardToken).balanceOf(address(this));
+		b = TokenInterface(_platformToken).balanceOf(address(this));
 	}
 
 	/**

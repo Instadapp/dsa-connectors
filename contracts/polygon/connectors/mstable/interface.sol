@@ -151,6 +151,10 @@ interface IStakingRewardsWithPlatformToken {
 	 * rewards token, and not the platform rewards
 	 */
 	function claimRewardOnly() external;
+
+	function getRewardToken() external returns (address token);
+
+	function getPlatformToken() external returns (address token);
 }
 
 abstract contract IFeederPool {
