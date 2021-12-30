@@ -1,20 +1,18 @@
 import { expect } from "chai";
 import hre from "hardhat";
-const { web3, deployments, waffle, ethers } = hre;
-const { provider, deployContract } = waffle;
+const { waffle, ethers } = hre;
+const { provider } = waffle;
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
-import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 
 import { addresses } from "../../../scripts/tests/polygon/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { tokens } from "../../../scripts/tests/polygon/tokens";
-import type { Signer, Contract, BigNumber } from "ethers";
+import type { Signer, Contract } from "ethers";
 
-import { ConnectV2mStable__factory, IERC20Minimal__factory, IERC20Minimal } from "../../../typechain";
+import { ConnectV2PmStable__factory, IERC20Minimal__factory, IERC20Minimal } from "../../../typechain";
 
 import { executeAndAssertDeposit, executeAndAssertSwap, executeAndAssertWithdraw } from "./mstable.utils";
 
@@ -26,7 +24,6 @@ import {
   calcMinOut,
   ONE_DAY,
   increaseTime,
-  DEFAULT_DECIMALS,
   connectorName,
   toEther
 } from "./mstable.helpers";
@@ -70,7 +67,7 @@ describe("MStable", async () => {
       instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
       connector = await deployAndEnableConnector({
         connectorName,
-        contractArtifact: ConnectV2mStable__factory,
+        contractArtifact: ConnectV2PmStable__factory,
         signer: masterSigner,
         connectors: instaConnectorsV2
       });
