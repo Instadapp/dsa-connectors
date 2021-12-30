@@ -16,7 +16,15 @@ import type { Signer, Contract, BigNumber } from "ethers";
 
 import { ConnectV2mStable__factory, IERC20Minimal__factory, IERC20Minimal } from "../../../typechain";
 
-import { fundWallet, getToken, simpleToExactAmount, DEAD_ADDRESS, calcMinOut } from "./mstable.helpers";
+import {
+  fundWallet,
+  getToken,
+  simpleToExactAmount,
+  DEAD_ADDRESS,
+  calcMinOut,
+  ONE_DAY,
+  increaseTime
+} from "./mstable.helpers";
 
 describe("MStable", async () => {
   const connectorName = "MStable";
@@ -278,13 +286,14 @@ describe("MStable", async () => {
         const mtaBalanceBefore = await mtaToken.balanceOf(dsaWallet0.address);
         console.log("MTA balance before: ", toEther(mtaBalanceBefore));
 
-        // Wait a day and let the rewards accumulate
-        await provider.send("evm_increaseTime", [600]);
+        // Wait a bit and let the rewards accumulate
+        await increaseTime(ONE_DAY);
 
         const spells = [
           {
             connector: connectorName,
-            method: "claimRewards"
+            method: "claimRewards",
+            args: []
           }
         ];
 

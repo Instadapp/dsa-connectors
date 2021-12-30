@@ -2,9 +2,20 @@ import hre, { ethers } from "hardhat";
 import { IERC20Minimal__factory } from "../../../typechain";
 import { BigNumber as BN } from "ethers";
 
-const DEAD_ADDRESS = "0x0000000000000000000000000000000000000001";
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-const DEFAULT_DECIMALS = 18;
+export const DEAD_ADDRESS = "0x0000000000000000000000000000000000000001";
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+export const DEFAULT_DECIMALS = 18;
+
+export const ZERO = BN.from(0);
+export const ONE_MIN = BN.from(60);
+export const TEN_MINS = BN.from(60 * 10);
+export const ONE_HOUR = BN.from(60 * 60);
+export const ONE_DAY = BN.from(60 * 60 * 24);
+export const FIVE_DAYS = BN.from(60 * 60 * 24 * 5);
+export const TEN_DAYS = BN.from(60 * 60 * 24 * 10);
+export const ONE_WEEK = BN.from(60 * 60 * 24 * 7);
+export const ONE_YEAR = BN.from(60 * 60 * 24 * 365);
 
 interface TokenData {
   tokenAddress: string;
@@ -12,7 +23,7 @@ interface TokenData {
   feederPool?: string;
 }
 
-const getToken = (tokenSymbol: string): TokenData => {
+export const getToken = (tokenSymbol: string): TokenData => {
   switch (tokenSymbol) {
     case "MTA":
       return {
@@ -51,7 +62,7 @@ const getToken = (tokenSymbol: string): TokenData => {
   }
 };
 
-const sendToken = async (token: string, amount: any, from: string, to: string): Promise<any> => {
+export const sendToken = async (token: string, amount: any, from: string, to: string): Promise<any> => {
   await hre.network.provider.request({
     method: "hardhat_impersonateAccount",
     params: [from]
@@ -67,20 +78,18 @@ const sendToken = async (token: string, amount: any, from: string, to: string): 
   return await IERC20Minimal__factory.connect(token, sender).transfer(to, amount);
 };
 
-const fundWallet = async (token: string, amount: any, to: string) => {
+export const fundWallet = async (token: string, amount: any, to: string) => {
   const { tokenAddress, tokenWhaleAddress } = getToken(token);
   await sendToken(tokenAddress, amount, tokenWhaleAddress!, to);
 };
 
-const calcMinOut = (amount: BN, slippage: number): BN => {
+export const calcMinOut = (amount: BN, slippage: number): BN => {
   const value = simpleToExactAmount(1 - slippage);
   const minOut = amount.mul(value).div(ethers.BigNumber.from(10).pow(DEFAULT_DECIMALS));
   return minOut;
 };
 
-const simpleToExactAmount = (amount: number | string | BN, decimals: number | BN = DEFAULT_DECIMALS): BN => {
-  // Code is largely lifted from the guts of web3 toWei here:
-  // https://github.com/ethjs/ethjs-unit/blob/master/src/index.js
+export const simpleToExactAmount = (amount: number | string | BN, decimals: number | BN = DEFAULT_DECIMALS): BN => {
   let amountString = amount.toString();
   const decimalsBN = BN.from(decimals);
 
@@ -134,4 +143,9 @@ const simpleToExactAmount = (amount: number | string | BN, decimals: number | BN
   return result;
 };
 
-export { fundWallet, getToken, simpleToExactAmount, DEAD_ADDRESS, ZERO_ADDRESS, calcMinOut };
+export const advanceBlock = async (): Promise<void> => ethers.provider.send("evm_mine", []);
+
+export const increaseTime = async (length: BN | number): Promise<void> => {
+  await ethers.provider.send("evm_increaseTime", [BN.from(length).toNumber()]);
+  await advanceBlock();
+};
