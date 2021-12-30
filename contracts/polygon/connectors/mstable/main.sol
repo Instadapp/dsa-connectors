@@ -10,9 +10,7 @@ import { Events } from "./events.sol";
 import { IMasset, ISavingsContractV2, IStakingRewardsWithPlatformToken, IFeederPool } from "./interface.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 
-import "hardhat/console.sol";
-
-abstract contract mStableResolver is Events, Helpers {
+abstract contract PmStableResolver is Events, Helpers {
 	//
 	/***************************************
                     CORE
@@ -415,6 +413,6 @@ abstract contract mStableResolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2mStable is mStableResolver {
+contract ConnectV2PmStable is PmStableResolver {
 	string public constant name = "mStable-Polygon-Connector-v1";
 }
