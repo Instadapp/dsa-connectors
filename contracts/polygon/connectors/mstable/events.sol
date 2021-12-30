@@ -10,4 +10,10 @@ contract Events {
 		address platformToken,
 		uint256 platformAmount
 	);
+	event LogSwap(
+		address from,
+		address to,
+		uint256 amountIn,
+		uint256 amountOut
+	);
 }

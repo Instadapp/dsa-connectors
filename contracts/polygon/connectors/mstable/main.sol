@@ -13,6 +13,7 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import "hardhat/console.sol";
 
 abstract contract mStableResolver is Events, Helpers {
+	//
 	/***************************************
                     CORE
     ****************************************/
@@ -48,6 +49,7 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _amount,
 		uint256 _minOut
 	) external returns (string memory _eventName, bytes memory _eventParam) {
+		//
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) != 0,
 			"Token not a bAsset"
@@ -81,6 +83,7 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _minOut,
 		address _path
 	) external returns (string memory _eventName, bytes memory _eventParam) {
+		//
 		require(_path != address(0), "Path must be set");
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) == 0,
@@ -105,6 +108,7 @@ abstract contract mStableResolver is Events, Helpers {
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
+
 	function withdraw(uint256 _credits)
 		external
 		returns (string memory _eventName, bytes memory _eventParam)
@@ -130,6 +134,7 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _credits,
 		uint256 _minOut
 	) external returns (string memory _eventName, bytes memory _eventParam) {
+		//
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) != 0,
 			"Token not a bAsset"
@@ -164,6 +169,7 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _minOut,
 		address _path
 	) external returns (string memory _eventName, bytes memory _eventParam) {
+		//
 		require(_path != address(0), "Path must be set");
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) == 0,
@@ -225,6 +231,97 @@ abstract contract mStableResolver is Events, Helpers {
 		);
 	}
 
+	/**
+	 * @dev Swap tokens
+	 * @notice Swaps tokens via Masset basket
+	 * @param _input Token address to swap from
+	 * @param _output Token address to swap to
+	 * @param _amount Amount of tokens to swap
+	 * @param _minOut Minimum amount of token to mint
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
+	 */
+
+	function swap(
+		address _input,
+		address _output,
+		uint256 _amount,
+		uint256 _minOut
+	) external returns (string memory _eventName, bytes memory _eventParam) {
+		//
+		approve(TokenInterface(_input), mUsdToken, _amount);
+		uint256 amountSwapped;
+
+		// Check the assets and swap accordingly
+		if (_output == mUsdToken) {
+			// bAsset to mUSD => mint
+			amountSwapped = IMasset(mUsdToken).mint(
+				_input,
+				_amount,
+				_minOut,
+				address(this)
+			);
+		} else if (_input == mUsdToken) {
+			// mUSD to bAsset => redeem
+			amountSwapped = IMasset(mUsdToken).redeem(
+				_output,
+				_amount,
+				_minOut,
+				address(this)
+			);
+		} else {
+			// bAsset to another bAsset => swap
+			amountSwapped = IMasset(mUsdToken).swap(
+				_input,
+				_output,
+				_amount,
+				_minOut,
+				address(this)
+			);
+		}
+
+		_eventName = "LogSwap()";
+		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
+	}
+
+	/**
+	 * @dev Swap tokens via Feeder Pool
+	 * @notice Swaps tokens via Feeder Pool
+	 * @param _input Token address to swap from
+	 * @param _output Token address to swap to
+	 * @param _amount Amount of tokens to swap
+	 * @param _minOut Minimum amount of token to mint
+	 * @param _path Feeder Pool address to use
+	 * @return _eventName Event name
+	 * @return _eventParam Event parameters
+	 */
+
+	function swapViaFeeder(
+		address _input,
+		address _output,
+		uint256 _amount,
+		uint256 _minOut,
+		address _path
+	) external returns (string memory _eventName, bytes memory _eventParam) {
+		//
+		uint256 amountSwapped;
+
+		approve(TokenInterface(_input), _path, _amount);
+
+		// swaps fAsset to mUSD via Feeder Pool
+		// swaps mUSD to fAsset via Feeder Pool
+		amountSwapped = IFeederPool(_path).swap(
+			_input,
+			_output,
+			_amount,
+			_minOut,
+			address(this)
+		);
+
+		_eventName = "LogSwap()";
+		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
+	}
+
 	/***************************************
                     Internal
     ****************************************/
@@ -244,6 +341,7 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _amount,
 		address _path
 	) internal returns (string memory _eventName, bytes memory _eventParam) {
+		//
 		// 1. Deposit mUSD to Save
 		approve(TokenInterface(mUsdToken), imUsdToken, _amount);
 		uint256 credits = ISavingsContractV2(imUsdToken).depositSavings(
@@ -315,22 +413,6 @@ abstract contract mStableResolver is Events, Helpers {
 		a = TokenInterface(_rewardToken).balanceOf(address(this));
 		b = TokenInterface(_platformToken).balanceOf(address(this));
 	}
-
-	/**
-	 * @dev Swaps token supported by mStable for another token
-	 * @notice Swaps token supported by mStable for another token
-	 * @param _token Address of token to swap
-	 * @param _amount Amount of token to swap
-	 * @param _minOutput Minimum amount of token to swap
-	 */
-
-	// function swap(
-	// 	address _token,
-	// 	uint256 _amount,
-	// 	uint256 _minOutput
-	// ) external returns (string memory _eventName, bytes memory _eventParam);
-	// TODO
-	// function to support via Feeders or separate function?
 }
 
 contract ConnectV2mStable is mStableResolver {

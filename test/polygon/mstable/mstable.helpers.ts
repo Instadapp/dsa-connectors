@@ -17,11 +17,15 @@ export const TEN_DAYS = BN.from(60 * 60 * 24 * 10);
 export const ONE_WEEK = BN.from(60 * 60 * 24 * 7);
 export const ONE_YEAR = BN.from(60 * 60 * 24 * 365);
 
+export const connectorName = "MStable";
+
 interface TokenData {
   tokenAddress: string;
   tokenWhaleAddress?: string;
   feederPool?: string;
 }
+
+export const toEther = (amount: BN) => ethers.utils.formatEther(amount);
 
 export const getToken = (tokenSymbol: string): TokenData => {
   switch (tokenSymbol) {
@@ -39,6 +43,10 @@ export const getToken = (tokenSymbol: string): TokenData => {
       return {
         tokenAddress: "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
         tokenWhaleAddress: "0x49854708A8c42eEB837A97Dd97D597890CEb1334"
+      };
+    case "USDC":
+      return {
+        tokenAddress: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"
       };
     case "imUSD":
       return {
