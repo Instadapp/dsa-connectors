@@ -16,6 +16,8 @@ import type { Signer, Contract, BigNumber } from "ethers";
 
 import { ConnectV2mStable__factory, IERC20Minimal__factory, IERC20Minimal } from "../../../typechain";
 
+import { executeAndAssertDeposit, executeAndAssertSwap, executeAndAssertWithdraw } from "./mstable.utils";
+
 import {
   fundWallet,
   getToken,
@@ -23,12 +25,13 @@ import {
   DEAD_ADDRESS,
   calcMinOut,
   ONE_DAY,
-  increaseTime
+  increaseTime,
+  DEFAULT_DECIMALS,
+  connectorName,
+  toEther
 } from "./mstable.helpers";
 
 describe("MStable", async () => {
-  const connectorName = "MStable";
-
   let dsaWallet0: Contract;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
@@ -36,193 +39,108 @@ describe("MStable", async () => {
 
   let mtaToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("MTA").tokenAddress, provider);
   let mUsdToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("mUSD").tokenAddress, provider);
-  let daiToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("DAI").tokenAddress, provider);
-  let fraxToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("FRAX").tokenAddress, provider);
   let imUsdToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("imUSD").tokenAddress, provider);
   let imUsdVault: IERC20Minimal = IERC20Minimal__factory.connect(getToken("imUSDVault").tokenAddress, provider);
+
+  let daiToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("DAI").tokenAddress, provider);
+  let usdcToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("USDC").tokenAddress, provider);
+  let fraxToken: IERC20Minimal = IERC20Minimal__factory.connect(getToken("FRAX").tokenAddress, provider);
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
 
-  const toEther = (amount: BigNumber) => ethers.utils.formatEther(amount);
-
-  before(async () => {
-    await hre.network.provider.request({
-      method: "hardhat_reset",
-      params: [
-        {
-          forking: {
-            // @ts-ignore
-            jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 23059414
-          }
-        }
-      ]
-    });
-
-    masterSigner = await getMasterSigner();
-    instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
-    connector = await deployAndEnableConnector({
-      connectorName,
-      contractArtifact: ConnectV2mStable__factory,
-      signer: masterSigner,
-      connectors: instaConnectorsV2
-    });
-
-    console.log("Connector address", connector.address);
-  });
-  it("should deploy", async () => {
-    expect(instaConnectorsV2.address).to.be.properAddress;
-    expect(connector.address).to.be.properAddress;
-    expect(await masterSigner.getAddress()).to.be.properAddress;
-  });
   describe("DSA wallet", async () => {
-    it("Should build DSA v2", async () => {
+    const fundAmount = simpleToExactAmount(10000);
+
+    const setup = async () => {
+      await hre.network.provider.request({
+        method: "hardhat_reset",
+        params: [
+          {
+            forking: {
+              // @ts-ignore
+              jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+              blockNumber: 23059414
+            }
+          }
+        ]
+      });
+
+      masterSigner = await getMasterSigner();
+      instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
+      connector = await deployAndEnableConnector({
+        connectorName,
+        contractArtifact: ConnectV2mStable__factory,
+        signer: masterSigner,
+        connectors: instaConnectorsV2
+      });
+
+      console.log("Connector address", connector.address);
+
       dsaWallet0 = await buildDSAv2(wallet0.address);
-      expect(dsaWallet0.address).to.be.properAddress;
-    });
-    it("Deposit ETH and tokens into DSA Wallet", async () => {
+
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: simpleToExactAmount(10)
       });
 
-      const fundAmount = simpleToExactAmount(10000);
-
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
-
       await fundWallet("mUSD", fundAmount, dsaWallet0.address);
       await fundWallet("DAI", fundAmount, dsaWallet0.address);
       await fundWallet("FRAX", fundAmount, dsaWallet0.address);
+    };
 
-      expect(await mUsdToken.balanceOf(dsaWallet0.address)).to.be.gte(fundAmount);
-      expect(await daiToken.balanceOf(dsaWallet0.address)).to.be.gte(fundAmount);
-      expect(await fraxToken.balanceOf(dsaWallet0.address)).to.be.gte(fundAmount);
+    describe("Deploy", async () => {
+      before(async () => {
+        await setup();
+      });
 
-      // No deposits prior
-      expect(await imUsdToken.balanceOf(dsaWallet0.address)).to.be.eq(0);
-      expect(await imUsdVault.balanceOf(dsaWallet0.address)).to.be.eq(0);
+      it("Should deploy properly", async () => {
+        expect(instaConnectorsV2.address).to.be.properAddress;
+        expect(connector.address).to.be.properAddress;
+        expect(await masterSigner.getAddress()).to.be.properAddress;
+
+        expect(dsaWallet0.address).to.be.properAddress;
+      });
+      it("Should fund the wallet", async () => {
+        expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+
+        expect(await mUsdToken.balanceOf(dsaWallet0.address)).to.be.gte(fundAmount);
+        expect(await daiToken.balanceOf(dsaWallet0.address)).to.be.gte(fundAmount);
+        expect(await fraxToken.balanceOf(dsaWallet0.address)).to.be.gte(fundAmount);
+      });
+      it("Should not have vault tokens prior", async () => {
+        // No deposits prior
+        expect(await imUsdToken.balanceOf(dsaWallet0.address)).to.be.eq(0);
+        expect(await imUsdVault.balanceOf(dsaWallet0.address)).to.be.eq(0);
+      });
     });
 
-    describe("Main", async () => {
+    describe("Main SAVE", async () => {
+      before(async () => {
+        await setup();
+      });
       it("Should deposit mUSD to Vault successfully", async () => {
         const depositAmount = simpleToExactAmount(100);
 
-        const mUsdBalanceBefore = await mUsdToken.balanceOf(dsaWallet0.address);
-        console.log("mUSD balance before: ", toEther(mUsdBalanceBefore));
-
-        const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
-
-        const spells = [
-          {
-            connector: connectorName,
-            method: "deposit",
-            args: [mUsdToken.address, depositAmount]
-          }
-        ];
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), DEAD_ADDRESS);
-
-        const mUsdBalanceAfter = await mUsdToken.balanceOf(dsaWallet0.address);
-        console.log("mUSD balance after: ", toEther(mUsdBalanceAfter));
-
-        const imUsdBalance = await imUsdToken.balanceOf(dsaWallet0.address);
-        console.log("imUSD balance: ", toEther(imUsdBalance));
-
-        const imUsdVaultBalance = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance: ", toEther(imUsdVaultBalance));
-
-        // Should have something in the vault but no imUSD
-        expect(await imUsdToken.balanceOf(dsaWallet0.address)).to.be.eq(0);
-        expect(await imUsdVault.balanceOf(dsaWallet0.address)).to.be.gt(0);
-        expect(mUsdBalanceAfter).to.eq(mUsdBalanceBefore.sub(depositAmount));
+        await executeAndAssertDeposit("deposit", mUsdToken, depositAmount, dsaWallet0, wallet0);
       });
       it("Should deposit DAI to Vault successfully (mUSD bAsset)", async () => {
         const depositAmount = simpleToExactAmount(100);
         const minOut = calcMinOut(depositAmount, 0.02);
 
-        const daiBalanceBefore = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance before: ", toEther(daiBalanceBefore));
-        const spells = [
-          {
-            connector: connectorName,
-            method: "depositViaMint",
-            args: [daiToken.address, depositAmount, minOut]
-          }
-        ];
-        const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), DEAD_ADDRESS);
-
-        const daiBalanceAfter = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance after: ", toEther(daiBalanceAfter));
-
-        const imUsdVaultBalanceAfter = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance after: ", toEther(imUsdVaultBalanceAfter));
-
-        expect(imUsdVaultBalanceAfter).to.be.gt(imUsdVaultBalanceBefore);
-        expect(await imUsdToken.balanceOf(dsaWallet0.address)).to.be.eq(0);
-        expect(daiBalanceAfter).to.eq(daiBalanceBefore.sub(depositAmount));
+        await executeAndAssertDeposit("depositViaMint", daiToken, depositAmount, dsaWallet0, wallet0, [minOut]);
       });
       it("Should deposit FRAX to Vault successfully (via Feeder Pool)", async () => {
         const depositAmount = simpleToExactAmount(100);
         const minOut = calcMinOut(depositAmount, 0.02);
+        const path = getToken("FRAX").feederPool;
 
-        const fraxBalanceBefore = await fraxToken.balanceOf(dsaWallet0.address);
-        console.log("FRAX balance before: ", toEther(fraxBalanceBefore));
-
-        const spells = [
-          {
-            connector: connectorName,
-            method: "depositViaSwap",
-            args: [fraxToken.address, depositAmount, minOut, getToken("FRAX").feederPool]
-          }
-        ];
-
-        const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), DEAD_ADDRESS);
-
-        const fraxBalanceAfter = await fraxToken.balanceOf(dsaWallet0.address);
-        console.log("FRAX balance after: ", toEther(fraxBalanceAfter));
-
-        const imUsdVaultBalanceAfter = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance after: ", toEther(imUsdVaultBalanceAfter));
-
-        expect(imUsdVaultBalanceAfter).to.be.gt(imUsdVaultBalanceBefore);
-        expect(await imUsdToken.balanceOf(dsaWallet0.address)).to.be.eq(0);
-        expect(fraxBalanceAfter).to.eq(fraxBalanceBefore.sub(depositAmount));
+        await executeAndAssertDeposit("depositViaSwap", fraxToken, depositAmount, dsaWallet0, wallet0, [minOut, path]);
       });
       it("Should withdraw from Vault to mUSD", async () => {
         const withdrawAmount = simpleToExactAmount(100);
 
-        const mUsdBalanceBefore = await mUsdToken.balanceOf(dsaWallet0.address);
-        console.log("mUSD balance before: ", toEther(mUsdBalanceBefore));
-
-        const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
-
-        const spells = [
-          {
-            connector: connectorName,
-            method: "withdraw",
-            args: [withdrawAmount]
-          }
-        ];
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), DEAD_ADDRESS);
-
-        const imUsdVaultBalanceAfter = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance after: ", toEther(imUsdVaultBalanceAfter));
-
-        const mUsdBalanceAfter = await mUsdToken.balanceOf(dsaWallet0.address);
-        console.log("mUSD balance after: ", toEther(mUsdBalanceAfter));
-
-        expect(imUsdVaultBalanceAfter).to.be.eq(imUsdVaultBalanceBefore.sub(withdrawAmount));
-        expect(mUsdBalanceAfter).to.gt(mUsdBalanceBefore);
+        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [withdrawAmount]);
       });
       it("Should withdraw from Vault to DAI (mUSD bAsset)", async () => {
         const withdrawAmount = simpleToExactAmount(100);
@@ -303,6 +221,51 @@ describe("MStable", async () => {
         console.log("MTA balance after: ", toEther(mtaBalanceAfter));
 
         expect(mtaBalanceAfter).to.be.gt(mtaBalanceBefore);
+      });
+    });
+    describe("Main SWAP", async () => {
+      before(async () => {
+        await setup();
+      });
+      it("Should swap mUSD to bAsset (redeem)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        await executeAndAssertSwap("swap", mUsdToken, 18, daiToken, 18, swapAmount, dsaWallet0, wallet0);
+      });
+      it("Should swap mUSD to fAsset (via feeder pool)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        const path = getToken("FRAX").feederPool;
+        await executeAndAssertSwap("swapViaFeeder", mUsdToken, 18, fraxToken, 18, swapAmount, dsaWallet0, wallet0, [
+          path
+        ]);
+      });
+      it("Should swap bAsset to mUSD (mint)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        await executeAndAssertSwap("swap", daiToken, 18, mUsdToken, 18, swapAmount, dsaWallet0, wallet0);
+      });
+      it("Should swap bAsset to bAsset (swap)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        await executeAndAssertSwap("swap", daiToken, 18, usdcToken, 6, swapAmount, dsaWallet0, wallet0);
+      });
+      it("Should swap bAsset to fAsset (via feeder)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        const path = getToken("FRAX").feederPool;
+        await executeAndAssertSwap("swapViaFeeder", daiToken, 18, fraxToken, 18, swapAmount, dsaWallet0, wallet0, [
+          path
+        ]);
+      });
+      it("Should swap fAsset to bAsset (via feeder)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        const path = getToken("FRAX").feederPool;
+        await executeAndAssertSwap("swapViaFeeder", fraxToken, 18, daiToken, 18, swapAmount, dsaWallet0, wallet0, [
+          path
+        ]);
+      });
+      it("Should swap fAsset to mUSD (via feeder)", async () => {
+        const swapAmount = simpleToExactAmount(100);
+        const path = getToken("FRAX").feederPool;
+        await executeAndAssertSwap("swapViaFeeder", fraxToken, 18, mUsdToken, 18, swapAmount, dsaWallet0, wallet0, [
+          path
+        ]);
       });
     });
   });
