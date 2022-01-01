@@ -6,9 +6,8 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import {
-  ConnectV2ParaswapMainnet,
-  ConnectV2ParaswapMainnet__factory,
-} from "../../../typechain";
+  ConnectV2ParaswapV5__factory,
+} from "../../../typechain"
 import { parseEther } from "@ethersproject/units";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { tokens } from "../../../scripts/tests/mainnet/tokens";
@@ -27,31 +26,28 @@ describe("Paraswap", function() {
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
   before(async () => {
-    // await hre.network.provider.request({
-    //     method: "hardhat_reset",
-    //     params: [
-    //         {
-    //             forking: {
-    //                 jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-    //                 blockNumber: 13300000,
-    //             },
-    //         },
-    //     ],
-    // });
+    await hre.network.provider.request({
+        method: "hardhat_reset",
+        params: [
+            {
+                forking: {
+                  // @ts-ignore
+                    jsonRpcUrl: hre.config.networks.hardhat.forking.url,
+                    // blockNumber: 13300000,
+                },
+            },
+        ],
+    });
     masterSigner = await getMasterSigner();
     const erc20 = abis.basic.erc20;
     instaConnectorsV2 = await ethers.getContractAt(
       abis.core.connectorsV2,
       addresses.core.connectorsV2
     );
-    const iusdc = await ethers.getContractAt(
-      erc20,
-      "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"
-    );
-    // console.log("instance = ", iusdc);
+
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2ParaswapMainnet__factory,
+      contractArtifact: ConnectV2ParaswapV5__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
@@ -126,7 +122,6 @@ describe("Paraswap", function() {
         const calldata = await axios
           .post(url2, txConfig)
           .then((data) => data.data.data);
-        // console.log(calldata);
 
         function caculateUnitAmt(
           buyAmount: any,

@@ -54,6 +54,6 @@ abstract contract ParaswapResolver is Helpers {
     }
 }
 
-contract ConnectV2ParaswapMainnet is ParaswapResolver {
-    string public name = "Paraswap-v1";
+contract ConnectV2ParaswapV5 is ParaswapResolver {
+    string public name = "Paraswap-v5";
 }
