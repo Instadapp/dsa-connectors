@@ -1,7 +1,5 @@
 pragma solidity ^0.7.6;
 
-// TODO: Interfaces go here
-// https://polygonscan.com/address/0xca9cf48ad534f1efa2b0f6923457f2953df86e0b#code
 interface IMasset {
 	// Mint
 	function mint(
