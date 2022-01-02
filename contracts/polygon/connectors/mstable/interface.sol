@@ -155,32 +155,31 @@ interface IStakingRewardsWithPlatformToken {
 	function getPlatformToken() external returns (address token);
 }
 
-abstract contract IFeederPool {
+interface IFeederPool {
 	// Mint
 	function mint(
 		address _input,
 		uint256 _inputQuantity,
 		uint256 _minOutputQuantity,
 		address _recipient
-	) external virtual returns (uint256 mintOutput);
+	) external returns (uint256 mintOutput);
 
 	function mintMulti(
 		address[] calldata _inputs,
 		uint256[] calldata _inputQuantities,
 		uint256 _minOutputQuantity,
 		address _recipient
-	) external virtual returns (uint256 mintOutput);
+	) external returns (uint256 mintOutput);
 
 	function getMintOutput(address _input, uint256 _inputQuantity)
 		external
 		view
-		virtual
 		returns (uint256 mintOutput);
 
 	function getMintMultiOutput(
 		address[] calldata _inputs,
 		uint256[] calldata _inputQuantities
-	) external view virtual returns (uint256 mintOutput);
+	) external view returns (uint256 mintOutput);
 
 	// Swaps
 	function swap(
@@ -189,13 +188,13 @@ abstract contract IFeederPool {
 		uint256 _inputQuantity,
 		uint256 _minOutputQuantity,
 		address _recipient
-	) external virtual returns (uint256 swapOutput);
+	) external returns (uint256 swapOutput);
 
 	function getSwapOutput(
 		address _input,
 		address _output,
 		uint256 _inputQuantity
-	) external view virtual returns (uint256 swapOutput);
+	) external view returns (uint256 swapOutput);
 
 	// Redemption
 	function redeem(
@@ -203,34 +202,33 @@ abstract contract IFeederPool {
 		uint256 _fpTokenQuantity,
 		uint256 _minOutputQuantity,
 		address _recipient
-	) external virtual returns (uint256 outputQuantity);
+	) external returns (uint256 outputQuantity);
 
 	function redeemProportionately(
 		uint256 _fpTokenQuantity,
 		uint256[] calldata _minOutputQuantities,
 		address _recipient
-	) external virtual returns (uint256[] memory outputQuantities);
+	) external returns (uint256[] memory outputQuantities);
 
 	function redeemExactBassets(
 		address[] calldata _outputs,
 		uint256[] calldata _outputQuantities,
 		uint256 _maxMassetQuantity,
 		address _recipient
-	) external virtual returns (uint256 mAssetRedeemed);
+	) external returns (uint256 mAssetRedeemed);
 
 	function getRedeemOutput(address _output, uint256 _fpTokenQuantity)
 		external
 		view
-		virtual
 		returns (uint256 bAssetOutput);
 
 	function getRedeemExactBassetsOutput(
 		address[] calldata _outputs,
 		uint256[] calldata _outputQuantities
-	) external view virtual returns (uint256 mAssetAmount);
+	) external view returns (uint256 mAssetAmount);
 
 	// Views
-	function mAsset() external view virtual returns (address);
+	function mAsset() external view returns (address);
 
-	function getPrice() public view virtual returns (uint256 price, uint256 k);
+	function getPrice() external view returns (uint256 price, uint256 k);
 }
