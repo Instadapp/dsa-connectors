@@ -118,14 +118,15 @@ describe("MStable", async () => {
       });
       it("Should deposit mUSD to Vault successfully", async () => {
         const depositAmount = simpleToExactAmount(100);
+        const minOut = depositAmount;
 
-        await executeAndAssertDeposit("deposit", mUsdToken, depositAmount, dsaWallet0, wallet0);
+        await executeAndAssertDeposit("deposit", mUsdToken, depositAmount, dsaWallet0, wallet0, [minOut]);
       });
       it("Should deposit DAI to Vault successfully (mUSD bAsset)", async () => {
         const depositAmount = simpleToExactAmount(100);
         const minOut = calcMinOut(depositAmount, 0.02);
 
-        await executeAndAssertDeposit("depositViaMint", daiToken, depositAmount, dsaWallet0, wallet0, [minOut]);
+        await executeAndAssertDeposit("deposit", daiToken, depositAmount, dsaWallet0, wallet0, [minOut]);
       });
       it("Should deposit alUSD to Vault successfully (via Feeder Pool)", async () => {
         const depositAmount = simpleToExactAmount(100);
@@ -136,66 +137,25 @@ describe("MStable", async () => {
       });
       it("Should withdraw from Vault to mUSD", async () => {
         const withdrawAmount = simpleToExactAmount(100);
+        const minOut = simpleToExactAmount(1);
 
-        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [withdrawAmount]);
+        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [minOut]);
       });
       it("Should withdraw from Vault to DAI (mUSD bAsset)", async () => {
         const withdrawAmount = simpleToExactAmount(100);
         const minOut = simpleToExactAmount(1);
 
-        const daiBalanceBefore = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance before: ", toEther(daiBalanceBefore));
-
-        const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
-
-        const spells = [
-          {
-            connector: connectorName,
-            method: "withdrawViaRedeem",
-            args: [daiToken.address, withdrawAmount, minOut]
-          }
-        ];
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), DEAD_ADDRESS);
-
-        const imUsdVaultBalanceAfter = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance after: ", toEther(imUsdVaultBalanceAfter));
-
-        const daiBalanceAfter = await daiToken.balanceOf(dsaWallet0.address);
-        console.log("DAI balance after: ", toEther(daiBalanceAfter));
-
-        expect(imUsdVaultBalanceAfter).to.be.eq(imUsdVaultBalanceBefore.sub(withdrawAmount));
-        expect(daiBalanceAfter).to.gt(daiBalanceBefore);
+        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [minOut]);
       });
       it("Should withdraw from Vault to alUSD (via Feeder Pool)", async () => {
         const withdrawAmount = simpleToExactAmount(100);
         const minOut = simpleToExactAmount(1);
+        const path = getToken("alUSD").feederPool;
 
-        const alusdBalanceBefore = await alusdToken.balanceOf(dsaWallet0.address);
-        console.log("Balance before: ", toEther(alusdBalanceBefore));
-
-        const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
-
-        const spells = [
-          {
-            connector: connectorName,
-            method: "withdrawViaSwap",
-            args: [alusdToken.address, withdrawAmount, minOut, getToken("alUSD").feederPool]
-          }
-        ];
-
-        const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), DEAD_ADDRESS);
-
-        const imUsdVaultBalanceAfter = await imUsdVault.balanceOf(dsaWallet0.address);
-        console.log("imUSD Vault balance after: ", toEther(imUsdVaultBalanceAfter));
-
-        const alusdBalanceAfter = await alusdToken.balanceOf(dsaWallet0.address);
-        console.log("alUSD balance after: ", toEther(alusdBalanceAfter));
-
-        expect(imUsdVaultBalanceAfter).to.be.eq(imUsdVaultBalanceBefore.sub(withdrawAmount));
-        expect(alusdBalanceAfter).to.gt(alusdBalanceBefore);
+        await executeAndAssertWithdraw("withdrawViaSwap", alusdToken, withdrawAmount, dsaWallet0, wallet0, [
+          minOut,
+          path
+        ]);
       });
       it("Should claim Rewards", async () => {
         const mtaBalanceBefore = await mtaToken.balanceOf(dsaWallet0.address);

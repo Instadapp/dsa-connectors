@@ -104,14 +104,14 @@ export const executeAndAssertDeposit = async (
 
 export const executeAndAssertWithdraw = async (
   method: string,
-  tokenFrom: IERC20Minimal,
+  tokenTo: IERC20Minimal,
   withdrawAmount: BigNumber,
   dsaWallet0: Contract,
   wallet0: Wallet,
   args: any[]
 ) => {
-  const mUsdBalanceBefore = await tokenFrom.balanceOf(dsaWallet0.address);
-  console.log("Balance before: ", toEther(mUsdBalanceBefore));
+  const tokenToBalanceBefore = await tokenTo.balanceOf(dsaWallet0.address);
+  console.log("Balance before: ", toEther(tokenToBalanceBefore));
 
   const imUsdVaultBalanceBefore = await imUsdVault.balanceOf(dsaWallet0.address);
   console.log("imUSD Vault balance before: ", toEther(imUsdVaultBalanceBefore));
@@ -120,7 +120,7 @@ export const executeAndAssertWithdraw = async (
     {
       connector: connectorName,
       method,
-      args
+      args: [tokenTo.address, withdrawAmount, ...(args ? args : [])]
     }
   ];
 
@@ -129,9 +129,9 @@ export const executeAndAssertWithdraw = async (
   const imUsdVaultBalanceAfter = await imUsdVault.balanceOf(dsaWallet0.address);
   console.log("imUSD Vault balance after: ", toEther(imUsdVaultBalanceAfter));
 
-  const mUsdBalanceAfter = await tokenFrom.balanceOf(dsaWallet0.address);
-  console.log("Balance after: ", toEther(mUsdBalanceAfter));
+  const tokenToBalanceAfter = await tokenTo.balanceOf(dsaWallet0.address);
+  console.log("Balance after: ", toEther(tokenToBalanceAfter));
 
   expect(imUsdVaultBalanceAfter).to.be.eq(imUsdVaultBalanceBefore.sub(withdrawAmount));
-  expect(mUsdBalanceAfter).to.gt(mUsdBalanceBefore);
+  expect(tokenToBalanceAfter).to.gt(tokenToBalanceBefore);
 };

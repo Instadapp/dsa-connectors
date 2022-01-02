@@ -8,7 +8,7 @@ pragma solidity ^0.7.6;
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { IMasset, ISavingsContractV2, IBoostedSavingsVault, IFeederPool } from "./interface.sol";
-import { TokenInterface } from "../common/interfaces.sol";
+import { TokenInterface } from "../../common/interfaces.sol";
 
 abstract contract mStableResolver is Events, Helpers {
 	//
@@ -17,51 +17,38 @@ abstract contract mStableResolver is Events, Helpers {
     ****************************************/
 
 	/**
-	 * @dev Deposit to Save via mUSD
+	 * @dev Deposit to Save via mUSD or bAsset
 	 * @notice Deposits token supported by mStable to Save
 	 * @param _token Address of token to deposit
 	 * @param _amount Amount of token to deposit
+	 * @param _minOut Minimum amount of token to mint/deposit, equal to _amount if mUSD
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
 
-	function deposit(address _token, uint256 _amount)
-		external
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		return _deposit(_token, _amount, imUsdToken);
-	}
-
-	/**
-	 * @dev Deposit to Save via bAsset
-	 * @notice Deposits token, requires _minOut for minting
-	 * @param _token Address of token to deposit
-	 * @param _amount Amount of token to deposit
-	 * @param _minOut Minimum amount of token to mint
-	 * @return _eventName Event name
-	 * @return _eventParam Event parameters
-	 */
-
-	function depositViaMint(
+	function deposit(
 		address _token,
 		uint256 _amount,
 		uint256 _minOut
 	) external returns (string memory _eventName, bytes memory _eventParam) {
 		//
-		require(
-			IMasset(mUsdToken).bAssetIndexes(_token) != 0,
-			"Token not a bAsset"
-		);
+		uint256 mintedAmount = _amount;
 
-		approve(TokenInterface(_token), mUsdToken, _amount);
-		uint256 mintedAmount = IMasset(mUsdToken).mint(
-			_token,
-			_amount,
-			_minOut,
-			address(this)
-		);
+		// Check if needs to be minted first
+		if (IMasset(mUsdToken).bAssetIndexes(_token) != 0) {
+			// mint first
+			approve(TokenInterface(_token), mUsdToken, _amount);
+			mintedAmount = IMasset(mUsdToken).mint(
+				_token,
+				_amount,
+				_minOut,
+				address(this)
+			);
+		} else {
+			require(mintedAmount >= _minOut, "mintedAmount < _minOut");
+		}
 
-		return _deposit(_token, mintedAmount, mUsdToken);
+		return _deposit(_token, mintedAmount, imUsdToken);
 	}
 
 	/**
@@ -100,54 +87,36 @@ abstract contract mStableResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Withdraw from Save to mUSD
+	 * @dev Withdraw from Save to mUSD or bAsset
 	 * @notice Withdraws from Save Vault to mUSD
+	 * @param _token Address of token to withdraw
 	 * @param _credits Credits to withdraw
+	 * @param _minOut Minimum amount of token to withdraw
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
 
-	function withdraw(uint256 _credits)
-		external
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		uint256 amountWithdrawn = _withdraw(_credits);
-
-		_eventName = "LogWithdraw()";
-		_eventParam = abi.encode(mUsdToken, amountWithdrawn, imUsdToken);
-	}
-
-	/**
-	 * @dev Withdraw from Save to bAsset
-	 * @notice Withdraws from Save Vault to bAsset
-	 * @param _token bAsset to withdraw to
-	 * @param _credits Credits to withdraw
-	 * @param _minOut Minimum amount of token to mint
-	 * @return _eventName Event name
-	 * @return _eventParam Event parameters
-	 */
-
-	function withdrawViaRedeem(
+	function withdraw(
 		address _token,
 		uint256 _credits,
 		uint256 _minOut
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		//
-		require(
-			IMasset(mUsdToken).bAssetIndexes(_token) != 0,
-			"Token not a bAsset"
-		);
-
 		uint256 amountWithdrawn = _withdraw(_credits);
-		uint256 amountRedeemed = IMasset(mUsdToken).redeem(
-			_token,
-			amountWithdrawn,
-			_minOut,
-			address(this)
-		);
 
-		_eventName = "LogRedeem()";
-		_eventParam = abi.encode(mUsdToken, amountRedeemed, _token);
+		// Check if needs to be redeemed
+		if (IMasset(mUsdToken).bAssetIndexes(_token) != 0) {
+			amountWithdrawn = IMasset(mUsdToken).redeem(
+				_token,
+				amountWithdrawn,
+				_minOut,
+				address(this)
+			);
+		} else {
+			require(amountWithdrawn >= _minOut, "amountWithdrawn < _minOut");
+		}
+
+		_eventName = "LogWithdraw()";
+		_eventParam = abi.encode(mUsdToken, amountWithdrawn, imUsdToken);
 	}
 
 	/**
