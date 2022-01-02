@@ -16,7 +16,7 @@ abstract contract Helpers is DSMath, Basic {
         bytes callData;
     }
 
-    address internal constant paraswap = 0x90249ed4d69D70E709fFCd8beE2c5A566f65dADE;
+    address internal constant paraswap = 0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
 
     function _swapHelper(SwapData memory swapData, uint256 wmaticAmt) internal returns (uint256 buyAmt) {
         TokenInterface buyToken = swapData.buyToken;
