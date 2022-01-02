@@ -50,7 +50,6 @@ function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    gasPrice: utils.parseUnits(networkGasPriceConfig[network], "gwei").toNumber(),
   };
 }
 
@@ -118,8 +117,8 @@ const config: HardhatUserConfig = {
     sources: "./contracts",
     tests: "./test",
   },
-  etherscan: {
-    apiKey: getScanApiKey(String(process.env.networkType)),
+  etherscan: { 
+     apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
   },
   typechain: {
     outDir: "typechain",
