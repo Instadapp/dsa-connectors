@@ -2,13 +2,13 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title 1Inch.
+ * @title 1InchV3.
  * @dev On-chain DEX Aggregator.
  */
 
 // import files from common directory
-import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
+import { TokenInterface , MemoryInterface } from "../../../common/interfaces.sol";
+import { Stores } from "../../../common/stores.sol";
 import { OneInchInterace, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
@@ -96,7 +96,7 @@ abstract contract OneInch is OneInchResolverHelpers {
      * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
-     * @param callData Data from 1inch API. You can generate calldata for calling 1inch route for exchange: <a href="https://api.1inch.exchange/swagger/ethereum/#/Swap/SwapFactoryCommonController_getSwap" target="_blank">here </a>
+     * @param callData Data from 1inch API.
      * @param setId ID stores the amount of token brought.
     */
     function sell(
@@ -123,6 +123,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInch is OneInch {
-    string public name = "1Inch-v1.2";
+contract ConnectV2OneInchV3Arbitrum is OneInch {
+    string public name = "1Inch-v1.0";
 }
