@@ -50,6 +50,6 @@ abstract contract ParaswapResolver is Helpers {
     }
 }
 
-contract ConnectV2ParaswapAvalanche is ParaswapResolver {
-    string public constant name = "Paraswap-v1";
+contract ConnectV2ParaswapV5Avalanche is ParaswapResolver {
+    string public constant name = "Paraswap-v5";
 }
