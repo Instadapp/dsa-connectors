@@ -13,8 +13,8 @@ abstract contract SushipswapResolver is Helpers, Events {
     /**
      * @dev Deposit Liquidity.
      * @notice Deposit Liquidity to a SushiSwap pool.
-     * @param tokenA The address of token A.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param tokenB The address of token B.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenA The address of token A.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenB The address of token B.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param amtA The amount of A tokens to deposit.
      * @param unitAmt The unit amount of of amtB/amtA with slippage.
      * @param slippage Slippage amount.
@@ -48,8 +48,8 @@ abstract contract SushipswapResolver is Helpers, Events {
     /**
      * @dev Withdraw Liquidity.
      * @notice Withdraw Liquidity from a SushiSwap pool.
-     * @param tokenA The address of token A.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param tokenB The address of token B.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenA The address of token A.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenB The address of token B.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param uniAmt The amount of pool tokens to withdraw.
      * @param unitAmtA The unit amount of amtA/uniAmt with slippage.
      * @param unitAmtB The unit amount of amtB/uniAmt with slippage.
@@ -83,10 +83,10 @@ abstract contract SushipswapResolver is Helpers, Events {
     }
 
     /**
-     * @dev Buy ETH/ERC20_Token.
+     * @dev Buy Matic/ERC20_Token.
      * @notice Buy a token using a SushiSwap
-     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAddr The address of the token to buy.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param buyAmt The amount of tokens to buy.
      * @param unitAmt The unit amount of sellAmt/buyAmt with slippage.
      * @param getId ID to retrieve buyAmt.
@@ -101,7 +101,7 @@ abstract contract SushipswapResolver is Helpers, Events {
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _buyAmt = getUint(getId, buyAmt);
-        (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(buyAddr, sellAddr);
+        (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeMaticAddress(buyAddr, sellAddr);
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         uint _slippageAmt = convert18ToDec(_sellAddr.decimals(),
@@ -112,8 +112,8 @@ abstract contract SushipswapResolver is Helpers, Events {
         uint _expectedAmt = getExpectedSellAmt(paths, _buyAmt);
         require(_slippageAmt >= _expectedAmt, "Too much slippage");
 
-        bool isEth = address(_sellAddr) == wethAddr;
-        convertEthToWeth(isEth, _sellAddr, _expectedAmt);
+        bool isMatic = address(_sellAddr) == wmaticAddr;
+        convertMaticToWmatic(isMatic, _sellAddr, _expectedAmt);
         approve(_sellAddr, address(router), _expectedAmt);
 
         uint _sellAmt = router.swapTokensForExactTokens(
@@ -124,8 +124,8 @@ abstract contract SushipswapResolver is Helpers, Events {
             block.timestamp + 1
         )[0];
 
-        isEth = address(_buyAddr) == wethAddr;
-        convertWethToEth(isEth, _buyAddr, _buyAmt);
+        isMatic = address(_buyAddr) == wmaticAddr;
+        convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
         setUint(setId, _sellAmt);
 
@@ -134,10 +134,10 @@ abstract contract SushipswapResolver is Helpers, Events {
     }
 
     /**
-     * @dev Sell ETH/ERC20_Token.
+     * @dev Sell Matic/ERC20_Token.
      * @notice Sell a token using a SushiSwap
-     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAddr The address of the token to buy.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The unit amount of buyAmt/sellAmt with slippage.
      * @param getId ID to retrieve sellAmt.
@@ -152,11 +152,11 @@ abstract contract SushipswapResolver is Helpers, Events {
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _sellAmt = getUint(getId, sellAmt);
-        (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(buyAddr, sellAddr);
+        (TokenInterface _buyAddr, TokenInterface _sellAddr) = changeMaticAddress(buyAddr, sellAddr);
         address[] memory paths = getPaths(address(_buyAddr), address(_sellAddr));
 
         if (_sellAmt == uint(-1)) {
-            _sellAmt = sellAddr == ethAddr ?
+            _sellAmt = sellAddr == maticAddr ?
                 address(this).balance :
                 _sellAddr.balanceOf(address(this));
         }
@@ -169,8 +169,8 @@ abstract contract SushipswapResolver is Helpers, Events {
         uint _expectedAmt = getExpectedBuyAmt(paths, _sellAmt);
         require(_slippageAmt <= _expectedAmt, "Too much slippage");
 
-        bool isEth = address(_sellAddr) == wethAddr;
-        convertEthToWeth(isEth, _sellAddr, _sellAmt);
+        bool isMatic = address(_sellAddr) == wmaticAddr;
+        convertMaticToWmatic(isMatic, _sellAddr, _sellAmt);
         approve(_sellAddr, address(router), _sellAmt);
 
         uint _buyAmt = router.swapExactTokensForTokens(
@@ -181,8 +181,8 @@ abstract contract SushipswapResolver is Helpers, Events {
             block.timestamp + 1
         )[1];
 
-        isEth = address(_buyAddr) == wethAddr;
-        convertWethToEth(isEth, _buyAddr, _buyAmt);
+        isMatic = address(_buyAddr) == wmaticAddr;
+        convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
         setUint(setId, _buyAmt);
 
@@ -191,6 +191,6 @@ abstract contract SushipswapResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2Sushiswap is SushipswapResolver {
-    string public constant name = "Sushipswap-v1.1";
+contract ConnectV2SushiswapPolygon is SushipswapResolver {
+    string public constant name = "Sushiswap-v1.1";
 }
