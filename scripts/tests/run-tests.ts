@@ -25,7 +25,7 @@ async function testRunner() {
   const { testName } = await inquirer.prompt([
     {
       name: "testName",
-      message: "For which resolver you want to run the tests?",
+      message: "For which connector you want to run the tests?",
       type: "list",
       choices: ["all", ...availableTests],
     },

@@ -1,6 +1,6 @@
 pragma solidity ^0.7.0;
 
-import { TokenInterface } from "../../common/interfaces.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
 
 interface OneInchInterace {
     function swap(

@@ -2,13 +2,13 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title 1Inch.
+ * @title 1InchV3.
  * @dev On-chain DEX Aggregator.
  */
 
 // import files from common directory
-import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
+import { TokenInterface , MemoryInterface } from "../../../common/interfaces.sol";
+import { Stores } from "../../../common/stores.sol";
 import { OneInchInterace, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
@@ -123,6 +123,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInchPolygon is OneInch {
+contract ConnectV2OneInchV3Polygon is OneInch {
     string public name = "1Inch-v1";
 }

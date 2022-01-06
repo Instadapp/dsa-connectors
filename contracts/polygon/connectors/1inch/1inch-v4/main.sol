@@ -2,31 +2,19 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title 1Inch.
+ * @title 1InchV4.
  * @dev On-chain DEX Aggregator.
  */
 
 // import files from common directory
-import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
+import { TokenInterface , MemoryInterface } from "../../../common/interfaces.sol";
+import { Stores } from "../../../common/stores.sol";
 import { OneInchInterace, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
 abstract contract OneInchResolver is Helpers, Events {
-    /**
-     * @dev 1inch swap uses `.call()`. This function restrict it to call only swap/trade functionality
-     * @param callData - calldata to extract the first 4 bytes for checking function signature
-     */
-    function checkOneInchSig(bytes memory callData) internal pure returns(bool isOk) {
-        bytes memory _data = callData;
-        bytes4 sig;
-        // solium-disable-next-line security/no-inline-assembly
-        assembly {
-            sig := mload(add(_data, 32))
-        }
-        isOk = sig == oneInchSwapSig || sig == oneInchUnoswapSig;
-    }
+ 
 
     /**
      * @dev 1inch API swap handler
@@ -71,20 +59,19 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
         TokenInterface _sellAddr = oneInchData.sellToken;
 
         uint ethAmt;
-        if (address(_sellAddr) == ethAddr) {
+        if (address(_sellAddr) == maticAddr) {
             ethAmt = oneInchData._sellAmt;
         } else {
             approve(TokenInterface(_sellAddr), oneInchAddr, oneInchData._sellAmt);
         }
 
-        require(checkOneInchSig(oneInchData.callData), "Not-swap-function");
 
         oneInchData._buyAmt = oneInchSwap(oneInchData, ethAmt);
         setUint(setId, oneInchData._buyAmt);
 
         return oneInchData;
 
-        // emitLogSellThree(oneInchData, setId);
+        
     }
 }
 
@@ -92,8 +79,8 @@ abstract contract OneInch is OneInchResolverHelpers {
     /**
      * @dev Sell ETH/ERC20_Token using 1Inch.
      * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
-     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAddr The address of the token to buy.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
      * @param callData Data from 1inch API.
@@ -123,6 +110,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInchArbitrum is OneInch {
-    string public name = "1Inch-v1.0";
+contract ConnectV2OneInchV4Polygon is OneInch {
+    string public name = "1Inch-v4-v1";
 }
