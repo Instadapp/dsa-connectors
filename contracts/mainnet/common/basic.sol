@@ -41,6 +41,10 @@ abstract contract Basic is DSMath, Stores {
         _sell = sell == ethAddr ? TokenInterface(wethAddr) : TokenInterface(sell);
     }
 
+    function changeEthAddrToWethAddr(address token) internal pure returns(address tokenAddr){
+        tokenAddr = token == ethAddr ? wethAddr : token;
+    }
+
     function convertEthToWeth(bool isEth, TokenInterface token, uint amount) internal {
         if(isEth) token.deposit{value: amount}();
     }

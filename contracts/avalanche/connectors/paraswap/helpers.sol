@@ -17,7 +17,7 @@ abstract contract Helpers is DSMath, Basic {
 
     address internal constant paraswap =
         0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
-
+        
     function _swapHelper(SwapData memory swapData, uint256 wavaxAmt)
         internal
         returns (uint256 buyAmt)
