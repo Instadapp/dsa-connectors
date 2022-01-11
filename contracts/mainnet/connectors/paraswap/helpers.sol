@@ -17,8 +17,8 @@ abstract contract Helpers is DSMath, Basic {
 
     address internal constant paraswap =
         0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57;
-        
-    function _swapHelper(SwapData memory swapData, uint256 wavaxAmt)
+
+    function _swapHelper(SwapData memory swapData, uint256 wethAmt)
         internal
         returns (uint256 buyAmt)
     {
@@ -35,7 +35,7 @@ abstract contract Helpers is DSMath, Basic {
 
         uint256 initalBal = getTokenBal(buyToken);
 
-        (bool success, ) = paraswap.call{value: wavaxAmt}(swapData.callData);
+        (bool success, ) = paraswap.call{value: wethAmt}(swapData.callData);
         if (!success) revert("paraswap-failed");
 
         uint256 finalBal = getTokenBal(buyToken);
@@ -51,17 +51,17 @@ abstract contract Helpers is DSMath, Basic {
     {
         TokenInterface _sellAddr = swapData.sellToken;
 
-        uint256 avaxAmt;
+        uint256 ethAmt;
 
-        if (address(_sellAddr) == avaxAddr) {
-            avaxAmt = swapData._sellAmt;
+        if (address(_sellAddr) == ethAddr) {
+            ethAmt = swapData._sellAmt;
         } else {
             address tokenProxy = AugustusSwapperInterface(paraswap)
                 .getTokenTransferProxy();
             approve(TokenInterface(_sellAddr), tokenProxy, swapData._sellAmt);
         }
 
-        swapData._buyAmt = _swapHelper(swapData, avaxAmt);
+        swapData._buyAmt = _swapHelper(swapData, ethAmt);
 
         setUint(setId, swapData._buyAmt);
 

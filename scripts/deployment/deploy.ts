@@ -23,6 +23,7 @@ async function main() {
     "Uniswap-V3-Staker-v1.1" : "ConnectV2UniswapV3StakerPolygon",
     "Paraswap-v5" : "ConnectV2ParaswapV5Polygon"
     "1INCH-V4" : "ConnectV2OneInchV4Polygon",
+    "ZEROEX-A": "ConnectV2ZeroExAvalanche",
   };
 
   const addressMapping: Record<string, string> = {};

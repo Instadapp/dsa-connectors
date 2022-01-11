@@ -8,15 +8,14 @@ export const deployConnector = async (connectorName: string) => {
   console.log(`${connectorName} Deployed: ${connector.address}`);
 
   try {
-        await hre.run("verify:verify", {
-            address: connector.address,
-            constructorArguments: []
-          }
-        )
-    } catch (error) {
-        console.log(`Failed to verify: ${connectorName}@${connector.address}`)
-        console.log(error)
-        console.log()
-    }
+    await hre.run("verify:verify", {
+      address: connector.address,
+      constructorArguments: [],
+    });
+  } catch (error) {
+    console.log(`Failed to verify: ${connectorName}@${connector.address}`);
+    console.log(error);
+    console.log();
+  }
   return connector.address;
 };

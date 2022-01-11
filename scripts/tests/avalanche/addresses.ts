@@ -5,7 +5,7 @@ export const addresses: Record<string, any> = {
     // "INSTAPOOL-A": "0x8f1e38c53af7bD2b2bE01b9580911b7Cca504F1b",
   },
   core: {
-    connectorsV2: "0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B",
-    instaIndex: "0x1eE00C305C51Ff3bE60162456A9B533C07cD9288",
+    connectorsV2: "0x127d8cD0E2b2E0366D522DeA53A787bfE9002C14",
+    instaIndex: "0x6CE3e607C808b4f4C26B7F6aDAeB619e49CAbb25",
   },
 };
