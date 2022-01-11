@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
 /**
@@ -9,7 +10,7 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-abstract contract SushipswapResolver is Helpers, Events {
+abstract contract SushiswapResolver is Helpers, Events {
     /**
      * @dev Deposit Liquidity.
      * @notice Deposit Liquidity to a SushiSwap pool.
@@ -191,6 +192,6 @@ abstract contract SushipswapResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2SushiswapArbitrum is SushipswapResolver {
-    string public constant name = "Sushiswap-v1.1";
+contract ConnectV2SushiswapArbitrum is SushiswapResolver {
+    string public constant name = "Sushiswap-v1";
 }
