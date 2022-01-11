@@ -51,7 +51,7 @@ function getNetworkUrl(networkType: string) {
   if (networkType === "avalanche")
     return "https://api.avax.network/ext/bc/C/rpc";
   else if (networkType === "polygon")
-    return `https://polygon-mumbai.g.alchemy.com/v2/${alchemyApiKey}`;
+    return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "arbitrum")
     return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
@@ -112,7 +112,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   etherscan: {
-    apiKey: "VT3JEKZ573EIRIMBRREREV2NNJ18NVNI51",
+    apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
   },
   typechain: {
     outDir: "typechain",
