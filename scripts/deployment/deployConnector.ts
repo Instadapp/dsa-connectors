@@ -1,4 +1,5 @@
 import hre, { ethers } from "hardhat";
+import { execScript } from "../tests/command";
 
 export const deployConnector = async (connectorName?: string) => {
   connectorName = String(process.env.connectorName) ?? connectorName;
@@ -8,15 +9,28 @@ export const deployConnector = async (connectorName?: string) => {
 
   console.log(`${connectorName} Deployed: ${connector.address}`);
 
-  try {
-    await hre.run("verify:verify", {
-      address: connector.address,
-      constructorArguments: [],
-    });
-  } catch (error) {
-    console.log(`Failed to verify: ${connectorName}@${connector.address}`);
-    console.log(error);
-    console.log();
+  const chain = String(hre.network.name);
+  if (chain !== "hardhat") {
+    try {
+      await execScript({
+        cmd: "npx",
+        args: [
+          "hardhat",
+          "verify",
+          "--network",
+          `${chain}`,
+          `${connector.address}`,
+        ],
+        env: {
+          networkType: chain,
+        },
+      });
+    } catch (error) {
+      console.log(`Failed to verify: ${connectorName}@${connector.address}`);
+      console.log(error);
+      console.log();
+    }
   }
+
   return connector.address;
 };

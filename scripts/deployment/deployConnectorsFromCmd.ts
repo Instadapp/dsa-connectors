@@ -5,8 +5,21 @@ import { join } from "path";
 
 let start: number, end: number;
 
+async function connectorSelect(chain: string) {
+  let { connector } = await inquirer.prompt([
+    {
+      name: "connector",
+      message: "Which connector do you want to deploy?",
+      type: "list",
+      choices: connectors[chain],
+    },
+  ]);
+
+  return connector;
+}
+
 async function deployRunner() {
-  const { chain } = await inquirer.prompt([
+  let { chain } = await inquirer.prompt([
     {
       name: "chain",
       message: "What chain do you want to deploy on?",
@@ -15,20 +28,47 @@ async function deployRunner() {
     },
   ]);
 
-  let { connector } = await inquirer.prompt([
+  let connector = await connectorSelect(chain);
+
+  let { choice } = await inquirer.prompt([
     {
-      name: "connector",
-      message: "Which connector do you want to deploy?",
+      name: "choice",
+      message: "Do you wanna select again?",
       type: "list",
-      choices: connectors,
+      choices: ["yes", "no"],
     },
   ]);
 
-  connector = connectMapping[connector];
+  if (choice === "yes") {
+    connector = await connectorSelect(chain);
+  }
+  connector = connectMapping[chain][connector];
+
+  let { choice1 } = await inquirer.prompt([
+    {
+      name: "choice",
+      message: "Do you wanna try deploy on hardhat first?",
+      type: "list",
+      choices: ["yes", "no"],
+    },
+  ]);
+
+  if (choice1 === "yes") {
+    chain = "hardhat";
+  }
+
+  console.log(`Deploying ${connector} on ${chain}, press (ctrl + c) to stop`);
+
   start = Date.now();
   await execScript({
     cmd: "npx",
-    args: ["hardhat", "run", "scripts/deployment/deploy.ts"],
+    args: [
+      "hardhat",
+      "run",
+      "scripts/deployment/deploy.ts",
+      "--network",
+      `${chain}`,
+    ],
     env: {
       connectorName: connector,
       networkType: chain,
