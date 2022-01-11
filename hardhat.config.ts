@@ -118,7 +118,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   etherscan: { 
-     apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
+     apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",
