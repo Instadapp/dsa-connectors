@@ -3,7 +3,7 @@ import inquirer from "inquirer";
 import { connectors, connectMapping } from "./connectors";
 import { join } from "path";
 
-let start: number, end: number;
+let start: number, end: number, runchain: string;
 
 async function connectorSelect(chain: string) {
   let { connector } = await inquirer.prompt([
@@ -46,18 +46,18 @@ async function deployRunner() {
 
   let { choice1 } = await inquirer.prompt([
     {
-      name: "choice",
+      name: "choice1",
       message: "Do you wanna try deploy on hardhat first?",
       type: "list",
       choices: ["yes", "no"],
     },
   ]);
 
-  if (choice1 === "yes") {
-    chain = "hardhat";
-  }
+  runchain = choice1 === "yes" ? "hardhat" : chain;
 
-  console.log(`Deploying ${connector} on ${chain}, press (ctrl + c) to stop`);
+  console.log(
+    `Deploying ${connector} on ${runchain}, press (ctrl + c) to stop`
+  );
 
   start = Date.now();
   await execScript({
@@ -67,7 +67,7 @@ async function deployRunner() {
       "run",
       "scripts/deployment/deploy.ts",
       "--network",
-      `${chain}`,
+      `${runchain}`,
     ],
     env: {
       connectorName: connector,
