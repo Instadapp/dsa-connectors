@@ -1,7 +1,9 @@
 name: PR status checks
 on:
-  pull_request:
+  # This is so the status check can run on forks.
+  pull_request_target:
     types: [assigned, opened, synchronize, reopened]
+
 jobs:
   build:
     runs-on: ubuntu-latest
