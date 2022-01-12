@@ -9,15 +9,15 @@ const mineTx = async (tx: any) => {
 
 const tokenMapping: Record<string, any> = {
   usdc: {
-    impersonateSigner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
+    impersonateSigner: "0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503",
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     abi: [
-      "function mint(address _to, uint256 _amount) external returns (bool);",
+      "function transfer(address to, uint value)"
     ],
     process: async function(owner: Signer | Provider, to: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
 
-      await mineTx(contract.mint(to, amt));
+      await mineTx(contract.transfer(to, amt));
     },
   },
   dai: {
