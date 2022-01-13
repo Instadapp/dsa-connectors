@@ -16,7 +16,7 @@ import type { Signer, Contract } from "ethers";
 import { CurrencyAmount, Token, TradeType, Currency, Percent } from "@uniswap/sdk-core";
 import { AlphaRouter } from "@uniswap/smart-order-router";
 const provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/47722f74a0264bd98bdc66c7f0177333");
-const router = new AlphaRouter({ chainId: 1, provider });
+const router = new AlphaRouter({ chainId: 1, provider: ethers.provider });
 
 describe("Auto Router", function () {
   const connectorName = "Auto-Router-test";
@@ -101,7 +101,8 @@ describe("Auto Router", function () {
       console.log(route);
       const calldata = route?.methodParameters?.calldata;
       console.log(route?.quote.numerator);
-      const unitAmt = "1000149";
+      const unitAmt = Number(route?.quote.numerator) / Number(route?.quote.denominator);
+      console.log(unitAmt);
       const spells = [
         {
           connector: connectorName,
