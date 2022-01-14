@@ -1,7 +1,6 @@
 pragma solidity ^0.7.0;
 
-import { MemoryInterface, InstaMapping } from "./interfaces.sol";
-
+import { MemoryInterface } from "./interfaces.sol";
 
 abstract contract Stores {
 
