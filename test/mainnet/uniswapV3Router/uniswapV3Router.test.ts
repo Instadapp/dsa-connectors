@@ -93,10 +93,12 @@ describe("Auto Router", function () {
       const DAI = new Token(1, sellTokenAddress, sellTokenDecimals);
       const USDC = new Token(1, buyTokenAddress, buyTokenDecimals);
       const daiAmount = CurrencyAmount.fromRawAmount(DAI, srcAmount);
-      const route = await router.route(daiAmount, USDC, TradeType.EXACT_OUTPUT, {
+
+      const deadline = 1696000000 // Fri Sep 29 2023 15:06:40 GMT+0000
+      const route = await router.route(daiAmount, USDC, TradeType.EXACT_INPUT, {
         recipient: dsaWallet0.address,
         slippageTolerance: new Percent(5, 100),
-        deadline: 100
+        deadline
       });
       console.log(route);
       const calldata = route?.methodParameters?.calldata;
