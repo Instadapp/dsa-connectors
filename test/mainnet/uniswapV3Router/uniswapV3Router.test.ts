@@ -27,6 +27,10 @@ describe("Auto Router", function () {
   let instaConnectorsV2: Contract;
   let connector: Contract;
 
+  // @ts-ignore
+  const provider = new ethers.providers.JsonRpcProvider(hre.config.networks.hardhat.forking.url);
+  const router = new AlphaRouter({ chainId: 1, provider });
+
   before(async () => {
     await hre.network.provider.request({
       method: "hardhat_reset",
@@ -112,9 +116,21 @@ describe("Auto Router", function () {
           args: [buyTokenAddress, sellTokenAddress, srcAmount, unitAmt, calldata, 0]
         }
       ];
+
+      const buyTokenContract = await ethers.getContractAt(
+        er20abi,
+        buyTokenAddress,
+      );
+
+      const initialBuyTokenBalance = await buyTokenContract.balanceOf(dsaWallet0.address)
+
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
       const receipt = await tx.wait();
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
+
+      const finalBuyTokenBalance = await buyTokenContract.balanceOf(dsaWallet0.address)
+
+      
+      expect(finalBuyTokenBalance).to.be.gt(initialBuyTokenBalance);
     });
   });
 });

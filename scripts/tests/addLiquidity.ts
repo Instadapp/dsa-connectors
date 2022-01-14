@@ -1,6 +1,6 @@
 import { Provider } from "@ethersproject/abstract-provider";
 import { Signer } from "@ethersproject/abstract-signer";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { impersonateAccounts } from "./impersonate";
 
 const mineTx = async (tx: any) => {
@@ -78,11 +78,11 @@ export async function addLiquidity(tokenName: string, address: any, amt: any) {
     token.impersonateSigner,
   ]);
 
-  // send 1 eth to cover any tx costs.
-  await signer.sendTransaction({
-    to: impersonatedSigner.address,
-    value: ethers.utils.parseEther("1"),
-  });
+  // send 2 eth to cover any tx costs.
+  await network.provider.send("hardhat_setBalance", [
+    impersonatedSigner.address,
+    ethers.utils.parseEther("2").toHexString(),
+  ]);
 
   await token.process(impersonatedSigner, address, amt);
 }
