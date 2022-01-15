@@ -43,7 +43,7 @@ abstract contract Helpers is DSMath, Basic {
         buyAmt = sub(finalBal, initalBal);
         require(_slippageAmt <= buyAmt, "Too much slippage");
 
-       isEth = address(buyToken) == ethAddr;
+       isEth = address(swapData.buyToken) == ethAddr;
        convertWethToEth(isEth,buyToken,buyAmt);
     }
 
