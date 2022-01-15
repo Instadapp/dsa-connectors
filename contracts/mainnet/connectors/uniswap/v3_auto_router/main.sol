@@ -41,7 +41,7 @@ abstract contract AutoRouter is Helpers, Events {
             _buyAmt: 0
         });
 
-        swapData = _Swap(swapData, setId);
+        swapData = _swap(swapData, setId);
 
         _eventName = "LogSwap(address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(buyAddr, sellAddr, swapData._buyAmt, swapData._sellAmt, 0, setId);
