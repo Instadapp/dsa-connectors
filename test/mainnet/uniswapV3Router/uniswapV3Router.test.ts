@@ -104,10 +104,36 @@ describe("Auto Router", function () {
         slippageTolerance: new Percent(5, 100),
         deadline
       });
-      console.log(route);
+    
       const calldata = route?.methodParameters?.calldata;
-      console.log(route?.quote.numerator);
-      const unitAmt = Number(route?.quote.numerator) / Number(route?.quote.denominator);
+    
+  const _buyAmount = route?.quote.toFixed();
+  const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
+  
+   
+      function caculateUnitAmt(
+        buyAmount: any,
+        sellAmount: any,
+        buyDecimal: any,
+        sellDecimal: any,
+        maxSlippage: any
+      ) {
+        let unitAmt: any;
+        unitAmt = new BigNumber(buyAmount)
+          .dividedBy(10 ** buyDecimal)
+          .dividedBy(new BigNumber(sellAmount).dividedBy(10 ** sellDecimal));
+        unitAmt = unitAmt.multipliedBy((100 - maxSlippage) / 100);
+        unitAmt = unitAmt.multipliedBy(1e18).toFixed(0);
+        return unitAmt;
+      }
+
+      const unitAmt = caculateUnitAmt(
+        buyTokenAmount,
+        srcAmount,
+        buyTokenDecimals,
+        sellTokenDecimals,
+        1
+      );
       console.log(unitAmt);
       const spells = [
         {
