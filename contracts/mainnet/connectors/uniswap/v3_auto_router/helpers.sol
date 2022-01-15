@@ -52,7 +52,7 @@ abstract contract Helpers is DSMath, Basic {
      * @param swapData Struct with multiple swap data defined in interfaces.sol 
      * @param setId Set token amount at this ID in `InstaMemory` Contract.
      */
-    function _Swap(
+    function _swap(
         SwapData memory swapData,
         uint setId
     ) internal returns (SwapData memory) {
