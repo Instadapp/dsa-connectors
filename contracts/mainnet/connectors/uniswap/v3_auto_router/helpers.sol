@@ -15,13 +15,19 @@ abstract contract Helpers is DSMath, Basic {
      /**
      * @dev UniswapV3 swapHelper
      * @param swapData - Struct defined in interfaces.sol
-     * @param ethAmt - Eth to swap for .value()
      */
     function _SwapHelper(
-        SwapData memory swapData,
-        uint ethAmt
+        SwapData memory swapData
     ) internal returns (uint buyAmt) {
-        TokenInterface buyToken = swapData.buyToken;
+        
+        TokenInterface sellToken = address(swapData.sellToken) == ethAddr ? TokenInterface(wethAddr) : swapData.sellToken;
+        TokenInterface buyToken = address(swapData.buyToken) == ethAddr ?  TokenInterface(wethAddr) : swapData.buyToken;
+         
+         bool isEth = address(swapData.sellToken) == ethAddr;
+        convertEthToWeth(isEth, sellToken, swapData._sellAmt);
+
+        approve(TokenInterface(sellToken), V3_SWAP_ROUTER_ADDRESS, swapData._sellAmt);
+    
         (uint _buyDec, uint _sellDec) = getTokensDec(buyToken, swapData.sellToken);
         uint _sellAmt18 = convertTo18(_sellDec, swapData._sellAmt);
         uint _slippageAmt = convert18ToDec(_buyDec, wmul(swapData.unitAmt, _sellAmt18));
@@ -29,14 +35,16 @@ abstract contract Helpers is DSMath, Basic {
         uint initalBal = getTokenBal(buyToken);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, ) = V3_SWAP_ROUTER_ADDRESS.call{value: ethAmt}(swapData.callData);
+        (bool success, ) = V3_SWAP_ROUTER_ADDRESS.call(swapData.callData);
         if (!success) revert("uniswapV3-swap-failed");
 
         uint finalBal = getTokenBal(buyToken);
 
         buyAmt = sub(finalBal, initalBal);
-
         require(_slippageAmt <= buyAmt, "Too much slippage");
+
+       isEth = address(buyToken) == ethAddr;
+       convertWethToEth(isEth,buyToken,buyAmt);
     }
 
      /**
@@ -48,16 +56,8 @@ abstract contract Helpers is DSMath, Basic {
         SwapData memory swapData,
         uint setId
     ) internal returns (SwapData memory) {
-        TokenInterface _sellAddr = swapData.sellToken;
-
-        uint ethAmt;
-        if (address(_sellAddr) == ethAddr) {
-            ethAmt = swapData._sellAmt;
-        } else {
-            approve(TokenInterface(_sellAddr), V3_SWAP_ROUTER_ADDRESS, swapData._sellAmt);
-        }
-
-        swapData._buyAmt = _SwapHelper(swapData, ethAmt);
+        
+        swapData._buyAmt = _SwapHelper(swapData);
         setUint(setId, swapData._buyAmt);
 
         return swapData;
