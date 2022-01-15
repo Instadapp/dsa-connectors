@@ -57,7 +57,7 @@ abstract contract Helpers is DSMath, Basic {
         uint setId
     ) internal returns (SwapData memory) {
         
-        swapData._buyAmt = _SwapHelper(swapData);
+        swapData._buyAmt = _swapHelper(swapData);
         setUint(setId, swapData._buyAmt);
 
         return swapData;
