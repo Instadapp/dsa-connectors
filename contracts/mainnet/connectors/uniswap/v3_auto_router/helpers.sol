@@ -16,7 +16,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev UniswapV3 swapHelper
      * @param swapData - Struct defined in interfaces.sol
      */
-    function _SwapHelper(
+    function _swapHelper(
         SwapData memory swapData
     ) internal returns (uint buyAmt) {
         
