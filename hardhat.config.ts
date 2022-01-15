@@ -23,6 +23,7 @@ const chainIds = {
   avalanche: 43114,
   polygon: 137,
   arbitrum: 42161,
+  optimism: 10
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -50,6 +51,7 @@ function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+    // gasPrice: 1000000, // 0.0001 GWEI
   };
 }
 
@@ -60,6 +62,8 @@ function getNetworkUrl(networkType: string) {
     return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "arbitrum")
     return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+  else if (networkType === "optimism")
+    return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
@@ -111,6 +115,7 @@ const config: HardhatUserConfig = {
     polygon: createConfig("polygon"),
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
+    optimism: createConfig("optimism"),
   },
   paths: {
     artifacts: "./artifacts",
