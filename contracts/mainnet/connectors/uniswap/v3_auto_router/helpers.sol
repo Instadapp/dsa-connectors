@@ -33,9 +33,6 @@ abstract contract Helpers is DSMath, Basic {
 
         buyAmt = sub(finalBal, initalBal);
         require(_slippageAmt <= buyAmt, "Too much slippage");
-
-        bool isEth = address(swapData.buyToken) == wethAddr;
-        convertWethToEth(isEth,swapData.buyToken,buyAmt);
     }
 
      /**
@@ -51,15 +48,19 @@ abstract contract Helpers is DSMath, Basic {
         swapData.sellToken = address(swapData.sellToken) == ethAddr ? TokenInterface(wethAddr) : swapData.sellToken;
         swapData.buyToken =  address(swapData.buyToken) == ethAddr ?  TokenInterface(wethAddr) : swapData.buyToken;
          
-         bool isEth = address(swapData.sellToken) == wethAddr;
-        convertEthToWeth(isEth, swapData.sellToken, swapData._sellAmt);
+        bool isEthSellToken = address(swapData.sellToken) == wethAddr;
+        convertEthToWeth(isEthSellToken, swapData.sellToken, swapData._sellAmt);
+    
         approve(TokenInterface(swapData.sellToken), V3_SWAP_ROUTER_ADDRESS, swapData._sellAmt);
     
         swapData._buyAmt = _swapHelper(swapData);
+
+        bool isEthBuyToken = address(swapData.buyToken) == wethAddr;
+        convertWethToEth(isEthBuyToken, swapData.buyToken, buyAmt);
+
         setUint(setId, swapData._buyAmt);
 
         return swapData;
-
     }
 
 }
