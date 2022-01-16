@@ -18,7 +18,7 @@ abstract contract Helpers is DSMath, Basic {
     INonfungiblePositionManager constant nftManager =
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
     IUniswapV3Staker constant staker =
-        IUniswapV3Staker(0x1f98407aaB862CdDeF78Ed252D6f557aA5b0f00d);
+        IUniswapV3Staker(0xe34139463bA50bD61336E0c446Bd8C0867c6fE65);
 
     /**
      * @dev Get Last NFT Index
