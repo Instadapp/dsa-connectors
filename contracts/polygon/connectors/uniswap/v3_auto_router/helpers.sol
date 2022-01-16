@@ -34,8 +34,6 @@ abstract contract Helpers is DSMath, Basic {
         buyAmt = sub(finalBal, initalBal);
         require(_slippageAmt <= buyAmt, "Too much slippage");
 
-        bool isMatic = address(swapData.buyToken) == wmaticAddr;
-        convertWmaticToMatic(isMatic,swapData.buyToken,buyAmt);
     }
 
      /**
@@ -48,14 +46,20 @@ abstract contract Helpers is DSMath, Basic {
         uint setId
     ) internal returns (SwapData memory) {
 
-        swapData.sellToken = address(swapData.sellToken) == maticAddr ? TokenInterface(wmaticAddr) : swapData.sellToken;
-        swapData.buyToken =  address(swapData.buyToken) == maticAddr ?  TokenInterface(wmaticAddr) : swapData.buyToken;
-         
-         bool isMatic = address(swapData.sellToken) == wmaticAddr;
-        convertMaticToWmatic(isMatic, swapData.sellToken, swapData._sellAmt);
+        bool isMaticSellToken = address(swapData.sellToken) == maticAddr;
+        bool isMaticBuyToken = address(swapData.buyToken) == maticAddr;
+
+        swapData.sellToken = isMaticSellToken ? TokenInterface(wmaticAddr) : swapData.sellToken;
+        swapData.buyToken =  isMaticBuyToken ?  TokenInterface(wmaticAddr) : swapData.buyToken;
+
+        convertMaticToWmatic(isMaticSellToken, swapData.sellToken, swapData._sellAmt);
+
         approve(TokenInterface(swapData.sellToken), V3_SWAP_ROUTER_ADDRESS, swapData._sellAmt);
     
         swapData._buyAmt = _swapHelper(swapData);
+
+        convertWmaticToMatic(isMaticBuyToken,swapData.buyToken,swapData._buyAmt);
+
         setUint(setId, swapData._buyAmt);
 
         return swapData;
