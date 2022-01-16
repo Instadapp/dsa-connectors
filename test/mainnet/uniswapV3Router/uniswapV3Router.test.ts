@@ -1,5 +1,4 @@
 import hre from "hardhat";
-import axios from "axios";
 import { expect } from "chai";
 const { ethers } = hre; //check
 import { BigNumber } from "bignumber.js";
@@ -15,8 +14,8 @@ import er20abi from "../../../scripts/constant/abi/basics/erc20.json";
 import type { Signer, Contract } from "ethers";
 import { CurrencyAmount, Token, TradeType, Currency, Percent } from "@uniswap/sdk-core";
 import { AlphaRouter } from "@uniswap/smart-order-router";
-const provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/47722f74a0264bd98bdc66c7f0177333");
-const router = new AlphaRouter({ chainId: 1, provider: ethers.provider });
+const provider = new ethers.providers.JsonRpcProvider(process.env.ETH_NODE_URL);
+const router = new AlphaRouter({ chainId: 1, provider: provider });
 
 describe("Auto Router", function () {
   const connectorName = "Auto-Router-test";
@@ -81,12 +80,12 @@ describe("Auto Router", function () {
       );
 
       expect(await daiToken.balanceOf(dsaWallet0.address)).to.be.gte(10);
-      // expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
     });
   });
 
   describe("Main", function () {
-    it("should swap the tokens", async function () {
+    it("should swap the tokens ", async function () {
       const buyTokenAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; //usdc
       const sellTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; //dai
       const sellTokenDecimals = 18;
@@ -94,12 +93,12 @@ describe("Auto Router", function () {
       const amount = 1;
 
       const srcAmount = new BigNumber(amount).times(new BigNumber(10).pow(sellTokenDecimals)).toFixed(0);
-      const DAI = new Token(1, sellTokenAddress, sellTokenDecimals);
-      const USDC = new Token(1, buyTokenAddress, buyTokenDecimals);
-      const daiAmount = CurrencyAmount.fromRawAmount(DAI, srcAmount);
+      const sellToken = new Token(1, sellTokenAddress, sellTokenDecimals);
+      const buyToken = new Token(1, buyTokenAddress, buyTokenDecimals);
+      const daiAmount = CurrencyAmount.fromRawAmount(sellToken, srcAmount);
 
       const deadline = 1696000000 // Fri Sep 29 2023 15:06:40 GMT+0000
-      const route = await router.route(daiAmount, USDC, TradeType.EXACT_INPUT, {
+      const route = await router.route(daiAmount, buyToken , TradeType.EXACT_INPUT, {
         recipient: dsaWallet0.address,
         slippageTolerance: new Percent(5, 100),
         deadline
@@ -134,7 +133,150 @@ describe("Auto Router", function () {
         sellTokenDecimals,
         1
       );
-      console.log(unitAmt);
+      const spells = [
+        {
+          connector: connectorName,
+          method: "sell",
+          args: [buyTokenAddress, sellTokenAddress, srcAmount, unitAmt, calldata, 0]
+        }
+      ];
+
+      const buyTokenContract = await ethers.getContractAt(
+        er20abi,
+        buyTokenAddress,
+      );
+
+      const initialBuyTokenBalance = await buyTokenContract.balanceOf(dsaWallet0.address)
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
+      const receipt = await tx.wait();
+
+      const finalBuyTokenBalance = await buyTokenContract.balanceOf(dsaWallet0.address)
+
+      
+      expect(finalBuyTokenBalance).to.be.gt(initialBuyTokenBalance);
+    });
+    it("should swap the tokens when selltoken is eth in the spell", async function () {
+      const buyTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; //dai
+      const sellTokenAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"; //weth
+      const sellTokenDecimals = 18;
+      const buyTokenDecimals = 18;
+      const amount = 1;
+
+      const srcAmount = new BigNumber(amount).times(new BigNumber(10).pow(sellTokenDecimals)).toFixed(0);
+      const sellToken = new Token(1, sellTokenAddress, sellTokenDecimals);
+      const buyToken = new Token(1, buyTokenAddress, buyTokenDecimals);
+      const sellAmount = CurrencyAmount.fromRawAmount(sellToken, srcAmount);
+
+      const deadline = 1696000000 // Fri Sep 29 2023 15:06:40 GMT+0000
+      const route = await router.route(sellAmount, buyToken, TradeType.EXACT_INPUT, {
+        recipient: dsaWallet0.address,
+        slippageTolerance: new Percent(5, 100),
+        deadline
+      });
+    
+      const calldata = route?.methodParameters?.calldata;
+    
+  const _buyAmount = route?.quote.toFixed();
+  const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
+  
+   
+      function caculateUnitAmt(
+        buyAmount: any,
+        sellAmount: any,
+        buyDecimal: any,
+        sellDecimal: any,
+        maxSlippage: any
+      ) {
+        let unitAmt: any;
+        unitAmt = new BigNumber(buyAmount)
+          .dividedBy(10 ** buyDecimal)
+          .dividedBy(new BigNumber(sellAmount).dividedBy(10 ** sellDecimal));
+        unitAmt = unitAmt.multipliedBy((100 - maxSlippage) / 100);
+        unitAmt = unitAmt.multipliedBy(1e18).toFixed(0);
+        return unitAmt;
+      }
+
+      const unitAmt = caculateUnitAmt(
+        buyTokenAmount,
+        srcAmount,
+        buyTokenDecimals,
+        sellTokenDecimals,
+        1
+      );
+      const ethAddr = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+      const spells = [
+        {
+          connector: connectorName,
+          method: "sell",
+          args: [buyTokenAddress, ethAddr, srcAmount, unitAmt, calldata, 0]
+        }
+      ];
+
+      const buyTokenContract = await ethers.getContractAt(
+        er20abi,
+        buyTokenAddress,
+      );
+
+      const initialBuyTokenBalance = await buyTokenContract.balanceOf(dsaWallet0.address)
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
+      const receipt = await tx.wait();
+
+      const finalBuyTokenBalance = await buyTokenContract.balanceOf(dsaWallet0.address)
+
+      
+      expect(finalBuyTokenBalance).to.be.gt(initialBuyTokenBalance);
+    });
+    it("should swap the tokens when buytoken is weth in the spell", async function () {
+      const buyTokenAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"; // weth
+      const sellTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; // dai
+      const sellTokenDecimals = 18;
+      const buyTokenDecimals = 18;
+      const amount = 4000;
+
+      const srcAmount = new BigNumber(amount).times(new BigNumber(10).pow(sellTokenDecimals)).toFixed(0);
+      const sellToken = new Token(1, sellTokenAddress, sellTokenDecimals);
+      const buyToken = new Token(1, buyTokenAddress, buyTokenDecimals);
+      const daiAmount = CurrencyAmount.fromRawAmount(sellToken, srcAmount);
+
+      const deadline = 1696000000 // Fri Sep 29 2023 15:06:40 GMT+0000
+      const route = await router.route(daiAmount, buyToken , TradeType.EXACT_INPUT, {
+        recipient: dsaWallet0.address,
+        slippageTolerance: new Percent(5, 100),
+        deadline
+      });
+    
+      const calldata = route?.methodParameters?.calldata;
+    
+  const _buyAmount = route?.quote.toFixed();
+  const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
+  
+   
+      function caculateUnitAmt(
+        buyAmount: any,
+        sellAmount: any,
+        buyDecimal: any,
+        sellDecimal: any,
+        maxSlippage: any
+      ) {
+        let unitAmt: any;
+        unitAmt = new BigNumber(buyAmount)
+          .dividedBy(10 ** buyDecimal)
+          .dividedBy(new BigNumber(sellAmount).dividedBy(10 ** sellDecimal));
+        unitAmt = unitAmt.multipliedBy((100 - maxSlippage) / 100);
+        unitAmt = unitAmt.multipliedBy(1e18).toFixed(0);
+        return unitAmt;
+      }
+
+      const unitAmt = caculateUnitAmt(
+        buyTokenAmount,
+        srcAmount,
+        buyTokenDecimals,
+        sellTokenDecimals,
+        1
+      );
+    
       const spells = [
         {
           connector: connectorName,

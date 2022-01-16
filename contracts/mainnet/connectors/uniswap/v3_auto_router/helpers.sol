@@ -11,7 +11,6 @@ abstract contract Helpers is DSMath, Basic {
      */
    address internal constant V3_SWAP_ROUTER_ADDRESS = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
 
-
      /**
      * @dev UniswapV3 swapHelper
      * @param swapData - Struct defined in interfaces.sol
@@ -20,31 +19,23 @@ abstract contract Helpers is DSMath, Basic {
         SwapData memory swapData
     ) internal returns (uint buyAmt) {
         
-        TokenInterface sellToken = address(swapData.sellToken) == ethAddr ? TokenInterface(wethAddr) : swapData.sellToken;
-        TokenInterface buyToken = address(swapData.buyToken) == ethAddr ?  TokenInterface(wethAddr) : swapData.buyToken;
-         
-         bool isEth = address(swapData.sellToken) == ethAddr;
-        convertEthToWeth(isEth, sellToken, swapData._sellAmt);
-
-        approve(TokenInterface(sellToken), V3_SWAP_ROUTER_ADDRESS, swapData._sellAmt);
-    
-        (uint _buyDec, uint _sellDec) = getTokensDec(buyToken, swapData.sellToken);
+        (uint _buyDec, uint _sellDec) = getTokensDec(swapData.buyToken, swapData.sellToken);
         uint _sellAmt18 = convertTo18(_sellDec, swapData._sellAmt);
         uint _slippageAmt = convert18ToDec(_buyDec, wmul(swapData.unitAmt, _sellAmt18));
 
-        uint initalBal = getTokenBal(buyToken);
+        uint initalBal = getTokenBal(swapData.buyToken);
 
         // solium-disable-next-line security/no-call-value
         (bool success, ) = V3_SWAP_ROUTER_ADDRESS.call(swapData.callData);
         if (!success) revert("uniswapV3-swap-failed");
 
-        uint finalBal = getTokenBal(buyToken);
+        uint finalBal = getTokenBal(swapData.buyToken);
 
         buyAmt = sub(finalBal, initalBal);
         require(_slippageAmt <= buyAmt, "Too much slippage");
 
-       isEth = address(swapData.buyToken) == ethAddr;
-       convertWethToEth(isEth,buyToken,buyAmt);
+        bool isEth = address(swapData.buyToken) == wethAddr;
+        convertWethToEth(isEth,swapData.buyToken,buyAmt);
     }
 
      /**
@@ -56,7 +47,14 @@ abstract contract Helpers is DSMath, Basic {
         SwapData memory swapData,
         uint setId
     ) internal returns (SwapData memory) {
-        
+
+        swapData.sellToken = address(swapData.sellToken) == ethAddr ? TokenInterface(wethAddr) : swapData.sellToken;
+        swapData.buyToken =  address(swapData.buyToken) == ethAddr ?  TokenInterface(wethAddr) : swapData.buyToken;
+         
+         bool isEth = address(swapData.sellToken) == wethAddr;
+        convertEthToWeth(isEth, swapData.sellToken, swapData._sellAmt);
+        approve(TokenInterface(swapData.sellToken), V3_SWAP_ROUTER_ADDRESS, swapData._sellAmt);
+    
         swapData._buyAmt = _swapHelper(swapData);
         setUint(setId, swapData._buyAmt);
 

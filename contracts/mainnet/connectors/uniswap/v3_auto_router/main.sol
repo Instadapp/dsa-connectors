@@ -1,4 +1,4 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0..0;
 pragma experimental ABIEncoderV2;
 
 /**
@@ -41,7 +41,7 @@ abstract contract AutoRouter is Helpers, Events {
             _buyAmt: 0
         });
 
-        swapData = _swap(swapData, setId);
+        swapData = _Swap(swapData, setId);
 
         _eventName = "LogSwap(address,address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(buyAddr, sellAddr, swapData._buyAmt, swapData._sellAmt, 0, setId);
