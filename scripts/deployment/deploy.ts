@@ -21,7 +21,7 @@ async function main() {
     "QUICKSWAP-A": "ConnectV2QuickswapPolygon",
     "UniswapV3-v1" : "ConnectV2UniswapV3Polygon", 
     "Uniswap-V3-Staker-v1.1" : "ConnectV2UniswapV3StakerPolygon",
-    "Paraswap-v5" : "ConnectV2ParaswapV5Polygon"
+    "Paraswap-v5" : "ConnectV2ParaswapV5Polygon",
     "1INCH-V4" : "ConnectV2OneInchV4Polygon",
     "ZEROEX-A": "ConnectV2ZeroExAvalanche",
   };
