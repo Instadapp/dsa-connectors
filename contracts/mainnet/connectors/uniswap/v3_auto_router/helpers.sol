@@ -45,11 +45,11 @@ abstract contract Helpers is DSMath, Basic {
         uint setId
     ) internal returns (SwapData memory) {
 
-        bool isEthBuyToken = address(swapData.buyToken) == ethAddr;
         bool isEthSellToken = address(swapData.sellToken) == ethAddr;
+        bool isEthBuyToken = address(swapData.buyToken) == ethAddr;
 
-        swapData.sellToken = address(swapData.sellToken) == ethAddr ? TokenInterface(wethAddr) : swapData.sellToken;
-        swapData.buyToken =  address(swapData.buyToken) == ethAddr ?  TokenInterface(wethAddr) : swapData.buyToken;
+        swapData.sellToken = isEthSellToken ? TokenInterface(wethAddr) : swapData.sellToken;
+        swapData.buyToken = isEthBuyToken ?  TokenInterface(wethAddr) : swapData.buyToken;
          
         convertEthToWeth(isEthSellToken, swapData.sellToken, swapData._sellAmt);
     
