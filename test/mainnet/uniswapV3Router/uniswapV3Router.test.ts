@@ -159,7 +159,7 @@ describe("Auto Router", function () {
 
     it("should swap the tokens when selltoken is eth in the spell", async function () {
       const buyTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; //dai
-      const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; //weth
+      const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; //eth
       const sellTokenDecimals = 18;
       const buyTokenDecimals = 18;
       const amount = 1;
