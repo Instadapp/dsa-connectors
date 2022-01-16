@@ -56,7 +56,7 @@ abstract contract Helpers is DSMath, Basic {
         swapData._buyAmt = _swapHelper(swapData);
 
         bool isEthBuyToken = address(swapData.buyToken) == wethAddr;
-        convertWethToEth(isEthBuyToken, swapData.buyToken, buyAmt);
+        convertWethToEth(isEthBuyToken, swapData.buyToken, swapData .buyAmt);
 
         setUint(setId, swapData._buyAmt);
 
