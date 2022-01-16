@@ -72,7 +72,7 @@ describe("Auto Router", function () {
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10")
       });
-      await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("10"));
+      await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("5000"));
       // console.log(dsaWallet0.address);
       const daiToken = await ethers.getContractAt(
         er20abi,
@@ -106,10 +106,10 @@ describe("Auto Router", function () {
     
       const calldata = route?.methodParameters?.calldata;
     
-  const _buyAmount = route?.quote.toFixed();
-  const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
-  
-   
+      const _buyAmount = route?.quote.toFixed();
+      const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
+      
+      
       function caculateUnitAmt(
         buyAmount: any,
         sellAmount: any,
@@ -156,15 +156,18 @@ describe("Auto Router", function () {
       
       expect(finalBuyTokenBalance).to.be.gt(initialBuyTokenBalance);
     });
+
     it("should swap the tokens when selltoken is eth in the spell", async function () {
       const buyTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; //dai
-      const sellTokenAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"; //weth
+      const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; //weth
       const sellTokenDecimals = 18;
       const buyTokenDecimals = 18;
       const amount = 1;
 
+      const wethAddr = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+
       const srcAmount = new BigNumber(amount).times(new BigNumber(10).pow(sellTokenDecimals)).toFixed(0);
-      const sellToken = new Token(1, sellTokenAddress, sellTokenDecimals);
+      const sellToken = new Token(1, wethAddr, sellTokenDecimals);
       const buyToken = new Token(1, buyTokenAddress, buyTokenDecimals);
       const sellAmount = CurrencyAmount.fromRawAmount(sellToken, srcAmount);
 
@@ -177,9 +180,9 @@ describe("Auto Router", function () {
     
       const calldata = route?.methodParameters?.calldata;
     
-  const _buyAmount = route?.quote.toFixed();
-  const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
-  
+      const _buyAmount = route?.quote.toFixed();
+      const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
+      
    
       function caculateUnitAmt(
         buyAmount: any,
@@ -204,12 +207,12 @@ describe("Auto Router", function () {
         sellTokenDecimals,
         1
       );
-      const ethAddr = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
       const spells = [
         {
           connector: connectorName,
           method: "sell",
-          args: [buyTokenAddress, ethAddr, srcAmount, unitAmt, calldata, 0]
+          args: [buyTokenAddress, sellTokenAddress, srcAmount, unitAmt, calldata, 0]
         }
       ];
 
@@ -228,6 +231,7 @@ describe("Auto Router", function () {
       
       expect(finalBuyTokenBalance).to.be.gt(initialBuyTokenBalance);
     });
+
     it("should swap the tokens when buytoken is weth in the spell", async function () {
       const buyTokenAddress = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"; // weth
       const sellTokenAddress = "0x6b175474e89094c44da98b954eedeac495271d0f"; // dai
@@ -249,9 +253,9 @@ describe("Auto Router", function () {
     
       const calldata = route?.methodParameters?.calldata;
     
-  const _buyAmount = route?.quote.toFixed();
-  const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
-  
+      const _buyAmount = route?.quote.toFixed();
+      const buyTokenAmount = new BigNumber(String(_buyAmount)).times(new BigNumber(10).pow(buyTokenDecimals)).toFixed(0);
+      
    
       function caculateUnitAmt(
         buyAmount: any,
