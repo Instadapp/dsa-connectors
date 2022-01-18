@@ -61,5 +61,5 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 }
 
 contract ConnectV2WETHOptimism is Resolver {
-    string constant public name = "WETH-v1.0";
+    string constant public name = "WETH-v1.1";
 }
