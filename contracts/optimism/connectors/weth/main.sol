@@ -27,7 +27,7 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
         uint _amt = getUint(getId, amt);
 
         _amt = _amt == uint(-1) ? address(this).balance : _amt;
-        wethFixContract.deposit{value: _amt}();
+        wethContract.deposit{value: _amt}();
         
         setUint(setId, _amt);
 
@@ -50,7 +50,7 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
         uint _amt = getUint(getId, amt);
 
         _amt = _amt == uint(-1) ? wethContract.balanceOf(address(this)) : _amt;
-        approve(wethFixContract, wethAddr, _amt);
+        approve(wethContract, address(wethContract), _amt);
         wethFixContract.withdraw(_amt);
 
         setUint(setId, _amt);
