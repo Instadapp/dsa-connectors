@@ -50,8 +50,8 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
         uint _amt = getUint(getId, amt);
 
         _amt = _amt == uint(-1) ? wethContract.balanceOf(address(this)) : _amt;
-        approve(wethContract, wethAddr, _amt);
-        wethContract.withdraw(_amt);
+        approve(wethContract, address(wethFixContract), _amt);
+        wethFixContract.withdraw(_amt);
 
         setUint(setId, _amt);
 
@@ -61,5 +61,5 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 }
 
 contract ConnectV2WETHOptimism is Resolver {
-    string constant public name = "WETH-v1.0";
+    string constant public name = "WETH-v1.1";
 }
