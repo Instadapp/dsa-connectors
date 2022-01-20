@@ -33,6 +33,7 @@ abstract contract mStableResolver is Events, Helpers {
 	) external returns (string memory _eventName, bytes memory _eventParam) {
 		//
 		uint256 mintedAmount = _amount;
+		address path;
 
 		// Check if needs to be minted first
 		if (IMasset(mUsdToken).bAssetIndexes(_token) != 0) {
@@ -44,11 +45,13 @@ abstract contract mStableResolver is Events, Helpers {
 				_minOut,
 				address(this)
 			);
+			path = mUsdToken;
 		} else {
 			require(mintedAmount >= _minOut, "mintedAmount < _minOut");
+			path = imUsdToken
 		}
 
-		return _deposit(_token, mintedAmount, imUsdToken);
+		return _deposit(_token, mintedAmount, path);
 	}
 
 	/**
@@ -115,7 +118,7 @@ abstract contract mStableResolver is Events, Helpers {
 			require(amountWithdrawn >= _minOut, "amountWithdrawn < _minOut");
 		}
 
-		_eventName = "LogWithdraw()";
+		_eventName = "LogWithdraw(address,uint256,address)";
 		_eventParam = abi.encode(mUsdToken, amountWithdrawn, imUsdToken);
 	}
 
@@ -154,7 +157,7 @@ abstract contract mStableResolver is Events, Helpers {
 			address(this)
 		);
 
-		_eventName = "LogRedeem()";
+		_eventName = "LogWithdraw(address,uint256,address)";
 		_eventParam = abi.encode(_token, amountRedeemed, _path);
 	}
 
@@ -178,7 +181,7 @@ abstract contract mStableResolver is Events, Helpers {
 
 		uint256 claimedRewardToken = sub(rewardAmountUpdated, rewardAmount);
 
-		_eventName = "LogClaimRewards()";
+		_eventName = "LogClaimRewards(address,uint256)";
 		_eventParam = abi.encode(rewardToken, claimedRewardToken);
 	}
 
@@ -231,7 +234,7 @@ abstract contract mStableResolver is Events, Helpers {
 			);
 		}
 
-		_eventName = "LogSwap()";
+		_eventName = "LogSwap(address,address,uint256,uint256)";
 		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
 	}
 
@@ -269,7 +272,7 @@ abstract contract mStableResolver is Events, Helpers {
 			address(this)
 		);
 
-		_eventName = "LogSwap()";
+		_eventName = "LogSwap(address,address,uint256,uint256)";
 		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
 	}
 
@@ -304,7 +307,7 @@ abstract contract mStableResolver is Events, Helpers {
 		IBoostedSavingsVault(imUsdVault).stake(credits);
 
 		// 3. Log Events
-		_eventName = "LogDeposit()";
+		_eventName = "LogDeposit(address,uint256,address)";
 		_eventParam = abi.encode(_token, _amount, _path);
 	}
 
@@ -359,5 +362,5 @@ abstract contract mStableResolver is Events, Helpers {
 }
 
 contract ConnectV2mStable is mStableResolver {
-	string public constant name = "mStable-Mainnet-Connector-v1";
+	string public constant name = "mStable-v1.0";
 }

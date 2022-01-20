@@ -33,6 +33,7 @@ abstract contract PmStableResolver is Events, Helpers {
 	) external returns (string memory _eventName, bytes memory _eventParam) {
 		//
 		uint256 mintedAmount = _amount;
+		address path;
 
 		// Check if needs to be minted first
 		if (IMasset(mUsdToken).bAssetIndexes(_token) != 0) {
@@ -44,11 +45,13 @@ abstract contract PmStableResolver is Events, Helpers {
 				_minOut,
 				address(this)
 			);
+			path = mUsdToken;
 		} else {
 			require(mintedAmount >= _minOut, "mintedAmount < _minOut");
+			path = imUsdToken
 		}
 
-		return _deposit(_token, mintedAmount, imUsdToken);
+		return _deposit(_token, mintedAmount, path);
 	}
 
 	/**
@@ -115,7 +118,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			require(amountWithdrawn >= _minOut, "amountWithdrawn < _minOut");
 		}
 
-		_eventName = "LogWithdraw()";
+		_eventName = "LogWithdraw(address,uint256,address)";
 		_eventParam = abi.encode(mUsdToken, amountWithdrawn, imUsdToken);
 	}
 
@@ -154,7 +157,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			address(this)
 		);
 
-		_eventName = "LogRedeem()";
+		_eventName = "LogWithdraw(address,uint256,address)";
 		_eventParam = abi.encode(_token, amountRedeemed, _path);
 	}
 
@@ -189,7 +192,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			platformAmount
 		);
 
-		_eventName = "LogClaimRewards()";
+		_eventName = "LogClaimRewards(address,uint256,address,uint256)";
 		_eventParam = abi.encode(
 			rewardToken,
 			claimedRewardToken,
@@ -247,7 +250,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			);
 		}
 
-		_eventName = "LogSwap()";
+		_eventName = "LogSwap(address,address,uint256,uint256)";
 		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
 	}
 
@@ -285,7 +288,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			address(this)
 		);
 
-		_eventName = "LogSwap()";
+		_eventName = "LogSwap(address,address,uint256,uint256)";
 		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
 	}
 
@@ -320,7 +323,7 @@ abstract contract PmStableResolver is Events, Helpers {
 		IStakingRewardsWithPlatformToken(imUsdVault).stake(credits);
 
 		// 3. Log Events
-		_eventName = "LogDeposit()";
+		_eventName = "LogDeposit(address,uint256,address)";
 		_eventParam = abi.encode(_token, _amount, _path);
 	}
 
@@ -382,5 +385,5 @@ abstract contract PmStableResolver is Events, Helpers {
 }
 
 contract ConnectV2PmStable is PmStableResolver {
-	string public constant name = "mStable-Polygon-Connector-v1";
+	string public constant name = "mStable-Polygon-v1.0";
 }
