@@ -7,8 +7,8 @@ pragma experimental ABIEncoderV2;
  */
 
 // import files from common directory
-import { TokenInterface , MemoryInterface } from "../../../common/interfaces.sol";
-import { Stores } from "../../../common/stores.sol";
+import { TokenInterface , MemoryInterface } from "../../common/interfaces.sol";
+import { Stores } from "../../common/stores.sol";
 import { OneInchInterace, OneInchData } from "./interface.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
@@ -106,6 +106,6 @@ abstract contract OneInch is OneInchResolverHelpers {
     }
 }
 
-contract ConnectV2OneInchV4 is OneInch {
+contract ConnectV2OneInchV4Avalanche is OneInch {
     string public name = "1Inch-v4";
 }
