@@ -51,7 +51,7 @@ abstract contract mStableResolver is Events, Helpers {
 			path = imUsdToken
 		}
 
-		return _deposit(_token, mintedAmount, path);
+		(_eventName, _eventParam) = _deposit(_token, mintedAmount, path);
 	}
 
 	/**
@@ -86,7 +86,8 @@ abstract contract mStableResolver is Events, Helpers {
 			_minOut,
 			address(this)
 		);
-		return _deposit(_token, mintedAmount, _path);
+
+		(_eventName, _eventParam) = _deposit(_token, mintedAmount, _path);
 	}
 
 	/**
