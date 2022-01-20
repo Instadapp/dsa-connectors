@@ -48,7 +48,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			path = mUsdToken;
 		} else {
 			require(mintedAmount >= _minOut, "mintedAmount < _minOut");
-			path = imUsdToken
+			path = imUsdToken;
 		}
 
 		(_eventName, _eventParam) = _deposit(_token, mintedAmount, path);
@@ -86,7 +86,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			_minOut,
 			address(this)
 		);
-		
+
 		(_eventName, _eventParam) = _deposit(_token, mintedAmount, _path);
 	}
 
