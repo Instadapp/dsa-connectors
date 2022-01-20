@@ -109,7 +109,6 @@ const config: HardhatUserConfig = {
       forking: {
         url: String(getNetworkUrl(String(process.env.networkType))),
       },
-      gasPrice: 25000000000,
     },
     mainnet: createConfig("mainnet"),
     polygon: createConfig("polygon"),
