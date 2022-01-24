@@ -3,7 +3,7 @@ import { IERC20Minimal__factory } from "../../../typechain";
 import { BigNumber as BN } from "ethers";
 
 export const DEAD_ADDRESS = "0x0000000000000000000000000000000000000001";
-export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const ZERO_ADDRESS = ethers.constants.AddressZero;
 
 export const DEFAULT_DECIMALS = 18;
 

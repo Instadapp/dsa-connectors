@@ -7,11 +7,11 @@ pragma solidity ^0.7.6;
 
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { IMasset, ISavingsContractV2, IBoostedSavingsVault, IFeederPool } from "./interface.sol";
+
 import { TokenInterface } from "../../common/interfaces.sol";
+import { IMasset, IBoostedSavingsVault, IFeederPool } from "./interface.sol";
 
 abstract contract mStableResolver is Events, Helpers {
-	//
 	/***************************************
                     CORE
     ****************************************/
@@ -31,7 +31,6 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _amount,
 		uint256 _minOut
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		//
 		uint256 mintedAmount = _amount;
 		address path;
 
@@ -71,7 +70,6 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _minOut,
 		address _path
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		//
 		require(_path != address(0), "Path must be set");
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) == 0,
@@ -140,7 +138,6 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _minOut,
 		address _path
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		//
 		require(_path != address(0), "Path must be set");
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) == 0,
@@ -203,7 +200,6 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _amount,
 		uint256 _minOut
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		//
 		approve(TokenInterface(_input), mUsdToken, _amount);
 		uint256 amountSwapped;
 
@@ -258,7 +254,6 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _minOut,
 		address _path
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		//
 		uint256 amountSwapped;
 
 		approve(TokenInterface(_input), _path, _amount);
@@ -275,90 +270,6 @@ abstract contract mStableResolver is Events, Helpers {
 
 		_eventName = "LogSwap(address,address,uint256,uint256)";
 		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
-	}
-
-	/***************************************
-                    Internal
-    ****************************************/
-
-	/**
-	 * @dev Deposit to Save from any asset
-	 * @notice Called internally from deposit functions
-	 * @param _token Address of token to deposit
-	 * @param _amount Amount of token to deposit
-	 * @param _path Path to mint mUSD (only needed for Feeder Pool)
-	 * @return _eventName Event name
-	 * @return _eventParam Event parameters
-	 */
-
-	function _deposit(
-		address _token,
-		uint256 _amount,
-		address _path
-	) internal returns (string memory _eventName, bytes memory _eventParam) {
-		//
-		// 1. Deposit mUSD to Save
-		approve(TokenInterface(mUsdToken), imUsdToken, _amount);
-		uint256 credits = ISavingsContractV2(imUsdToken).depositSavings(
-			_amount
-		);
-
-		// 2. Stake imUSD to Vault
-		approve(TokenInterface(imUsdToken), imUsdVault, credits);
-		IBoostedSavingsVault(imUsdVault).stake(credits);
-
-		// 3. Log Events
-		_eventName = "LogDeposit(address,uint256,address)";
-		_eventParam = abi.encode(_token, _amount, _path);
-	}
-
-	/**
-	 * @dev Withdraws from Save
-	 * @notice Withdraws token supported by mStable from Save
-	 * @param _credits Credits to withdraw
-	 * @return amountWithdrawn Amount withdrawn in mUSD
-	 */
-
-	function _withdraw(uint256 _credits)
-		internal
-		returns (uint256 amountWithdrawn)
-	{
-		// 1. Withdraw from Vault
-		// approve(TokenInterface(imUsdVault), imUsdToken, _credits);
-		IBoostedSavingsVault(imUsdVault).withdraw(_credits);
-
-		// 2. Withdraw from Save
-		approve(TokenInterface(imUsdToken), imUsdVault, _credits);
-		amountWithdrawn = ISavingsContractV2(imUsdToken).redeemCredits(
-			_credits
-		);
-	}
-
-	/**
-	 * @dev Returns the reward tokens
-	 * @notice Gets the reward tokens from the vault contract
-	 * @return rewardToken Address of reward token
-	 */
-
-	function _getRewardTokens() internal view returns (address rewardToken) {
-		rewardToken = address(
-			IBoostedSavingsVault(imUsdVault).getRewardToken()
-		);
-	}
-
-	/**
-	 * @dev Returns the internal balances of the rewardToken and platformToken
-	 * @notice Gets current balances of rewardToken and platformToken, used for calculating rewards accrued
-	 * @param _rewardToken Address of reward token
-	 * @return a Amount of reward token
-	 */
-
-	function _getRewardInternalBal(address _rewardToken)
-		internal
-		view
-		returns (uint256 a)
-	{
-		a = TokenInterface(_rewardToken).balanceOf(address(this));
 	}
 }
 
