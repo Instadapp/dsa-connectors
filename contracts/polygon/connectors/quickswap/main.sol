@@ -252,5 +252,5 @@ abstract contract QuickpswapResolver is Helpers, Events {
 }
 
 contract ConnectV2QuickswapPolygon is QuickpswapResolver {
-	string public constant name = "Quickswap-v1";
+	string public constant name = "Quickswap-v1.0";
 }
