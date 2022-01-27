@@ -11,7 +11,7 @@ abstract contract Helpers is DSMath, Basic {
      * @dev ISushiSwapRouter
      */
     ISushiSwapRouter internal constant router =
-        ISushiSwapRouter(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
+        ISushiSwapRouter(0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506);
 
     function getExpectedBuyAmt(address[] memory paths, uint256 sellAmt)
         internal
@@ -73,7 +73,7 @@ abstract contract Helpers is DSMath, Basic {
             uint256 _liquidity
         )
     {
-        (TokenInterface _tokenA, TokenInterface _tokenB) = changeEthAddress(
+        (TokenInterface _tokenA, TokenInterface _tokenB) = changeAvaxAddress(
             tokenA,
             tokenB
         );
@@ -86,11 +86,11 @@ abstract contract Helpers is DSMath, Basic {
             wmul(unitAmt, convertTo18(_tokenA.decimals(), _amtA))
         );
 
-        bool isEth = address(_tokenA) == wethAddr;
-        convertEthToWeth(isEth, _tokenA, _amtA);
+        bool isAvax = address(_tokenA) == wavaxAddr;
+        convertAvaxToWavax(isAvax, _tokenA, _amtA);
 
-        isEth = address(_tokenB) == wethAddr;
-        convertEthToWeth(isEth, _tokenB, _amtB);
+        isAvax = address(_tokenB) == wavaxAddr;
+        convertAvaxToWavax(isAvax, _tokenB, _amtB);
 
         approve(_tokenA, address(router), _amtA);
         approve(_tokenB, address(router), _amtB);
@@ -150,11 +150,11 @@ abstract contract Helpers is DSMath, Basic {
             );
         }
 
-        bool isEth = address(_tokenA) == wethAddr;
-        convertWethToEth(isEth, _tokenA, _amtA);
+        bool isAvax = address(_tokenA) == wavaxAddr;
+        convertWavaxToAvax(isAvax, _tokenA, _amtA);
 
-        isEth = address(_tokenB) == wethAddr;
-        convertWethToEth(isEth, _tokenB, _amtB);
+        isAvax = address(_tokenB) == wavaxAddr;
+        convertWavaxToAvax(isAvax, _tokenB, _amtB);
     }
 
     function _getRemoveLiquidityData(
@@ -169,7 +169,7 @@ abstract contract Helpers is DSMath, Basic {
             uint256 _uniAmt
         )
     {
-        (_tokenA, _tokenB) = changeEthAddress(tokenA, tokenB);
+        (_tokenA, _tokenB) = changeAvaxAddress(tokenA, tokenB);
         address exchangeAddr = ISushiSwapFactory(router.factory()).getPair(
             address(_tokenA),
             address(_tokenB)

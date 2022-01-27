@@ -122,8 +122,8 @@ const config: HardhatUserConfig = {
     sources: "./contracts",
     tests: "./test",
   },
-  etherscan: {
-    apiKey: getScanApiKey(String(process.env.networkType)),
+  etherscan: { 
+     apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",

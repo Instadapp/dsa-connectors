@@ -192,6 +192,6 @@ abstract contract SushiswapResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2Sushiswap is SushiswapResolver {
+contract ConnectV2SushiswapArbitrum is SushiswapResolver {
     string public constant name = "Sushiswap-v1";
 }
