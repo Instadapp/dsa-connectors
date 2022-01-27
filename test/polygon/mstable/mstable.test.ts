@@ -120,32 +120,36 @@ describe("MStable", async () => {
         const depositAmount = simpleToExactAmount(100);
         const minOut = depositAmount;
 
-        await executeAndAssertDeposit("deposit", mUsdToken, depositAmount, dsaWallet0, wallet0, [minOut]);
+        await executeAndAssertDeposit("deposit", mUsdToken, depositAmount, dsaWallet0, wallet0, [minOut, true]);
       });
       it("Should deposit DAI to Vault successfully (mUSD bAsset)", async () => {
         const depositAmount = simpleToExactAmount(100);
         const minOut = calcMinOut(depositAmount, 0.02);
 
-        await executeAndAssertDeposit("deposit", daiToken, depositAmount, dsaWallet0, wallet0, [minOut]);
+        await executeAndAssertDeposit("deposit", daiToken, depositAmount, dsaWallet0, wallet0, [minOut, true]);
       });
       it("Should deposit FRAX to Vault successfully (via Feeder Pool)", async () => {
         const depositAmount = simpleToExactAmount(100);
         const minOut = calcMinOut(depositAmount, 0.02);
         const path = getToken("FRAX").feederPool;
 
-        await executeAndAssertDeposit("depositViaSwap", fraxToken, depositAmount, dsaWallet0, wallet0, [minOut, path]);
+        await executeAndAssertDeposit("depositViaSwap", fraxToken, depositAmount, dsaWallet0, wallet0, [
+          minOut,
+          path,
+          true
+        ]);
       });
       it("Should withdraw from Vault to mUSD", async () => {
         const withdrawAmount = simpleToExactAmount(100);
         const minOut = simpleToExactAmount(1);
 
-        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [minOut]);
+        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [minOut, true]);
       });
       it("Should withdraw from Vault to DAI (mUSD bAsset)", async () => {
         const withdrawAmount = simpleToExactAmount(100);
         const minOut = simpleToExactAmount(1);
 
-        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [minOut]);
+        await executeAndAssertWithdraw("withdraw", mUsdToken, withdrawAmount, dsaWallet0, wallet0, [minOut, true]);
       });
       it("Should withdraw from Vault to FRAX (via Feeder Pool)", async () => {
         const withdrawAmount = simpleToExactAmount(100);
@@ -154,7 +158,8 @@ describe("MStable", async () => {
 
         await executeAndAssertWithdraw("withdrawViaSwap", fraxToken, withdrawAmount, dsaWallet0, wallet0, [
           minOut,
-          path
+          path,
+          true
         ]);
       });
       it("Should claim Rewards", async () => {
@@ -168,7 +173,7 @@ describe("MStable", async () => {
           {
             connector: connectorName,
             method: "claimRewards",
-            args: []
+            args: [0, 0]
           }
         ];
 

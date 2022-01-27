@@ -24,6 +24,7 @@ abstract contract Helpers is DSMath, Basic {
 	 * @param _token Address of token to deposit
 	 * @param _amount Amount of token to deposit
 	 * @param _path Path to mint mUSD (only needed for Feeder Pool)
+	 * @param _stake stake token in Vault?
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -31,42 +32,51 @@ abstract contract Helpers is DSMath, Basic {
 	function _deposit(
 		address _token,
 		uint256 _amount,
-		address _path
+		address _path,
+		bool _stake
 	) internal returns (string memory _eventName, bytes memory _eventParam) {
 		// 1. Deposit mUSD to Save
 		approve(TokenInterface(mUsdToken), imUsdToken, _amount);
 		uint256 credits = ISavingsContractV2(imUsdToken).depositSavings(
 			_amount
 		);
-
-		// 2. Stake imUSD to Vault
-		approve(TokenInterface(imUsdToken), imUsdVault, credits);
-		IStakingRewardsWithPlatformToken(imUsdVault).stake(credits);
-
+		if (_stake) {
+			// 2. Stake imUSD to Vault
+			approve(TokenInterface(imUsdToken), imUsdVault, credits);
+			IStakingRewardsWithPlatformToken(imUsdVault).stake(credits);
+		}
 		// 3. Log Events
-		_eventName = "LogDeposit(address,uint256,address)";
-		_eventParam = abi.encode(_token, _amount, _path);
+		_eventName = "LogDeposit(address,uint256,address,bool)";
+		_eventParam = abi.encode(_token, _amount, _path, _stake);
 	}
 
 	/**
 	 * @dev Withdraws from Save
 	 * @notice Withdraws token supported by mStable from Save
 	 * @param _credits Credits to withdraw
+	 * @param _unstake unstake from Vault?
 	 * @return amountWithdrawn Amount withdrawn in mUSD
 	 */
 
-	function _withdraw(uint256 _credits)
+	function _withdraw(uint256 _credits, bool _unstake)
 		internal
 		returns (uint256 amountWithdrawn)
 	{
+		uint256 credits;
 		// 1. Withdraw from Vault
-		IStakingRewardsWithPlatformToken(imUsdVault).withdraw(_credits);
+		if (_unstake) {
+			credits = _credits == uint256(-1)
+				? TokenInterface(imUsdVault).balanceOf(address(this))
+				: _credits;
+			IStakingRewardsWithPlatformToken(imUsdVault).withdraw(credits);
+		}
 
 		// 2. Withdraw from Save
+		credits = _credits == uint256(-1)
+			? TokenInterface(imUsdToken).balanceOf(address(this))
+			: _credits;
 		approve(TokenInterface(imUsdToken), imUsdVault, _credits);
-		amountWithdrawn = ISavingsContractV2(imUsdToken).redeemCredits(
-			_credits
-		);
+		amountWithdrawn = ISavingsContractV2(imUsdToken).redeemCredits(credits);
 	}
 
 	/**

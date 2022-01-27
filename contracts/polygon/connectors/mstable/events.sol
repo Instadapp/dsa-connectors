@@ -1,8 +1,13 @@
 pragma solidity ^0.7.6;
 
 contract Events {
-	event LogDeposit(address token, uint256 amount, address path);
-	event LogWithdraw(address token, uint256 amount, address path);
+	event LogDeposit(address token, uint256 amount, address path, bool stake);
+	event LogWithdraw(
+		address token,
+		uint256 amount,
+		address path,
+		bool unstake
+	);
 	event LogClaimRewards(
 		address token,
 		uint256 amount,

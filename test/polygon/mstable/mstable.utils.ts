@@ -45,7 +45,7 @@ export const executeAndAssertSwap = async (
     {
       connector: connectorName,
       method,
-      args: [tokenFrom.address, tokenTo.address, swapAmount, 1, ...(args ? args : [])]
+      args: [tokenFrom.address, tokenTo.address, swapAmount, 1, ...(args ? args : []), 0, 0]
     }
   ];
 
@@ -81,7 +81,7 @@ export const executeAndAssertDeposit = async (
     {
       connector: connectorName,
       method,
-      args: [tokenFrom.address, depositAmount, ...(args ? args : [])]
+      args: [tokenFrom.address, depositAmount, ...(args ? args : []), 0, 0]
     }
   ];
 
@@ -120,7 +120,7 @@ export const executeAndAssertWithdraw = async (
     {
       connector: connectorName,
       method,
-      args: [tokenTo.address, withdrawAmount, ...(args ? args : [])]
+      args: [tokenTo.address, withdrawAmount, ...(args ? args : []), 0, 0]
     }
   ];
 

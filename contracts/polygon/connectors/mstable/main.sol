@@ -21,6 +21,9 @@ abstract contract PmStableResolver is Events, Helpers {
 	 * @param _token Address of token to deposit
 	 * @param _amount Amount of token to deposit
 	 * @param _minOut Minimum amount of token to mint/deposit, equal to _amount if mUSD
+	 * @param _stake stake token in Vault?
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens deposited
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -28,28 +31,43 @@ abstract contract PmStableResolver is Events, Helpers {
 	function deposit(
 		address _token,
 		uint256 _amount,
-		uint256 _minOut
+		uint256 _minOut,
+		bool _stake,
+		uint256 _getId,
+		uint256 _setId
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		uint256 mintedAmount = _amount;
+		uint256 amount = getUint(_getId, _amount);
+		amount = amount == uint256(-1)
+			? TokenInterface(_token).balanceOf(address(this))
+			: amount;
+		uint256 mintedAmount;
 		address path;
 
 		// Check if needs to be minted first
 		if (IMasset(mUsdToken).bAssetIndexes(_token) != 0) {
 			// mint first
-			approve(TokenInterface(_token), mUsdToken, _amount);
+			approve(TokenInterface(_token), mUsdToken, amount);
 			mintedAmount = IMasset(mUsdToken).mint(
 				_token,
-				_amount,
+				amount,
 				_minOut,
 				address(this)
 			);
 			path = mUsdToken;
 		} else {
-			require(mintedAmount >= _minOut, "mintedAmount < _minOut");
+			require(amount >= _minOut, "mintedAmount < _minOut");
+			mintedAmount = amount;
 			path = imUsdToken;
 		}
 
-		(_eventName, _eventParam) = _deposit(_token, mintedAmount, path);
+		setUint(_setId, mintedAmount);
+
+		(_eventName, _eventParam) = _deposit(
+			_token,
+			mintedAmount,
+			path,
+			_stake
+		);
 	}
 
 	/**
@@ -59,6 +77,9 @@ abstract contract PmStableResolver is Events, Helpers {
 	 * @param _amount Amount of token to deposit
 	 * @param _minOut Minimum amount of token to mint
 	 * @param _path Feeder Pool address for _token
+	 * @param _stake stake token in Vault?
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens deposited
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -67,7 +88,10 @@ abstract contract PmStableResolver is Events, Helpers {
 		address _token,
 		uint256 _amount,
 		uint256 _minOut,
-		address _path
+		address _path,
+		bool _stake,
+		uint256 _getId,
+		uint256 _setId
 	) external returns (string memory _eventName, bytes memory _eventParam) {
 		require(_path != address(0), "Path must be set");
 		require(
@@ -75,16 +99,27 @@ abstract contract PmStableResolver is Events, Helpers {
 			"Token is bAsset"
 		);
 
-		approve(TokenInterface(_token), _path, _amount);
+		uint256 amount = getUint(_getId, _amount);
+		amount = amount == uint256(-1)
+			? TokenInterface(_token).balanceOf(address(this))
+			: amount;
+
+		approve(TokenInterface(_token), _path, amount);
 		uint256 mintedAmount = IFeederPool(_path).swap(
 			_token,
 			mUsdToken,
-			_amount,
+			amount,
 			_minOut,
 			address(this)
 		);
 
-		(_eventName, _eventParam) = _deposit(_token, mintedAmount, _path);
+		setUint(_setId, mintedAmount);
+		(_eventName, _eventParam) = _deposit(
+			_token,
+			mintedAmount,
+			_path,
+			_stake
+		);
 	}
 
 	/**
@@ -93,6 +128,9 @@ abstract contract PmStableResolver is Events, Helpers {
 	 * @param _token Address of token to withdraw
 	 * @param _credits Credits to withdraw
 	 * @param _minOut Minimum amount of token to withdraw
+	 * @param _unstake from the Vault first?
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens withdrawn
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -100,9 +138,13 @@ abstract contract PmStableResolver is Events, Helpers {
 	function withdraw(
 		address _token,
 		uint256 _credits,
-		uint256 _minOut
+		uint256 _minOut,
+		bool _unstake,
+		uint256 _getId,
+		uint256 _setId
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		uint256 amountWithdrawn = _withdraw(_credits);
+		uint256 credits = getUint(_getId, _credits);
+		uint256 amountWithdrawn = _withdraw(credits, _unstake);
 
 		// Check if needs to be redeemed
 		if (IMasset(mUsdToken).bAssetIndexes(_token) != 0) {
@@ -116,8 +158,14 @@ abstract contract PmStableResolver is Events, Helpers {
 			require(amountWithdrawn >= _minOut, "amountWithdrawn < _minOut");
 		}
 
-		_eventName = "LogWithdraw(address,uint256,address)";
-		_eventParam = abi.encode(mUsdToken, amountWithdrawn, imUsdToken);
+		setUint(_setId, amountWithdrawn);
+		_eventName = "LogWithdraw(address,uint256,address,bool)";
+		_eventParam = abi.encode(
+			mUsdToken,
+			amountWithdrawn,
+			imUsdToken,
+			_unstake
+		);
 	}
 
 	/**
@@ -127,6 +175,9 @@ abstract contract PmStableResolver is Events, Helpers {
 	 * @param _credits Credits to withdraw
 	 * @param _minOut Minimum amount of token to mint
 	 * @param _path Feeder Pool address for _token
+	 * @param _unstake from the Vault first?
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens withdrawn
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -135,7 +186,10 @@ abstract contract PmStableResolver is Events, Helpers {
 		address _token,
 		uint256 _credits,
 		uint256 _minOut,
-		address _path
+		address _path,
+		bool _unstake,
+		uint256 _getId,
+		uint256 _setId
 	) external returns (string memory _eventName, bytes memory _eventParam) {
 		require(_path != address(0), "Path must be set");
 		require(
@@ -143,7 +197,8 @@ abstract contract PmStableResolver is Events, Helpers {
 			"Token is bAsset"
 		);
 
-		uint256 amountWithdrawn = _withdraw(_credits);
+		uint256 credits = getUint(_getId, _credits);
+		uint256 amountWithdrawn = _withdraw(credits, _unstake);
 
 		approve(TokenInterface(mUsdToken), _path, amountWithdrawn);
 		uint256 amountRedeemed = IFeederPool(_path).swap(
@@ -154,18 +209,21 @@ abstract contract PmStableResolver is Events, Helpers {
 			address(this)
 		);
 
-		_eventName = "LogWithdraw(address,uint256,address)";
-		_eventParam = abi.encode(_token, amountRedeemed, _path);
+		setUint(_setId, amountRedeemed);
+		_eventName = "LogWithdraw(address,uint256,address,bool)";
+		_eventParam = abi.encode(_token, amountRedeemed, _path, _unstake);
 	}
 
 	/**
 	 * @dev Claims Rewards
 	 * @notice Claims accrued rewards from the Vault
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens withdrawn
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
 
-	function claimRewards()
+	function claimRewards(uint256 _getId, uint256 _setId)
 		external
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
@@ -189,6 +247,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			platformAmount
 		);
 
+		setUint(_setId, claimedRewardToken);
 		_eventName = "LogClaimRewards(address,uint256,address,uint256)";
 		_eventParam = abi.encode(
 			rewardToken,
@@ -205,6 +264,8 @@ abstract contract PmStableResolver is Events, Helpers {
 	 * @param _output Token address to swap to
 	 * @param _amount Amount of tokens to swap
 	 * @param _minOut Minimum amount of token to mint
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens swapped
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -213,9 +274,16 @@ abstract contract PmStableResolver is Events, Helpers {
 		address _input,
 		address _output,
 		uint256 _amount,
-		uint256 _minOut
+		uint256 _minOut,
+		uint256 _getId,
+		uint256 _setId
 	) external returns (string memory _eventName, bytes memory _eventParam) {
-		approve(TokenInterface(_input), mUsdToken, _amount);
+		uint256 amount = getUint(_getId, _amount);
+		amount = amount == uint256(-1)
+			? TokenInterface(_input).balanceOf(address(this))
+			: amount;
+
+		approve(TokenInterface(_input), mUsdToken, amount);
 		uint256 amountSwapped;
 
 		// Check the assets and swap accordingly
@@ -223,7 +291,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			// bAsset to mUSD => mint
 			amountSwapped = IMasset(mUsdToken).mint(
 				_input,
-				_amount,
+				amount,
 				_minOut,
 				address(this)
 			);
@@ -231,7 +299,7 @@ abstract contract PmStableResolver is Events, Helpers {
 			// mUSD to bAsset => redeem
 			amountSwapped = IMasset(mUsdToken).redeem(
 				_output,
-				_amount,
+				amount,
 				_minOut,
 				address(this)
 			);
@@ -240,14 +308,16 @@ abstract contract PmStableResolver is Events, Helpers {
 			amountSwapped = IMasset(mUsdToken).swap(
 				_input,
 				_output,
-				_amount,
+				amount,
 				_minOut,
 				address(this)
 			);
 		}
 
+		setUint(_setId, amountSwapped);
+
 		_eventName = "LogSwap(address,address,uint256,uint256)";
-		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
+		_eventParam = abi.encode(_input, _output, amount, amountSwapped);
 	}
 
 	/**
@@ -258,6 +328,8 @@ abstract contract PmStableResolver is Events, Helpers {
 	 * @param _amount Amount of tokens to swap
 	 * @param _minOut Minimum amount of token to mint
 	 * @param _path Feeder Pool address to use
+	 * @param _getId ID to retrieve amt
+	 * @param _setId ID stores the amount of tokens swapped
 	 * @return _eventName Event name
 	 * @return _eventParam Event parameters
 	 */
@@ -267,24 +339,32 @@ abstract contract PmStableResolver is Events, Helpers {
 		address _output,
 		uint256 _amount,
 		uint256 _minOut,
-		address _path
+		address _path,
+		uint256 _getId,
+		uint256 _setId
 	) external returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 amountSwapped;
+		uint256 amount = getUint(_getId, _amount);
+		amount = amount == uint256(-1)
+			? TokenInterface(_input).balanceOf(address(this))
+			: amount;
 
-		approve(TokenInterface(_input), _path, _amount);
+		approve(TokenInterface(_input), _path, amount);
 
 		// swaps fAsset to mUSD via Feeder Pool
 		// swaps mUSD to fAsset via Feeder Pool
 		amountSwapped = IFeederPool(_path).swap(
 			_input,
 			_output,
-			_amount,
+			amount,
 			_minOut,
 			address(this)
 		);
 
+		setUint(_setId, amountSwapped);
+
 		_eventName = "LogSwap(address,address,uint256,uint256)";
-		_eventParam = abi.encode(_input, _output, _amount, amountSwapped);
+		_eventParam = abi.encode(_input, _output, amount, amountSwapped);
 	}
 }
 
