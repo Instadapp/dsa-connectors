@@ -1,6 +1,6 @@
 import hre, { ethers } from "hardhat";
-import { execScript } from "../tests/command";
 
+import { execScript } from "../tests/command";
 export const deployConnector = async (connectorName?: string) => {
   connectorName = String(process.env.connectorName) ?? connectorName;
   const Connector = await ethers.getContractFactory(connectorName);

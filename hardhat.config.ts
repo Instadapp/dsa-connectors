@@ -23,6 +23,7 @@ const chainIds = {
   avalanche: 43114,
   polygon: 137,
   arbitrum: 42161,
+  optimism: 10
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -39,21 +40,30 @@ const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
 
+const networkGasPriceConfig: Record<string, string> = {
+  "mainnet": "160",
+  "polygon": "50",
+  "avalanche": "50",
+  "arbitrum": "2"
+}
+
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+    // gasPrice: 1000000, // 0.0001 GWEI
   };
 }
 
 function getNetworkUrl(networkType: string) {
-  //console.log(process.env);
   if (networkType === "avalanche")
     return "https://api.avax.network/ext/bc/C/rpc";
   else if (networkType === "polygon")
     return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "arbitrum")
     return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+  else if (networkType === "optimism")
+    return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
@@ -104,6 +114,7 @@ const config: HardhatUserConfig = {
     polygon: createConfig("polygon"),
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
+    optimism: createConfig("optimism"),
   },
   paths: {
     artifacts: "./artifacts",
@@ -111,8 +122,8 @@ const config: HardhatUserConfig = {
     sources: "./contracts",
     tests: "./test",
   },
-  etherscan: {
-    apiKey: getScanApiKey(getNetworkUrl(String(process.env.networkType))),
+  etherscan: { 
+     apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",
