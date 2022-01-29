@@ -214,14 +214,16 @@ abstract contract UniswapResolver is Helpers, Events {
      * @dev Create incentive
      * @notice Create incentive
      * @param _rewardToken _rewardToken address
-     * @param _length incentive length
+     * @param _startTime stake start time
+     * @param _endTime stake end time
      * @param _refundee refundee address
      * @param _poolAddr Uniswap V3 Pool address
      * @param _reward reward amount
      */
     function createIncentive(
         address _rewardToken,
-        uint256 _length,
+        uint256 _startTime,
+        uint256 _endTime,
         address _refundee,
         address _poolAddr,
         uint256 _reward
@@ -231,8 +233,6 @@ abstract contract UniswapResolver is Helpers, Events {
         returns (string memory _eventName, bytes memory _eventParam)
     {
         IUniswapV3Pool pool = IUniswapV3Pool(_poolAddr);
-        uint256 _startTime = block.timestamp;
-        uint256 _endTime = _startTime + _length;
         IUniswapV3Staker.IncentiveKey memory _key = IUniswapV3Staker
             .IncentiveKey(
                 IERC20Minimal(_rewardToken),
