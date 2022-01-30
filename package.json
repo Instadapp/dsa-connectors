@@ -11,7 +11,8 @@
     "deploy": "node scripts/deployConnectorsFromCmd.js",
     "test:runner": "hardhat run scripts/tests/run-tests.ts",
     "typechain": "hardhat typechain",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "deploy:runner": "hardhat run scripts/deployment/deployConnectorsFromCmd.ts"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,8 @@
     "@openzeppelin/contracts": "^3.4.0-solc-0.7",
     "@typechain/ethers-v5": "^8.0.5",
     "@typechain/hardhat": "^3.0.0",
+    "@uniswap/sdk-core": "^3.0.1",
+    "@uniswap/smart-order-router": "^2.5.12",
     "@uniswap/v3-core": "^1.0.0",
     "@uniswap/v3-periphery": "^1.3.0",
     "chalk": "^5.0.0",
