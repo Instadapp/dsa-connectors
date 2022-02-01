@@ -9,14 +9,15 @@ import {TokenInterface} from "../../common/interfaces.sol";
 
 /**
  * @title Notional
- * @notice Fixed Rate Lending and Borrowing
+ * @dev Fixed Rate Lending and Borrowing
  */
 abstract contract NotionalResolver is Events, Helpers {
     using SafeInt256 for int256;
 
     /**
      * @notice Deposit collateral into Notional, this should only be used for reducing risk of
-     * liquidation. Deposits into Notional are not earning fixed rates, they are earning the cToken
+     * liquidation. 
+    *  @dev Deposits into Notional are not earning fixed rates, they are earning the cToken
      * lending rate. In order to lend at fixed rates use `depositAndLend`
      * @param currencyId notional defined currency id to deposit
      * @param useUnderlying if true, will accept a deposit in the underlying currency (i.e DAI), if false
@@ -64,7 +65,7 @@ abstract contract NotionalResolver is Events, Helpers {
 
         setUint(setId, assetCashDeposited);
 
-        _eventName = "LogDepositCollateral(uint16,bool,uint256,uint256)";
+        _eventName = "LogDepositCollateral(address,uint16,bool,uint256,uint256)";
         _eventParam = abi.encode(
             address(this),
             currencyId,
@@ -76,6 +77,7 @@ abstract contract NotionalResolver is Events, Helpers {
 
     /**
      * @notice Withdraw collateral from Notional
+     * @dev This spell allows users to withdraw collateral from Notional
      * @param currencyId notional defined currency id to withdraw
      * @param redeemToUnderlying if true, will redeem the amount withdrawn to the underlying currency (i.e. DAI),
      * if false, will simply withdraw the asset token (i.e. cDAI)
@@ -90,11 +92,17 @@ abstract contract NotionalResolver is Events, Helpers {
         uint256 withdrawAmount,
         uint256 getId,
         uint256 setId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
         withdrawAmount = getUint(getId, withdrawAmount);
         uint88 amountInternalPrecision = withdrawAmount == uint256(-1)
             ? uint88(getCashBalance(currencyId))
-            : uint88(convertToInternal(currencyId, SafeInt256.toInt(withdrawAmount)));
+            : uint88(
+                convertToInternal(currencyId, SafeInt256.toInt(withdrawAmount))
+            );
 
         uint256 amountWithdrawn = notional.withdraw(
             currencyId,
@@ -115,11 +123,13 @@ abstract contract NotionalResolver is Events, Helpers {
     }
 
     /**
-     * @dev Claims NOTE tokens and transfers to the address
+     * @notice Claims NOTE tokens and transfers to the address
+     * @dev This spell allows users to claim nToken incentives
      * @param setId the id to set the balance of NOTE tokens claimed
      */
     function claimNOTE(uint256 setId)
         external
+        payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
         uint256 notesClaimed = notional.nTokenClaimIncentives();
@@ -146,8 +156,16 @@ abstract contract NotionalResolver is Events, Helpers {
         uint96 tokensToRedeem,
         uint256 getId,
         uint256 setId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = getNTokenRedeemAmount(currencyId, tokensToRedeem, getId);
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        tokensToRedeem = getNTokenRedeemAmount(
+            currencyId,
+            tokensToRedeem,
+            getId
+        );
 
         int256 _assetCashChange = notional.nTokenRedeem(
             address(this),
@@ -193,8 +211,16 @@ abstract contract NotionalResolver is Events, Helpers {
         bool redeemToUnderlying,
         uint256 getId,
         uint256 setId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = getNTokenRedeemAmount(currencyId, tokensToRedeem, getId);
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        tokensToRedeem = getNTokenRedeemAmount(
+            currencyId,
+            tokensToRedeem,
+            getId
+        );
 
         BalanceAction[] memory action = new BalanceAction[](1);
         action[0].actionType = DepositActionType.RedeemNToken;
@@ -247,8 +273,16 @@ abstract contract NotionalResolver is Events, Helpers {
         uint88 fCashAmount,
         uint32 minLendRate,
         uint256 getId
-    ) external returns (string memory _eventName, bytes memory _eventParam) {
-        tokensToRedeem = getNTokenRedeemAmount(currencyId, tokensToRedeem, getId);
+    )
+        external
+        payable
+        returns (string memory _eventName, bytes memory _eventParam)
+    {
+        tokensToRedeem = getNTokenRedeemAmount(
+            currencyId,
+            tokensToRedeem,
+            getId
+        );
 
         BalanceActionWithTrades[] memory action = new BalanceActionWithTrades[](
             1
@@ -276,6 +310,7 @@ abstract contract NotionalResolver is Events, Helpers {
 
     /**
      * @notice Deposit asset or underlying tokens and mint nTokens in a single transaction
+     * @dev This spell allows users to deposit and mint nTokens (providing liquidity)
      * @param currencyId notional defined currency id to deposit
      * @param depositAmount amount of tokens to deposit
      * @param useUnderlying if true, will accept a deposit in the underlying currency (i.e DAI), if false
@@ -310,7 +345,11 @@ abstract contract NotionalResolver is Events, Helpers {
         // withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
         int256 nTokenBefore = getNTokenBalance(currencyId);
-        uint256 msgValue = getMsgValue(currencyId, useUnderlying, depositAmount);
+        uint256 msgValue = getMsgValue(
+            currencyId,
+            useUnderlying,
+            depositAmount
+        );
 
         notional.batchBalanceAction{value: msgValue}(address(this), action);
 
@@ -336,6 +375,7 @@ abstract contract NotionalResolver is Events, Helpers {
     /**
      * @notice Uses existing Notional cash balance (deposits in Notional held as cTokens) and uses them to mint
      * nTokens.
+     * @dev This spell allows users to mint nTokens (providing liquidity) from existing cash balance.
      * @param currencyId notional defined currency id of the cash balance
      * @param cashBalanceToMint amount of account's cash balance to convert to nTokens
      * @param getId id of cash balance
@@ -348,6 +388,7 @@ abstract contract NotionalResolver is Events, Helpers {
         uint256 setId
     )
         external
+        payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
         cashBalanceToMint = getUint(getId, cashBalanceToMint);
@@ -437,7 +478,11 @@ abstract contract NotionalResolver is Events, Helpers {
         trades[0] = encodeLendTrade(marketIndex, fCashAmount, minLendRate);
         action[0].trades = trades;
 
-        uint256 msgValue = getMsgValue(currencyId, useUnderlying, depositAmount);
+        uint256 msgValue = getMsgValue(
+            currencyId,
+            useUnderlying,
+            depositAmount
+        );
         notional.batchBalanceAndTradeAction{value: msgValue}(
             address(this),
             action
@@ -479,7 +524,7 @@ abstract contract NotionalResolver is Events, Helpers {
      * @param borrowCurrencyId id of the currency to borrow
      * @param marketIndex the market index to borrow from. This is a number from 1 to 7 which corresponds to the tenor
      * of the fCash asset to borrow. Tenors are described here: https://docs.notional.finance/notional-v2/quarterly-rolls/tenors
-     * @param fCashAmount amount of fCash for the account to borrow, this is equal to how much the account must pay 
+     * @param fCashAmount amount of fCash for the account to borrow, this is equal to how much the account must pay
      * at maturity (principal plus interest).
      * @param maxBorrowRate the maximum interest rate that the account is willing to borrow at, if set to zero the account will accept
      * any borrowing rate
@@ -504,10 +549,9 @@ abstract contract NotionalResolver is Events, Helpers {
         payable
         returns (string memory _eventName, bytes memory _eventParam)
     {
-        bool useUnderlying = (
-            depositAction == DepositActionType.DepositUnderlying || 
-            depositAction == DepositActionType.DepositUnderlyingAndMintNToken
-        );
+        bool useUnderlying = (depositAction ==
+            DepositActionType.DepositUnderlying ||
+            depositAction == DepositActionType.DepositUnderlyingAndMintNToken);
 
         depositAmount = getDepositAmountAndSetApproval(
             getId,
@@ -528,7 +572,11 @@ abstract contract NotionalResolver is Events, Helpers {
                 redeemToUnderlying
             );
 
-        uint256 msgValue = getMsgValue(depositCurrencyId, useUnderlying, depositAmount);
+        uint256 msgValue = getMsgValue(
+            depositCurrencyId,
+            useUnderlying,
+            depositAmount
+        );
         executeTradeActionWithBalanceChange(
             actions,
             msgValue,

@@ -68,6 +68,7 @@ contract Events {
     );
 
     event LogDepositCollateralBorrowAndWithdraw(
+        address indexed account,
         bool useUnderlying,
         uint256 depositAmount,
         uint16 borrowCurrencyId,
@@ -78,17 +79,11 @@ contract Events {
     );
 
     event LogWithdrawLend(
+        address indexed account,
         uint16 currencyId,
         uint8 marketIndex,
         uint88 fCashAmount,
         uint32 maxBorrowRate
-    );
-
-    event LogRepayBorrow(
-        uint16 currencyId,
-        uint8 marketIndex,
-        int88 netCashToAccount,
-        uint32 minLendRate
     );
 
     event LogBatchActionRaw(address indexed account);

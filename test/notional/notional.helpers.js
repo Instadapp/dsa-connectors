@@ -140,19 +140,6 @@ const withdrawLend = async (dsa, authority, referrer, currencyId, marketIndex, f
     await tx.wait()
 };
 
-const depositERC20 = async (dsa, authority, referrer, token, amount) => {
-    const spells = [
-        {
-            connector: "BASIC-A",
-            method: "deposit",
-            args: [token, amount, 0, 0]
-        }
-    ];
-
-    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
-    await tx.wait()
-};
-
 module.exports = {
     depositCollteral,
     depositAndMintNToken,
@@ -162,6 +149,5 @@ module.exports = {
     redeemNTokenRaw,
     redeemNTokenAndWithdraw,
     redeemNTokenAndDeleverage,
-    depositCollateralBorrowAndWithdraw,
-    depositERC20
+    depositCollateralBorrowAndWithdraw
 };

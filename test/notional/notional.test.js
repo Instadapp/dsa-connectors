@@ -133,9 +133,7 @@ describe("Notional", function () {
 
         it("test_deposit_ETH_asset", async function () {
             const depositAmount = ethers.utils.parseUnits("1", 8);
-            await cethToken.connect(cethWhale).transfer(wallet0.address, depositAmount);
-            await cethToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cethToken.address, depositAmount);
+            await cethToken.connect(cethWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollteral(dsaWallet0, wallet0, wallet1, ETH_ID, depositAmount, false);
             const bal = await notional.callStatic.getAccountBalance(ETH_ID, dsaWallet0.address);
             // balance in internal asset precision
@@ -145,9 +143,7 @@ describe("Notional", function () {
 
         it("test_deposit_DAI_underlying", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 18);
-            await daiToken.connect(daiWhale).transfer(wallet0.address, depositAmount);
-            await daiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, daiToken.address, depositAmount);
+            await daiToken.connect(daiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollteral(dsaWallet0, wallet0, wallet1, DAI_ID, depositAmount, true);
             const bal = await notional.callStatic.getAccountBalance(DAI_ID, dsaWallet0.address);
             // balance in internal asset precision
@@ -157,9 +153,7 @@ describe("Notional", function () {
 
         it("test_deposit_DAI_asset", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollteral(dsaWallet0, wallet0, wallet1, DAI_ID, depositAmount, false);
             const bal = await notional.callStatic.getAccountBalance(DAI_ID, dsaWallet0.address);
             // balance in internal asset precision
@@ -195,9 +189,7 @@ describe("Notional", function () {
 
         it("test_deposit_ETH_asset_and_lend", async function () {
             const depositAmount = ethers.utils.parseUnits("1", 8);
-            await cethToken.connect(cethWhale).transfer(wallet0.address, depositAmount);
-            await cethToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cethToken.address, depositAmount);
+            await cethToken.connect(cethWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositAndLend(dsaWallet0, wallet0, wallet1, ETH_ID, false, depositAmount, MARKET_3M, 0.01e8, 0);
             const portfolio = await notional.getAccountPortfolio(dsaWallet0.address);
             expect(portfolio.length, "expect 1 lending position").to.be.equal(1);
@@ -206,9 +198,7 @@ describe("Notional", function () {
 
         it("test_deposit_DAI_underlying_and_lend", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 18);
-            await daiToken.connect(daiWhale).transfer(wallet0.address, depositAmount);
-            await daiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, daiToken.address, depositAmount);
+            await daiToken.connect(daiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositAndLend(dsaWallet0, wallet0, wallet1, DAI_ID, true, depositAmount, MARKET_3M, 100e8, 0);
             const portfolio = await notional.getAccountPortfolio(dsaWallet0.address);
             expect(portfolio.length, "expect 1 lending position").to.be.equal(1);
@@ -217,9 +207,7 @@ describe("Notional", function () {
 
         it("test_deposit_DAI_asset_and_lend", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositAndLend(dsaWallet0, wallet0, wallet1, DAI_ID, false, depositAmount, MARKET_3M, 10e8, 0);
             const portfolio = await notional.getAccountPortfolio(dsaWallet0.address);
             expect(portfolio.length, "expect 1 lending position").to.be.equal(1);
@@ -275,9 +263,7 @@ describe("Notional", function () {
 
         it("test_deposit_DAI_underlying_and_borrow_ETH", async function () {
             const depositAmount = ethers.utils.parseUnits("20000", 18);
-            await daiToken.connect(daiWhale).transfer(wallet0.address, depositAmount);
-            await daiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, daiToken.address, depositAmount);
+            await daiToken.connect(daiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollateralBorrowAndWithdraw(
                 dsaWallet0, wallet0, wallet1, DAI_ID, DEPOSIT_UNDERLYING, depositAmount, ETH_ID, MARKET_3M, 1e8, 0, true
             );
@@ -289,9 +275,7 @@ describe("Notional", function () {
 
         it("test_deposit_DAI_asset_and_borrow_ETH", async function () {
             const depositAmount = ethers.utils.parseUnits("1000000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollateralBorrowAndWithdraw(
                 dsaWallet0, wallet0, wallet1, DAI_ID, DEPOSIT_ASSET, depositAmount, ETH_ID, MARKET_3M, 1e8, 0, true
             );
@@ -303,9 +287,7 @@ describe("Notional", function () {
 
         it("test_mint_nDAI_underlying_and_borrow_ETH", async function () {
             const depositAmount = ethers.utils.parseUnits("20000", 18);
-            await daiToken.connect(daiWhale).transfer(wallet0.address, depositAmount);
-            await daiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, daiToken.address, depositAmount);
+            await daiToken.connect(daiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollateralBorrowAndWithdraw(
                 dsaWallet0, wallet0, wallet1, DAI_ID, DEPOSIT_UNDERLYING_MINT_NTOKEN, depositAmount, ETH_ID, MARKET_3M, 1e8, 0, true
             );
@@ -317,9 +299,7 @@ describe("Notional", function () {
 
         it("test_mint_nDAI_asset_and_borrow_ETH", async function () {
             const depositAmount = ethers.utils.parseUnits("1000000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollateralBorrowAndWithdraw(
                 dsaWallet0, wallet0, wallet1, DAI_ID, DEPOSIT_ASSET_MINT_NTOKEN, depositAmount, ETH_ID, MARKET_3M, 1e8, 0, true
             );
@@ -361,9 +341,7 @@ describe("Notional", function () {
 
         it("test_redeem_DAI_raw", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositAndMintNToken(dsaWallet0, wallet0, wallet1, DAI_ID, depositAmount, false);
             await helpers.redeemNTokenRaw(dsaWallet0, wallet0, wallet1, DAI_ID, true, MaxUint96)
             const bal = await notional.callStatic.getAccountBalance(DAI_ID, dsaWallet0.address);
@@ -373,9 +351,7 @@ describe("Notional", function () {
 
         it("test_redeem_DAI_and_withdraw_redeem", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositAndMintNToken(dsaWallet0, wallet0, wallet1, DAI_ID, depositAmount, false);
             await helpers.redeemNTokenAndWithdraw(dsaWallet0, wallet0, wallet1, DAI_ID, MaxUint96, ethers.constants.MaxUint256, true);
             const bal = await notional.callStatic.getAccountBalance(DAI_ID, dsaWallet0.address);
@@ -385,9 +361,7 @@ describe("Notional", function () {
 
         it("test_redeem_DAI_and_withdraw_no_redeem", async function () {
             const depositAmount = ethers.utils.parseUnits("1000", 8);
-            await cdaiToken.connect(cdaiWhale).transfer(wallet0.address, depositAmount);
-            await cdaiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, cdaiToken.address, depositAmount);
+            await cdaiToken.connect(cdaiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositAndMintNToken(dsaWallet0, wallet0, wallet1, DAI_ID, depositAmount, false);
             expect(await cdaiToken.balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseEther("0"));
             await helpers.redeemNTokenAndWithdraw(dsaWallet0, wallet0, wallet1, DAI_ID, MaxUint96, ethers.constants.MaxUint256, false);
@@ -402,9 +376,7 @@ describe("Notional", function () {
 
         it("test_redeem_DAI_and_deleverage", async function () {
             const depositAmount = ethers.utils.parseUnits("20000", 18);
-            await daiToken.connect(daiWhale).transfer(wallet0.address, depositAmount);
-            await daiToken.connect(wallet0).approve(dsaWallet0.address, ethers.constants.MaxUint256);
-            await helpers.depositERC20(dsaWallet0, wallet0, wallet1, daiToken.address, depositAmount);
+            await daiToken.connect(daiWhale).transfer(dsaWallet0.address, depositAmount);
             await helpers.depositCollateralBorrowAndWithdraw(
                 dsaWallet0, wallet0, wallet1, DAI_ID, DEPOSIT_UNDERLYING, depositAmount, ETH_ID, MARKET_3M, 1e8, 0, true
             );
