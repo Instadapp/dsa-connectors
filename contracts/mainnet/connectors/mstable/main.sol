@@ -36,7 +36,11 @@ abstract contract mStableResolver is Events, Helpers {
 		bool _stake,
 		uint256 _setId,
 		uint256 _getId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		uint256 amount = getUint(_getId, _amount);
 		amount = amount == uint256(-1)
 			? TokenInterface(_token).balanceOf(address(this))
@@ -92,7 +96,11 @@ abstract contract mStableResolver is Events, Helpers {
 		bool _stake,
 		uint256 _setId,
 		uint256 _getId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		require(_path != address(0), "Path must be set");
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) == 0,
@@ -142,7 +150,11 @@ abstract contract mStableResolver is Events, Helpers {
 		bool _unstake,
 		uint256 _getId,
 		uint256 _setId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		uint256 credits = getUint(_getId, _credits);
 		uint256 amountWithdrawn = _withdraw(credits, _unstake);
 
@@ -190,7 +202,11 @@ abstract contract mStableResolver is Events, Helpers {
 		bool _unstake,
 		uint256 _getId,
 		uint256 _setId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		require(_path != address(0), "Path must be set");
 		require(
 			IMasset(mUsdToken).bAssetIndexes(_token) == 0,
@@ -227,6 +243,7 @@ abstract contract mStableResolver is Events, Helpers {
 
 	function claimRewards(uint256 _getId, uint256 _setId)
 		external
+		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		address rewardToken = _getRewardTokens();
@@ -264,7 +281,11 @@ abstract contract mStableResolver is Events, Helpers {
 		uint256 _minOut,
 		uint256 _getId,
 		uint256 _setId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		uint256 amount = getUint(_getId, _amount);
 		amount = amount == uint256(-1)
 			? TokenInterface(_input).balanceOf(address(this))
@@ -327,7 +348,11 @@ abstract contract mStableResolver is Events, Helpers {
 		address _path,
 		uint256 _getId,
 		uint256 _setId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		uint256 amountSwapped;
 		uint256 amount = getUint(_getId, _amount);
 		amount = amount == uint256(-1)
