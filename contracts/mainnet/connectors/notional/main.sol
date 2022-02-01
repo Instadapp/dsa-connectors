@@ -1,16 +1,17 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
+/**
+ * @title Notional
+ * @dev Fixed Rate Lending and Borrowing
+ */
+
 import {Helpers} from "./helpers.sol";
 import {SafeInt256} from "./SafeInt256.sol";
 import {Events} from "./events.sol";
 import {DepositActionType, BalanceActionWithTrades, BalanceAction} from "./interface.sol";
 import {TokenInterface} from "../../common/interfaces.sol";
 
-/**
- * @title Notional
- * @dev Fixed Rate Lending and Borrowing
- */
 abstract contract NotionalResolver is Events, Helpers {
     using SafeInt256 for int256;
 
