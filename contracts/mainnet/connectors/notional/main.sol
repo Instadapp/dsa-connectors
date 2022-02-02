@@ -7,14 +7,11 @@ pragma abicoder v2;
  */
 
 import {Helpers} from "./helpers.sol";
-import {SafeInt256} from "./SafeInt256.sol";
 import {Events} from "./events.sol";
 import {DepositActionType, BalanceActionWithTrades, BalanceAction} from "./interface.sol";
 import {TokenInterface} from "../../common/interfaces.sol";
 
 abstract contract NotionalResolver is Events, Helpers {
-    using SafeInt256 for int256;
-
     /**
      * @notice Deposit collateral into Notional, this should only be used for reducing risk of
      * liquidation. 
@@ -102,7 +99,7 @@ abstract contract NotionalResolver is Events, Helpers {
         uint88 amountInternalPrecision = withdrawAmount == uint256(-1)
             ? uint88(getCashBalance(currencyId))
             : uint88(
-                convertToInternal(currencyId, SafeInt256.toInt(withdrawAmount))
+                convertToInternal(currencyId, withdrawAmount)
             );
 
         uint256 amountWithdrawn = notional.withdraw(
@@ -345,7 +342,7 @@ abstract contract NotionalResolver is Events, Helpers {
         action[0].depositActionAmount = depositAmount;
         // withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
-        int256 nTokenBefore = getNTokenBalance(currencyId);
+        uint256 nTokenBefore = getNTokenBalance(currencyId);
         uint256 msgValue = getMsgValue(
             currencyId,
             useUnderlying,
@@ -354,9 +351,7 @@ abstract contract NotionalResolver is Events, Helpers {
 
         notional.batchBalanceAction{value: msgValue}(address(this), action);
 
-        int256 nTokenBalanceChange = getNTokenBalance(currencyId).sub(
-            nTokenBefore
-        );
+        uint256 nTokenBalanceChange = sub(getNTokenBalance(currencyId), nTokenBefore);
 
         if (setId != 0) {
             // Set the amount of nTokens minted
@@ -402,13 +397,11 @@ abstract contract NotionalResolver is Events, Helpers {
         action[0].depositActionAmount = cashBalanceToMint;
         // NOTE: withdraw amount, withdraw cash and redeem to underlying are all 0 and false
 
-        int256 nTokenBefore = getNTokenBalance(currencyId);
+        uint256 nTokenBefore = getNTokenBalance(currencyId);
 
         notional.batchBalanceAction(address(this), action);
 
-        int256 nTokenBalanceChange = getNTokenBalance(currencyId).sub(
-            nTokenBefore
-        );
+        uint256 nTokenBalanceChange = sub(getNTokenBalance(currencyId), nTokenBefore);
 
         if (setId != 0) {
             // Set the amount of nTokens minted

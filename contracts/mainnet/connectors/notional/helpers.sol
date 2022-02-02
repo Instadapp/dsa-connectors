@@ -1,18 +1,15 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {Token, NotionalInterface, BalanceAction, BalanceActionWithTrades, DepositActionType} from "./interface.sol";
-import {SafeInt256} from "./SafeInt256.sol";
 import {Basic} from "../../common/basic.sol";
+import {DSMath} from "../../common/math.sol";
 import {TokenInterface} from "../../common/interfaces.sol";
 
-contract Helpers is Basic {
-    using SafeMath for uint256;
-    using SafeInt256 for int256;
+abstract contract Helpers is DSMath, Basic {
     uint8 internal constant LEND_TRADE = 0;
     uint8 internal constant BORROW_TRADE = 1;
-    int256 internal constant INTERNAL_TOKEN_PRECISION = 1e8;
+    uint256 internal constant INTERNAL_TOKEN_PRECISION = 1e8;
     uint256 internal constant ETH_CURRENCY_ID = 1;
     uint256 internal constant MAX_DEPOSIT = uint256(-1);
 
@@ -20,25 +17,30 @@ contract Helpers is Basic {
     NotionalInterface internal constant notional =
         NotionalInterface(0x1344A36A1B56144C3Bc62E7757377D288fDE0369);
 
-    /// @notice Returns the address of the underlying token for a given currency id, 
-    function getUnderlyingToken(uint16 currencyId) internal view returns (address) {
-        (
-            /* Token memory assetToken */,
-            Token memory underlyingToken
-        ) = notional.getCurrency(currencyId);
+    /// @notice Returns the address of the underlying token for a given currency id,
+    function getUnderlyingToken(uint16 currencyId)
+        internal
+        view
+        returns (address)
+    {
+        // prettier-ignore
+        (/* assetToken */, Token memory underlyingToken) = notional.getCurrency(currencyId);
         return underlyingToken.tokenAddress;
     }
 
     /// @notice Returns the address of the asset token for a given currency id
     function getAssetToken(uint16 currencyId) internal view returns (address) {
-        (
-            Token memory assetToken,
-            /* Token memory underlyingToken */
-        ) = notional.getCurrency(currencyId);
+        // prettier-ignore
+        (Token memory assetToken, /* underlyingToken */) = notional.getCurrency(currencyId);
         return assetToken.tokenAddress;
     }
 
-    function getCashBalance(uint16 currencyId) internal view returns (int256 cashBalance) {
+    function getCashBalance(uint16 currencyId)
+        internal
+        view
+        returns (int256 cashBalance)
+    {
+        // prettier-ignore
         (
             cashBalance,
             /* int256 nTokenBalance */,
@@ -46,17 +48,25 @@ contract Helpers is Basic {
         ) = notional.getAccountBalance(currencyId, address(this));
     }
 
-    function getNTokenBalance(uint16 currencyId) internal view returns (int256 nTokenBalance) {
+    function getNTokenBalance(uint16 currencyId)
+        internal
+        view
+        returns (uint256)
+    {
+        // prettier-ignore
         (
             /* int256 cashBalance */,
-            nTokenBalance,
+            int256 nTokenBalance,
             /* int256 lastClaimTime */
         ) = notional.getAccountBalance(currencyId, address(this));
+        return toUint(nTokenBalance);
     }
 
-    function getNTokenRedeemAmount(uint16 currencyId, uint96 _tokensToRedeem, uint256 getId)
-        internal
-        returns (uint96 tokensToRedeem) {
+    function getNTokenRedeemAmount(
+        uint16 currencyId,
+        uint96 _tokensToRedeem,
+        uint256 getId
+    ) internal returns (uint96 tokensToRedeem) {
         tokensToRedeem = uint96(getUint(getId, _tokensToRedeem));
         if (tokensToRedeem == uint96(-1)) {
             tokensToRedeem = uint96(getNTokenBalance(currencyId));
@@ -73,17 +83,20 @@ contract Helpers is Basic {
             : 0;
     }
 
-    function convertToInternal(uint16 currencyId, int256 amount)
-        internal view
-        returns (int256)
+    function convertToInternal(uint16 currencyId, uint256 amount)
+        internal
+        view
+        returns (uint256)
     {
         // If token decimals is greater than INTERNAL_TOKEN_PRECISION then this will truncate
         // down to the internal precision. Resulting dust will accumulate to the protocol.
         // If token decimals is less than INTERNAL_TOKEN_PRECISION then this will add zeros to the
         // end of amount and will not result in dust.
+        // prettier-ignore
         (Token memory assetToken, /* underlyingToken */) = notional.getCurrency(currencyId);
-        if (assetToken.decimals == INTERNAL_TOKEN_PRECISION) return amount;
-        return amount.mul(INTERNAL_TOKEN_PRECISION).div(assetToken.decimals);
+        uint256 decimals = toUint(assetToken.decimals);
+        if (decimals == INTERNAL_TOKEN_PRECISION) return amount;
+        return div(mul(amount, INTERNAL_TOKEN_PRECISION), decimals);
     }
 
     function encodeLendTrade(
@@ -121,9 +134,10 @@ contract Helpers is Basic {
         depositAmount = getUint(getId, depositAmount);
         if (currencyId == ETH_CURRENCY_ID && useUnderlying) {
             // No approval required for ETH so we can return the deposit amount
-            return depositAmount == MAX_DEPOSIT
-                ? address(this).balance
-                : depositAmount;
+            return
+                depositAmount == MAX_DEPOSIT
+                    ? address(this).balance
+                    : depositAmount;
         }
 
         address tokenAddress = useUnderlying
@@ -184,7 +198,7 @@ contract Helpers is Basic {
 
         if (setId != 0) {
             uint256 balanceAfter = getBalance(tokenAddress);
-            setUint(setId, balanceAfter.sub(balanceBefore));
+            setUint(setId, sub(balanceAfter, balanceBefore));
         }
     }
 
@@ -207,7 +221,7 @@ contract Helpers is Basic {
 
         if (setId != 0) {
             uint256 balanceAfter = getBalance(tokenAddress);
-            setUint(setId, balanceAfter.sub(balanceBefore));
+            setUint(setId, sub(balanceAfter, balanceBefore));
         }
     }
 
