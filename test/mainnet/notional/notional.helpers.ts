@@ -1,6 +1,14 @@
-const encodeSpells = require("../../scripts/encodeSpells.js")
+import { BigNumber } from "ethers";
+import { encodeSpells } from "../../../scripts/tests/encodeSpells"
 
-const depositCollteral = async (dsa, authority, referrer, currencyId, amount, underlying) => {
+const depositCollteral = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    amount: BigNumber,
+    underlying: boolean
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
@@ -13,7 +21,14 @@ const depositCollteral = async (dsa, authority, referrer, currencyId, amount, un
     await tx.wait()
 };
 
-const depositAndMintNToken = async (dsa, authority, referrer, currencyId, amount, underlying) => {
+const depositAndMintNToken = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    amount: BigNumber,
+    underlying: boolean
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
@@ -26,20 +41,36 @@ const depositAndMintNToken = async (dsa, authority, referrer, currencyId, amount
     await tx.wait()
 }
 
-const depositAndLend = async (dsa, authority, referrer, currencyId, underlying, amount, market, fcash, minRate) => {
+const depositAndLend = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    underlying: boolean,
+    amount: BigNumber,
+    market: number,
+    fcash: BigNumber
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
             method: "depositAndLend",
-            args: [currencyId, amount, underlying, market, fcash, minRate, 0]
+            args: [currencyId, amount, underlying, market, fcash, 0, 0]
         }
     ];
 
     const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
-    await tx.wait()    
+    await tx.wait()
 };
 
-const withdrawCollateral = async (dsa, authority, referrer, currencyId, amount, underlying) => {
+const withdrawCollateral = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    amount: BigNumber,
+    underlying: boolean
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
@@ -52,7 +83,14 @@ const withdrawCollateral = async (dsa, authority, referrer, currencyId, amount, 
     await tx.wait()
 };
 
-const redeemNTokenRaw = async (dsa, authority, referrer, currencyId, sellTokenAssets, tokensToRedeem) => {
+const redeemNTokenRaw = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    sellTokenAssets: boolean,
+    tokensToRedeem: BigNumber
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
@@ -65,7 +103,15 @@ const redeemNTokenRaw = async (dsa, authority, referrer, currencyId, sellTokenAs
     await tx.wait()
 };
 
-const redeemNTokenAndWithdraw = async (dsa, authority, referrer, currencyId, tokensToRedeem, amountToWithdraw, redeemToUnderlying) => {
+const redeemNTokenAndWithdraw = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    tokensToRedeem: BigNumber,
+    amountToWithdraw: BigNumber,
+    redeemToUnderlying: boolean
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
@@ -78,12 +124,20 @@ const redeemNTokenAndWithdraw = async (dsa, authority, referrer, currencyId, tok
     await tx.wait()
 };
 
-const redeemNTokenAndDeleverage = async (dsa, authority, referrer, currencyId, tokensToRedeem, marketIndex, fCashAmount, minLendRate) => {
+const redeemNTokenAndDeleverage = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    tokensToRedeem: BigNumber,
+    marketIndex: number,
+    fCashAmount: BigNumber
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
             method: "redeemNTokenAndDeleverage",
-            args: [currencyId, tokensToRedeem, marketIndex, fCashAmount, minLendRate, 0]
+            args: [currencyId, tokensToRedeem, marketIndex, fCashAmount, 0, 0]
         }
     ];
 
@@ -92,17 +146,16 @@ const redeemNTokenAndDeleverage = async (dsa, authority, referrer, currencyId, t
 };
 
 const depositCollateralBorrowAndWithdraw = async (
-    dsa,
-    authority,
-    referrer,
-    depositCurrencyId,
-    depositUnderlying,
-    depositAmount,
-    borrowCurrencyId,
-    marketIndex,
-    fCashAmount,
-    maxBorrowRate,
-    redeedmUnderlying
+    dsa: any,
+    authority: any,
+    referrer: any,
+    depositCurrencyId: number,
+    depositType: number,
+    depositAmount: BigNumber,
+    borrowCurrencyId: number,
+    marketIndex: number,
+    fCashAmount: BigNumber,
+    redeedmUnderlying: boolean
 ) => {
     const spells = [
         {
@@ -110,12 +163,12 @@ const depositCollateralBorrowAndWithdraw = async (
             method: "depositCollateralBorrowAndWithdraw",
             args: [
                 depositCurrencyId,
-                depositUnderlying,
+                depositType,
                 depositAmount,
                 borrowCurrencyId,
                 marketIndex,
                 fCashAmount,
-                maxBorrowRate,
+                0,
                 redeedmUnderlying,
                 0,
                 0
@@ -127,12 +180,19 @@ const depositCollateralBorrowAndWithdraw = async (
     await tx.wait()
 };
 
-const withdrawLend = async (dsa, authority, referrer, currencyId, marketIndex, fCashAmount, maxBorrowRate) => {
+const withdrawLend = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    currencyId: number,
+    marketIndex: number,
+    fCashAmount: BigNumber
+) => {
     const spells = [
         {
             connector: "NOTIONAL-TEST-A",
             method: "withdrawLend",
-            args: [currencyId, marketIndex, fCashAmount, maxBorrowRate, 0]
+            args: [currencyId, marketIndex, fCashAmount, 0, 0]
         }
     ];
 
@@ -140,7 +200,7 @@ const withdrawLend = async (dsa, authority, referrer, currencyId, marketIndex, f
     await tx.wait()
 };
 
-module.exports = {
+export default {
     depositCollteral,
     depositAndMintNToken,
     depositAndLend,

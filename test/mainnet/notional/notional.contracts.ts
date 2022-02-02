@@ -98,7 +98,7 @@ const ERC20_TOKEN_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
 ];
 
-module.exports = {
+export default {
     NOTIONAL_CONTRACT_ADDRESS,
     NOTIONAL_CONTRACT_ABI,
     WETH_TOKEN_ADDRESS,
