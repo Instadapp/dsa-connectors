@@ -15,7 +15,7 @@ abstract contract NotionalResolver is Events, Helpers {
     /**
      * @notice Deposit collateral into Notional, this should only be used for reducing risk of
      * liquidation. 
-    *  @dev Deposits into Notional are not earning fixed rates, they are earning the cToken
+     *  @dev Deposits into Notional are not earning fixed rates, they are earning the cToken
      * lending rate. In order to lend at fixed rates use `depositAndLend`
      * @param currencyId notional defined currency id to deposit
      * @param useUnderlying if true, will accept a deposit in the underlying currency (i.e DAI), if false
