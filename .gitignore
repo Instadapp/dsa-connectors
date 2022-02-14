@@ -63,4 +63,8 @@ build/contracts
 # buidler
 artifacts
 cache
+<<<<<<< HEAD
 typechain
+=======
+typechain
+>>>>>>> 64d52604ec3f9c9172250d8ab60275599074af87
