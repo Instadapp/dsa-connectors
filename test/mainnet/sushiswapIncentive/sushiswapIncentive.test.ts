@@ -94,6 +94,12 @@ describe("Sushiswap", function () {
     });
 
     describe("Main", function () {
+        const data = {
+            poolId: 0,
+            version: 0, 
+            lpToken: ethers.constants.AddressZero
+        }
+
         it("Should deposit successfully", async function () {
             const ethAmount = ethers.utils.parseEther("2") // 1 ETH
             const daiUnitAmount = ethers.utils.parseEther("4000") // 1 ETH
@@ -134,7 +140,8 @@ describe("Sushiswap", function () {
                                 DAI_ADDR,
                                 ethers.utils.parseEther("10"),
                                 getId,
-                                setId
+                                setId,
+                                data
                             ]
                         }
                     ]
@@ -152,7 +159,8 @@ describe("Sushiswap", function () {
                             args: [
                                 WETH_ADDR,
                                 DAI_ADDR,
-                                setId
+                                setId,
+                                data
                             ]
                         }
                     ]
@@ -173,7 +181,8 @@ describe("Sushiswap", function () {
                                 DAI_ADDR,
                                 ethers.utils.parseEther("1"),
                                 getId,
-                                setId
+                                setId,
+                                data
                             ]
                         }
                     ]
@@ -194,7 +203,8 @@ describe("Sushiswap", function () {
                                 DAI_ADDR,
                                 ethers.utils.parseEther("1"),
                                 getId,
-                                setId
+                                setId,
+                                data
                             ]
                         }
                     ]
