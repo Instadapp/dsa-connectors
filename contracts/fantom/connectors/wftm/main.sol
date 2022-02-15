@@ -1,8 +1,8 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title WETH.
- * @dev Wrap and Unwrap WETH.
+ * @title WFTM.
+ * @dev Wrap and Unwrap WFTM.
  */
 
 import { DSMath } from "../../common/math.sol";
@@ -13,11 +13,11 @@ import { Helpers } from "./helpers.sol";
 abstract contract Resolver is Events, DSMath, Basic, Helpers {
 
     /**
-     * @dev Deposit ETH into WETH.
-     * @notice Wrap ETH into WETH
-     * @param amt The amount of ETH to deposit. (For max: `uint256(-1)`)
+     * @dev Deposit FTM into WFTM.
+     * @notice Wrap FTM into WFTM
+     * @param amt The amount of FTM to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
-     * @param setId ID stores the amount of ETH deposited.
+     * @param setId ID stores the amount of FTM deposited.
      */
     function deposit(
         uint256 amt,
@@ -36,11 +36,11 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
     }
 
     /**
-     * @dev Withdraw ETH from WETH from Smart  Account
-     * @notice Unwrap ETH from WETH
-     * @param amt The amount of weth to withdraw. (For max: `uint256(-1)`)
+     * @dev Withdraw FTM from WFTM from Smart  Account
+     * @notice Unwrap FTM from WFTM
+     * @param amt The amount of wFTM to withdraw. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
-     * @param setId ID stores the amount of ETH withdrawn.
+     * @param setId ID stores the amount of FTM withdrawn.
      */
     function withdraw(
         uint amt,
@@ -60,6 +60,6 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
     }
 }
 
-contract ConnectV2WETHArbitrum is Resolver {
-    string constant public name = "WETH-v1.0";
+contract ConnectV2WFTMFantom is Resolver {
+    string constant public name = "WFTM-v1.0";
 }
