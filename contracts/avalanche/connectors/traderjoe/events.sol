@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 contract Events {
     event LogDeposit(
         address indexed token,
-        address cToken,
+        address jToken,
         uint256 tokenAmt,
         uint256 getId,
         uint256 setId
@@ -11,7 +11,7 @@ contract Events {
 
     event LogWithdraw(
         address indexed token,
-        address cToken,
+        address jToken,
         uint256 tokenAmt,
         uint256 getId,
         uint256 setId
@@ -19,7 +19,7 @@ contract Events {
 
     event LogBorrow(
         address indexed token,
-        address cToken,
+        address jToken,
         uint256 tokenAmt,
         uint256 getId,
         uint256 setId
@@ -27,26 +27,26 @@ contract Events {
 
     event LogPayback(
         address indexed token,
-        address cToken,
+        address jToken,
         uint256 tokenAmt,
         uint256 getId,
         uint256 setId
     );
 
-    event LogDepositCToken(
+    event LogDepositJToken(
         address indexed token,
-        address cToken,
+        address jToken,
         uint256 tokenAmt,
-        uint256 cTokenAmt,
+        uint256 jTokenAmt,
         uint256 getId, 
         uint256 setId
     );
 
-    event LogWithdrawCToken(
+    event LogWithdrawJToken(
         address indexed token,
-        address cToken,
+        address jToken,
         uint256 tokenAmt,
-        uint256 cTokenAmt,
+        uint256 jTokenAmt,
         uint256 getId,
         uint256 setId
     );

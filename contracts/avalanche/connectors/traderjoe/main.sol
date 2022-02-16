@@ -10,21 +10,21 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { CETHInterface, CTokenInterface } from "./interface.sol";
+import { JAVAXInterface, JTokenInterface } from "./interface.sol";
 
-abstract contract CompoundResolver is Events, Helpers {
+abstract contract TraderJoeResolver is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
      * @notice Deposit a token to Compound for lending / collaterization.
      * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param cToken The address of the corresponding cToken.
+     * @param jToken The address of the corresponding cToken.
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens deposited.
     */
     function depositRaw(
         address token,
-        address cToken,
+        address jToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
@@ -33,15 +33,15 @@ abstract contract CompoundResolver is Events, Helpers {
 
         require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
-        enterMarket(cToken);
+        enterMarket(jToken);
         if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            CETHInterface(cToken).mint{value: _amt}();
+            JAVAXInterface(cToken).mint{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
             approve(tokenContract, cToken, _amt);
-            require(CTokenInterface(cToken).mint(_amt) == 0, "deposit-failed");
+            require(JTokenInterface(cToken).mint(_amt) == 0, "deposit-failed");
         }
         setUint(setId, _amt);
 
@@ -63,7 +63,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address cToken) = compMapping.getMapping(tokenId);
+        
         (_eventName, _eventParam) = depositRaw(token, cToken, amt, getId, setId);
     }
 
@@ -87,7 +87,7 @@ abstract contract CompoundResolver is Events, Helpers {
         
         require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
-        CTokenInterface cTokenContract = CTokenInterface(cToken);
+        JTokenInterface cTokenContract = JTokenInterface(cToken);
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
             uint initialBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
@@ -142,7 +142,7 @@ abstract contract CompoundResolver is Events, Helpers {
         require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
         enterMarket(cToken);
-        require(CTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
+        require(JTokenInterface(cToken).borrow(_amt) == 0, "borrow-failed");
         setUint(setId, _amt);
 
         _eventName = "LogBorrow(address,address,uint256,uint256,uint256)";
@@ -187,12 +187,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
         require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
-        CTokenInterface cTokenContract = CTokenInterface(cToken);
+        JTokenInterface cTokenContract = JTokenInterface(cToken);
         _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(address(this)) : _amt;
 
         if (token == ethAddr) {
             require(address(this).balance >= _amt, "not-enough-eth");
-            CETHInterface(cToken).repayBorrow{value: _amt}();
+            JAVAXInterface(cToken).repayBorrow{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
@@ -245,12 +245,12 @@ abstract contract CompoundResolver is Events, Helpers {
 
         enterMarket(cToken);
 
-        CTokenInterface ctokenContract = CTokenInterface(cToken);
+        JTokenInterface ctokenContract = JTokenInterface(cToken);
         uint initialBal = ctokenContract.balanceOf(address(this));
 
         if (token == ethAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            CETHInterface(cToken).mint{value: _amt}();
+            JAVAXInterface(cToken).mint{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
@@ -308,7 +308,7 @@ abstract contract CompoundResolver is Events, Helpers {
         uint _cAmt = getUint(getId, cTokenAmt);
         require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
 
-        CTokenInterface cTokenContract = CTokenInterface(cToken);
+        JTokenInterface cTokenContract = JTokenInterface(cToken);
         TokenInterface tokenContract = TokenInterface(token);
         _cAmt = _cAmt == uint(-1) ? cTokenContract.balanceOf(address(this)) : _cAmt;
 
@@ -371,7 +371,7 @@ abstract contract CompoundResolver is Events, Helpers {
         require(tokenToPay != address(0) && cTokenPay != address(0), "invalid token/ctoken address");
         require(tokenInReturn != address(0) && cTokenColl != address(0), "invalid token/ctoken address");
 
-        CTokenInterface cTokenContract = CTokenInterface(cTokenPay);
+        JTokenInterface cTokenContract = JTokenInterface(cTokenPay);
 
         {
             (,, uint shortfal) = troller.getAccountLiquidity(borrower);
@@ -381,7 +381,7 @@ abstract contract CompoundResolver is Events, Helpers {
 
         if (tokenToPay == ethAddr) {
             require(address(this).balance >= _amt, "not-enought-eth");
-            CETHInterface(cTokenPay).liquidateBorrow{value: _amt}(borrower, cTokenColl);
+            JAVAXInterface(cTokenPay).liquidateBorrow{value: _amt}(borrower, cTokenColl);
         } else {
             TokenInterface tokenContract = TokenInterface(tokenToPay);
             require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
