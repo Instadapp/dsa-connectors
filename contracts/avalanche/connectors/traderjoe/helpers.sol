@@ -10,11 +10,7 @@ abstract contract Helpers is DSMath, Basic {
      */
     JoetrollerInterface internal constant troller = JoetrollerInterface(0xdc13687554205E5b89Ac783db14bb5bba4A1eDaC);
 
-    /**
-     * @dev Compound Mapping
-     */
-    JoeTraderMappingInterface internal constant compMapping = JoeTraderMappingInterface(0xe7a85d0adDB972A4f0A4e57B698B37f171519e88);
-
+    
     /**
      * @dev enter compound market
      */

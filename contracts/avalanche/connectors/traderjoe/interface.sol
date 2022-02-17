@@ -30,7 +30,3 @@ interface JoetrollerInterface {
     function claimJoe(address) external;
 }
 
-interface JoeTraderMappingInterface {
-    function jTokenMapping(string calldata tokenId) external view returns (address);
-    function getMapping(string calldata tokenId) external view returns (address, address);
-}

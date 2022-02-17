@@ -58,7 +58,8 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @param setId ID stores the amount of tokens deposited.
     */
     function deposit(
-        string calldata tokenId,
+        address token,
+        address jToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
