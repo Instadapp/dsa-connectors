@@ -27,6 +27,6 @@ interface JoetrollerInterface {
     function exitMarket(address jTokenAddress) external returns (uint);
     function getAssetsIn(address account) external view returns (address[] memory);
     function getAccountLiquidity(address account) external view returns (uint, uint, uint);
-    function claimJoe(address) external;
+    
 }
 
