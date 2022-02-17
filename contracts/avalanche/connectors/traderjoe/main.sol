@@ -112,12 +112,13 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdraw(
-        string calldata tokenId,
+        address token, 
+        address jToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address jToken) = compMapping.getMapping(tokenId);
+        
         (_eventName, _eventParam) = withdrawRaw(token, jToken, amt, getId, setId);
     }
 
@@ -158,12 +159,12 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @param setId ID stores the amount of tokens borrowed.
     */
     function borrow(
-        string calldata tokenId,
+        address token, 
+        address jToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address jToken) = compMapping.getMapping(tokenId);
         (_eventName, _eventParam) = borrowRaw(token, jToken, amt, getId, setId);
     }
 
@@ -214,12 +215,13 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @param setId ID stores the amount of tokens paid back.
     */
     function payback(
-        string calldata tokenId,
+        address token, 
+        address jToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address jToken) = compMapping.getMapping(tokenId);
+        
         (_eventName, _eventParam) = paybackRaw(token, jToken, amt, getId, setId);
     }
 
@@ -280,12 +282,13 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @param setId ID stores the amount of jTokens received.
     */
     function depositJToken(
-        string calldata tokenId,
+        address token, 
+        address jToken,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address jToken) = compMapping.getMapping(tokenId);
+        
         (_eventName, _eventParam) = depositJTokenRaw(token, jToken, amt, getId, setId);
     }
 
@@ -336,12 +339,13 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @param setId ID stores the amount of tokens withdrawn.
     */
     function withdrawJToken(
-        string calldata tokenId,
+        address token, 
+        address jToken,
         uint jTokenAmt,
         uint getId,
         uint setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address token, address jToken) = compMapping.getMapping(tokenId);
+        
         (_eventName, _eventParam) = withdrawJTokenRaw(token, jToken, jTokenAmt, getId, setId);
     }
 
@@ -414,14 +418,15 @@ abstract contract TraderJoeResolver is Events, Helpers {
     */
     function liquidate(
         address borrower,
-        string calldata tokenIdToPay,
-        string calldata tokenIdInReturn,
+        address tokenToPay, 
+        address jTokenToPay,
+        address tokenInReturn, 
+        address jTokenColl,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        (address tokenToPay, address jTokenToPay) = compMapping.getMapping(tokenIdToPay);
-        (address tokenInReturn, address jTokenColl) = compMapping.getMapping(tokenIdInReturn);
+        
 
         (_eventName, _eventParam) = liquidateRaw(
             borrower,
@@ -436,6 +441,6 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2Compound is CompoundResolver {
-    string public name = "Compound-v1.1";
+contract ConnectV2Compound is TraderJoeResolver {
+    string public name = "TraderJoe-v1.1";
 }
