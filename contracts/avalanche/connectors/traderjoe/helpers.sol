@@ -6,13 +6,13 @@ import { JoetrollerInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     /**
-     * @dev Compound Comptroller
+     * @dev TraderJoe Comptroller
      */
     JoetrollerInterface internal constant troller = JoetrollerInterface(0xdc13687554205E5b89Ac783db14bb5bba4A1eDaC);
 
     
     /**
-     * @dev enter compound market
+     * @dev enter traderjoe market
      */
     function enterMarket(address jToken) internal {
         address[] memory markets = troller.getAssetsIn(address(this));

@@ -449,6 +449,6 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2Compound is CompoundResolver {
-    string public name = "Compound-v1.1";
+contract ConnectV2TraderJoe is TraderJoeResolver {
+    string public name = "TraderJoe-v1.1";
 }
