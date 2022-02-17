@@ -2,7 +2,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title Compound.
+ * @title Trader-Joe.
  * @dev Lending & Borrowing.
  */
 
@@ -14,9 +14,9 @@ import { JAVAXInterface, JTokenInterface } from "./interface.sol";
 
 abstract contract TraderJoeResolver is Events, Helpers {
     /**
-     * @dev Deposit ETH/ERC20_Token.
-     * @notice Deposit a token to Compound for lending / collaterization.
-     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @dev Deposit AVAX/ERC20_Token.
+     * @notice Deposit a token to TraderJoe for lending / collaterization.
+     * @param token The address of the token to deposit. (For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jToken The address of the corresponding jToken.
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -50,9 +50,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Deposit ETH/ERC20_Token using the Mapping.
-     * @notice Deposit a token to Compound for lending / collaterization.
-     * @param tokenId The token id of the token to deposit.(For eg: ETH-A)
+     * @dev Deposit AVAX/ERC20_Token using token and jToken addresses.
+     * @notice Deposit a token to TraderJoe for lending / collaterization.
+     * @param tokenId The token id of the token to deposit.(For eg: AVAX-A)
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens deposited.
@@ -69,9 +69,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw ETH/ERC20_Token.
-     * @notice Withdraw deposited token from Compound
-     * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @dev Withdraw AVAX/ERC20_Token.
+     * @notice Withdraw deposited token from TraderJoe
+     * @param token The address of the token to withdraw. (For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jToken The address of the corresponding jToken.
      * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -105,9 +105,10 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw ETH/ERC20_Token using the Mapping.
-     * @notice Withdraw deposited token from Compound
-     * @param tokenId The token id of the token to withdraw.(For eg: ETH-A)
+     * @dev Withdraw AVAX/ERC20_Token using token and jToken addresses.
+     * @notice Withdraw deposited token from TraderJoe
+     * @param token Token address
+     * @param jToken Respective jToken address
      * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens withdrawn.
@@ -124,9 +125,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Borrow ETH/ERC20_Token.
-     * @notice Borrow a token using Compound
-     * @param token The address of the token to borrow. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @dev Borrow AVAX/ERC20_Token.
+     * @notice Borrow a token using TraderJoe
+     * @param token The address of the token to borrow. (For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jToken The address of the corresponding jToken.
      * @param amt The amount of the token to borrow.
      * @param getId ID to retrieve amt.
@@ -152,9 +153,10 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
      /**
-     * @dev Borrow ETH/ERC20_Token using the Mapping.
-     * @notice Borrow a token using Compound
-     * @param tokenId The token id of the token to borrow.(For eg: DAI-A)
+     * @dev Borrow AVAX/ERC20_Token token and jToken addresses.
+     * @notice Borrow a token using TraderJoe
+     * @param token Token address
+     * @param jToken Respective jToken address
      * @param amt The amount of the token to borrow.
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens borrowed.
@@ -170,9 +172,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Payback borrowed ETH/ERC20_Token.
+     * @dev Payback borrowed AVAX/ERC20_Token.
      * @notice Payback debt owed.
-     * @param token The address of the token to payback. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param token The address of the token to payback. (For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jToken The address of the corresponding jToken.
      * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -208,9 +210,10 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Payback borrowed ETH/ERC20_Token using the Mapping.
+     * @dev Payback borrowed AVAX/ERC20_Token using token and jToken addresses.
      * @notice Payback debt owed.
-     * @param tokenId The token id of the token to payback.(For eg: COMP-A)
+     * @param token Token address
+     * @param jToken Respective jToken address
      * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens paid back.
@@ -227,9 +230,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Deposit ETH/ERC20_Token.
+     * @dev Deposit AVAX/ERC20_Token.
      * @notice Same as depositRaw. The only difference is this method stores jToken amount in set ID.
-     * @param token The address of the token to deposit. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param token The address of the token to deposit. (For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jToken The address of the corresponding jToken.
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
@@ -275,9 +278,10 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Deposit ETH/ERC20_Token using the Mapping.
+     * @dev Deposit AVAX/ERC20_Token using token and jToken addresses.
      * @notice Same as deposit. The only difference is this method stores jToken amount in set ID.
-     * @param tokenId The token id of the token to depositJToken.(For eg: DAI-A)
+     * @param token Token address
+     * @param jToken Respective jToken address
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of jTokens received.
@@ -294,9 +298,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw CETH/CERC20_Token using jToken Amt.
+     * @dev Withdraw JAVAX/CERC20_Token using jToken Amt.
      * @notice Same as withdrawRaw. The only difference is this method fetch jToken amount in get ID.
-     * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param token The address of the token to withdraw. (For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jToken The address of the corresponding jToken.
      * @param jTokenAmt The amount of jTokens to withdraw
      * @param getId ID to retrieve jTokenAmt 
@@ -332,9 +336,10 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Withdraw CETH/CERC20_Token using jToken Amt & the Mapping.
+     * @dev Withdraw JAVAX/CERC20_Token using jToken Amt & using token and jToken addresses.
      * @notice Same as withdraw. The only difference is this method fetch jToken amount in get ID.
-     * @param tokenId The token id of the token to withdraw jToken.(For eg: ETH-A)
+     * @param token Token address
+     * @param jToken Respective jToken address
      * @param jTokenAmt The amount of jTokens to withdraw
      * @param getId ID to retrieve jTokenAmt 
      * @param setId ID stores the amount of tokens withdrawn.
@@ -354,7 +359,7 @@ abstract contract TraderJoeResolver is Events, Helpers {
      * @dev Liquidate a position.
      * @notice Liquidate a position.
      * @param borrower Borrower's Address.
-     * @param tokenToPay The address of the token to pay for liquidation.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param tokenToPay The address of the token to pay for liquidation.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param jTokenPay Corresponding jToken address.
      * @param tokenInReturn The address of the token to return for liquidation.
      * @param jTokenColl Corresponding jToken address.
@@ -408,11 +413,13 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 
     /**
-     * @dev Liquidate a position using the mapping.
-     * @notice Liquidate a position using the mapping.
+     * @dev Liquidate a position using the tokenToPay, jTokenToPay, tokenInReturn, jTokenColl addresses.
+     * @notice Liquidate a position using the tokenToPay, jTokenToPay, tokenInReturn, jTokenColl addresses.
      * @param borrower Borrower's Address.
-     * @param tokenIdToPay token id of the token to pay for liquidation.(For eg: ETH-A)
-     * @param tokenIdInReturn token id of the token to return for liquidation.(For eg: USDC-A)
+     * @param tokenToPay Token to pay.
+     * @param jTokenToPay Corresponding jToken to pay.
+     * @param tokenInReturn Token which you get in return.
+     * @param jTokenColl Corresponding jToken which you get in return.
      * @param amt token amount to pay for liquidation.
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of paid for liquidation.
@@ -442,6 +449,6 @@ abstract contract TraderJoeResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2Compound is TraderJoeResolver {
-    string public name = "TraderJoe-v1.1";
+contract ConnectV2Compound is CompoundResolver {
+    string public name = "Compound-v1.1";
 }
