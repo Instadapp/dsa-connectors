@@ -34,7 +34,7 @@ abstract contract TraderJoeResolver is Events, Helpers {
         require(token != address(0) && jToken != address(0), "invalid token/jToken address");
 
         enterMarket(jToken);
-        if (token == ethAddr) {
+        if (token == avaxAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             JAVAXInterface(jToken).mint{value: _amt}();
         } else {
@@ -52,7 +52,8 @@ abstract contract TraderJoeResolver is Events, Helpers {
     /**
      * @dev Deposit AVAX/ERC20_Token using token and jToken addresses.
      * @notice Deposit a token to TraderJoe for lending / collaterization.
-     * @param tokenId The token id of the token to deposit.(For eg: AVAX-A)
+     * @param token Token address
+     * @param jToken Respective jToken address
      * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens deposited.
@@ -91,9 +92,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
         JTokenInterface jTokenContract = JTokenInterface(jToken);
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
-            uint initialBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
+            uint initialBal = token == avaxAddr ? address(this).balance : tokenContract.balanceOf(address(this));
             require(jTokenContract.redeem(jTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
-            uint finalBal = token == ethAddr ? address(this).balance : tokenContract.balanceOf(address(this));
+            uint finalBal = token == avaxAddr ? address(this).balance : tokenContract.balanceOf(address(this));
             _amt = finalBal - initialBal;
         } else {
             require(jTokenContract.redeemUnderlying(_amt) == 0, "withdraw-failed");
@@ -194,7 +195,7 @@ abstract contract TraderJoeResolver is Events, Helpers {
         JTokenInterface jTokenContract = JTokenInterface(jToken);
         _amt = _amt == uint(-1) ? jTokenContract.borrowBalanceCurrent(address(this)) : _amt;
 
-        if (token == ethAddr) {
+        if (token == avaxAddr) {
             require(address(this).balance >= _amt, "not-enough-eth");
             JAVAXInterface(jToken).repayBorrow{value: _amt}();
         } else {
@@ -254,7 +255,7 @@ abstract contract TraderJoeResolver is Events, Helpers {
         JTokenInterface jTokenContract = JTokenInterface(jToken);
         uint initialBal = jTokenContract.balanceOf(address(this));
 
-        if (token == ethAddr) {
+        if (token == avaxAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
             JAVAXInterface(jToken).mint{value: _amt}();
         } else {
@@ -322,9 +323,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
 
         uint withdrawAmt;
         {
-            uint initialBal = token != ethAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
+            uint initialBal = token != avaxAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
             require(jTokenContract.redeem(_cAmt) == 0, "redeem-failed");
-            uint finalBal = token != ethAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
+            uint finalBal = token != avaxAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
 
             withdrawAmt = sub(finalBal, initialBal);
         }
@@ -389,7 +390,7 @@ abstract contract TraderJoeResolver is Events, Helpers {
             _amt = _amt == uint(-1) ? jTokenContract.borrowBalanceCurrent(borrower) : _amt;
         }
 
-        if (tokenToPay == ethAddr) {
+        if (tokenToPay == avaxAddr) {
             require(address(this).balance >= _amt, "not-enought-eth");
             JAVAXInterface(jTokenPay).liquidateBorrow{value: _amt}(borrower, jTokenColl);
         } else {
