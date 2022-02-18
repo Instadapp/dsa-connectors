@@ -77,8 +77,8 @@ describe("TraderJoe", function () {
 
     describe("Main", function () {
         console.log(1)
-        it("Should deposit AVAX in Compound", async function () {
-            const amount = ethers.utils.parseEther("1") // 1 ETH
+        it("Should deposit AVAX in TraderJoe", async function () {
+            const amount = ethers.utils.parseEther("1") // 1 AVAX
             const spells = [
                 {
                     connector: connectorName,
@@ -97,17 +97,17 @@ describe("TraderJoe", function () {
 
         it("Should borrow and payback DAI from TraderJoe", async function () {
             const amount = ethers.utils.parseEther("100") // 100 DAI
-            const setId = "83478237"
+            
             const spells = [
                 {
                     connector: connectorName,
                     method: "borrow",
-                    args: ["DAI-A", amount, 0, setId]
+                    args: ['0xd586E7F844cEa2F87f50152665BCbc2C279D8d70','0xc988c170d0E38197DC634A45bF00169C7Aa7CA19', amount, 0, 0]
                 },
                 {
                     connector: connectorName,
                     method: "payback",
-                    args: ["DAI-A", 0, setId, 0]
+                    args: ['0xd586E7F844cEa2F87f50152665BCbc2C279D8d70','0xc988c170d0E38197DC634A45bF00169C7Aa7CA19', 0, 0, 0]
                 }
             ]
 
@@ -121,7 +121,7 @@ describe("TraderJoe", function () {
                 {
                     connector: connectorName,
                     method: "deposit",
-                    args: ["AVAX-A", constants.max_value, 0, 0]
+                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', '0xC22F01ddc8010Ee05574028528614634684EC29e', constants.max_value, 0, 0]
                 }
             ]
 
@@ -135,7 +135,7 @@ describe("TraderJoe", function () {
                 {
                     connector: connectorName,
                     method: "withdraw",
-                    args: ["AVAX-A", constants.max_value, 0, 0]
+                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', '0xC22F01ddc8010Ee05574028528614634684EC29e', constants.max_value, 0, 0]
                 }
             ]
 
