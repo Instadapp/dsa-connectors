@@ -3,6 +3,7 @@ pragma solidity ^0.7.0;
 interface JTokenInterface {
     function mint(uint mintAmount) external returns (uint);
     function redeem(uint redeemTokens) external returns (uint);
+    function redeemNative(uint redeemTokens) external returns (uint);
     function borrow(uint borrowAmount) external returns (uint);
     function repayBorrow(uint repayAmount) external returns (uint);
     function repayBorrowBehalf(address borrower, uint repayAmount) external returns (uint); // For ERC20
@@ -17,6 +18,7 @@ interface JTokenInterface {
 
 interface JAVAXInterface {
     function mint() external payable;
+    function mintNative() external payable;
     function repayBorrow() external payable;
     function repayBorrowBehalf(address borrower) external payable;
     function liquidateBorrow(address borrower, address jTokenCollateral) external payable;

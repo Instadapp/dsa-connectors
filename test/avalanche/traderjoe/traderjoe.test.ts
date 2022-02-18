@@ -76,27 +76,29 @@ describe("TraderJoe", function () {
     });
 
     describe("Main", function () {
-        console.log(1)
+        
         it("Should deposit AVAX in TraderJoe", async function () {
+
             const amount = ethers.utils.parseEther("1") // 1 AVAX
+            console.log(9)
             const spells = [
                 {
                     connector: connectorName,
                     method: "deposit",
-                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', '0xC22F01ddc8010Ee05574028528614634684EC29e', amount, 0, 0]
+                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE','0xC22F01ddc8010Ee05574028528614634684EC29e', amount, 0, 0]
                 }
             ]
-            console.log(1)
+            console.log(8)
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-            console.log(1)
+            console.log(7)
             const receipt = await tx.wait()
-            console.log(1)
+            console.log(6)
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
-            console.log(1)
+            console.log()
         });
 
         it("Should borrow and payback DAI from TraderJoe", async function () {
-            const amount = ethers.utils.parseEther("100") // 100 DAI
+            const amount = ethers.utils.parseEther("10") // 10 DAI
             
             const spells = [
                 {
@@ -107,7 +109,7 @@ describe("TraderJoe", function () {
                 {
                     connector: connectorName,
                     method: "payback",
-                    args: ['0xd586E7F844cEa2F87f50152665BCbc2C279D8d70','0xc988c170d0E38197DC634A45bF00169C7Aa7CA19', 0, 0, 0]
+                    args: ['0xd586E7F844cEa2F87f50152665BCbc2C279D8d70','0xc988c170d0E38197DC634A45bF00169C7Aa7CA19', amount, 0, 0]
                 }
             ]
 
@@ -141,7 +143,7 @@ describe("TraderJoe", function () {
 
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
             const receipt = await tx.wait()
-            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("9"));
         });
     })
 })

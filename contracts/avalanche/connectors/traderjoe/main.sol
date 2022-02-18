@@ -11,6 +11,7 @@ import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { JAVAXInterface, JTokenInterface } from "./interface.sol";
+import "hardhat/console.sol";
 
 abstract contract TraderJoeResolver is Events, Helpers {
     /**
@@ -29,24 +30,35 @@ abstract contract TraderJoeResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
+        
         uint _amt = getUint(getId, amt);
-
+        
         require(token != address(0) && jToken != address(0), "invalid token/jToken address");
 
         enterMarket(jToken);
+        
         if (token == avaxAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            JAVAXInterface(jToken).mint{value: _amt}();
+           
+            JAVAXInterface(jToken).mintNative{value: _amt}();
+            
         } else {
             TokenInterface tokenContract = TokenInterface(token);
+            
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;
+           
             approve(tokenContract, jToken, _amt);
+            
             require(JTokenInterface(jToken).mint(_amt) == 0, "deposit-failed");
+            
         }
+        
         setUint(setId, _amt);
 
         _eventName = "LogDeposit(address,address,uint256,uint256,uint256)";
+        
         _eventParam = abi.encode(token, jToken, _amt, getId, setId);
+        
     }
 
     /**
@@ -65,8 +77,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        
+        console.log(1);
         (_eventName, _eventParam) = depositRaw(token, jToken, amt, getId, setId);
+        console.log(1);
     }
 
     /**
@@ -85,24 +98,35 @@ abstract contract TraderJoeResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
+        
         uint _amt = getUint(getId, amt);
         
         require(token != address(0) && jToken != address(0), "invalid token/jToken address");
 
         JTokenInterface jTokenContract = JTokenInterface(jToken);
+        
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
             uint initialBal = token == avaxAddr ? address(this).balance : tokenContract.balanceOf(address(this));
-            require(jTokenContract.redeem(jTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
+            
+            require(jTokenContract.redeemNative(jTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
+        
             uint finalBal = token == avaxAddr ? address(this).balance : tokenContract.balanceOf(address(this));
+           
             _amt = finalBal - initialBal;
+            
         } else {
+            
             require(jTokenContract.redeemUnderlying(_amt) == 0, "withdraw-failed");
+           
         }
+        
         setUint(setId, _amt);
 
         _eventName = "LogWithdraw(address,address,uint256,uint256,uint256)";
+        
         _eventParam = abi.encode(token, jToken, _amt, getId, setId);
+        
     }
 
     /**
