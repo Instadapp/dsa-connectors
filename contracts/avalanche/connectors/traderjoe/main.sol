@@ -108,16 +108,26 @@ abstract contract TraderJoeResolver is Events, Helpers {
         if (_amt == uint(-1)) {
             TokenInterface tokenContract = TokenInterface(token);
             uint initialBal = token == avaxAddr ? address(this).balance : tokenContract.balanceOf(address(this));
+            if(token == avaxAddr){
+                require(jTokenContract.redeemNative(jTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
+            }
+            else{
+                require(jTokenContract.redeem(jTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
+            }
             
-            require(jTokenContract.redeemNative(jTokenContract.balanceOf(address(this))) == 0, "full-withdraw-failed");
         
             uint finalBal = token == avaxAddr ? address(this).balance : tokenContract.balanceOf(address(this));
            
             _amt = finalBal - initialBal;
             
         } else {
+            if(token == avaxAddr){
+                require(jTokenContract.redeemUnderlyingNative(_amt) == 0, "withdraw-failed");
+            }
+            else{
+                require(jTokenContract.redeemUnderlying(_amt) == 0, "withdraw-failed");
+            }
             
-            require(jTokenContract.redeemUnderlying(_amt) == 0, "withdraw-failed");
            
         }
         
@@ -281,7 +291,7 @@ abstract contract TraderJoeResolver is Events, Helpers {
 
         if (token == avaxAddr) {
             _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            JAVAXInterface(jToken).mint{value: _amt}();
+            JAVAXInterface(jToken).mintNative{value: _amt}();
         } else {
             TokenInterface tokenContract = TokenInterface(token);
             _amt = _amt == uint(-1) ? tokenContract.balanceOf(address(this)) : _amt;

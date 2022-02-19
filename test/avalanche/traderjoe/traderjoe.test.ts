@@ -10,6 +10,7 @@ import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2"
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner"
 import { addresses } from "../../../scripts/tests/avalanche/addresses";
+import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
 import { ConnectV2TraderJoe__factory } from "../../../typechain";
@@ -66,12 +67,18 @@ describe("TraderJoe", function () {
             expect(!!dsaWallet0.address).to.be.true;
         });
 
-        it("Deposit AVAX into DSA wallet", async function () {
+        it("Deposit AVAX and DAI into DSA wallet", async function () {
             await wallet0.sendTransaction({
                 to: dsaWallet0.address,
                 value: ethers.utils.parseEther("10")
             });
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+
+            await addLiquidity(
+                "dai",
+                dsaWallet0.address,
+                ethers.utils.parseEther("10")
+              );
         });
     });
 
@@ -80,7 +87,6 @@ describe("TraderJoe", function () {
         it("Should deposit AVAX in TraderJoe", async function () {
 
             const amount = ethers.utils.parseEther("1") // 1 AVAX
-            console.log(9)
             const spells = [
                 {
                     connector: connectorName,
@@ -88,14 +94,26 @@ describe("TraderJoe", function () {
                     args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE','0xC22F01ddc8010Ee05574028528614634684EC29e', amount, 0, 0]
                 }
             ]
-            console.log(8)
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
-            console.log(7)
             const receipt = await tx.wait()
-            console.log(6)
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
             console.log()
         });
+
+        it("Should deposit DAI in TraderJoe", async function () {
+            const spells = [
+                {
+                    connector: connectorName,
+                    method: "deposit",
+                    args: ['0xd586E7F844cEa2F87f50152665BCbc2C279D8d70', '0xc988c170d0E38197DC634A45bF00169C7Aa7CA19', '1000000000000000000', 0, 0]
+                }
+            ]
+
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            const receipt = await tx.wait()
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
+        });
+
 
         it("Should borrow and payback DAI from TraderJoe", async function () {
             const amount = ethers.utils.parseEther("10") // 10 DAI
@@ -118,26 +136,28 @@ describe("TraderJoe", function () {
             expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
         });
 
-        it("Should deposit all AVAX in TraderJoe", async function () {
+       
+        it("Should withdraw all DAI from TraderJoe", async function () {
+            const amount = ethers.utils.parseEther("1") 
             const spells = [
                 {
                     connector: connectorName,
-                    method: "deposit",
-                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', '0xC22F01ddc8010Ee05574028528614634684EC29e', constants.max_value, 0, 0]
+                    method: "withdraw",
+                    args: ['0xd586E7F844cEa2F87f50152665BCbc2C279D8d70', '0xc988c170d0E38197DC634A45bF00169C7Aa7CA19' ,'1000000000000000000', 0, 0]
                 }
             ]
 
             const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
             const receipt = await tx.wait()
-            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("0"));
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("9"));
         });
-
-        it("Should withdraw all AVAX from TraderJoe", async function () {
+        it("Should withdraw all Avax from TraderJoe", async function () {
+            const amount = ethers.utils.parseEther("1") 
             const spells = [
                 {
                     connector: connectorName,
                     method: "withdraw",
-                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', '0xC22F01ddc8010Ee05574028528614634684EC29e', constants.max_value, 0, 0]
+                    args: ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', '0xC22F01ddc8010Ee05574028528614634684EC29e' ,amount, 0, 0]
                 }
             ]
 
