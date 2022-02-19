@@ -77,9 +77,9 @@ abstract contract TraderJoeResolver is Events, Helpers {
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        console.log(1);
+        
         (_eventName, _eventParam) = depositRaw(token, jToken, amt, getId, setId);
-        console.log(1);
+        
     }
 
     /**
@@ -358,7 +358,12 @@ abstract contract TraderJoeResolver is Events, Helpers {
         uint withdrawAmt;
         {
             uint initialBal = token != avaxAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
-            require(jTokenContract.redeem(_cAmt) == 0, "redeem-failed");
+            if(token == avaxAddr){
+                require(jTokenContract.redeemNative(_cAmt) == 0, "redeem-failed");
+            }
+            else{
+                require(jTokenContract.redeem(_cAmt) == 0, "redeem-failed");
+            }
             uint finalBal = token != avaxAddr ? tokenContract.balanceOf(address(this)) : address(this).balance;
 
             withdrawAmt = sub(finalBal, initialBal);
