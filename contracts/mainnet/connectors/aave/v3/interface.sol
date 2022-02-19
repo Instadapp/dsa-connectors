@@ -1,47 +1,91 @@
 pragma solidity ^0.7.0;
 
 interface AaveInterface {
-    function deposit(address _asset, uint256 _amount, address _onBehalfOf, uint16 _referralCode) external;
-    function withdraw(address _asset, uint256 _amount, address _to) external;
-    function borrow(
-        address _asset,
-        uint256 _amount,
-        uint256 _interestRateMode,
-        uint16 _referralCode,
-        address _onBehalfOf
-    ) external;
-    function repay(address _asset, uint256 _amount, uint256 _rateMode, address _onBehalfOf) external;
-    function setUserUseReserveAsCollateral(address _asset, bool _useAsCollateral) external;
-    function swapBorrowRateMode(address _asset, uint256 _rateMode) external;
+	function supply(
+		address asset,
+		uint256 amount,
+		address onBehalfOf,
+		uint16 referralCode
+	) external;
+
+	function withdraw(
+		address asset,
+		uint256 amount,
+		address to
+	) external returns (uint256);
+
+	function borrow(
+		address asset,
+		uint256 amount,
+		uint256 interestRateMode,
+		uint16 referralCode,
+		address onBehalfOf
+	) external;
+
+	function repay(
+		address asset,
+		uint256 amount,
+		uint256 interestRateMode,
+		address onBehalfOf
+	) external returns (uint256);
+
+	function repayWithATokens(
+		address asset,
+		uint256 amount,
+		uint256 interestRateMode
+	) external returns (uint256);
+
+	function setUserUseReserveAsCollateral(address asset, bool useAsCollateral)
+		external;
+
+	function swapBorrowRateMode(address asset, uint256 interestRateMode)
+		external;
+
+	function setUserEMode(uint8 categoryId) external;
 }
 
-interface AaveLendingPoolProviderInterface {
-    function getLendingPool() external view returns (address);
+interface AavePoolProviderInterface {
+	function getPool() external view returns (address);
 }
 
 interface AaveDataProviderInterface {
-    function getReserveTokensAddresses(address _asset) external view returns (
-        address aTokenAddress,
-        address stableDebtTokenAddress,
-        address variableDebtTokenAddress
-    );
-    function getUserReserveData(address _asset, address _user) external view returns (
-        uint256 currentATokenBalance,
-        uint256 currentStableDebt,
-        uint256 currentVariableDebt,
-        uint256 principalStableDebt,
-        uint256 scaledVariableDebt,
-        uint256 stableBorrowRate,
-        uint256 liquidityRate,
-        uint40 stableRateLastUpdated,
-        bool usageAsCollateralEnabled
-    );
+	function getReserveTokensAddresses(address _asset)
+		external
+		view
+		returns (
+			address aTokenAddress,
+			address stableDebtTokenAddress,
+			address variableDebtTokenAddress
+		);
+
+	function getUserReserveData(address _asset, address _user)
+		external
+		view
+		returns (
+			uint256 currentATokenBalance,
+			uint256 currentStableDebt,
+			uint256 currentVariableDebt,
+			uint256 principalStableDebt,
+			uint256 scaledVariableDebt,
+			uint256 stableBorrowRate,
+			uint256 liquidityRate,
+			uint40 stableRateLastUpdated,
+			bool usageAsCollateralEnabled
+		);
+
+	function getReserveEModeCategory(address asset)
+		external
+		view
+		returns (uint256);
 }
 
 interface AaveAddressProviderRegistryInterface {
-    function getAddressesProvidersList() external view returns (address[] memory);
+	function getAddressesProvidersList()
+		external
+		view
+		returns (address[] memory);
 }
 
 interface ATokenInterface {
-    function balanceOf(address _user) external view returns(uint256);
+	function balanceOf(address _user) external view returns (uint256);
 }
