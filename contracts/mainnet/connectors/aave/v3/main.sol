@@ -183,8 +183,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 	/**
 	 * @dev Payback borrowed ETH/ERC20_Token using aTokens.
-	 * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the
-	 * equivalent debt tokens.
+	 * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens.
 	 * @param token The address of the token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
 	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
