@@ -182,8 +182,9 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Payback borrowed ETH/ERC20_Token .
-	 * @notice Payback debt owed.
+	 * @dev Payback borrowed ETH/ERC20_Token using aTokens.
+	 * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the
+	 * equivalent debt tokens.
 	 * @param token The address of the token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
 	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
@@ -271,6 +272,23 @@ abstract contract AaveResolver is Events, Helpers {
 
 		_eventName = "LogSwapRateMode(address,uint256)";
 		_eventParam = abi.encode(token, rateMode);
+	}
+
+	/**
+	 * @dev Set user e-mode
+	 * @notice Updates the user's e-mode category
+	 * @param categoryId The category Id of the e-mode user want to set
+	 */
+	function setUserEMode(uint8 categoryId)
+		external
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		AaveInterface aave = AaveInterface(aaveProvider.getPool());
+
+		aave.setUserEMode(categoryId);
+
+		_eventName = "LogSetUserEMode(uint8)";
+		_eventParam = abi.encode(categoryId);
 	}
 }
 
