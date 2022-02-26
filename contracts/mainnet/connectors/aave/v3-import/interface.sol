@@ -47,6 +47,25 @@ interface IFlashLoan {
 	) external;
 }
 
+interface ATokenInterface {
+	function scaledBalanceOf(address _user) external view returns (uint256);
+
+	function isTransferAllowed(address _user, uint256 _amount)
+		external
+		view
+		returns (bool);
+
+	function balanceOf(address _user) external view returns (uint256);
+
+	function transferFrom(
+		address,
+		address,
+		uint256
+	) external returns (bool);
+
+	function allowance(address, address) external returns (uint256);
+}
+
 interface AaveLendingPoolProviderInterface {
 	function getLendingPool() external view returns (address);
 }
@@ -82,8 +101,4 @@ interface AaveAddressProviderRegistryInterface {
 		external
 		view
 		returns (address[] memory);
-}
-
-interface ATokenInterface {
-	function balanceOf(address _user) external view returns (uint256);
 }

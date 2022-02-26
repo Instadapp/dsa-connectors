@@ -149,13 +149,13 @@ contract AaveResolver is Helpers, Events {
 	}
 
 	function _repay(
-		address[] tokens,
-		uint256[] amounts,
+		address[] memory tokens,
+		uint256[] memory amounts,
 		address recepient
 	) internal {
 		for (uint256 i = 0; i < tokens.length; i++) {
 			require(_balance(tokens[i]) >= amounts[i], "Repay failed!");
-			TokenInterface(tokens[i]).Transfer(recepient, amounts[i]);
+			TokenInterface(tokens[i]).transfer(recepient, amounts[i]);
 		}
 	}
 }
@@ -236,7 +236,7 @@ contract AaveHelpers is AaveResolver {
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
-		data.supplyAmts = new uint256[](inputData.supplyAssets.length);
+		data.supplyAmts = new uint256[](inputData.supplyTokens.length);
 		data._supplyTokens = new address[](inputData.supplyTokens.length);
 		data.aTokens = new ATokenInterface[](inputData.supplyTokens.length);
 
@@ -281,65 +281,61 @@ contract AaveHelpers is AaveResolver {
 		address initiator,
 		bytes calldata params
 	) external returns (bool) {
-		ImportData memory Data;
-		(Data) = abi.decode(params, (ImportData));
+		ImportData memory data;
+		(data) = abi.decode(params, (ImportData));
 
 		// 1. payback borrowed amount;
 		AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 		_PaybackStable(
-			Data._borrowTokens.length,
+			data._borrowTokens.length,
 			aave,
-			Data._borrowTokens,
-			Data.stableBorrowAmts,
-			Data.userAccount
+			data._borrowTokens,
+			data.stableBorrowAmts,
+			data.userAccount
 		);
 		_PaybackVariable(
-			Data._borrowTokens.length,
+			data._borrowTokens.length,
 			aave,
-			Data._borrowTokens,
-			Data.variableBorrowAmts,
-			Data.userAccount
+			data._borrowTokens,
+			data.variableBorrowAmts,
+			data.userAccount
 		);
 
 		// 2. transfer atokens to this address;
 		_TransferAtokens(
-			Data._supplyTokens.length,
+			data._supplyTokens.length,
 			aave,
-			Data.aTokens,
-			Data.supplyAmts,
-			Data._supplyTokens,
-			Data.userAccount
+			data.aTokens,
+			data.supplyAmts,
+			data._supplyTokens,
+			data.userAccount
 		);
 		// 3. take debt including flashloan fee;
-		Data = _includeFee(Data, premiums);
+		data = _includeFee(data, premiums);
 
-		if (Data.convertStable) {
+		if (data.convertStable) {
 			_BorrowVariable(
-				Data._borrowTokens.length,
+				data._borrowTokens.length,
 				aave,
-				Data._borrowTokens,
-				Data.totalBorrowAmtsFinalAmtsWithFee
+				data._borrowTokens,
+				data.totalBorrowAmtsWithFee
 			);
 		} else {
 			_BorrowStable(
-				inputData.borrowTokens.length,
+				data._borrowTokens.length,
 				aave,
-				Data._borrowTokens,
-				Data.stableBorrowFinalAmts
+				data._borrowTokens,
+				data.stableBorrowAmts
 			);
 			_BorrowVariable(
-				inputData.borrowTokens.length,
+				data._borrowTokens.length,
 				aave,
-				Data._borrowTokens,
-				Data.variableBorrowFinalAmtsWithFee
+				data._borrowTokens,
+				data.variableBorrowAmtsWithFee
 			);
 		}
 		// 4. repay flashloan with the borrowed assets
-		_repay(
-			Data._borrowTokens,
-			Data.totalBorrowAmtsAmtsWithFee,
-			flashloanAddr
-		);
+		_repay(data._borrowTokens, data.totalBorrowAmtsWithFee, flashloanAddr);
 	}
 }
 
@@ -365,7 +361,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 
 		bytes memory _callData = abi.encode(data);
 
-		flashborrow(data._borrowTokens, data.totalBorrowAmts, 5, _calldata);
+		flashBorrow(data._borrowTokens, data.totalBorrowAmts, 5, _callData);
 
 		_eventName = "LogAaveV2Import(address,bool,address[],address[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
