@@ -13,6 +13,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
+import { network } from "hardhat";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -35,6 +36,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
+const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
 const mnemonic =
   process.env.MNEMONIC ??
@@ -51,7 +53,7 @@ function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    // gasPrice: 1000000, // 0.0001 GWEI
+    gasPrice: 1000000, // 0.0001 GWEI
   };
 }
 
@@ -71,6 +73,7 @@ function getScanApiKey(networkType: string) {
   if (networkType === "avalanche") return SNOWTRACE_API;
   else if (networkType === "polygon") return POLYGONSCAN_API;
   else if (networkType === "arbitrum") return ARBISCAN_API;
+  else if (networkType === "optimism") return OPTIMISM_API;
   else return ETHERSCAN_API;
 }
 
@@ -122,8 +125,8 @@ const config: HardhatUserConfig = {
     sources: "./contracts",
     tests: "./test",
   },
-  etherscan: { 
-     apiKey: getScanApiKey(String(process.env.networkType)),
+  etherscan: {
+    apiKey: getScanApiKey(String(process.env.networkType)),
   },
   typechain: {
     outDir: "typechain",
