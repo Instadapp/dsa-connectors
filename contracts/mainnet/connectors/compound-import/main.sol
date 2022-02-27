@@ -7,30 +7,18 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
 // 1. Get info for all the assets the user has supplied as collateral and the assets he borrowed.
-// 2. Take the flash loan for all the borrowed assets.
-// 3. Using this flash loan, pay back the user's debt in the EOA account.
-// 4. After paying the debt, transfer the user's tokens from EOA to DSA.
-// 5. Then borrow debt of same tokens but include flash loan fee in it.
-// 6. Payback the flash loan for all the tokens.
+// 2. Using the flash loan funds, pay back the user's debt in the EOA account.
+// 3. After paying the debt, transfer the user's tokens from EOA to DSA.
+// 4. Then borrow debt of same tokens but include flash loan fee in it.
 
-// fill logics in contract functions
-contract FlashLoanHelper is Helpers, Events {
-    function _flashLoan(
-        address[] memory _tokens,
-        uint256[] memory _amts
-    ) internal {
-        // fill in logic for flash loans
-    }
-
-    function _repayFlashLoan(
-        address[] memory _tokens,
-        uint256[] memory _amts
-    ) internal {
-        // fill in logic for flash loan repayment
-    }
-}
-
-contract CompoundResolver is Helpers, Events {
+contract CompoundHelper is Helpers, Events {
+    /**
+     * @notice repays the debt taken by user on Compound on its behalf to free its collateral for transfer
+     * @dev uses the cEth contract for ETH repays, otherwise the general cToken interface
+     * @param _userAccount the user address for which debt is to be repayed
+     * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has debt positions
+     * @param _borrowAmts array containing the amount borrowed for each token
+     */
     function _repayUserDebt(
         address _userAccount,
         CTokenInterface[] memory _cTokenContracts,
@@ -48,6 +36,13 @@ contract CompoundResolver is Helpers, Events {
         }
     }
 
+    /**
+     * @notice used to transfer user's supply position on Compound to DSA
+     * @dev uses the transferFrom token in cToken contracts to transfer positions, requires approval from user first
+     * @param _userAccount address of the user account whose position is to be transferred
+     * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has supply positions
+     * @param _amts array containing the amount supplied for each token
+     */
     function _transferTokensToDsa(
         address _userAccount, 
         CTokenInterface[] memory _cTokenContracts,
@@ -60,20 +55,25 @@ contract CompoundResolver is Helpers, Events {
         }
     }
 
+    /**
+     * @notice borrows the user's debt positions from Compound via DSA, so that its debt positions get imported to DSA
+     * @dev actually borrow some extra amount than the original position to cover the flash loan fee
+     * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has debt positions
+     * @param _amts array containing the amounts the user had borrowed originally from Compound plus the flash loan fee
+     */
     function _borrowDebtPosition(
-        CTokenInterface[] memory _ctokenContracts, 
+        CTokenInterface[] memory _cTokenContracts, 
         uint[] memory _amts
     ) internal {
-        for (uint i = 0; i < _ctokenContracts.length; i++) {
+        for (uint i = 0; i < _cTokenContracts.length; i++) {
             if (_amts[i] > 0) {
-            // add _amts flash loan fees to _amts[i]
-                require(_ctokenContracts[i].borrow(_amts[i]) == 0, "borrow-failed-collateral?");
+                require(_cTokenContracts[i].borrow(_amts[i]) == 0, "borrow-failed-collateral?");
             }
         }        
     }
 }
 
-contract CompoundHelpers is CompoundResolver {
+contract CompoundResolver is CompoundHelper {
     struct ImportData {
         address[] cTokens; // is the list of all tokens the user has interacted with (supply/borrow) -> used to enter markets
         uint[] borrowAmts;
@@ -92,6 +92,13 @@ contract CompoundHelpers is CompoundResolver {
         string[] borrowIds;
     }
 
+    /**
+     * @notice fetch the borrow details of the user
+     * @dev approve the cToken to spend (borrowed amount of) tokens to allow for repaying later
+     * @param _importInputData the struct containing borrowIds of the users borrowed tokens
+     * @param data struct used to store the final data on which the CompoundHelper contract functions operate
+     * @return ImportData the final value of param data
+     */
     function getBorrowAmounts (
         ImportInputData memory _importInputData,
         ImportData memory data
@@ -135,6 +142,13 @@ contract CompoundHelpers is CompoundResolver {
         return data;
     }
 
+    /**
+     * @notice fetch the supply details of the user
+     * @dev only reads data from blockchain hence view
+     * @param _importInputData the struct containing supplyIds of the users supplied tokens
+     * @param data struct used to store the final data on which the CompoundHelper contract functions operate
+     * @return ImportData the final value of param data
+     */
     function getSupplyAmounts (
         ImportInputData memory _importInputData,
         ImportData memory data
@@ -172,79 +186,94 @@ contract CompoundHelpers is CompoundResolver {
     }
 }
 
-contract CompoundImportResolver is CompoundHelpers, FlashLoanHelper {
+contract CompoundImport is CompoundResolver {
 
-    // get info for all the assets the user has supplied as collateral and the assets borrowed
+    /**
+     * @notice this function performs the import of user's Compound positions into its DSA
+     * @dev called internally by the importCompound and migrateCompound functions
+     * @param _importInputData the struct containing borrowIds of the users borrowed tokens
+     */
     function _importCompound(
-        ImportInputData memory importInputData
+        ImportInputData memory _importInputData
     ) internal returns (string memory _eventName, bytes memory _eventParam) {
-        require(AccountInterface(address(this)).isAuth(importInputData.userAccount), "user-account-not-auth");
+        require(AccountInterface(address(this)).isAuth(_importInputData.userAccount), "user-account-not-auth");
 
-        require(importInputData.supplyIds.length > 0, "0-length-not-allowed");
+        require(_importInputData.supplyIds.length > 0, "0-length-not-allowed");
 
         ImportData memory data;
 
-        uint _length = add(importInputData.supplyIds.length, importInputData.borrowIds.length);
+        uint _length = add(_importInputData.supplyIds.length, _importInputData.borrowIds.length);
         data.cTokens = new address[](_length);
 
-        data = getBorrowAmounts(importInputData, data);
-        data = getSupplyAmounts(importInputData, data);
+        // get info about all borrowings and lendings by the user on Compound
+        data = getBorrowAmounts(_importInputData, data);
+        data = getSupplyAmounts(_importInputData, data);
 
         for(uint i = 0; i < data.cTokens.length; i++){
             enterMarket(data.cTokens[i]);
         }
 
-        // take flash loan for all the borrowed assets
-        // use the addresses of the borrowed tokens and their amounts to get the same flash loans
-        _flashLoan(data.borrowTokens, data.borrowAmts);
-
         // pay back user's debt using flash loan funds
-        _repayUserDebt(importInputData.userAccount, data.borrowCtokens, data.borrowAmts);
+        _repayUserDebt(_importInputData.userAccount, data.borrowCtokens, data.borrowAmts);
 
         // transfer user's tokens to DSA
-        _transferTokensToDsa(importInputData.userAccount, data.supplyCtokens, data.supplyAmts);
+        _transferTokensToDsa(_importInputData.userAccount, data.supplyCtokens, data.supplyAmts);
 
         // borrow the earlier position from Compound with flash loan fee added
         _borrowDebtPosition(data.borrowCtokens, data.borrowAmts);
 
-        // payback flash loan 
-        _repayFlashLoan(data.borrowTokens, data.borrowAmts); // update borrowAmounts with flash loan fee
-
         _eventName = "LogCompoundImport(address,address[],string[],string[],uint256[],uint256[])";
         _eventParam = abi.encode(
-            importInputData.userAccount,
+            _importInputData.userAccount,
             data.cTokens,
-            importInputData.supplyIds,
-            importInputData.borrowIds,
+            _importInputData.supplyIds,
+            _importInputData.borrowIds,
             data.supplyAmts,
             data.borrowAmts
         );
     }
 
+    /**
+     * @notice import Compound position of the address passed in as userAccount
+     * @dev internally calls _importContract to perform the actual import
+     * @param _userAccount address of user whose position is to be imported to DSA
+     * @param _supplyIds Ids of all tokens the user has supplied to Compound
+     * @param _borrowIds Ids of all token borrowed by the user
+     */
     function importCompound(
-        address userAccount,
-        string[] memory supplyIds,
-        string[] memory borrowIds
+        address _userAccount,
+        string[] memory _supplyIds,
+        string[] memory _borrowIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         ImportInputData memory inputData = ImportInputData({
-            userAccount: userAccount,
-            supplyIds: supplyIds,
-            borrowIds: borrowIds
+            userAccount: _userAccount,
+            supplyIds: _supplyIds,
+            borrowIds: _borrowIds
         }); 
 
         (_eventName, _eventParam) = _importCompound(inputData);
     }
 
+    /**
+     * @notice import msg.sender's Compound position (which is the user since this is a delegateCall)
+     * @dev internally calls _importContract to perform the actual import
+     * @param _supplyIds Ids of all tokens the user has supplied to Compound
+     * @param _borrowIds Ids of all token borrowed by the user
+     */
     function migrateCompound(
-        string[] memory supplyIds,
-        string[] memory borrowIds
+        string[] memory _supplyIds,
+        string[] memory _borrowIds
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         ImportInputData memory inputData = ImportInputData({
             userAccount: msg.sender,
-            supplyIds: supplyIds,
-            borrowIds: borrowIds
+            supplyIds: _supplyIds,
+            borrowIds: _borrowIds
         });
 
         (_eventName, _eventParam) = _importCompound(inputData);
     }
+}
+
+contract ConnectV2CompoundImport is CompoundImport {
+    string public constant name = "Compound-Import-v2";
 }
