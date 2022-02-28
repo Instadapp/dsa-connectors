@@ -60,14 +60,16 @@ contract CompoundHelper is Helpers, Events {
      * @dev actually borrow some extra amount than the original position to cover the flash loan fee
      * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has debt positions
      * @param _amts array containing the amounts the user had borrowed originally from Compound plus the flash loan fee
+     * @param _flashLoanFee flash loan fee (in percentage and scaled up to 10**2)
      */
     function _borrowDebtPosition(
         CTokenInterface[] memory _cTokenContracts, 
-        uint[] memory _amts
+        uint256[] memory _amts,
+        uint256 _flashLoanFee
     ) internal {
         for (uint i = 0; i < _cTokenContracts.length; i++) {
             if (_amts[i] > 0) {
-                require(_cTokenContracts[i].borrow(_amts[i]) == 0, "borrow-failed-collateral?");
+                require(_cTokenContracts[i].borrow(add(_amts[i], mul(_amts[i], mul(_flashLoanFee, 10**14)))) == 0, "borrow-failed-collateral?");
             }
         }        
     }
@@ -192,9 +194,11 @@ contract CompoundImport is CompoundResolver {
      * @notice this function performs the import of user's Compound positions into its DSA
      * @dev called internally by the importCompound and migrateCompound functions
      * @param _importInputData the struct containing borrowIds of the users borrowed tokens
+     * @param _flashLoanFee flash loan fee
      */
     function _importCompound(
-        ImportInputData memory _importInputData
+        ImportInputData memory _importInputData,
+        uint256 _flashLoanFee
     ) internal returns (string memory _eventName, bytes memory _eventParam) {
         require(AccountInterface(address(this)).isAuth(_importInputData.userAccount), "user-account-not-auth");
 
@@ -220,7 +224,7 @@ contract CompoundImport is CompoundResolver {
         _transferTokensToDsa(_importInputData.userAccount, data.supplyCtokens, data.supplyAmts);
 
         // borrow the earlier position from Compound with flash loan fee added
-        _borrowDebtPosition(data.borrowCtokens, data.borrowAmts);
+        _borrowDebtPosition(data.borrowCtokens, data.borrowAmts, _flashLoanFee);
 
         _eventName = "LogCompoundImport(address,address[],string[],string[],uint256[],uint256[])";
         _eventParam = abi.encode(
@@ -239,11 +243,13 @@ contract CompoundImport is CompoundResolver {
      * @param _userAccount address of user whose position is to be imported to DSA
      * @param _supplyIds Ids of all tokens the user has supplied to Compound
      * @param _borrowIds Ids of all token borrowed by the user
+     * @param _flashLoanFee flash loan fee (in percentage and scaled up to 10**2)
      */
     function importCompound(
         address _userAccount,
         string[] memory _supplyIds,
-        string[] memory _borrowIds
+        string[] memory _borrowIds,
+        uint256 _flashLoanFee
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         ImportInputData memory inputData = ImportInputData({
             userAccount: _userAccount,
@@ -251,7 +257,7 @@ contract CompoundImport is CompoundResolver {
             borrowIds: _borrowIds
         }); 
 
-        (_eventName, _eventParam) = _importCompound(inputData);
+        (_eventName, _eventParam) = _importCompound(inputData, _flashLoanFee);
     }
 
     /**
@@ -259,10 +265,12 @@ contract CompoundImport is CompoundResolver {
      * @dev internally calls _importContract to perform the actual import
      * @param _supplyIds Ids of all tokens the user has supplied to Compound
      * @param _borrowIds Ids of all token borrowed by the user
+     * @param _flashLoanFee flash loan fee (in percentage and scaled up to 10**2)
      */
     function migrateCompound(
         string[] memory _supplyIds,
-        string[] memory _borrowIds
+        string[] memory _borrowIds,
+        uint256 _flashLoanFee
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         ImportInputData memory inputData = ImportInputData({
             userAccount: msg.sender,
@@ -270,7 +278,7 @@ contract CompoundImport is CompoundResolver {
             borrowIds: _borrowIds
         });
 
-        (_eventName, _eventParam) = _importCompound(inputData);
+        (_eventName, _eventParam) = _importCompound(inputData, _flashLoanFee);
     }
 }
 
