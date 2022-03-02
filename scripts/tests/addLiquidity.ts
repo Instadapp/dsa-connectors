@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 
 import { impersonateAccounts } from "./impersonate";
 import { tokenMapping as mainnetMapping } from "./mainnet/tokens";
