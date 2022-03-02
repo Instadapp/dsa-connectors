@@ -11,7 +11,8 @@
     "deploy": "node scripts/deployConnectorsFromCmd.js",
     "test:runner": "hardhat run scripts/tests/run-tests.ts",
     "typechain": "hardhat typechain",
-    "compile": "hardhat compile"
+    "compile": "hardhat compile",
+    "deploy:runner": "hardhat run scripts/deployment/deployConnectorsFromCmd.ts"
   },
   "repository": {
     "type": "git",

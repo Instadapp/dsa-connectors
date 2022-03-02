@@ -15,13 +15,14 @@ import { Events } from "./events.sol";
 
 abstract contract AutoRouter is Helpers, Events {
     /**
-     * @dev Sell ETH/ERC20_Token using uniswap v3 auto router.
+     * @dev Sell Matic/ERC20_Token using uniswap v3 auto router.
      * @notice Swap tokens from getting an optimized trade routes
-     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAddr The address of the token to buy.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
-     * @param callData Data from Uniswap V3 auto router SDK.
+     * @param callData Data from Uniswap V3 auto router SDK. You can generate calldata and unitAmt using uniswap-v3-autorouter or using this <a href="https://docs.instadapp.io/faq/connectors/calldata-param" target="_blank">API</a>
+
      * @param setId ID stores the amount of token brought.
     */
     function sell(
@@ -48,6 +49,6 @@ abstract contract AutoRouter is Helpers, Events {
     }
 }
 
-contract ConnectV2UniswapV3AutoRouter is AutoRouter {
+contract ConnectV2UniswapV3AutoRouterPolygon is AutoRouter {
     string public name = "UniswapV3-Auto-Router-v1";
 }
