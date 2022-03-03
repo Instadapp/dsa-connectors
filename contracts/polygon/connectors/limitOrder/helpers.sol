@@ -55,7 +55,7 @@ contract Helpers is Basic {
         } else {
             amountSend_ = params_.amount == type(uint128).max ? getTokenBal(TokenInterface(params_.token1)) : params_.amount;
             convertMaticToWmatic(address(token1_) == wmaticAddr, token1_, amountSend_);
-            approve(TokenInterface(token1_), address(limitCon_), amountSend_);
+            approve(token1_, address(limitCon_), amountSend_);
         }
 
         {
