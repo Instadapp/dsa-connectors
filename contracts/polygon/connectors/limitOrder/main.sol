@@ -79,7 +79,7 @@ contract LimitOrderConnector is Helpers {
     }
 
 
-    function withdrawFull(
+    function closeFull(
         uint256 tokenId_,
         uint256 setId_
     )
