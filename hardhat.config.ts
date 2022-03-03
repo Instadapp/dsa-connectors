@@ -40,11 +40,11 @@ const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
 
-const networkGasPriceConfig: Record<string, string> = {
-  "mainnet": "160",
-  "polygon": "50",
-  "avalanche": "50",
-  "arbitrum": "2"
+const networkGasPriceConfig: Record<string, Number> = {
+  "mainnet": 160000000000,
+  "polygon": 50000000000,
+  "avalanche": 50000000000,
+  "arbitrum": 2000000000
 }
 
 function createConfig(network: string) {
