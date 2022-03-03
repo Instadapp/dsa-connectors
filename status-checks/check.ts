@@ -92,7 +92,7 @@ const checkEvents = async (connector: {
     const eventsPath = `${connector.path}/events.sol`;
     const mainPath = `${connector.path}/main.sol`;
     if (connector.events.length) {
-      const eventNames: any[] = [];
+      const eventNames:string[] = [];
       for (let i1 = 0; i1 < connector.mainEvents.length; i1++) {
         const mainEvent = connector.mainEvents[i1];
         const name = mainEvent.split("(")[0];
@@ -196,7 +196,7 @@ const parseCode = async (connector: { path: any; code?: any }) => {
     let funcs = [];
     let event: string[] = [];
     let mainEvents: string[] = [];
-    let firstLine: number = 0;
+    let firstLine: number = -1;
     let mainEventsLines = [];
     for (let index = 0; index < strs.length; index++) {
       const str = strs[index];
@@ -297,7 +297,7 @@ const parseCode = async (connector: { path: any; code?: any }) => {
   }
 };
 
-const checkComments = async (connector: { funcs: string | any[]; path: any; }) => {
+const checkComments = async (connector:any) => {
   try {
     const errors = [];
     for (let i1 = 0; i1 < connector.funcs.length; i1++) {
