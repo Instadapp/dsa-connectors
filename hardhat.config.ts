@@ -124,10 +124,10 @@ const config: HardhatUserConfig = {
   },
   etherscan: { 
      apiKey: {
-       mainnet: ETHERSCAN_API,
-       polygon: POLYGONSCAN_API,
-       arbitrumOne: ARBISCAN_API,
-       avalanche: SNOWTRACE_API  
+       mainnet: String(ETHERSCAN_API),
+       polygon: String(POLYGONSCAN_API),
+       arbitrumOne: String(ARBISCAN_API),
+       avalanche: String(SNOWTRACE_API),
      }
   },
   typechain: {
