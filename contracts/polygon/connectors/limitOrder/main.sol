@@ -58,7 +58,7 @@ contract LimitOrderConnector is Helpers {
     }
 
 
-    function withdrawMid(
+    function closeMid(
         uint256 tokenId_,
         uint256 amountAMin_,
         uint256 amountBMin_,
