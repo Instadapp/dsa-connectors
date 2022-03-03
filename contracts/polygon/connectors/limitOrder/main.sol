@@ -11,7 +11,7 @@ import {TokenInterface} from "../../common/interfaces.sol";
  */
 contract LimitOrderConnector is Helpers {
 
-    function createPosition(
+    function create(
         address token0_,
         address token1_,
         uint24 fee_,
