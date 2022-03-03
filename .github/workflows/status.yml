@@ -33,7 +33,7 @@ jobs:
         id: status_check
         run: |
           # Run status checks, Remove ANSI colors from the text
-          output=$(ts-node ./status-checks/index.ts | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+          output=$(node ./status-checks | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
           # Escape newlines so _all_ the output is included in the set-output
           output="${output//'%'/'%25'}"
           output="${output//$'\n'/'%0A'}"
