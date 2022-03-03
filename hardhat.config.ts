@@ -67,12 +67,6 @@ function getNetworkUrl(networkType: string) {
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
-// function getScanApiKey(networkType: string) {
-//   if (networkType === "avalanche") return SNOWTRACE_API;
-//   else if (networkType === "polygon") return POLYGONSCAN_API;
-//   else if (networkType === "arbitrum") return ARBISCAN_API;
-//   else return ETHERSCAN_API;
-// }
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
