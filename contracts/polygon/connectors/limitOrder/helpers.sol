@@ -6,7 +6,7 @@ import "./interface.sol";
 
 contract Helpers is Basic {
 
-    UniLimitOrder limitCon_ = UniLimitOrder(0xfC428E6535dC5Fee30fb57cFc93EBB1D92fdCf6e);
+    UniLimitOrder public constant limitCon_ = UniLimitOrder(0xfC428E6535dC5Fee30fb57cFc93EBB1D92fdCf6e);
 
     function sortTokenAddress(address _token0, address _token1)
         internal
