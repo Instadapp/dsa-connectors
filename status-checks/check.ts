@@ -317,7 +317,7 @@ const checkComments = async (connector:any) => {
       }
       const reqs = ["@dev", "@notice"];
       for (let i3 = 0; i3 < reqs.length; i3++) {
-        if (!func.comments.some((comment:string) => comment.startsWith(reqs[i3]))) {
+        if (!func.comments.some((comment: string) => comment.startsWith(reqs[i3]))) {
           errors.push(
             `no ${reqs[i3]} for function ${func.name} at ${connector.path}/main.sol:${func.firstLine}`
           );
