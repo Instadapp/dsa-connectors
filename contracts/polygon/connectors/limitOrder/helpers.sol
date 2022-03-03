@@ -6,19 +6,7 @@ import "./interface.sol";
 
 contract Helpers is Basic {
 
-    UniLimitOrder public constant limitCon_ = UniLimitOrder(0xfC428E6535dC5Fee30fb57cFc93EBB1D92fdCf6e);
-
-    function sortTokenAddress(address _token0, address _token1)
-        internal
-        pure
-        returns (address token0, address token1)
-    {
-        if (_token0 > _token1) {
-            (token0, token1) = (_token1, _token0);
-        } else {
-            (token0, token1) = (_token0, _token1);
-        }
-    }
+    IUniLimitOrder public constant limitCon_ = IUniLimitOrder(0xfC428E6535dC5Fee30fb57cFc93EBB1D92fdCf6e);
 
     struct MintParams {
         address token0;
@@ -58,19 +46,8 @@ contract Helpers is Basic {
             approve(token1_, address(limitCon_), amountSend_);
         }
 
-        {
-            (address token0, ) = sortTokenAddress(
-                address(token0_),
-                address(token1_)
-            );
-
-            if (token0 != address(token0_)) {
-                (token0_, token1_) = (token1_, token0_);
-            }
-        }
-
-        UniLimitOrder.MintParams memory parameter = 
-            UniLimitOrder.MintParams(
+        IUniLimitOrder.MintParams memory parameter = 
+            IUniLimitOrder.MintParams(
                 address(token0_),
                 address(token1_),
                 params_.fee,

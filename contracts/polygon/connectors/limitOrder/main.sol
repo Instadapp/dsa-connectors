@@ -2,7 +2,7 @@ pragma solidity ^0.8.1;
 // SPDX-License-Identifier: MIT
 
 import {Helpers} from "./helpers.sol";
-import {UniLimitOrder} from "./interface.sol";
+import {IUniLimitOrder} from "./interface.sol";
 import {TokenInterface} from "../../common/interfaces.sol";
 
 /**
