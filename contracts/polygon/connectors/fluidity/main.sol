@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 /**
  * @title Fluidity.
- * @dev 
+ * @dev
  */
 
 import { Events } from "./events.sol";
@@ -12,15 +12,14 @@ import { Helpers } from "./helper.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 
 abstract contract FluidityResolver is Events, Helpers {
-
-	 /**
-     * @dev 
-     * @notice 
-     * @param token_ Token Address.
-     * @param amt Token Amount.
-     * @param getId ID to retrieve amt
-     * @param setId ID stores the amount of tokens supplied
-     */
+	/**
+	 * @dev
+	 * @notice
+	 * @param token_ Token Address.
+	 * @param amt Token Amount.
+	 * @param getId ID to retrieve amt
+	 * @param setId ID stores the amount of tokens supplied
+	 */
 	function supply(
 		address token_,
 		uint256 amt,
@@ -49,14 +48,14 @@ abstract contract FluidityResolver is Events, Helpers {
 		);
 	}
 
- /**
-     * @dev 
-     * @notice 
-     * @param token_ Token Address.
-     * @param amtount Token Amount.
-     * @param getId ID to retrieve amt
-     * @param setId ID stores the amount of tokens withdrawn
-     */
+	/**
+	 * @dev
+	 * @notice
+	 * @param token_ Token Address.
+	 * @param amtount Token Amount.
+	 * @param getId ID to retrieve amt
+	 * @param setId ID stores the amount of tokens withdrawn
+	 */
 	function withdraw(
 		address token_,
 		uint256 amount_,
@@ -79,14 +78,14 @@ abstract contract FluidityResolver is Events, Helpers {
 		);
 	}
 
- 	/**
-     * @dev 
-     * @notice 
-     * @param token_ Token Address.
-     * @param itokenAmtount iToken Amount.
-     * @param getId ID to retrieve amt
-     * @param setId ID stores the amount of itokens withdrawn
-     */
+	/**
+	 * @dev
+	 * @notice
+	 * @param token_ Token Address.
+	 * @param itokenAmtount iToken Amount.
+	 * @param getId ID to retrieve amt
+	 * @param setId ID stores the amount of itokens withdrawn
+	 */
 
 	function withdrawItoken(
 		address token_,
@@ -105,12 +104,12 @@ abstract contract FluidityResolver is Events, Helpers {
 	}
 
 	/**
-     * @dev 
-     * @notice 
-     * @param user_  User Address.
-     * @param token_ Token Address.
-     * @param setId Array of setId stores the amount of claimed Rewards
-     */
+	 * @dev
+	 * @notice
+	 * @param user_  User Address.
+	 * @param token_ Token Address.
+	 * @param setId Array of setId stores the amount of claimed Rewards
+	 */
 	function claim(
 		address user_,
 		address token_,
