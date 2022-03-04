@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.6;
 
-interface P1M2 {
+interface IProtocolModule {
 	function supply(address token_, uint256 amount_)
 		external
 		returns (uint256 itokenAmount_);
@@ -16,4 +17,6 @@ interface P1M2 {
 	function claim(address user_, address token_)
 		external
 		returns (uint256[] memory updatedRewards_);
+
+
 }

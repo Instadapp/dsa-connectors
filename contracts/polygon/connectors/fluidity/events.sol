@@ -1,15 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.6;
 
 
 contract Events {
 
-event LogSupply(address indexed token_, uint amount_,uint itokenAmount_,uint getId,uint setId);
+event LogSupply(address indexed token_, uint256 amount_,uint256 itokenAmount_,uint256 getId,uint256 setId);
 
-event LogWithdraw(address indexed token_, uint amt_,uint itokenAmount_,uint getId,uint setId);
+event LogWithdraw(address indexed token_, uint256 amt_,uint256 itokenAmount_,uint256 getId,uint256 setId);
 
-event LogWithdrawItoken(address indexed token_, uint amt_,uint amount_,uint getId,uint setId);
+event LogWithdrawItoken(address indexed token_, uint256 amt_,uint256 amount_,uint256 getId,uint256 setId);
 
-event LogClaimReward(address indexed user_ , address  indexed token_ , uint[] updatedRewards_)
+event LogClaimReward(address indexed user_ , address  indexed token_ , uint256[] updatedRewards_,uint256[] setId);
 
 
 }
