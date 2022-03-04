@@ -121,11 +121,12 @@ abstract contract FluidityResolver is Events, Helpers {
 			setUint(setId[i], updatedRewards_[i]);
 		}
 
-		_eventName = "LogClaimReward(address,address,uint256[])";
+		_eventName = "LogClaimReward(address,address,uint256[],uint256[])";
 		_eventParam = abi.encode(
 			address(user_),
 			address(token_),
-			updatedRewards_
+			updatedRewards_,
+			setId
 		);
 	}
 }

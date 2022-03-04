@@ -9,8 +9,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
+	using SafeERC20 for IERC20;
+
 	IProtocolModule internal constant protocolModule =
-		IProtocolModule("0xf40c01Adc86CF5d534Ff5CaFaA451694FdD2b08C");
+		IProtocolModule(0xf40c01Adc86CF5d534Ff5CaFaA451694FdD2b08C);
 
 	function approve(
 		TokenInterface token_,
