@@ -41,17 +41,17 @@ const mnemonic =
   "test test test test test test test test test test test junk";
 
 const networkGasPriceConfig: Record<string, Number> = {
-  "mainnet": 160000000000,
-  "polygon": 50000000000,
-  "avalanche": 50000000000,
-  "arbitrum": 2000000000
+  "mainnet": 160,
+  "polygon": 50,
+  "avalanche": 25,
+  "arbitrum":1,
 }
 
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    // gasPrice: 1000000, // 0.0001 GWEI
+    gasPrice: Number(networkGasPriceConfig[network])*1e9, // 0.0001 GWEI
   };
 }
 
@@ -109,7 +109,7 @@ const config: HardhatUserConfig = {
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
     optimism: createConfig("optimism"),
-  },
+  }, 
   paths: {
     artifacts: "./artifacts",
     cache: "./cache",
