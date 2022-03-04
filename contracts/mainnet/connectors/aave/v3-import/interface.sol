@@ -37,16 +37,6 @@ interface AaveInterface {
 	function swapBorrowRateMode(address _asset, uint256 _rateMode) external;
 }
 
-interface IFlashLoan {
-	function flashLoan(
-		address[] memory tokens_,
-		uint256[] memory amts_,
-		uint256 route,
-		bytes calldata data_,
-		bytes calldata instaData_
-	) external;
-}
-
 interface ATokenInterface {
 	function scaledBalanceOf(address _user) external view returns (uint256);
 
@@ -67,7 +57,7 @@ interface ATokenInterface {
 }
 
 interface AaveLendingPoolProviderInterface {
-	function getLendingPool() external view returns (address);
+	function getPool() external view returns (address);
 }
 
 interface AaveDataProviderInterface {
