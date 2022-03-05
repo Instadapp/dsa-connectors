@@ -4,17 +4,29 @@ import { promises as fs } from "fs";
 import { join } from "path";
 import { execScript } from "./command";
 
+import { task } from "hardhat/config";
+
+
 let start: number, end: number;
 
-async function testRunner() {
-  const { chain } = await inquirer.prompt([
-    {
-      name: "chain",
-      message: "What chain do you want to run tests on?",
-      type: "list",
-      choices: ["mainnet", "polygon", "avalanche", "arbitrum"],
-    },
-  ]);
+task("run_tests_on", "runs specified test on a specified chain")
+.addPositionalParam("chain")
+.addPositionalParam("test")
+.setAction(async (taskArgs) => {
+  const chain = taskArgs.chain;
+  const test = taskArgs.test;
+  await testRunner(chain,test)
+  .then(() =>
+    console.log(
+      `🙌 finished the test runner, time taken ${(end - start) / 1000} sec`
+    )
+  )
+  .catch((err) => console.error("❌ failed due to error: ", err));
+
+});
+
+async function testRunner(chain: string, testName: string) {
+
   const testsPath = join(__dirname, "../../test", chain);
   await fs.access(testsPath);
   const availableTests = await fs.readdir(testsPath);
@@ -22,14 +34,6 @@ async function testRunner() {
     throw new Error(`No tests available for ${chain}`);
   }
 
-  const { testName } = await inquirer.prompt([
-    {
-      name: "testName",
-      message: "For which connector you want to run the tests?",
-      type: "list",
-      choices: ["all", ...availableTests],
-    },
-  ]);
   start = Date.now();
   let path: string;
   if (testName === "all") {
@@ -59,10 +63,3 @@ async function testRunner() {
   end = Date.now();
 }
 
-testRunner()
-  .then(() =>
-    console.log(
-      `🙌 finished the test runner, time taken ${(end - start) / 1000} sec`
-    )
-  )
-  .catch((err) => console.error("❌ failed due to error: ", err));
