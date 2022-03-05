@@ -17,19 +17,20 @@ const { encodeSpells } = require("../../../scripts/tests/encodeSpells");
 const encodeFlashcastData = require("../../../scripts/tests/encodeFlashcastData").default;
 const { ConnectV2CompoundImport__factory } = require("../../../typechain");
 const { ConnectV2InstaPoolV4__factory } = require("../../../typechain");
+const { ConnectV2Compound__factory } = require("../../../typechain");
 
 
 describe('Import Compound', function () {
     // const connectorName = "COMPOUND-IMPORT-ABC";
     const connectorName = "COMPOUND-IMPORT-C";
     const instapoolConnector = "INSTAPOOL-C";
-    let dsaWallet0; // signers
+    const compoundConnector = "COMPOUND-C";
+    let dsaWallet; // signers
     let cEth, cDai, comptroller, Dai; // contracts
     let masterSigner = Signer;
-    let connector, connector2;
-    let wallet0, wallet1, wallet2, wallet3;
-    const wallets = provider.getWallets()
-
+    let connector, connector2, connector3;
+    let owner;
+    let wallets;
 
     before(async () => {
         // create (reset) mainnet fork
@@ -49,6 +50,7 @@ describe('Import Compound', function () {
         masterSigner = await getMasterSigner()
         instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
 
+        // compound import connector
         connector = await deployAndEnableConnector({
             connectorName,
             contractArtifact: ConnectV2CompoundImport__factory,
@@ -56,7 +58,8 @@ describe('Import Compound', function () {
             connectors: instaConnectorsV2
         })
         console.log("Connector address", connector.address);
-
+        
+        // flash loan connector
         connector2 = await deployAndEnableConnector({
             connectorName: instapoolConnector,
             contractArtifact: ConnectV2InstaPoolV4__factory,
@@ -65,14 +68,21 @@ describe('Import Compound', function () {
         })
         console.log("Connector2 address", connector2.address);
 
-        [wallet0, wallet1, wallet2, wallet3] = wallets
+        // compound connector
+        connector3 = await deployAndEnableConnector({
+            connectorName: compoundConnector,
+            contractArtifact: ConnectV2Compound__factory,
+            signer: masterSigner,
+            connectors: instaConnectorsV2
+        })
+        console.log("Connector3 address", connector3.address);
 
         // get an account
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
             params: ["0x10a25c6886AE02fde87C5561CDD331d941d0771a"],
         });
-        wallet0 = await ethers.getSigner("0x10a25c6886AE02fde87C5561CDD331d941d0771a");
+        owner = await ethers.getSigner("0x10a25c6886AE02fde87C5561CDD331d941d0771a");
 
         await hre.network.provider.send("hardhat_setBalance", [
             "0x10a25c6886AE02fde87C5561CDD331d941d0771a",
@@ -86,16 +96,16 @@ describe('Import Compound', function () {
         comptroller = new ethers.Contract(comptrollerAddress, comptrollerAbi, ethers.provider);
 
         // deposit ether to Compound
-        await cEth.connect(wallet0).mint({
+        await cEth.connect(owner).mint({
             value: parseEther('10')
         });
 
         // enter markets with deposits
         const cTokens = [cEth.address];
-        await comptroller.connect(wallet0).enterMarkets(cTokens);
+        await comptroller.connect(owner).enterMarkets(cTokens);
 
         // borrow dai from Compound
-        await cDai.connect(wallet0).borrow(parseUnits('1000'));
+        await cDai.connect(owner).borrow(parseUnits('1000'));
     });
 
     describe('Deployment', async () => {
@@ -106,23 +116,36 @@ describe('Import Compound', function () {
 
     describe("DSA wallet setup", async () => {
         it("Should build DSA v2", async () => {
-            dsaWallet0 = await buildDSAv2(wallet0.address);
-            console.log(dsaWallet0.address);
-            expect(!!dsaWallet0.address).to.be.true;
+            dsaWallet = await buildDSAv2(owner.address);
+            console.log(dsaWallet.address);
+            expect(!!dsaWallet.address).to.be.true;
         });
 
         it("Deposit ETH into DSA wallet", async function () {
-            await wallet0.sendTransaction({
-                to: dsaWallet0.address,
+            await owner.sendTransaction({
+                to: dsaWallet.address,
                 value: ethers.utils.parseEther("10")
             });
-            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+            expect(await ethers.provider.getBalance(dsaWallet.address)).to.be.gte(ethers.utils.parseEther("10"));
         });
     });
 
     describe('Compound position migration', async () => {
         it('Should migrate Compound position', async () => {
+            const amount = ethers.utils.parseEther("100") // 100 DAI
+            const setId = "83478237";
+
             const flashSpells = [
+                {
+                    connector: compoundConnector,
+                    method: "borrow",
+                    args: ["DAI-A", amount, 0, setId]
+                },
+                {
+                    connector: compoundConnector,
+                    method: "payback",
+                    args: ["DAI-A", 0, setId, 0]
+                },
                 {
                     connector: instapoolConnector,
                     method: 'flashPayback',
@@ -137,8 +160,8 @@ describe('Import Compound', function () {
                     args: [Dai.address, parseUnits('1000'), 0, encodeFlashcastData(flashSpells), "0x"]
                 }
             ]
-
-            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
+            console.log(owner.address);
+            const tx = await dsaWallet.connect(owner).cast(...encodeSpells(spells), owner.address)
             const receipt = await tx.wait();
         })
         // take flash loan of dai through spell
