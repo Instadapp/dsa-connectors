@@ -1,5 +1,6 @@
 const { expect, should } = require("chai");
 const { ethers } = require('hardhat');
+const { provider, deployContract} = waffle
 const { Signer, Contract } = require("ethers");
 
 const { buildDSAv2 } = require("../../../scripts/tests/buildDSAv2");
@@ -22,10 +23,13 @@ describe('Import Compound', function () {
     // const connectorName = "COMPOUND-IMPORT-ABC";
     const connectorName = "COMPOUND-IMPORT-C";
     const instapoolConnector = "INSTAPOOL-C";
-    let owner; // signers
+    let dsaWallet0; // signers
     let cEth, cDai, comptroller, Dai; // contracts
     let masterSigner = Signer;
     let connector, connector2;
+    let wallet0, wallet1, wallet2, wallet3;
+    const wallets = provider.getWallets()
+
 
     before(async () => {
         // create (reset) mainnet fork
@@ -61,12 +65,14 @@ describe('Import Compound', function () {
         })
         console.log("Connector2 address", connector2.address);
 
-        // // get an account
+        [wallet0, wallet1, wallet2, wallet3] = wallets
+
+        // get an account
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
             params: ["0x10a25c6886AE02fde87C5561CDD331d941d0771a"],
         });
-        owner = await ethers.getSigner("0x10a25c6886AE02fde87C5561CDD331d941d0771a");
+        wallet0 = await ethers.getSigner("0x10a25c6886AE02fde87C5561CDD331d941d0771a");
 
         await hre.network.provider.send("hardhat_setBalance", [
             "0x10a25c6886AE02fde87C5561CDD331d941d0771a",
@@ -80,16 +86,16 @@ describe('Import Compound', function () {
         comptroller = new ethers.Contract(comptrollerAddress, comptrollerAbi, ethers.provider);
 
         // deposit ether to Compound
-        await cEth.connect(owner).mint({
+        await cEth.connect(wallet0).mint({
             value: parseEther('10')
         });
 
         // enter markets with deposits
         const cTokens = [cEth.address];
-        await comptroller.connect(owner).enterMarkets(cTokens);
+        await comptroller.connect(wallet0).enterMarkets(cTokens);
 
         // borrow dai from Compound
-        await cDai.connect(owner).borrow(parseUnits('1000'));
+        await cDai.connect(wallet0).borrow(parseUnits('1000'));
     });
 
     describe('Deployment', async () => {
@@ -100,9 +106,17 @@ describe('Import Compound', function () {
 
     describe("DSA wallet setup", async () => {
         it("Should build DSA v2", async () => {
-            dsaWallet0 = await buildDSAv2(owner.address);
+            dsaWallet0 = await buildDSAv2(wallet0.address);
             console.log(dsaWallet0.address);
             expect(!!dsaWallet0.address).to.be.true;
+        });
+
+        it("Deposit ETH into DSA wallet", async function () {
+            await wallet0.sendTransaction({
+                to: dsaWallet0.address,
+                value: ethers.utils.parseEther("10")
+            });
+            expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
         });
     });
 
@@ -124,7 +138,7 @@ describe('Import Compound', function () {
                 }
             ]
 
-            const tx = await dsaWallet0.connect(owner).cast(...encodeSpells(spells), owner.address)
+            const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)
             const receipt = await tx.wait();
         })
         // take flash loan of dai through spell
