@@ -19,7 +19,7 @@ export async function buildDSAv2(owner: any) {
     abis.core.instaIndex,
     getAddress(String(process.env.networkType))
   );
-
+    
   const tx = await instaIndex.build(owner, 2, owner);
   const receipt = await tx.wait();
   const event = receipt.events.find(
