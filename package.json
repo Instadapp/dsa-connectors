@@ -6,9 +6,9 @@
   "scripts": {
     "test": "hardhat run scripts/tests/global-test.ts",
     "coverage": "./node_modules/.bin/solidity-coverage",
-    "check": "node status-checks/huskyCheck.ts",
-    "check-husky": "node status-checks/huskyCheck.ts",
-    "deploy": "node scripts/deployConnectorsFromCmd.js",
+    "check": "ts-node status-checks/huskyCheck.ts",
+    "check-husky": "ts-node status-checks/huskyCheck.ts",
+    "deploy": "ts-node scripts/deployConnectorsFromCmd.ts",
     "test:runner": "hardhat run scripts/tests/run-tests.ts",
     "typechain": "hardhat typechain",
     "compile": "hardhat compile",
