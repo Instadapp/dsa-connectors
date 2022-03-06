@@ -85,7 +85,7 @@ describe("LidoStEth", function() {
         {
           connector: connectorName,
           method: "deposit",
-          args: [_amt,"0x0000000000000000000000000000000000000000",0,0]
+          args: [_amt,0,0]
         },
       ];
       const tx = await dsaWallet0
