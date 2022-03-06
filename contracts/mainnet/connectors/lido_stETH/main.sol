@@ -39,5 +39,5 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 }
 
 contract ConnectV2LidoStEth is Resolver {
-	string public constant name = "LidoStEth-v1.0";
+	string public constant name = "LidoStEth-v1";
 }
