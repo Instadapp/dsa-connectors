@@ -7,7 +7,7 @@ import { AaveInterface, AaveLendingPoolProviderInterface, AaveDataProviderInterf
 import "./events.sol";
 import "./interface.sol";
 
-abstract contract AaveResolver is DSMath, Basic {
+abstract contract Helper is DSMath, Basic {
 	/**
 	 * @dev Aave referal code
 	 */
@@ -57,7 +57,7 @@ abstract contract AaveResolver is DSMath, Basic {
 	}
 }
 
-contract AaveHelpers is AaveResolver {
+contract AaveHelpers is Helper {
 	function getBorrowAmount(address _token, address userAccount)
 		internal
 		view

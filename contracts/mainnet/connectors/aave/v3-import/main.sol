@@ -74,12 +74,13 @@ contract AaveV3ImportResolver is AaveHelpers {
 			);
 		}
 
-		_eventName = "LogAaveV2Import(address,bool,address[],address[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveV3Import(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
 			inputData.convertStable,
 			inputData.supplyTokens,
 			inputData.borrowTokens,
+			inputData.flashLoanFees,
 			data.supplyAmts,
 			data.stableBorrowAmts,
 			data.variableBorrowAmts
@@ -104,5 +105,5 @@ contract AaveV3ImportResolver is AaveHelpers {
 }
 
 contract ConnectV2AaveV3Import is AaveV3ImportResolver {
-	string public constant name = "Aave-v3-Import-v2";
+	string public constant name = "Aave-v3-import-v1";
 }
