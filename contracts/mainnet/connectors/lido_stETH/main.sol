@@ -15,11 +15,13 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 	 * @dev deposit ETH into Lido.
 	 * @notice sends Eth into lido and in return you get equivalent of stEth tokens
 	 * @param amt The amount of ETH to deposit. (For max: `uint256(-1)`)
+	 * @param referral optional referral parameter
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of ETH deposited.
 	 */
 	function deposit(
 		uint256 amt,
+		address referral,
 		uint256 getId,
 		uint256 setId
 	)
@@ -30,11 +32,11 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 		uint256 _amt = getUint(getId, amt);
 
 		_amt = _amt == uint256(-1) ? address(this).balance : _amt;
-		lidoInterface.submit{ value: amt }(address(0));
+		lidoInterface.submit{ value: amt }(referral);
 		setUint(setId, _amt);
 
-		_eventName = "LogDeposit(uint256,uint256,uint256)";
-		_eventParam = abi.encode(_amt, getId, setId);
+		_eventName = "LogDeposit(uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(_amt, referral, getId, setId);
 	}
 }
 
