@@ -92,7 +92,7 @@ const checkEvents = async (connector: {
     const eventsPath = `${connector.path}/events.sol`;
     const mainPath = `${connector.path}/main.sol`;
     if (connector.events.length) {
-      const eventNames = [];
+      const eventNames:string[] = [];
       for (let i1 = 0; i1 < connector.mainEvents.length; i1++) {
         const mainEvent = connector.mainEvents[i1];
         const name = mainEvent.split("(")[0];
@@ -131,7 +131,7 @@ const checkEvents = async (connector: {
         }
       }
       if (connector.mainEvents.length < connector.events.length) {
-        const deprecatedEvents = connector.events.filter((e) => {
+        const deprecatedEvents = connector.events.filter((e: string) => {
           let used = false;
           for (let index = 0; index < eventNames.length; index++) {
             if (e.split("(")[0].split(" ")[1] === eventNames[index])
@@ -157,7 +157,7 @@ const checkEvents = async (connector: {
 const getCommments = async (strs: string | any[]) => {
   try {
     const comments = [];
-    let type: string;
+    let type: string = '';
     for (let index = strs.length - 1; index >= 0; index--) {
       const str = strs[index];
       if (!type) {
@@ -194,9 +194,9 @@ const parseCode = async (connector: { path: any; code?: any }) => {
     const eventsFirstLines = [];
     let func = [];
     let funcs = [];
-    let event = [];
-    let mainEvents = [];
-    let firstLine: number;
+    let event: string[] = [];
+    let mainEvents: string[] = [];
+    let firstLine: number = -1;
     let mainEventsLines = [];
     for (let index = 0; index < strs.length; index++) {
       const str = strs[index];
@@ -297,7 +297,7 @@ const parseCode = async (connector: { path: any; code?: any }) => {
   }
 };
 
-const checkComments = async (connector) => {
+const checkComments = async (connector:any) => {
   try {
     const errors = [];
     for (let i1 = 0; i1 < connector.funcs.length; i1++) {
@@ -317,7 +317,7 @@ const checkComments = async (connector) => {
       }
       const reqs = ["@dev", "@notice"];
       for (let i3 = 0; i3 < reqs.length; i3++) {
-        if (!func.comments.some((comment) => comment.startsWith(reqs[i3]))) {
+        if (!func.comments.some((comment: string) => comment.startsWith(reqs[i3]))) {
           errors.push(
             `no ${reqs[i3]} for function ${func.name} at ${connector.path}/main.sol:${func.firstLine}`
           );
