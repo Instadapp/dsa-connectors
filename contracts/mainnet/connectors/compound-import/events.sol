@@ -7,7 +7,7 @@ contract Events {
         address[] ctokens,
         string[] supplyIds,
         string[] borrowIds,
-        uint[] supplyAmts,
-        uint[] borrowAmts
+        uint256[] supplyAmts,
+        uint256[] borrowAmts
     );
 }
