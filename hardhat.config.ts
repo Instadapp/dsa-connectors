@@ -38,6 +38,8 @@ const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
+const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
+const FANTOM_API = process.env.FANTOM_API_KEY;
 const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
@@ -124,6 +126,8 @@ const config: HardhatUserConfig = {
        polygon: String(POLYGONSCAN_API),
        arbitrumOne: String(ARBISCAN_API),
        avalanche: String(SNOWTRACE_API),
+       optimisticEthereum: String(OPTIMISM_API),
+       opera: String(FANTOM_API),
      }
   },
   typechain: {
