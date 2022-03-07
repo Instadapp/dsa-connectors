@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.6;
-pragma experimental ABIEncoderV2;
 
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";

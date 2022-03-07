@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.6;
-pragma experimental ABIEncoderV2;
 
 /**
  * @title Fluidity.
@@ -33,7 +32,7 @@ abstract contract FluidityResolver is Events, Helpers {
 			? tokenContract.balanceOf(address(this))
 			: amt_;
 
-		Helpers.approve(tokenContract, address(this), amt_);
+		approve(tokenContract, address(protocolModule), amt_);
 		uint256 itokenAmount_ = protocolModule.supply(token_, amt_);
 
 		setUint(setId, amt_);
@@ -56,15 +55,26 @@ abstract contract FluidityResolver is Events, Helpers {
 	 * @param getId ID to retrieve amt
 	 * @param setId ID stores the amount of tokens withdrawn
 	 */
-	function withdraw(
+	function withdrawRaw(
 		address token_,
 		uint256 amount_,
 		uint256 getId,
 		uint256 setId
 	) public returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 amt_ = getUint(getId, amount_);
+		uint256 itokenAmount_;
 
-		uint256 itokenAmount_ = protocolModule.withdraw(token_, amt_);
+		if (amt_ == type(uint256).max) {
+			address itoken_ = protocolModule.tokenToItoken(token_);
+
+			TokenInterface tokenContract = TokenInterface(itoken_);
+
+			amt_ = tokenContract.balanceOf(address(this));
+
+			itokenAmount_ = protocolModule.withdrawItoken(itoken_, amt_);
+		} else {
+			itokenAmount_ = protocolModule.withdraw(token_, amt_);
+		}
 
 		setUint(setId, amt_);
 
@@ -76,31 +86,6 @@ abstract contract FluidityResolver is Events, Helpers {
 			getId,
 			setId
 		);
-	}
-
-	/**
-	 * @dev
-	 * @notice
-	 * @param token_ Token Address.
-	 * @param itokenAmtount iToken Amount.
-	 * @param getId ID to retrieve amt
-	 * @param setId ID stores the amount of itokens withdrawn
-	 */
-
-	function withdrawItoken(
-		address token_,
-		uint256 itokenAmount_,
-		uint256 getId,
-		uint256 setId
-	) public returns (string memory _eventName, bytes memory _eventParam) {
-		uint256 amt_ = getUint(getId, itokenAmount_);
-
-		uint256 amount_ = protocolModule.withdrawItoken(token_, amt_);
-
-		setUint(setId, amt_);
-
-		_eventName = "LogWithdrawItoken(address,uint256,uint256,uint256,uint256)";
-		_eventParam = abi.encode(address(token_), amt_, amount_, getId, setId);
 	}
 
 	/**
@@ -129,8 +114,87 @@ abstract contract FluidityResolver is Events, Helpers {
 			setId
 		);
 	}
+
+	/**
+	 * @dev
+	 * @notice
+	 * @param token_ Token Address.
+	 * @param amt Token Amount.
+	 * @param getId ID to retrieve amt
+	 * @param setId ID stores the amount of itokens
+	 */
+
+	function supplyItoken(
+		address token_,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	) public returns (string memory _eventName, bytes memory _eventParam) {
+		uint256 amt_ = getUint(getId, amt);
+
+		TokenInterface tokenContract = TokenInterface(token_);
+		amt_ = amt_ == type(uint256).max
+			? tokenContract.balanceOf(address(this))
+			: amt_;
+
+		approve(tokenContract, address(protocolModule), amt_);
+		uint256 itokenAmount_ = protocolModule.supply(token_, amt_);
+
+		setUint(setId, itokenAmount_);
+
+		_eventName = "LogSupplyItoken(address,uint256,uint256,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(token_),
+			amt_,
+			itokenAmount_,
+			getId,
+			setId
+		);
+	}
+
+	/**
+	 * @dev
+	 * @notice
+	 * @param token_ Token Address.
+	 * @param amtount Token Amount.
+	 * @param getId ID to retrieve amt
+	 * @param setId ID stores the amount of itokens
+	 */
+
+	function withdrawItokenRaw(
+		address token_,
+		uint256 amount_,
+		uint256 getId,
+		uint256 setId
+	) public returns (string memory _eventName, bytes memory _eventParam) {
+		uint256 amt_ = getUint(getId, amount_);
+		uint256 itokenAmount_;
+
+		if (amt_ == type(uint256).max) {
+			address itoken_ = protocolModule.tokenToItoken(token_);
+
+			TokenInterface tokenContract = TokenInterface(itoken_);
+
+			amt_ = tokenContract.balanceOf(address(this));
+
+			itokenAmount_ = protocolModule.withdrawItoken(itoken_, amt_);
+		} else {
+			itokenAmount_ = protocolModule.withdraw(token_, amt_);
+		}
+
+		setUint(setId, itokenAmount_);
+
+		_eventName = "LogWithdrawItoken(address,uint256,uint256,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(itoken_),
+			amt_,
+			itokenAmount_,
+			getId,
+			setId
+		);
+	}
 }
 
 contract ConnectV2FluidityP1 is FluidityResolver {
-	string public constant name = "FluidityP1M2";
+	string public constant name = "FluidityP1";
 }

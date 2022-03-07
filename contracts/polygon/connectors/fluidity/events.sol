@@ -10,6 +10,14 @@ contract Events {
 		uint256 setId
 	);
 
+	event LogSupplyItoken(
+		address indexed token_,
+		uint256 amount_,
+		uint256 itokenAmount_,
+		uint256 getId,
+		uint256 setId
+	);
+
 	event LogWithdraw(
 		address indexed token_,
 		uint256 amt_,

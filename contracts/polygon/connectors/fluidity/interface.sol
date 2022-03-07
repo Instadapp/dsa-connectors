@@ -17,4 +17,9 @@ interface IProtocolModule {
 	function claim(address user_, address token_)
 		external
 		returns (uint256[] memory updatedRewards_);
+
+	function tokenToItoken(address token_)
+		external
+		view
+		returns (address itoken_);
 }
