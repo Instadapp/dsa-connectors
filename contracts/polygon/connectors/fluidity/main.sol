@@ -39,7 +39,7 @@ abstract contract FluidityResolver is Events, Helpers {
 
 		_eventName = "LogSupply(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			address(token_),
+			token_,
 			amt_,
 			itokenAmount_,
 			getId,
@@ -55,33 +55,34 @@ abstract contract FluidityResolver is Events, Helpers {
 	 * @param getId ID to retrieve amt
 	 * @param setId ID stores the amount of tokens withdrawn
 	 */
-	function withdrawRaw(
+	function withdraw(
 		address token_,
 		uint256 amount_,
 		uint256 getId,
 		uint256 setId
 	) public returns (string memory _eventName, bytes memory _eventParam) {
-		uint256 amt_ = getUint(getId, amount_);
+		uint256 amt = getUint(getId, amount_);
 		uint256 itokenAmount_;
 
-		if (amt_ == type(uint256).max) {
+		if (amt == type(uint256).max) {
 			address itoken_ = protocolModule.tokenToItoken(token_);
 
 			TokenInterface tokenContract = TokenInterface(itoken_);
 
-			amt_ = tokenContract.balanceOf(address(this));
+			itokenAmount_ = tokenContract.balanceOf(address(this));
 
-			itokenAmount_ = protocolModule.withdrawItoken(itoken_, amt_);
+			amt_ = protocolModule.withdrawItoken(token_, itokenAmount_);
 		} else {
-			itokenAmount_ = protocolModule.withdraw(token_, amt_);
+			itokenAmount_ = protocolModule.withdraw(token_, amt);
 		}
 
 		setUint(setId, amt_);
 
-		_eventName = "LogWithdraw(address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogWithdraw(address,uint256,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			address(token_),
+			token_,
 			amt_,
+			itoken_,
 			itokenAmount_,
 			getId,
 			setId
@@ -108,8 +109,8 @@ abstract contract FluidityResolver is Events, Helpers {
 
 		_eventName = "LogClaimReward(address,address,uint256[],uint256[])";
 		_eventParam = abi.encode(
-			address(user_),
-			address(token_),
+			user_,
+			token_,
 			updatedRewards_,
 			setId
 		);
@@ -142,9 +143,10 @@ abstract contract FluidityResolver is Events, Helpers {
 
 		setUint(setId, itokenAmount_);
 
-		_eventName = "LogSupplyItoken(address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogSupplyItoken(address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			address(token_),
+			token_,
+			itoken_,
 			amt_,
 			itokenAmount_,
 			getId,
@@ -161,7 +163,7 @@ abstract contract FluidityResolver is Events, Helpers {
 	 * @param setId ID stores the amount of itokens
 	 */
 
-	function withdrawItokenRaw(
+	function withdrawItoken(
 		address token_,
 		uint256 amount_,
 		uint256 getId,
@@ -175,18 +177,19 @@ abstract contract FluidityResolver is Events, Helpers {
 
 			TokenInterface tokenContract = TokenInterface(itoken_);
 
-			amt_ = tokenContract.balanceOf(address(this));
+			itokenAmount_ = tokenContract.balanceOf(address(this));
 
-			itokenAmount_ = protocolModule.withdrawItoken(itoken_, amt_);
+			amt_ = protocolModule.withdrawItoken(token_, itokenAmount_);
 		} else {
 			itokenAmount_ = protocolModule.withdraw(token_, amt_);
 		}
 
 		setUint(setId, itokenAmount_);
 
-		_eventName = "LogWithdrawItoken(address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogWithdrawItoken(address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			address(itoken_),
+			token,
+			itoken_,
 			amt_,
 			itokenAmount_,
 			getId,

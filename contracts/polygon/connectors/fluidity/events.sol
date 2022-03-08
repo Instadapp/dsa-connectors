@@ -5,6 +5,7 @@ contract Events {
 	event LogSupply(
 		address indexed token_,
 		uint256 amount_,
+		address itoken_,
 		uint256 itokenAmount_,
 		uint256 getId,
 		uint256 setId
@@ -12,6 +13,7 @@ contract Events {
 
 	event LogSupplyItoken(
 		address indexed token_,
+		address indexed itoken_,
 		uint256 amount_,
 		uint256 itokenAmount_,
 		uint256 getId,
@@ -27,7 +29,8 @@ contract Events {
 	);
 
 	event LogWithdrawItoken(
-		address indexed token_,
+		address indexed token,
+		address indexed itoken_,
 		uint256 amt_,
 		uint256 amount_,
 		uint256 getId,
