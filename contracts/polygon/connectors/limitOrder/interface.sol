@@ -3,7 +3,6 @@ pragma solidity ^0.8.1;
 
 interface IUniLimitOrder {
 
-    function NftToOwner(uint256) external view returns (address);
     function token0to1(uint256) external view returns (bool);
 
     struct MintParams {
