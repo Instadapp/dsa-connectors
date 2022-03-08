@@ -1,4 +1,5 @@
-pragma solidity ^0.8.1;
+pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 
 import {Helpers} from "./helpers.sol";
@@ -48,7 +49,7 @@ contract LimitOrderConnector is Helpers {
         setUint(setId_, liquidity_);
 
         eventName_ = "LogCreate(uint256,uint256,uint256,int24,int24)";
-        _eventParam = abi.encode(
+        eventParam_ = abi.encode(
             tokenId_,
             liquidity_,
             minAmount_,

@@ -1,7 +1,8 @@
-pragma solidity ^0.8.1;
+pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 // SPDX-License-Identifier: MIT
 
-import { Basic } from "../../common/basic.sol";
+import { Basic, TokenInterface } from "../../common/basic.sol";
 import "./interface.sol";
 
 contract Helpers is Basic {
