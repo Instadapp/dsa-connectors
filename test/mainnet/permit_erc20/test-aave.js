@@ -107,7 +107,6 @@ describe("starting tests for aave", function () {
             console.log("The funds have been deposited to our contract through depositWithPermit function");
         });
 
-
     });
   
   });
