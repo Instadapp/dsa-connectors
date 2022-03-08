@@ -7,14 +7,21 @@ import "./helpers.sol";
 import "./events.sol";
 
 contract _AaveV2ToV3MigrationResolver is _AaveHelper {
-	function _importAave(address userAccount, ImportInputData memory inputData)
+	function _importAave(
+		address userAccount,
+		ImportInputData memory inputData,
+		bool doImport
+	)
 		internal
 		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		require(
-			AccountInterface(address(this)).isAuth(userAccount),
-			"user-account-not-auth"
-		);
+	{	
+		if (doImport) {
+			// check only when we are importing from user's address
+			require(
+				AccountInterface(address(this)).isAuth(userAccount),
+				"user-account-not-auth"
+			);
+		}
 
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
 
@@ -44,15 +51,17 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			userAccount
 		);
 
-		//  transfer atokens to this address;
-		_TransferAtokens(
-			data._supplyTokens.length,
-			aaveV2,
-			data.aTokens,
-			data.supplyAmts,
-			data._supplyTokens,
-			userAccount
-		);
+		if (doImport) {
+			//  transfer atokens to user's DSA address;
+			_TransferAtokens(
+				data._supplyTokens.length,
+				aaveV2,
+				data.aTokens,
+				data.supplyAmts,
+				data._supplyTokens,
+				userAccount
+			);
+		}
 
 		// withdraw v2 supplied tokens
 		_WithdrawTokensFromV2(
@@ -92,9 +101,10 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			);
 		}
 
-		_eventName = "LogAaveV2ImportToV3(address,bool,address[],address[],uint256,uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveV2ImportToV3(address,bool,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
+			doImport,
 			inputData.convertStable,
 			inputData.supplyTokens,
 			inputData.borrowTokens,
@@ -113,7 +123,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(userAccount, inputData);
+		(_eventName, _eventParam) = _importAave(userAccount, inputData, false);
 	}
 
 	function migrateAaveV2ToV3(ImportInputData memory inputData)
@@ -121,7 +131,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(msg.sender, inputData);
+		(_eventName, _eventParam) = _importAave(msg.sender, inputData, true);
 	}
 }
 
