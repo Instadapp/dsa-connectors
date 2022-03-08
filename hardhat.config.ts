@@ -13,12 +13,9 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
-<<<<<<< HEAD
 import "./scripts/tests/tests-run"
 
-=======
 import { network } from "hardhat";
->>>>>>> origin/main
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
