@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
 
 contract Events {
-	event LogAaveV2ImportToV3(
+	event LogAaveImportV2ToV3(
 		address indexed user,
 		bool doImport,
 		bool convertStable,

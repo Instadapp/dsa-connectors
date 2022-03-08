@@ -39,7 +39,7 @@ abstract contract Helper is DSMath, Basic {
 		view
 		returns (bool isCol)
 	{
-		(, , , , , , , , isCol) = aaveData.getUserReserveData(token, user);
+		(, , , , , , , , isCol) = aaveV2Data.getUserReserveData(token, user);
 	}
 
 	struct ImportData {
@@ -65,7 +65,7 @@ abstract contract Helper is DSMath, Basic {
 }
 
 contract _AaveHelper is Helper {
-	function getBorrowAmount(address _token, address userAccount)
+	function getBorrowAmountV2(address _token, address userAccount)
 		internal
 		view
 		returns (uint256 stableBorrow, uint256 variableBorrow)
@@ -74,7 +74,7 @@ contract _AaveHelper is Helper {
 			,
 			address stableDebtTokenAddress,
 			address variableDebtTokenAddress
-		) = aaveData.getReserveTokensAddresses(_token);
+		) = aaveV2Data.getReserveTokensAddresses(_token);
 
 		stableBorrow = ATokenV2Interface(stableDebtTokenAddress).balanceOf(
 			userAccount
@@ -84,7 +84,7 @@ contract _AaveHelper is Helper {
 		);
 	}
 
-	function getBorrowAmounts(
+	function getBorrowAmountsV2(
 		address userAccount,
 		AaveV2Interface aaveV2,
 		ImportInputData memory inputData,
@@ -119,7 +119,7 @@ contract _AaveHelper is Helper {
 				(
 					data.stableBorrowAmts[i],
 					data.variableBorrowAmts[i]
-				) = getBorrowAmount(_token, userAccount);
+				) = getBorrowAmountV2(_token, userAccount);
 
 				if (data.variableBorrowAmts[i] != 0) {
 					data.variableBorrowAmtsWithFee[i] = add(
@@ -152,7 +152,7 @@ contract _AaveHelper is Helper {
 		return data;
 	}
 
-	function getSupplyAmounts(
+	function getSupplyAmountsV2(
 		address userAccount,
 		ImportInputData memory inputData,
 		ImportData memory data
@@ -175,7 +175,7 @@ contract _AaveHelper is Helper {
 			address _token = inputData.supplyTokens[i] == maticAddr
 				? wmaticAddr
 				: inputData.supplyTokens[i];
-			(address _aToken, , ) = aaveData.getReserveTokensAddresses(_token);
+			(address _aToken, , ) = aaveV2Data.getReserveTokensAddresses(_token);
 			data._supplyTokens[i] = _token;
 			data.aTokens[i] = ATokenV2Interface(_aToken);
 			data.supplyAmts[i] = data.aTokens[i].balanceOf(userAccount);
@@ -184,7 +184,7 @@ contract _AaveHelper is Helper {
 		return data;
 	}
 
-	function _paybackBehalfOne(
+	function _paybackBehalfOneV2(
 		AaveV2Interface aaveV2,
 		address token,
 		uint256 amt,
@@ -194,7 +194,7 @@ contract _AaveHelper is Helper {
 		aaveV2.repay(token, amt, rateMode, user);
 	}
 
-	function _PaybackStable(
+	function _PaybackStableV2(
 		uint256 _length,
 		AaveV2Interface aaveV2,
 		address[] memory tokens,
@@ -203,12 +203,12 @@ contract _AaveHelper is Helper {
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {
-				_paybackBehalfOne(aaveV2, tokens[i], amts[i], 1, user);
+				_paybackBehalfOneV2(aaveV2, tokens[i], amts[i], 1, user);
 			}
 		}
 	}
 
-	function _PaybackVariable(
+	function _PaybackVariableV2(
 		uint256 _length,
 		AaveV2Interface aaveV2,
 		address[] memory tokens,
@@ -217,12 +217,12 @@ contract _AaveHelper is Helper {
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {
-				_paybackBehalfOne(aaveV2, tokens[i], amts[i], 2, user);
+				_paybackBehalfOneV2(aaveV2, tokens[i], amts[i], 2, user);
 			}
 		}
 	}
 
-	function _TransferAtokens(
+	function _TransferAtokensV2(
 		uint256 _length,
 		AaveV2Interface aaveV2,
 		ATokenV2Interface[] memory atokenContracts,
@@ -264,7 +264,7 @@ contract _AaveHelper is Helper {
 		}
 	}
 
-	function _depositTokensInV3(
+	function _depositTokensV3(
 		uint256 _length,
 		AaveV3Interface aaveV3,
 		uint256[] memory amts,
@@ -289,7 +289,7 @@ contract _AaveHelper is Helper {
 		}
 	}
 
-	function _BorrowVariable(
+	function _BorrowVariableV3(
 		uint256 _length,
 		AaveV3Interface aaveV3,
 		address[] memory tokens,
@@ -297,12 +297,12 @@ contract _AaveHelper is Helper {
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {
-				_borrowOne(aaveV3, tokens[i], amts[i], 2);
+				_borrowOneV3(aaveV3, tokens[i], amts[i], 2);
 			}
 		}
 	}
 
-	function _BorrowStable(
+	function _BorrowStableV3(
 		uint256 _length,
 		AaveV3Interface aaveV3,
 		address[] memory tokens,
@@ -310,12 +310,12 @@ contract _AaveHelper is Helper {
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {
-				_borrowOne(aaveV3, tokens[i], amts[i], 1);
+				_borrowOneV3(aaveV3, tokens[i], amts[i], 1);
 			}
 		}
 	}
 
-	function _borrowOne(
+	function _borrowOneV3(
 		AaveV3Interface aaveV3,
 		address token,
 		uint256 amt,

@@ -32,18 +32,18 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		);
 		AaveV3Interface aaveV3 = AaveV3Interface(aaveV3Provider.getPool());
 
-		data = getBorrowAmounts(userAccount, aaveV2, inputData, data);
-		data = getSupplyAmounts(userAccount, inputData, data);
+		data = getBorrowAmountsV2(userAccount, aaveV2, inputData, data);
+		data = getSupplyAmountsV2(userAccount, inputData, data);
 
 		//  payback borrowed amount;
-		_PaybackStable(
+		_PaybackStableV2(
 			data._borrowTokens.length,
 			aaveV2,
 			data._borrowTokens,
 			data.stableBorrowAmts,
 			userAccount
 		);
-		_PaybackVariable(
+		_PaybackVariableV2(
 			data._borrowTokens.length,
 			aaveV2,
 			data._borrowTokens,
@@ -53,7 +53,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 
 		if (doImport) {
 			//  transfer atokens to user's DSA address;
-			_TransferAtokens(
+			_TransferAtokensV2(
 				data._supplyTokens.length,
 				aaveV2,
 				data.aTokens,
@@ -71,7 +71,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			data._supplyTokens
 		);
 		// deposit tokens in v3
-		_depositTokensInV3(
+		_depositTokensV3(
 			data._supplyTokens.length,
 			aaveV3,
 			data.supplyAmts,
@@ -80,20 +80,20 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 
 		// borrow assets in aave v3 after migrating position
 		if (data.convertStable) {
-			_BorrowVariable(
+			_BorrowVariableV3(
 				data._borrowTokens.length,
 				aaveV3,
 				data._borrowTokens,
 				data.totalBorrowAmtsWithFee
 			);
 		} else {
-			_BorrowStable(
+			_BorrowStableV3(
 				data._borrowTokens.length,
 				aaveV3,
 				data._borrowTokens,
 				data.stableBorrowAmtsWithFee
 			);
-			_BorrowVariable(
+			_BorrowVariableV3(
 				data._borrowTokens.length,
 				aaveV3,
 				data._borrowTokens,
@@ -101,7 +101,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			);
 		}
 
-		_eventName = "LogAaveV2ImportToV3(address,bool,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveImportV2ToV3(address,bool,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
 			doImport,
@@ -135,6 +135,6 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 	}
 }
 
-contract AaveV2ToV3MigrationResolverPolygon is _AaveV2ToV3MigrationResolver {
-	string public constant name = "Aave-v2-to-v3-import";
+contract ConnectV2AaveV2ToV3MigrationPolygon is _AaveV2ToV3MigrationResolver {
+	string public constant name = "Aave-Import-v2-to-v3";
 }
