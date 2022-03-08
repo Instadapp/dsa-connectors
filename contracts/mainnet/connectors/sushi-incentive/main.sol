@@ -20,6 +20,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 	 * @param amount amount of LP token
 	 * @param getId ID to retrieve amount
 	 * @param setId ID stores Pool ID
+	 * @param data the metadata struct
 	 */
 	function deposit(
 		address token1,
@@ -66,6 +67,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 	 * @param amount amount of LP token
 	 * @param getId ID to retrieve amount
 	 * @param setId ID stores Pool ID
+	 * @param data the metadata struct
 	 */
 	function withdraw(
 		address token1,
@@ -104,6 +106,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 	 * @param token1 token1 deposited of LP token
 	 * @param token2 token2 deposited LP token
 	 * @param setId ID stores Pool ID
+	 * @param data the metadata struct
 	 */
 	function harvest(
 		address token1,
@@ -143,6 +146,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 	 * @param amount amount of LP token
 	 * @param getId ID to retrieve amount
 	 * @param setId ID stores Pool ID
+	 * @param data the metadata struct
 	 */
 	function withdrawAndHarvest(
 		address token1,
@@ -183,6 +187,7 @@ abstract contract SushipswapIncentiveResolver is Helpers, Events {
 	 * @param token1 token1 deposited of LP token
 	 * @param token2 token2 deposited LP token
 	 * @param setId ID stores Pool ID
+	 * @param data the metadata struct
 	 */
 	function emergencyWithdraw(
 		address token1,
