@@ -9,7 +9,7 @@ abstract contract Helpers is DSMath, Basic {
 	 * @dev Aave Pool Provider
 	 */
 	AavePoolProviderInterface internal constant aaveProvider =
-		AavePoolProviderInterface(0x7013523049CeC8b06F594edb8c5fb7F232c0Df7C); // Arbitrum address - PoolAddressesProvider
+		AavePoolProviderInterface(0x7013523049CeC8b06F594edb8c5fb7F232c0Df7C); // Optimism address - PoolAddressesProvider
 
 	/**
 	 * @dev Aave Pool Data Provider
