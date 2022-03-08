@@ -17,7 +17,7 @@ abstract contract Helper is DSMath, Basic {
 	 */
 	AaveV2LendingPoolProviderInterface internal constant aaveV2Provider =
 		AaveV2LendingPoolProviderInterface(
-			0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 // v2 address TODO: need to update this
+			0xd05e3E715d945B59290df0ae8eF85c1BdB684744 // v2 address
 		);
 
 	/**
@@ -25,14 +25,14 @@ abstract contract Helper is DSMath, Basic {
 	 */
 	AaveV3PoolProviderInterface internal constant aaveV3Provider =
 		AaveV3PoolProviderInterface(
-			0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 // v2 address TODO: need to update this
+			0x7013523049CeC8b06F594edb8c5fb7F232c0Df7C // Polygon address - PoolAddressesProvider
 		);
 
 	/**
 	 * @dev Aave Protocol Data Provider
 	 */
-	AaveV2DataProviderInterface internal constant aaveData =
-		AaveV2DataProviderInterface(0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d); // TODO: need to update this
+	AaveV2DataProviderInterface internal constant aaveV2Data =
+		AaveV2DataProviderInterface(0x7551b5D2763519d4e37e8B81929D336De671d46d); // v2 address
 
 	function getIsColl(address token, address user)
 		internal
