@@ -7,15 +7,18 @@ import "./helpers.sol";
 import "./events.sol";
 
 contract _AaveV2ToV3MigrationResolver is _AaveHelper {
-	function _importAave(address userAccount, ImportInputData memory inputData)
-		internal
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		require(
-			AccountInterface(address(this)).isAuth(userAccount),
-			"user-account-not-auth"
-		);
-
+	function _importAave(
+		address userAccount,
+		ImportInputData memory inputData,
+		bool doImport
+	) internal returns (string memory _eventName, bytes memory _eventParam) {
+		if (doImport) {
+			// check only when we are importing from user's address
+			require(
+				AccountInterface(address(this)).isAuth(userAccount),
+				"user-account-not-auth"
+			);
+		}
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
 
 		ImportData memory data;
@@ -25,18 +28,18 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		);
 		AaveV3Interface aaveV3 = AaveV3Interface(aaveV3Provider.getPool());
 
-		data = getBorrowAmounts(userAccount, aaveV2, inputData, data);
-		data = getSupplyAmounts(userAccount, inputData, data);
+		data = getBorrowAmountsV2(userAccount, aaveV2, inputData, data);
+		data = getSupplyAmountsV2(userAccount, inputData, data);
 
 		//  payback borrowed amount;
-		_PaybackStable(
+		_PaybackStableV2(
 			data._borrowTokens.length,
 			aaveV2,
 			data._borrowTokens,
 			data.stableBorrowAmts,
 			userAccount
 		);
-		_PaybackVariable(
+		_PaybackVariableV2(
 			data._borrowTokens.length,
 			aaveV2,
 			data._borrowTokens,
@@ -44,16 +47,17 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			userAccount
 		);
 
-		//  transfer atokens to this address;
-		_TransferAtokens(
-			data._supplyTokens.length,
-			aaveV2,
-			data.aTokens,
-			data.supplyAmts,
-			data._supplyTokens,
-			userAccount
-		);
-
+		if (doImport) {
+			//  transfer atokens to this address;
+			_TransferAtokensV2(
+				data._supplyTokens.length,
+				aaveV2,
+				data.aTokens,
+				data.supplyAmts,
+				data._supplyTokens,
+				userAccount
+			);
+		}
 		// withdraw v2 supplied tokens
 		_WithdrawTokensFromV2(
 			data._supplyTokens.length,
@@ -62,7 +66,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			data._supplyTokens
 		);
 		// deposit tokens in v3
-		_depositTokensInV3(
+		_depositTokensV3(
 			data._supplyTokens.length,
 			aaveV3,
 			data.supplyAmts,
@@ -71,20 +75,20 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 
 		// borrow assets in aave v3 after migrating position
 		if (data.convertStable) {
-			_BorrowVariable(
+			_BorrowVariableV3(
 				data._borrowTokens.length,
 				aaveV3,
 				data._borrowTokens,
 				data.totalBorrowAmtsWithFee
 			);
 		} else {
-			_BorrowStable(
+			_BorrowStableV3(
 				data._borrowTokens.length,
 				aaveV3,
 				data._borrowTokens,
 				data.stableBorrowAmtsWithFee
 			);
-			_BorrowVariable(
+			_BorrowVariableV3(
 				data._borrowTokens.length,
 				aaveV3,
 				data._borrowTokens,
@@ -92,9 +96,10 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			);
 		}
 
-		_eventName = "LogAaveV2ImportToV3(address,bool,address[],address[],uint256,uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveImportV2ToV3(address,bool,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
+			doImport,
 			inputData.convertStable,
 			inputData.supplyTokens,
 			inputData.borrowTokens,
@@ -113,7 +118,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(userAccount, inputData);
+		(_eventName, _eventParam) = _importAave(userAccount, inputData, false);
 	}
 
 	function migrateAaveV2ToV3(ImportInputData memory inputData)
@@ -121,10 +126,10 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(msg.sender, inputData);
+		(_eventName, _eventParam) = _importAave(msg.sender, inputData, false);
 	}
 }
 
-contract AaveV2ToV3MigrationResolverAvalanche is _AaveV2ToV3MigrationResolver {
-	string public constant name = "Aave-v2-to-v3-import";
+contract ConnectV2AaveV2ToV3MigrationPolygon is _AaveV2ToV3MigrationResolver {
+	string public constant name = "Aave-Import-v2-to-v3";
 }

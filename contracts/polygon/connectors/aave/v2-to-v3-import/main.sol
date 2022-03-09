@@ -11,10 +11,7 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		address userAccount,
 		ImportInputData memory inputData,
 		bool doImport
-	)
-		internal
-		returns (string memory _eventName, bytes memory _eventParam)
-	{	
+	) internal returns (string memory _eventName, bytes memory _eventParam) {
 		if (doImport) {
 			// check only when we are importing from user's address
 			require(
