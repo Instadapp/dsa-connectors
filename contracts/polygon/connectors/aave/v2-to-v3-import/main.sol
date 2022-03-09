@@ -112,6 +112,12 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		);
 	}
 
+	/**
+	 * @dev Import aave position .
+	 * @notice Import EOA's aave V2 position to DSA's aave v3 position
+	 * @param userAccount The address of the EOA from which aave position will be imported
+	 * @param inputData The struct containing all the neccessary input data
+	 */
 	function importAaveV2ToV3(
 		address userAccount,
 		ImportInputData memory inputData
@@ -120,15 +126,20 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(userAccount, inputData, false);
+		(_eventName, _eventParam) = _importAave(userAccount, inputData, true);
 	}
 
+	/**
+	 * @dev Migrate aave position .
+	 * @notice Migrate DSA's aave V2 position to DSA's aave v3 position
+	 * @param inputData The struct containing all the neccessary input data
+	 */
 	function migrateAaveV2ToV3(ImportInputData memory inputData)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(msg.sender, inputData, true);
+		(_eventName, _eventParam) = _importAave(msg.sender, inputData, false);
 	}
 }
 
