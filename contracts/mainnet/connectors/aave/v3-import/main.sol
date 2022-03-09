@@ -87,6 +87,12 @@ contract AaveV3ImportResolver is AaveHelpers {
 		);
 	}
 
+	/**
+	 * @dev Import aave V3 position .
+	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
+	 * @param userAccount The address of the EOA from which aave position will be imported
+	 * @param inputData The struct containing all the neccessary input data
+	 */
 	function importAave(address userAccount, ImportInputData memory inputData)
 		external
 		payable
