@@ -94,14 +94,6 @@ contract AaveV3ImportResolver is AaveHelpers {
 	{
 		(_eventName, _eventParam) = _importAave(userAccount, inputData);
 	}
-
-	function migrateAave(ImportInputData memory inputData)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		(_eventName, _eventParam) = _importAave(msg.sender, inputData);
-	}
 }
 
 contract ConnectV2AaveV3ImportAvalanche is AaveV3ImportResolver {
