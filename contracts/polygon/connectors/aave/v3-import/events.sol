@@ -1,4 +1,4 @@
-pragma solidity ^0.8.6;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 contract Events {
@@ -7,6 +7,7 @@ contract Events {
 		address[] ctokens,
 		string[] supplyIds,
 		string[] borrowIds,
+		uint256[] flashLoanFees,
 		uint256[] supplyAmts,
 		uint256[] borrowAmts
 	);

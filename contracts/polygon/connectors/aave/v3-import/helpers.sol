@@ -1,9 +1,9 @@
-pragma solidity ^0.8.6;
+pragma solidity ^0.7.0;
 
 import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
 import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
-import { AaveInterface, AaveLendingPoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
+import { AaveInterface, AavePoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
 import "./events.sol";
 import "./interface.sol";
 
@@ -16,16 +16,14 @@ abstract contract Helper is DSMath, Basic {
 	/**
 	 * @dev Aave Lending Pool Provider
 	 */
-	AaveLendingPoolProviderInterface internal constant aaveProvider =
-		AaveLendingPoolProviderInterface(
-			0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 // v2 address TODO: need to update this
-		);
+	AavePoolProviderInterface internal constant aaveProvider =
+		AavePoolProviderInterface(0x7013523049CeC8b06F594edb8c5fb7F232c0Df7C);
 
 	/**
 	 * @dev Aave Protocol Data Provider
 	 */
 	AaveDataProviderInterface internal constant aaveData =
-		AaveDataProviderInterface(0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d); // TODO: need to update this
+		AaveDataProviderInterface(0x44C7324E9d84D6534DD6f292Cc08f1816e45Ff6e);
 
 	function getIsColl(address token, address user)
 		internal

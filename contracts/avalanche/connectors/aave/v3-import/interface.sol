@@ -1,7 +1,7 @@
-pragma solidity ^0.8.6;
+pragma solidity ^0.7.0;
 
 interface AaveInterface {
-	function deposit(
+	function supply(
 		address _asset,
 		uint256 _amount,
 		address _onBehalfOf,
@@ -56,7 +56,7 @@ interface ATokenInterface {
 	function allowance(address, address) external returns (uint256);
 }
 
-interface AaveLendingPoolProviderInterface {
+interface AavePoolProviderInterface {
 	function getPool() external view returns (address);
 }
 
