@@ -175,7 +175,9 @@ contract _AaveHelper is Helper {
 			address _token = inputData.supplyTokens[i] == maticAddr
 				? wmaticAddr
 				: inputData.supplyTokens[i];
-			(address _aToken, , ) = aaveV2Data.getReserveTokensAddresses(_token);
+			(address _aToken, , ) = aaveV2Data.getReserveTokensAddresses(
+				_token
+			);
 			data._supplyTokens[i] = _token;
 			data.aTokens[i] = ATokenV2Interface(_aToken);
 			data.supplyAmts[i] = data.aTokens[i].balanceOf(userAccount);

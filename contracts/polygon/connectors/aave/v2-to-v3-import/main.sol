@@ -11,6 +11,13 @@ import "./events.sol";
  * @dev  migrate aave V2 position to aave v3 position
  */
 contract _AaveV2ToV3MigrationResolver is _AaveHelper {
+	/**
+	 * @dev Import aave position .
+	 * @notice Import EOA's or DSA's aave V2 position to DSA's aave v3 position
+	 * @param userAccount The address of the EOA from which aave position will be imported
+	 * @param inputData The struct containing all the neccessary input data
+	 * @param doImport boolean, to support DSA v2->v3 migration
+	 */
 	function _importAave(
 		address userAccount,
 		ImportInputData memory inputData,

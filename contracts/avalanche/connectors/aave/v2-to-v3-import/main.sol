@@ -145,6 +145,6 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 	}
 }
 
-contract ConnectV2AaveV2ToV3MigrationPolygon is _AaveV2ToV3MigrationResolver {
+contract ConnectV2AaveV2ToV3MigrationAvalanche is _AaveV2ToV3MigrationResolver {
 	string public constant name = "Aave-Import-v2-to-v3";
 }
