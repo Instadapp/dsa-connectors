@@ -85,10 +85,19 @@ contract AaveHelpers is Helper {
 			data.variableBorrowAmts = new uint256[](
 				inputData.borrowTokens.length
 			);
+			data.variableBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
 			data.stableBorrowAmts = new uint256[](
 				inputData.borrowTokens.length
 			);
+			data.stableBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
 			data.totalBorrowAmts = new uint256[](inputData.borrowTokens.length);
+			data.totalBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
 			for (uint256 i = 0; i < inputData.borrowTokens.length; i++) {
 				for (uint256 j = i; j < inputData.borrowTokens.length; j++) {
 					if (j != i) {
@@ -122,6 +131,9 @@ contract AaveHelpers is Helper {
 						data.stableBorrowAmts[i],
 						inputData.flashLoanFees[i]
 					);
+					data.variableBorrowAmtsWithFee[i] = data.variableBorrowAmts[
+						i
+					];
 				}
 
 				data.totalBorrowAmts[i] = add(
