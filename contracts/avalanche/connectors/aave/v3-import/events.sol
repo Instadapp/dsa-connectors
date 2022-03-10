@@ -1,4 +1,4 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
 contract Events {

@@ -1,4 +1,4 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.6;
 
 import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
