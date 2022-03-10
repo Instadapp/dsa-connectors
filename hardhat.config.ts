@@ -50,6 +50,8 @@ const networkGasPriceConfig: Record<string, Number> = {
   "polygon": 50,
   "avalanche": 25,
   "arbitrum":1,
+  "fantom": 1700,
+  "optimism": 0.01,
 }
 
 function createConfig(network: string) {
