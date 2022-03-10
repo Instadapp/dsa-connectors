@@ -14,7 +14,7 @@ import {Events} from "./events.sol";
 
 
 contract permit_erc20 {
-    address dai_address = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // dai has a different implementation for permit
+    address private immutable daiAddress = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // dai has a different implementation for permit
 
     /**
      * @notice ERC20_Permit functionality
@@ -41,7 +41,7 @@ contract permit_erc20 {
         external
         returns (string memory _eventName, bytes memory _eventParam) 
     {
-        if(_asset==dai_address){
+        if(_asset==daiAddress){
             ERC20_dai_functions token = ERC20_dai_functions(_asset);
             token.permit(_owner, address(this), nonce, _deadline, true, v, r, s);
             token.transferFrom(_owner, address(this), _amount);
