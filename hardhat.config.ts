@@ -51,7 +51,7 @@ const networkGasPriceConfig: Record<string, Number> = {
   "avalanche": 25,
   "arbitrum":1,
   "fantom": 1700,
-  "optimism": 0.01,
+  "optimism": 0.001,
 }
 
 function createConfig(network: string) {
