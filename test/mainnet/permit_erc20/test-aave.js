@@ -7,10 +7,14 @@ dotenv.config();
 
 const { expect } = require("chai");
 
+
 const private_key ='0x' + process.env.PRIVATE_KEY;
-const public_address = process.env.PUBLIC_ADDRESS;
+
+// Please note that the public address should correspond to the PRIVATE_KEY in .env file to make the test run succesfully.
+const public_address = "0x3Fc046bdE274Fe8Ed2a7Fd008cD9DEB2540dfE36"; 
 const deadline = 1000000000000;
 const value = 10000000;
+
 
 describe("starting tests for aave", function () {
     let account_with_funds;
