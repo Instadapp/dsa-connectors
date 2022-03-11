@@ -42,7 +42,7 @@ const mnemonic =
 
 const networkGasPriceConfig: Record<string, string> = {
   "mainnet": "160",
-  "polygon": "50",
+  "polygon": "100",
   "avalanche": "50",
   "arbitrum": "2"
 }

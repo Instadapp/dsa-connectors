@@ -7,7 +7,7 @@ import "./interface.sol";
 
 contract Helpers is Basic {
 
-    IUniLimitOrder public constant limitCon_ = IUniLimitOrder(0xfC428E6535dC5Fee30fb57cFc93EBB1D92fdCf6e);
+    IUniLimitOrder public constant limitCon_ = IUniLimitOrder(0x94F401fAD3ebb89fB7380f5fF6E875A88E6Af916);
 
     struct MintParams {
         address token0;
@@ -39,11 +39,11 @@ contract Helpers is Basic {
 
         if(params_.token0to1){
             amountSend_ = params_.amount == type(uint128).max ? getTokenBal(TokenInterface(params_.token0)) : params_.amount;
-            convertMaticToWmatic(address(token0_) == wmaticAddr, token0_, amountSend_);
+            convertMaticToWmatic(address(token0_) == maticAddr, token0_, amountSend_);
             approve(token0_, address(limitCon_), amountSend_);
         } else {
             amountSend_ = params_.amount == type(uint128).max ? getTokenBal(TokenInterface(params_.token1)) : params_.amount;
-            convertMaticToWmatic(address(token1_) == wmaticAddr, token1_, amountSend_);
+            convertMaticToWmatic(address(token1_) == maticAddr, token1_, amountSend_);
             approve(token1_, address(limitCon_), amountSend_);
         }
 

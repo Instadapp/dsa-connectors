@@ -20,7 +20,6 @@ contract LimitOrderConnector is Helpers {
         int24 tickUpper_,
         uint256 amount_,
         bool token0to1_,
-        uint256 getId_,
         uint256 setId_
     )
         external
@@ -37,8 +36,6 @@ contract LimitOrderConnector is Helpers {
                 amount_,
                 token0to1_
             );
-
-        params_.amount = getUint(getId_, amount_);
 
         (
             uint256 tokenId_,
