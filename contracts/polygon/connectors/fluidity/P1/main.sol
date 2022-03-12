@@ -8,7 +8,7 @@ pragma solidity ^0.8.6;
 
 import { Events } from "./events.sol";
 import { Helpers } from "./helper.sol";
-import { TokenInterface } from "../../common/interfaces.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
 
 abstract contract FluidityResolver is Events, Helpers {
 	/**

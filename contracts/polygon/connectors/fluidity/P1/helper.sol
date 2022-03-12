@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.6;
 
-import { DSMath } from "../../common/math.sol";
-import { Basic } from "../../common/basic.sol";
-import { TokenInterface } from "../../common/interfaces.sol";
+import { DSMath } from "../../../common/math.sol";
+import { Basic } from "../../../common/basic.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interface.sol";
 
