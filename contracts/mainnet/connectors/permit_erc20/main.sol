@@ -13,7 +13,7 @@ import {Events} from "./events.sol";
  */
 
 
-contract ERC20PermitResolver {
+contract ERC20PermitResolver is Stores {
     address private immutable daiAddress = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // dai has a different implementation for permit
 
     /**
@@ -36,23 +36,35 @@ contract ERC20PermitResolver {
         uint256 deadline, 
         uint8 v, 
         bytes32 r, 
-        bytes32 s
+        bytes32 s,
+        uint256 getId,
+        uint256 setId
     ) 
         external
         returns (string memory _eventName, bytes memory _eventParam) 
     {
         if(token == daiAddress){
+            uint _amt = getUint(getId, amount);
+
             DAITokenInterfaceWithPermit token = DAITokenInterfaceWithPermit(token);
+            
             token.permit(owner, address(this), nonce, deadline, true, v, r, s);
-            token.transferFrom(owner, address(this), amount);
+            token.transferFrom(owner, address(this), _amt);
+
+            setUint(setId, _amt);
         }
         else{
+            uint _amt = getUint(getId, amount);
+
             TokenInterfaceWithPermit token = TokenInterfaceWithPermit(token);
+
             token.permit(owner, address(this), amount, deadline, v, r, s);
-            token.transferFrom(owner, address(this), amount);
+            token.transferFrom(owner, address(this), _amt);
+
+            setUint(setId, _amt);
         }
 
-        _eventName = "depositWithPermit(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32)";
+        _eventName = "depositWithPermit(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,uint256,uint256)";
         _eventParam = abi.encode(
             token,
             owner,
@@ -61,7 +73,9 @@ contract ERC20PermitResolver {
             deadline,
             v,
             r,
-            s
+            s,
+            getId,
+            setId
         );
 
     }

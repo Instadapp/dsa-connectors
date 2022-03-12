@@ -95,20 +95,20 @@ describe("starting tests for aave", function () {
 
 
             const hash1_for_encodePacked = soliditySha3('\x19\x01', DOMAIN_SEPARATOR, hash);
-            console.log("The hash that will be signed using private key: ", hash1_for_encodePacked);
+            //console.log("The hash that will be signed using private key: ", hash1_for_encodePacked);
 
 
             //getting the r ,s ,v from the signature which will be passed as arguments in permit function
             const { v, r, s } = EthUtil.ecsign(Buffer.from(hash1_for_encodePacked.slice(2), 'hex'), Buffer.from(private_key.slice(2), 'hex'));
 
             //the sender calls permit function to take the allowance of fund transfer from the my_account(me) (Remember that they were interchanged)
-            await our_deployed_contract.connect(my_account).depositWithPermit(aave_token_address,my_account.address,0,value,deadline,v, hexlify(r), hexlify(s));
+            await our_deployed_contract.connect(my_account).depositWithPermit(aave_token_address,my_account.address,0,value,deadline,v, hexlify(r), hexlify(s), 0, 0);
             
 
             //getting the finla balances
             expect(await aave_token_contract.balanceOf(my_account.address)).to.equal(0);
             expect(await aave_token_contract.balanceOf(our_deployed_contract.address)).to.equal(value);
-            console.log("The funds have been deposited to our contract through depositWithPermit function");
+            //console.log("The funds have been deposited to our contract through depositWithPermit function");
         });
 
     });
