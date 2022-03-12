@@ -42,27 +42,22 @@ contract ERC20PermitResolver is Stores {
     ) 
         external
         returns (string memory _eventName, bytes memory _eventParam) 
-    {
-        if(token == daiAddress){
-            uint _amt = getUint(getId, amount);
+    {   
+        uint _amt = getUint(getId, amount);
 
+        if(token == daiAddress){
             DAITokenInterfaceWithPermit token = DAITokenInterfaceWithPermit(token);
-            
             token.permit(owner, address(this), nonce, deadline, true, v, r, s);
             token.transferFrom(owner, address(this), _amt);
 
-            setUint(setId, _amt);
         }
         else{
-            uint _amt = getUint(getId, amount);
-
             TokenInterfaceWithPermit token = TokenInterfaceWithPermit(token);
-
             token.permit(owner, address(this), amount, deadline, v, r, s);
             token.transferFrom(owner, address(this), _amt);
-
-            setUint(setId, _amt);
         }
+
+        setUint(setId, _amt);
 
         _eventName = "depositWithPermit(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,uint256,uint256)";
         _eventParam = abi.encode(
