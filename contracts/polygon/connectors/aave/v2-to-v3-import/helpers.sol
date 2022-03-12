@@ -25,7 +25,7 @@ abstract contract Helper is DSMath, Basic {
 	 */
 	AaveV3PoolProviderInterface internal constant aaveV3Provider =
 		AaveV3PoolProviderInterface(
-			0x7013523049CeC8b06F594edb8c5fb7F232c0Df7C // Polygon address - PoolAddressesProvider
+			0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb // Polygon address - PoolAddressesProvider
 		);
 
 	/**
