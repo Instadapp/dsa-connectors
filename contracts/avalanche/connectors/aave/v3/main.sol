@@ -64,7 +64,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 	/**
 	 * @dev Withdraw avax/ERC20_Token.
-	 * @notice Withdraw deposited token from Aave v2
+	 * @notice Withdraw deposited token from Aave v3
 	 * @param token The address of the token to withdraw.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
@@ -104,7 +104,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 	/**
 	 * @dev Borrow avax/ERC20_Token.
-	 * @notice Borrow a token using Aave v2
+	 * @notice Borrow a token using Aave v3
 	 * @param token The address of the token to borrow.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to borrow.
 	 * @param rateMode The type of borrow debt. (For Stable: 1, Variable: 2)

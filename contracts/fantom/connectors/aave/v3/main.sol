@@ -13,9 +13,9 @@ import { AaveInterface } from "./interface.sol";
 
 abstract contract AaveResolver is Events, Helpers {
 	/**
-	 * @dev Deposit ETH/ERC20_Token.
+	 * @dev Deposit Ftm/ERC20_Token.
 	 * @notice Deposit a token to Aave v3 for lending / collaterization.
-	 * @param token The address of the token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token The address of the token to deposit.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
@@ -34,14 +34,14 @@ abstract contract AaveResolver is Events, Helpers {
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
+		bool isFTM = token == ftmAddr;
+		address _token = isFTM ? wftmAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		if (isEth) {
+		if (isFTM) {
 			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
-			convertEthToWeth(isEth, tokenContract, _amt);
+			convertFtmToWftm(isFTM, tokenContract, _amt);
 		} else {
 			_amt = _amt == uint256(-1)
 				? tokenContract.balanceOf(address(this))
@@ -63,9 +63,9 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20_Token.
+	 * @dev Withdraw ftm/ERC20_Token.
 	 * @notice Withdraw deposited token from Aave v3
-	 * @param token The address of the token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token The address of the token to withdraw.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
@@ -83,8 +83,8 @@ abstract contract AaveResolver is Events, Helpers {
 		uint256 _amt = getUint(getId, amt);
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
+		bool isFTM = token == ftmAddr;
+		address _token = isFTM ? wftmAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
@@ -94,7 +94,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 		_amt = sub(finalBal, initialBal);
 
-		convertWethToEth(isEth, tokenContract, _amt);
+		convertWftmToFtm(isFTM, tokenContract, _amt);
 
 		setUint(setId, _amt);
 
@@ -103,9 +103,9 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Borrow ETH/ERC20_Token.
+	 * @dev Borrow ftm/ERC20_Token.
 	 * @notice Borrow a token using Aave v3
-	 * @param token The address of the token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token The address of the token to borrow.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to borrow.
 	 * @param rateMode The type of borrow debt. (For Stable: 1, Variable: 2)
 	 * @param getId ID to retrieve amt.
@@ -126,11 +126,11 @@ abstract contract AaveResolver is Events, Helpers {
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
+		bool isFTM = token == ftmAddr;
+		address _token = isFTM ? wftmAddr : token;
 
 		aave.borrow(_token, _amt, rateMode, referralCode, address(this));
-		convertWethToEth(isEth, TokenInterface(_token), _amt);
+		convertWftmToFtm(isFTM, TokenInterface(_token), _amt);
 
 		setUint(setId, _amt);
 
@@ -139,9 +139,9 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Payback borrowed ETH/ERC20_Token.
+	 * @dev Payback borrowed ftm/ERC20_Token.
 	 * @notice Payback debt owed.
-	 * @param token The address of the token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token The address of the token to payback.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
 	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
 	 * @param getId ID to retrieve amt.
@@ -162,14 +162,14 @@ abstract contract AaveResolver is Events, Helpers {
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
+		bool isFTM = token == ftmAddr;
+		address _token = isFTM ? wftmAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
 		_amt = _amt == uint256(-1) ? getPaybackBalance(_token, rateMode) : _amt;
 
-		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
+		if (isFTM) convertFtmToWftm(isFTM, tokenContract, _amt);
 
 		approve(tokenContract, address(aave), _amt);
 
@@ -182,9 +182,9 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Payback borrowed ETH/ERC20_Token using aTokens.
+	 * @dev Payback borrowed ftm/ERC20_Token using aTokens.
 	 * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens.
-	 * @param token The address of the token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token The address of the token to payback.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
 	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
 	 * @param getId ID to retrieve amt.
@@ -205,14 +205,14 @@ abstract contract AaveResolver is Events, Helpers {
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
+		bool isFTM = token == ftmAddr;
+		address _token = isFTM ? wftmAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
 		_amt = _amt == uint256(-1) ? getPaybackBalance(_token, rateMode) : _amt;
 
-		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
+		if (isFTM) convertFtmToWftm(isFTM, tokenContract, _amt);
 
 		approve(tokenContract, address(aave), _amt);
 
@@ -253,7 +253,7 @@ abstract contract AaveResolver is Events, Helpers {
 	/**
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
-	 * @param token The address of the token to swap borrow rate.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token The address of the token to swap borrow rate.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
 	 */
 	function swapBorrowRateMode(address token, uint256 rateMode)
@@ -291,6 +291,6 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2AaveV3 is AaveResolver {
-	string public constant name = "AaveV3-v1.0";
+contract ConnectV2AaveV3Fantom is AaveResolver {
+	string public constant name = "AaveV3-v1";
 }
