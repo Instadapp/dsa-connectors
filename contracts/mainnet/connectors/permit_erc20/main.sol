@@ -43,8 +43,9 @@ contract ERC20PermitResolver is Stores {
         external
         returns (string memory _eventName, bytes memory _eventParam) 
     {   
-        uint _amt = getUint(getId, amount);
 
+        uint _amt = getUint(getId, amount);
+        
         if(token == daiAddress){
             DAITokenInterfaceWithPermit token = DAITokenInterfaceWithPermit(token);
             token.permit(owner, address(this), nonce, deadline, true, v, r, s);
