@@ -1,8 +1,8 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title WETH.
- * @dev Wrap and Unwrap WETH.
+ * @title Stake Eth.
+ * @dev deposit Eth into lido and in return you get equivalent of stEth tokens
  */
 
 import { DSMath } from "../../common/math.sol";
