@@ -32,7 +32,7 @@ describe("starting tests for aave", function () {
 
       //deploying the main contract
       owner = await ethers.getSigners();
-      contract1 = await ethers.getContractFactory("permit_erc20");
+      contract1 = await ethers.getContractFactory("ERC20PermitResolver");
       our_deployed_contract = await contract1.deploy();
       await our_deployed_contract.deployed();
 
@@ -58,7 +58,7 @@ describe("starting tests for aave", function () {
 
 
       //creating instance of the AAVE token contract
-      aave_token_contract = await ethers.getContractAt("ERC20_functions", aave_token_address);
+      aave_token_contract = await ethers.getContractAt("TokenInterfaceWithPermit", aave_token_address);
       
 
       // needed for getting public variables necessary for hashing

@@ -38,6 +38,7 @@
     "hardhat-docgen": "^1.2.0",
     "inquirer": "^8.2.0",
     "minimist": "^1.2.5",
+    "run": "^1.4.0",
     "solc": "^0.8.10",
     "typechain": "^6.0.5"
   },
