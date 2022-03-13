@@ -60,7 +60,7 @@ contract ERC20PermitResolver is Stores {
 
         setUint(setId, _amt);
 
-        _eventName = "depositWithPermit(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,uint256,uint256)";
+        _eventName = "logDepositWithPermit(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32,uint256,uint256)";
         _eventParam = abi.encode(
             token,
             owner,
