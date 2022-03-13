@@ -14,7 +14,7 @@ import {Events} from "./events.sol";
 
 
 contract ERC20PermitResolver is Stores {
-    address private immutable daiAddress = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // dai has a different implementation for permit
+    address constant immutable daiAddress = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // dai has a different implementation for permit
 
     /**
      * @notice Deposit ERC20 using Permit
