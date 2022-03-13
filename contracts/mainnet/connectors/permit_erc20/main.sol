@@ -78,6 +78,6 @@ contract ERC20PermitResolver is Stores {
 
 }
 
-contract ConnectERC20Permit is ERC20PermitResolver{
+contract ConnectV2ERC20Permit is ERC20PermitResolver{
     string public name = "ERC20PermitResolver";
 }
