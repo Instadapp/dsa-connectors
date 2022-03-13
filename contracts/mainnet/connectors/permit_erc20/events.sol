@@ -1,7 +1,7 @@
 pragma solidity ^0.7.0;
 
 contract Events {
-    event depositWithPermit(
+    event logDepositWithPermit(
         address asset,
         address owner, 
         uint256 nonce, 
