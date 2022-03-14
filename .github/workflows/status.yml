@@ -1,12 +1,13 @@
 name: PR status checks
 on:
-  # This is so the status check can run on forks.
   pull_request_target:
     types: [assigned, opened, synchronize, reopened]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         node-version: [16.x]
@@ -31,21 +32,13 @@ jobs:
       - name: Run status checks
         id: status_check
         run: |
+          mkdir -p pr
           # Run status checks, Remove ANSI colors from the text
-          output=$(node ./status-checks | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
-          # Escape newlines so _all_ the output is included in the set-output
-          output="${output//'%'/'%25'}"
-          output="${output//$'\n'/'%0A'}"
-          output="${output//$'\r'/'%0D'}"
-          echo "::set-output name=status_check_output::$output"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Auto Comment Status Check Result
-        # Use with caution
-        uses: bubkoo/auto-comment@v1
+          output=$(npx ts-node ./status-checks/index.ts | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+          cat <<< "$output" > "./pr/status-check-output"
+          echo ${{ github.event.number }} > ./pr/number
+      - uses: actions/upload-artifact@v2
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pullRequestSynchronize: "```${{ steps.status_check.outputs.status_check_output }}```"
-          pullRequestAssigned: "```${{ steps.status_check.outputs.status_check_output }}```"
-          pullRequestOpened: "```${{ steps.status_check.outputs.status_check_output }}```"
-          pullRequestReopened: "```${{ steps.status_check.outputs.status_check_output }}```"
+          name: pr
+          path: pr/
+          retention-days: 1

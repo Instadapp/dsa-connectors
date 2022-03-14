@@ -24,7 +24,8 @@ const chainIds = {
   avalanche: 43114,
   polygon: 137,
   arbitrum: 42161,
-  optimism: 10
+  optimism: 10,
+  fantom: 250
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -36,6 +37,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
+const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
 const FANTOMSCAN_API = process.env.FANTOM_API_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
@@ -68,6 +70,8 @@ function getScanApiKey(networkType: string) {
   if (networkType === "avalanche") return SNOWTRACE_API;
   else if (networkType === "polygon") return POLYGONSCAN_API;
   else if (networkType === "arbitrum") return ARBISCAN_API;
+  else if (networkType === "fantom") return FANTOMSCAN_API;
+  else if (networkType === "optimism") return OPTIMISM_API;
   else return ETHERSCAN_API;
 }
 
@@ -112,7 +116,7 @@ const config: HardhatUserConfig = {
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
     optimism: createConfig("optimism"),
-    fantom: createConfig("optimism")
+    fantom: createConfig("fantom")
   },
   paths: {
     artifacts: "./artifacts",
