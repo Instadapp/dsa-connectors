@@ -24,8 +24,8 @@ async function deployRunner() {
       name: "chain",
       message: "What chain do you want to deploy on?",
       type: "list",
-      choices: ["mainnet", "polygon", "avalanche", "arbitrum"],
-    },
+      choices: ["mainnet", "polygon", "avalanche", "arbitrum", "optimism"]
+    }
   ]);
 
   // let connector = await connectorSelect(chain);
@@ -48,8 +48,8 @@ async function deployRunner() {
     {
       name: "connector",
       message: "Enter the connector contract name? (ex: ConnectV2Paraswap)",
-      type: "input",
-    },
+      type: "input"
+    }
   ]);
 
   let { choice } = await inquirer.prompt([
@@ -57,39 +57,29 @@ async function deployRunner() {
       name: "choice",
       message: "Do you wanna try deploy on hardhat first?",
       type: "list",
-      choices: ["yes", "no"],
-    },
+      choices: ["yes", "no"]
+    }
   ]);
 
   runchain = choice === "yes" ? "hardhat" : chain;
 
-  console.log(
-    `Deploying ${connector} on ${runchain}, press (ctrl + c) to stop`
-  );
+  console.log(`Deploying ${connector} on ${runchain}, press (ctrl + c) to stop`);
 
   start = Date.now();
   await execScript({
     cmd: "npx",
-    args: [
-      "hardhat",
-      "run",
-      "scripts/deployment/deploy.ts",
-      "--network",
-      `${runchain}`,
-    ],
+    args: ["hardhat", "run", "scripts/deployment/deploy.ts", "--network", `${runchain}`],
     env: {
       connectorName: connector,
-      networkType: chain,
-    },
+      networkType: chain
+    }
   });
   end = Date.now();
 }
 
 deployRunner()
   .then(() => {
-    console.log(
-      `Done successfully, total time taken: ${(end - start) / 1000} sec`
-    );
+    console.log(`Done successfully, total time taken: ${(end - start) / 1000} sec`);
     process.exit(0);
   })
   .catch((err) => {
