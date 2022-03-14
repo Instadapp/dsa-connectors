@@ -14,6 +14,7 @@ import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
 import "./scripts/tests/tests-run"
+import { network } from "hardhat";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -36,8 +37,9 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
-const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
 const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
+const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
+
 const FANTOM_API = process.env.FANTOM_API_KEY;
 const mnemonic =
   process.env.MNEMONIC ??
