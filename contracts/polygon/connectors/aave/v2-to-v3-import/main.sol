@@ -1,15 +1,15 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
-import "./interfaces.sol";
-import "./helpers.sol";
-import "./events.sol";
-
 /**
  * @title Aave v2 to v3 import connector .
  * @dev  migrate aave V2 position to aave v3 position
  */
+
+import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
+import "./interfaces.sol";
+import "./helpers.sol";
+import "./events.sol";
 
 contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 	/**
