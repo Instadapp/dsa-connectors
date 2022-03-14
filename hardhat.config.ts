@@ -13,6 +13,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
+import "./scripts/tests/tests-run"
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -36,22 +37,26 @@ const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
 const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
+const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
+const FANTOM_API = process.env.FANTOM_API_KEY;
 const mnemonic =
   process.env.MNEMONIC ??
   "test test test test test test test test test test test junk";
 
-const networkGasPriceConfig: Record<string, string> = {
-  "mainnet": "160",
-  "polygon": "50",
-  "avalanche": "50",
-  "arbitrum": "2"
+const networkGasPriceConfig: Record<string, Number> = {
+  "mainnet": 160,
+  "polygon": 50,
+  "avalanche": 25,
+  "arbitrum":1,
+  "fantom": 1700,
+  "optimism": 0.001,
 }
 
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    // gasPrice: 1000000, // 0.0001 GWEI
+    gasPrice: Number(networkGasPriceConfig[network])*1e9,
   };
 }
 
@@ -67,12 +72,6 @@ function getNetworkUrl(networkType: string) {
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
-function getScanApiKey(networkType: string) {
-  if (networkType === "avalanche") return SNOWTRACE_API;
-  else if (networkType === "polygon") return POLYGONSCAN_API;
-  else if (networkType === "arbitrum") return ARBISCAN_API;
-  else return ETHERSCAN_API;
-}
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -123,7 +122,14 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   etherscan: { 
-     apiKey: getScanApiKey(String(process.env.networkType)),
+     apiKey: {
+      mainnet: String(ETHERSCAN_API),
+      polygon: String(POLYGONSCAN_API),
+      arbitrumOne: String(ARBISCAN_API),
+      avalanche: String(SNOWTRACE_API), 
+      optimisticEthereum: String(OPTIMISM_API),
+      opera: String(FANTOM_API),
+     }
   },
   typechain: {
     outDir: "typechain",
