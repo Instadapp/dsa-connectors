@@ -35,7 +35,7 @@
     "chalk": "^5.0.0",
     "dotenv": "^10.0.0",
     "hardhat-docgen": "^1.2.0",
-    "inquirer": "^8.2.0",
+    "inquirer": "^8.2.0", 
     "minimist": "^1.2.5",
     "solc": "^0.8.10",
     "typechain": "^6.0.5"
