@@ -25,7 +25,7 @@ const chainIds = {
   polygon: 137,
   arbitrum: 42161,
   optimism: 10,
-  fantom:250
+  fantom: 250
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -39,13 +39,8 @@ const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
 const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
 const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
 const FANTOMSCAN_API = process.env.FANTOM_API_KEY;
-<<<<<<< HEAD
+const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
-=======
-const mnemonic =
-  process.env.MNEMONIC ??
-  "test test test test test test test test test test test junk";
->>>>>>> 2a009cc8da9682a1e82ec3119909e6dbaf30f11e
 
 const networkGasPriceConfig: Record<string, string> = {
   mainnet: "160",
@@ -57,30 +52,17 @@ const networkGasPriceConfig: Record<string, string> = {
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
-    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    gasPrice: 220000000000 // 0.0001 GWEI
+    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic }
+    // gasPrice: 1000000, // 0.0001 GWEI
   };
 }
 
 function getNetworkUrl(networkType: string) {
-<<<<<<< HEAD
   if (networkType === "avalanche") return "https://api.avax.network/ext/bc/C/rpc";
   else if (networkType === "polygon") return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "arbitrum") return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "optimism") return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "fantom") return `https://rpc.ftm.tools/`;
-=======
-  if (networkType === "avalanche")
-    return "https://api.avax.network/ext/bc/C/rpc";
-  else if (networkType === "polygon")
-    return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-  else if (networkType === "arbitrum")
-    return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-  else if (networkType === "optimism")
-    return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-  else if(networkType === "fantom")
-    return `https://rpc.ftm.tools/`
->>>>>>> 2a009cc8da9682a1e82ec3119909e6dbaf30f11e
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
@@ -88,12 +70,9 @@ function getScanApiKey(networkType: string) {
   if (networkType === "avalanche") return SNOWTRACE_API;
   else if (networkType === "polygon") return POLYGONSCAN_API;
   else if (networkType === "arbitrum") return ARBISCAN_API;
-<<<<<<< HEAD
   else if (networkType === "fantom") return FANTOMSCAN_API;
-=======
-  else if(networkType === "fantom") return FANTOMSCAN_API;
+  else if (networkType === "fantom") return FANTOMSCAN_API;
   else if (networkType === "optimism") return OPTIMISM_API;
->>>>>>> 2a009cc8da9682a1e82ec3119909e6dbaf30f11e
   else return ETHERSCAN_API;
 }
 
@@ -138,7 +117,7 @@ const config: HardhatUserConfig = {
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
     optimism: createConfig("optimism"),
-    fantom: createConfig("fantom"),
+    fantom: createConfig("fantom")
   },
   paths: {
     artifacts: "./artifacts",
