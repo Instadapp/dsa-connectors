@@ -1,8 +1,9 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Stake Eth.
- * @dev deposit Eth into lido and in return you get equivalent of stEth tokens
+ * @title Stake Ether.
+ * @dev Stake ETH and receive stETH while staking.
+
  */
 
 import { DSMath } from "../../common/math.sol";
@@ -13,7 +14,7 @@ import { Helpers } from "./helpers.sol";
 abstract contract Resolver is Events, DSMath, Basic, Helpers {
 	/**
 	 * @dev deposit ETH into Lido.
-	 * @notice sends Eth into lido and in return you get equivalent of stEth tokens
+	 * @notice stake Eth in Lido, users receive stETH tokens on a 1:1 basis representing their staked ETH.
 	 * @param amt The amount of ETH to deposit. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of ETH deposited.
