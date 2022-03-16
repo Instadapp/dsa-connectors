@@ -100,13 +100,15 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 			);
 		}
 
-		_eventName = "LogAaveImportV2ToV3(address,bool,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveImportV2ToV3(address,bool,bool,address[],address[],address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
 			doImport,
 			inputData.convertStable,
 			inputData.supplyTokens,
+			inputData.supplyTokensV3,
 			inputData.borrowTokens,
+			inputData.borrowTokensV3,
 			inputData.flashLoanFees,
 			data.supplyAmts,
 			data.stableBorrowAmts,
