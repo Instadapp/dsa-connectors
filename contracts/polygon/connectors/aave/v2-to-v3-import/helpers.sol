@@ -44,7 +44,9 @@ abstract contract Helper is DSMath, Basic {
 
 	struct ImportData {
 		address[] _supplyTokens;
+		address[] _supplyTokensV3;
 		address[] _borrowTokens;
+		address[] _borrowTokensV3;
 		ATokenV2Interface[] aTokens;
 		uint256[] supplyAmts;
 		uint256[] variableBorrowAmts;
@@ -58,7 +60,9 @@ abstract contract Helper is DSMath, Basic {
 
 	struct ImportInputData {
 		address[] supplyTokens;
+		address[] supplyTokensV3;
 		address[] borrowTokens;
+		address[] borrowTokensV3;
 		bool convertStable;
 		uint256[] flashLoanFees;
 	}
@@ -92,6 +96,7 @@ contract _AaveHelper is Helper {
 	) internal returns (ImportData memory) {
 		if (inputData.borrowTokens.length > 0) {
 			data._borrowTokens = new address[](inputData.borrowTokens.length);
+			data._borrowTokensV3 = new address[](inputData.borrowTokensV3.length);
 			data.variableBorrowAmts = new uint256[](
 				inputData.borrowTokens.length
 			);
@@ -114,7 +119,11 @@ contract _AaveHelper is Helper {
 				address _token = inputData.borrowTokens[i] == maticAddr
 					? wmaticAddr
 					: inputData.borrowTokens[i];
+				address _tokenV3 = inputData.borrowTokensV3[i] == maticAddr
+					? wmaticAddr
+					: inputData.borrowTokensV3[i];
 				data._borrowTokens[i] = _token;
+				data._borrowTokensV3[i] = _tokenV3;
 
 				(
 					data.stableBorrowAmts[i],
@@ -159,6 +168,7 @@ contract _AaveHelper is Helper {
 	) internal view returns (ImportData memory) {
 		data.supplyAmts = new uint256[](inputData.supplyTokens.length);
 		data._supplyTokens = new address[](inputData.supplyTokens.length);
+		data._supplyTokensV3 = new address[](inputData.supplyTokensV3.length);
 		data.aTokens = new ATokenV2Interface[](inputData.supplyTokens.length);
 
 		for (uint256 i = 0; i < inputData.supplyTokens.length; i++) {
@@ -175,10 +185,15 @@ contract _AaveHelper is Helper {
 			address _token = inputData.supplyTokens[i] == maticAddr
 				? wmaticAddr
 				: inputData.supplyTokens[i];
+			address _tokenV3 = inputData.supplyTokensV3[i] == maticAddr
+				? wmaticAddr
+				: inputData.supplyTokensV3[i];
+
 			(address _aToken, , ) = aaveV2Data.getReserveTokensAddresses(
 				_token
 			);
 			data._supplyTokens[i] = _token;
+			data._supplyTokensV3[i] = _tokenV3;
 			data.aTokens[i] = ATokenV2Interface(_aToken);
 			data.supplyAmts[i] = data.aTokens[i].balanceOf(userAccount);
 		}
