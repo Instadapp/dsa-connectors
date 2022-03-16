@@ -71,31 +71,31 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		);
 		// deposit tokens in v3
 		_depositTokensV3(
-			data._supplyTokens.length,
+			data._supplyTokensV3.length,
 			aaveV3,
 			data.supplyAmts,
-			data._supplyTokens
+			data._supplyTokensV3
 		);
 
 		// borrow assets in aave v3 after migrating position
 		if (data.convertStable) {
 			_BorrowVariableV3(
-				data._borrowTokens.length,
+				data._borrowTokensV3.length,
 				aaveV3,
-				data._borrowTokens,
+				data._borrowTokensV3,
 				data.totalBorrowAmtsWithFee
 			);
 		} else {
 			_BorrowStableV3(
-				data._borrowTokens.length,
+				data._borrowTokensV3.length,
 				aaveV3,
-				data._borrowTokens,
+				data._borrowTokensV3,
 				data.stableBorrowAmtsWithFee
 			);
 			_BorrowVariableV3(
-				data._borrowTokens.length,
+				data._borrowTokensV3.length,
 				aaveV3,
-				data._borrowTokens,
+				data._borrowTokensV3,
 				data.variableBorrowAmtsWithFee
 			);
 		}
