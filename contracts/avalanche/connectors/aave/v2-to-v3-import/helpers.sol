@@ -44,7 +44,9 @@ abstract contract Helper is DSMath, Basic {
 
 	struct ImportData {
 		address[] _supplyTokens;
+		address[] _supplyTokensV3;
 		address[] _borrowTokens;
+		address[] _borrowTokensV3;
 		ATokenV2Interface[] aTokens;
 		uint256[] supplyAmts;
 		uint256[] variableBorrowAmts;
@@ -65,6 +67,21 @@ abstract contract Helper is DSMath, Basic {
 }
 
 contract _AaveHelper is Helper {
+	/*
+	 ** Convert Avalanche Bridge tokens to Offical tokens. Like USDC.e to USDC
+	 */
+	function convertABTokens(address _token) internal pure returns (address) {
+		if (_token == 0xc7198437980c041c805A1EDcbA50c1Ce5db95118) {
+			// USDT.e => USDT
+			return 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7;
+		} else if (_token == 0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664) {
+			// USDC.e => USDC
+			return 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E;
+		} else {
+			return _token;
+		}
+	}
+
 	function getBorrowAmountV2(address _token, address userAccount)
 		internal
 		view
@@ -92,13 +109,24 @@ contract _AaveHelper is Helper {
 	) internal returns (ImportData memory) {
 		if (inputData.borrowTokens.length > 0) {
 			data._borrowTokens = new address[](inputData.borrowTokens.length);
+			data._borrowTokensV3 = new address[](inputData.borrowTokens.length);
 			data.variableBorrowAmts = new uint256[](
 				inputData.borrowTokens.length
 			);
 			data.stableBorrowAmts = new uint256[](
 				inputData.borrowTokens.length
 			);
+			data.variableBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
+			data.stableBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
+			data.totalBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
 			data.totalBorrowAmts = new uint256[](inputData.borrowTokens.length);
+
 			for (uint256 i = 0; i < inputData.borrowTokens.length; i++) {
 				for (uint256 j = i; j < inputData.borrowTokens.length; j++) {
 					if (j != i) {
@@ -115,6 +143,7 @@ contract _AaveHelper is Helper {
 					? wavaxAddr
 					: inputData.borrowTokens[i];
 				data._borrowTokens[i] = _token;
+				data._borrowTokensV3[i] = convertABTokens(_token);
 
 				(
 					data.stableBorrowAmts[i],
@@ -159,6 +188,7 @@ contract _AaveHelper is Helper {
 	) internal view returns (ImportData memory) {
 		data.supplyAmts = new uint256[](inputData.supplyTokens.length);
 		data._supplyTokens = new address[](inputData.supplyTokens.length);
+		data._supplyTokensV3 = new address[](inputData.supplyTokens.length);
 		data.aTokens = new ATokenV2Interface[](inputData.supplyTokens.length);
 
 		for (uint256 i = 0; i < inputData.supplyTokens.length; i++) {
@@ -179,6 +209,8 @@ contract _AaveHelper is Helper {
 				_token
 			);
 			data._supplyTokens[i] = _token;
+			data._supplyTokensV3[i] = convertABTokens(_token);
+
 			data.aTokens[i] = ATokenV2Interface(_aToken);
 			data.supplyAmts[i] = data.aTokens[i].balanceOf(userAccount);
 		}
