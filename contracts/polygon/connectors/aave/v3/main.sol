@@ -280,6 +280,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 */
 	function setUserEMode(uint8 categoryId)
 		external
+		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
