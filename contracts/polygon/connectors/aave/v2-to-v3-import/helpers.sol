@@ -91,11 +91,20 @@ contract _AaveHelper is Helper {
 		ImportData memory data
 	) internal returns (ImportData memory) {
 		if (inputData.borrowTokens.length > 0) {
-			data._borrowTokens = new address[](inputData.borrowTokens.length);
+						data._borrowTokens = new address[](inputData.borrowTokens.length);
 			data.variableBorrowAmts = new uint256[](
 				inputData.borrowTokens.length
 			);
 			data.stableBorrowAmts = new uint256[](
+				inputData.borrowTokens.length
+			);
+			data.variableBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
+			data.stableBorrowAmtsWithFee = new uint256[](
+				inputData.borrowTokens.length
+			);
+			data.totalBorrowAmtsWithFee = new uint256[](
 				inputData.borrowTokens.length
 			);
 			data.totalBorrowAmts = new uint256[](inputData.borrowTokens.length);
