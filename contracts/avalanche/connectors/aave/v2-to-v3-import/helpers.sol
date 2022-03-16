@@ -69,19 +69,18 @@ abstract contract Helper is DSMath, Basic {
 contract _AaveHelper is Helper {
 	/*
 	 ** Convert Avalanche Bridge tokens to Offical tokens. Like USDC.e to USDC
-	*/
-	function convertABTokens (address _token) internal view returns (address) {
+	 */
+	function convertABTokens(address _token) internal pure returns (address) {
 		if (_token == 0xc7198437980c041c805A1EDcbA50c1Ce5db95118) {
 			// USDT.e => USDT
-			return 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7
-		} else  if (_token == 0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664) {
+			return 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7;
+		} else if (_token == 0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664) {
 			// USDC.e => USDC
-			return 0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e
+			return 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E;
 		} else {
-			return _token
+			return _token;
 		}
 	}
-
 
 	function getBorrowAmountV2(address _token, address userAccount)
 		internal
