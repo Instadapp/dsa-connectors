@@ -42,18 +42,20 @@ const FANTOMSCAN_API = process.env.FANTOM_API_KEY;
 const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
-const networkGasPriceConfig: Record<string, string> = {
-  mainnet: "160",
-  polygon: "50",
-  avalanche: "50",
-  arbitrum: "2"
+const networkGasPriceConfig: Record<string, number> = {
+  mainnet: 100,
+  polygon: 50,
+  avalanche: 30,
+  arbitrum: 1,
+  optimism: 0.001,
+  fantom: 300
 };
 
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
-    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic }
-    // gasPrice: 1000000, // 0.0001 GWEI
+    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+    gasPrice: networkGasPriceConfig[network] * 1e9 // Update the mapping above
   };
 }
 
@@ -64,16 +66,6 @@ function getNetworkUrl(networkType: string) {
   else if (networkType === "optimism") return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "fantom") return `https://rpc.ftm.tools/`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
-}
-
-function getScanApiKey(networkType: string) {
-  if (networkType === "avalanche") return SNOWTRACE_API;
-  else if (networkType === "polygon") return POLYGONSCAN_API;
-  else if (networkType === "arbitrum") return ARBISCAN_API;
-  else if (networkType === "fantom") return FANTOMSCAN_API;
-  else if (networkType === "fantom") return FANTOMSCAN_API;
-  else if (networkType === "optimism") return OPTIMISM_API;
-  else return ETHERSCAN_API;
 }
 
 /**
@@ -126,7 +118,14 @@ const config: HardhatUserConfig = {
     tests: "./test"
   },
   etherscan: {
-    apiKey: getScanApiKey(String(process.env.networkType))
+    apiKey: {
+      mainnet: String(process.env.MAIN_ETHSCAN_KEY),
+      optimisticEthereum: String(process.env.OPT_ETHSCAN_KEY),
+      polygon: String(process.env.POLY_ETHSCAN_KEY),
+      arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
+      avalanche: String(process.env.AVAX_ETHSCAN_KEY),
+      opera: String(process.env.FTM_ETHSCAN_KEY)
+    }
   },
   typechain: {
     outDir: "typechain",
