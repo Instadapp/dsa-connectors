@@ -14,6 +14,7 @@ import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
 import { network } from "hardhat";
+import bigNumber from "bignumber.js";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -34,12 +35,6 @@ if (!alchemyApiKey) {
 }
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
-const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
-const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
-const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
-const FANTOMSCAN_API = process.env.FANTOM_API_KEY;
-const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
 const networkGasPriceConfig: Record<string, number> = {
@@ -55,7 +50,7 @@ function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    gasPrice: networkGasPriceConfig[network] * 1e9 // Update the mapping above
+    gasPrice: new bigNumber(networkGasPriceConfig[network]).multipliedBy(1e9).toNumber() // Update the mapping above
   };
 }
 
