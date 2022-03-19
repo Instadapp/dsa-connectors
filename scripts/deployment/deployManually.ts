@@ -1,5 +1,5 @@
 import { Contract } from "@ethersproject/contracts";
-import { ethers } from "hardhat";
+import hre, { ethers } from "hardhat";
 
 import { Greeter__factory } from "../../typechain";
 
@@ -9,6 +9,10 @@ async function main(): Promise<void> {
   await greeter.deployed();
 
   console.log("Greeter deployed to: ", greeter.address);
+
+  await hre.run("verify:verify", {
+    address: greeter.address
+  });
 }
 
 main()
