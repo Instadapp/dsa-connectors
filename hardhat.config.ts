@@ -52,8 +52,8 @@ const networkGasPriceConfig: Record<string, string> = {
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
-    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic }
-    // gasPrice: 1000000, // 0.0001 GWEI
+    accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
+    gasPrice: 35 * 1e9 // 0.0001 GWEI
   };
 }
 
@@ -126,7 +126,7 @@ const config: HardhatUserConfig = {
     tests: "./test"
   },
   etherscan: {
-    apiKey: getScanApiKey(String(process.env.networkType))
+    apiKey: "CZ1YB396AX4XAQ489Y4NJ33SJBCYZZD1VS"
   },
   typechain: {
     outDir: "typechain",

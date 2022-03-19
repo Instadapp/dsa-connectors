@@ -143,7 +143,11 @@ contract _AaveV2ToV3MigrationResolver is _AaveHelper {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(msg.sender, inputData, false);
+		(_eventName, _eventParam) = _importAave(
+			address(this),
+			inputData,
+			false
+		);
 	}
 }
 
