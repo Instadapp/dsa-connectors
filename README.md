@@ -58,6 +58,8 @@ To deploy a connector using interactive CLI
 $ npm run deploy:runner
 ```
 
+(To deploy script manually use `scripts/deployment/deployManually.ts` script)
+
 ### checks
 
 To check that code is compatible with github actions
