@@ -14,6 +14,7 @@ import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
 import { network } from "hardhat";
+import bigNumber from "bignumber.js";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -24,7 +25,8 @@ const chainIds = {
   avalanche: 43114,
   polygon: 137,
   arbitrum: 42161,
-  optimism: 10
+  optimism: 10,
+  fantom: 250
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -33,48 +35,32 @@ if (!alchemyApiKey) {
 }
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
-const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
-const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
-const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
-const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
-const mnemonic =
-  process.env.MNEMONIC ??
-  "test test test test test test test test test test test junk";
+const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
-const networkGasPriceConfig: Record<string, string> = {
-  "mainnet": "160",
-  "polygon": "50",
-  "avalanche": "50",
-  "arbitrum": "2"
-}
+const networkGasPriceConfig: Record<string, number> = {
+  mainnet: 100,
+  polygon: 50,
+  avalanche: 30,
+  arbitrum: 1,
+  optimism: 0.001,
+  fantom: 300
+};
 
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    gasPrice: 1000000, // 0.0001 GWEI
+    gasPrice: new bigNumber(networkGasPriceConfig[network]).multipliedBy(1e9).toNumber() // Update the mapping above
   };
 }
 
 function getNetworkUrl(networkType: string) {
-  if (networkType === "avalanche")
-    return "https://api.avax.network/ext/bc/C/rpc";
-  else if (networkType === "polygon")
-    return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-  else if (networkType === "arbitrum")
-    return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
-  else if (networkType === "optimism")
-    return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+  if (networkType === "avalanche") return "https://api.avax.network/ext/bc/C/rpc";
+  else if (networkType === "polygon") return `https://polygon-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+  else if (networkType === "arbitrum") return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+  else if (networkType === "optimism") return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+  else if (networkType === "fantom") return `https://rpc.ftm.tools/`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
-}
-
-function getScanApiKey(networkType: string) {
-  if (networkType === "avalanche") return SNOWTRACE_API;
-  else if (networkType === "polygon") return POLYGONSCAN_API;
-  else if (networkType === "arbitrum") return ARBISCAN_API;
-  else if (networkType === "optimism") return OPTIMISM_API;
-  else return ETHERSCAN_API;
 }
 
 /**
@@ -88,53 +74,61 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
-          },
-        },
+            runs: 200
+          }
+        }
       },
       {
-        version: "0.6.0",
+        version: "0.6.0"
       },
       {
-        version: "0.6.2",
+        version: "0.6.2"
       },
       {
-        version: "0.6.5",
-      },
-    ],
+        version: "0.6.5"
+      }
+    ]
   },
   networks: {
     hardhat: {
       accounts: {
-        mnemonic,
+        mnemonic
       },
       chainId: chainIds.hardhat,
       forking: {
-        url: String(getNetworkUrl(String(process.env.networkType))),
-      },
+        url: String(getNetworkUrl(String(process.env.networkType)))
+      }
     },
     mainnet: createConfig("mainnet"),
     polygon: createConfig("polygon"),
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
     optimism: createConfig("optimism"),
+    fantom: createConfig("fantom")
   },
   paths: {
     artifacts: "./artifacts",
     cache: "./cache",
     sources: "./contracts",
-    tests: "./test",
+    tests: "./test"
   },
   etherscan: {
-    apiKey: getScanApiKey(String(process.env.networkType)),
+    apiKey: {
+      mainnet: String(process.env.MAIN_ETHSCAN_KEY),
+      optimisticEthereum: String(process.env.OPT_ETHSCAN_KEY),
+      polygon: String(process.env.POLY_ETHSCAN_KEY),
+      arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
+      avalanche: String(process.env.AVAX_ETHSCAN_KEY),
+      opera: String(process.env.FTM_ETHSCAN_KEY)
+    }
   },
   typechain: {
     outDir: "typechain",
-    target: "ethers-v5",
+    target: "ethers-v5"
   },
   mocha: {
-    timeout: 10000 * 1000, // 10,000 seconds
-  },
+    timeout: 10000 * 1000 // 10,000 seconds
+  }
   // tenderly: {
   //   project: process.env.TENDERLY_PROJECT,
   //   username: process.env.TENDERLY_USERNAME,
