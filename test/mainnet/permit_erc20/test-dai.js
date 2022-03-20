@@ -99,7 +99,7 @@ describe("starting tests for dai", function () {
       const { v, r, s } = EthUtil.ecsign(Buffer.from(hash1_for_encodePacked.slice(2), 'hex'), Buffer.from(private_key.slice(2), 'hex'));
 
       //the sender calls permit function to take the allowance of fund transfer from the my_account(me) (Remember that they were interchanged)
-      await our_deployed_contract.depositWithPermit(dai_token_address, my_account.address, currentValidNonce, value, deadline, v, hexlify(r), hexlify(s), 0, 0);
+      await our_deployed_contract.depositWithPermit(dai_token_address, my_account.address, value, deadline, v, hexlify(r), hexlify(s), 0, 0);
 
 
       //getting the finla balances

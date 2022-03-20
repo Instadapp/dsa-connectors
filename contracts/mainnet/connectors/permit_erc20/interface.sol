@@ -15,6 +15,8 @@ interface TokenInterfaceWithPermit is TokenInterface {
 }
 
 interface DAITokenInterfaceWithPermit is TokenInterface {
+	function nonces(address owner) external returns (uint256);
+
 	function permit(
 		address holder,
 		address spender,
