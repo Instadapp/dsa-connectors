@@ -11,7 +11,6 @@ import { Events } from "./events.sol";
  * @title ERC20 Permit.
  * @dev Deposit ERC20 using Permit.
  */
-
 contract ERC20PermitResolver is Stores, Helpers {
 	address internal constant daiAddress =
 		0x6B175474E89094C44Da98b954EedeAC495271d0F; // dai has a different implementation for permit
@@ -26,6 +25,8 @@ contract ERC20PermitResolver is Stores, Helpers {
 	 * @param v The signature variable provided by the owner.
 	 * @param r The signature variable provided by the owner.
 	 * @param s The signature variable provided by the owner.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposit.
 	 */
 	function depositWithPermit(
 		address token,
@@ -37,7 +38,7 @@ contract ERC20PermitResolver is Stores, Helpers {
 		bytes32 s,
 		uint256 getId,
 		uint256 setId
-	) external returns (string memory _eventName, bytes memory _eventParam) {
+	) external payable returns (string memory _eventName, bytes memory _eventParam) {
 		Helpers.SignatureParams memory signatureParams = Helpers
 			.SignatureParams({
 				Amount: amount,
