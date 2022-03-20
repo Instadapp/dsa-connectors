@@ -14,6 +14,7 @@ import { NetworkUserConfig } from "hardhat/types";
 import { utils } from "ethers";
 import Web3 from "web3";
 import { network } from "hardhat";
+import bigNumber from "bignumber.js";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -34,26 +35,22 @@ if (!alchemyApiKey) {
 }
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_API = process.env.ETHERSCAN_API_KEY;
-const POLYGONSCAN_API = process.env.POLYGON_API_KEY;
-const ARBISCAN_API = process.env.ARBISCAN_API_KEY;
-const SNOWTRACE_API = process.env.SNOWTRACE_API_KEY;
-const FANTOMSCAN_API = process.env.FANTOM_API_KEY;
-const OPTIMISM_API = process.env.OPTIMISM_API_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
-const networkGasPriceConfig: Record<string, string> = {
-  mainnet: "160",
-  polygon: "50",
-  avalanche: "50",
-  arbitrum: "2"
+const networkGasPriceConfig: Record<string, number> = {
+  mainnet: 100,
+  polygon: 50,
+  avalanche: 30,
+  arbitrum: 1,
+  optimism: 0.001,
+  fantom: 300
 };
 
 function createConfig(network: string) {
   return {
     url: getNetworkUrl(network),
     accounts: !!PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : { mnemonic },
-    gasPrice: 35 * 1e9 // 0.0001 GWEI
+    gasPrice: new bigNumber(networkGasPriceConfig[network]).multipliedBy(1e9).toNumber() // Update the mapping above
   };
 }
 
@@ -64,16 +61,6 @@ function getNetworkUrl(networkType: string) {
   else if (networkType === "optimism") return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "fantom") return `https://rpc.ftm.tools/`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
-}
-
-function getScanApiKey(networkType: string) {
-  if (networkType === "avalanche") return SNOWTRACE_API;
-  else if (networkType === "polygon") return POLYGONSCAN_API;
-  else if (networkType === "arbitrum") return ARBISCAN_API;
-  else if (networkType === "fantom") return FANTOMSCAN_API;
-  else if (networkType === "fantom") return FANTOMSCAN_API;
-  else if (networkType === "optimism") return OPTIMISM_API;
-  else return ETHERSCAN_API;
 }
 
 /**
@@ -126,7 +113,14 @@ const config: HardhatUserConfig = {
     tests: "./test"
   },
   etherscan: {
-    apiKey: "CZ1YB396AX4XAQ489Y4NJ33SJBCYZZD1VS"
+    apiKey: {
+      mainnet: String(process.env.MAIN_ETHSCAN_KEY),
+      optimisticEthereum: String(process.env.OPT_ETHSCAN_KEY),
+      polygon: String(process.env.POLY_ETHSCAN_KEY),
+      arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
+      avalanche: String(process.env.AVAX_ETHSCAN_KEY),
+      opera: String(process.env.FTM_ETHSCAN_KEY)
+    }
   },
   typechain: {
     outDir: "typechain",
