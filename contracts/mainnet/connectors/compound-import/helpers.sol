@@ -79,15 +79,6 @@ contract CompoundHelper is Helpers {
             data.borrowCtokensAddr = new address[](_importInputData.borrowIds.length);
             data.borrowAmts = new uint[](_importInputData.borrowIds.length);
 
-            // check for repeated tokens
-            for (uint i = 0; i < _importInputData.borrowIds.length; i++) {
-                bytes32 i_hash = keccak256(abi.encode(_importInputData.borrowIds[i]));
-                for (uint j = i + 1; j < _importInputData.borrowIds.length; j++) {
-                    bytes32 j_hash = keccak256(abi.encode(_importInputData.borrowIds[j]));
-                    require(i_hash != j_hash, "token-repeated");
-                }
-            }
-
             // populate the arrays with borrow tokens, cToken addresses and instances, and borrow amounts
             for (uint i = 0; i < _importInputData.borrowIds.length; i++) {
                 (address _token, address _cToken) = compMapping.getMapping(_importInputData.borrowIds[i]);
@@ -128,15 +119,6 @@ contract CompoundHelper is Helpers {
         data.supplyCtokensAddr = new address[](_importInputData.supplyIds.length);
         data.supplyAmts = new uint[](_importInputData.supplyIds.length);
 
-        // check for repeated tokens
-        for (uint i = 0; i < _importInputData.supplyIds.length; i++) {
-            bytes32 i_hash = keccak256(abi.encode(_importInputData.supplyIds[i]));
-            for (uint j = i + 1; j < _importInputData.supplyIds.length; j++) {
-                bytes32 j_hash = keccak256(abi.encode(_importInputData.supplyIds[j]));
-                require(i_hash != j_hash, "token-repeated");
-            }
-        }
-
         // populate arrays with supply data (supply tokens address, cToken addresses, cToken instances and supply amounts)
         for (uint i = 0; i < _importInputData.supplyIds.length; i++) {
             (address _token, address _cToken) = compMapping.getMapping(_importInputData.supplyIds[i]);
@@ -172,7 +154,10 @@ contract CompoundHelper is Helpers {
                     cEth.repayBorrowBehalf{value: _borrowAmts[i]}(_userAccount);
                 }
                 else{
-                    require(_cTokenContracts[i].repayBorrowBehalf(_userAccount, _borrowAmts[i]) == 0, "repayOnBehalf-failed");
+                    require(_cTokenContracts[i].repayBorrowBehalf(
+                        _userAccount,
+                        _borrowAmts[i]
+                    ) == 0, "repayOnBehalf-failed");
                 }
             }
         }
@@ -192,7 +177,11 @@ contract CompoundHelper is Helpers {
     ) internal {
         for(uint i = 0; i < _cTokenContracts.length; i++) {
             if(_amts[i] > 0) {
-                require(_cTokenContracts[i].transferFrom(_userAccount, address(this), _amts[i]), "ctoken-transfer-failed-allowance?");
+                require(_cTokenContracts[i].transferFrom(
+                    _userAccount, 
+                    address(this), 
+                    _amts[i]
+                ), "ctoken-transfer-failed-allowance?");
             }
         }
     }
@@ -202,16 +191,20 @@ contract CompoundHelper is Helpers {
      * @dev actually borrow some extra amount than the original position to cover the flash loan fee
      * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has debt positions
      * @param _amts array containing the amounts the user had borrowed originally from Compound plus the flash loan fee
-     * @param _flashLoanFee flash loan fee (in percentage and scaled up to 10**2)
+     * @param _flashLoanFees flash loan fee (in percentage and scaled up to 10**2)
      */
     function _borrowDebtPosition(
         CTokenInterface[] memory _cTokenContracts, 
         uint256[] memory _amts,
-        uint256 _flashLoanFee
+        uint256[] memory _flashLoanFees
     ) internal {
         for (uint i = 0; i < _cTokenContracts.length; i++) {
             if (_amts[i] > 0) {
-                require(_cTokenContracts[i].borrow(add(_amts[i], mul(_amts[i], mul(_flashLoanFee, 10**14)))) == 0, "borrow-failed-collateral?");
+                require(_cTokenContracts[i].borrow(
+                    add(
+                        _amts[i], 
+                        _flashLoanFees[i]
+                    )) == 0, "borrow-failed-collateral?");
             }
         }        
     }

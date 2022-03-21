@@ -16,11 +16,11 @@ contract CompoundImportResolver is CompoundHelper {
      * @notice this function performs the import of user's Compound positions into its DSA
      * @dev called internally by the importCompound and migrateCompound functions
      * @param _importInputData the struct containing borrowIds of the users borrowed tokens
-     * @param _flashLoanFee flash loan fee
+     * @param _flashLoanFees list of flash loan fees
      */
     function _importCompound(
         ImportInputData memory _importInputData,
-        uint256 _flashLoanFee
+        uint256[] memory _flashLoanFees
     ) internal returns (string memory _eventName, bytes memory _eventParam) {
         require(AccountInterface(address(this)).isAuth(_importInputData.userAccount), "user-account-not-auth");
 
@@ -46,7 +46,7 @@ contract CompoundImportResolver is CompoundHelper {
         _transferTokensToDsa(_importInputData.userAccount, data.supplyCtokens, data.supplyAmts);
 
         // borrow the earlier position from Compound with flash loan fee added
-        _borrowDebtPosition(data.borrowCtokens, data.borrowAmts, _flashLoanFee);
+        _borrowDebtPosition(data.borrowCtokens, data.borrowAmts, _flashLoanFees);
 
         _eventName = "LogCompoundImport(address,address[],string[],string[],uint256[],uint256[])";
         _eventParam = abi.encode(
@@ -65,13 +65,13 @@ contract CompoundImportResolver is CompoundHelper {
      * @param _userAccount address of user whose position is to be imported to DSA
      * @param _supplyIds Ids of all tokens the user has supplied to Compound
      * @param _borrowIds Ids of all token borrowed by the user
-     * @param _flashLoanFee flash loan fee (in percentage and scaled up to 10**2)
+     * @param _flashLoanFees list of flash loan fees
      */
     function importCompound(
         address _userAccount,
         string[] memory _supplyIds,
         string[] memory _borrowIds,
-        uint256 _flashLoanFee
+        uint256[] memory _flashLoanFees
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         ImportInputData memory inputData = ImportInputData({
             userAccount: _userAccount,
@@ -79,29 +79,9 @@ contract CompoundImportResolver is CompoundHelper {
             borrowIds: _borrowIds
         }); 
 
-        (_eventName, _eventParam) = _importCompound(inputData, _flashLoanFee);
+        (_eventName, _eventParam) = _importCompound(inputData, _flashLoanFees);
     }
 
-    /**
-     * @notice import msg.sender's Compound position (which is the user since this is a delegateCall)
-     * @dev internally calls _importContract to perform the actual import
-     * @param _supplyIds Ids of all tokens the user has supplied to Compound
-     * @param _borrowIds Ids of all token borrowed by the user
-     * @param _flashLoanFee flash loan fee (in percentage and scaled up to 10**2)
-     */
-    function migrateCompound(
-        string[] memory _supplyIds,
-        string[] memory _borrowIds,
-        uint256 _flashLoanFee
-    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        ImportInputData memory inputData = ImportInputData({
-            userAccount: msg.sender,
-            supplyIds: _supplyIds,
-            borrowIds: _borrowIds
-        });
-
-        (_eventName, _eventParam) = _importCompound(inputData, _flashLoanFee);
-    }
 }
 
 contract ConnectV2CompoundImport is CompoundImportResolver {
