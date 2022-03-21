@@ -42,18 +42,13 @@ abstract contract Helpers is DSMath, Basic {
 
     /**
      * @dev enter compound market
+     * @param _userAccount address of the EOA's account to get the user's entered markets
      */
-    function enterMarket(address cToken) internal {
-        address[] memory markets = troller.getAssetsIn(address(this));
-        bool isEntered = false;
+    function _enterMarkets(address _userAccount) internal {
+        address[] memory markets = troller.getAssetsIn(_userAccount);
         for (uint i = 0; i < markets.length; i++) {
-            if (markets[i] == cToken) {
-                isEntered = true;
-            }
-        }
-        if (!isEntered) {
             address[] memory toEnter = new address[](1);
-            toEnter[0] = cToken;
+            toEnter[0] = markets[i];
             troller.enterMarkets(toEnter);
         }
     }
