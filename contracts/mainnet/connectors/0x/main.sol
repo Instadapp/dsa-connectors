@@ -23,7 +23,6 @@ abstract contract ZeroEx is Helpers {
      * @param callData Data from 0x API.
      * @param setId ID stores the amount of token brought.
      */
-
     function swap(
         address buyAddr,
         address sellAddr,
