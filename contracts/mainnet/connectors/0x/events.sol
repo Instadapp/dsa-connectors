@@ -1,4 +1,5 @@
-pragma solidity ^0.7.0;
+//SPDX-License-Identifier: MIT
+ragma solidity ^0.7.0;
 
 contract Events {
     event LogSwap(
