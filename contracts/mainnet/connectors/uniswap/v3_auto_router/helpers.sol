@@ -51,21 +51,17 @@ abstract contract Helpers is DSMath, Basic {
 		internal
 		returns (SwapData memory)
 	{
-		bool isMaticSellToken = address(swapData.sellToken) == maticAddr;
-		bool isMaticBuyToken = address(swapData.buyToken) == maticAddr;
+		bool isEthSellToken = address(swapData.sellToken) == ethAddr;
+		bool isEthBuyToken = address(swapData.buyToken) == ethAddr;
 
-		swapData.sellToken = isMaticSellToken
-			? TokenInterface(wmaticAddr)
+		swapData.sellToken = isEthSellToken
+			? TokenInterface(wethAddr)
 			: swapData.sellToken;
-		swapData.buyToken = isMaticBuyToken
-			? TokenInterface(wmaticAddr)
+		swapData.buyToken = isEthBuyToken
+			? TokenInterface(wethAddr)
 			: swapData.buyToken;
 
-		convertMaticToWmatic(
-			isMaticSellToken,
-			swapData.sellToken,
-			swapData._sellAmt
-		);
+		convertEthToWeth(isEthSellToken, swapData.sellToken, swapData._sellAmt);
 
 		approve(
 			TokenInterface(swapData.sellToken),
@@ -75,11 +71,7 @@ abstract contract Helpers is DSMath, Basic {
 
 		swapData._buyAmt = _swapHelper(swapData);
 
-		convertWmaticToMatic(
-			isMaticBuyToken,
-			swapData.buyToken,
-			swapData._buyAmt
-		);
+		convertWethToEth(isEthBuyToken, swapData.buyToken, swapData._buyAmt);
 
 		setUint(setId, swapData._buyAmt);
 
