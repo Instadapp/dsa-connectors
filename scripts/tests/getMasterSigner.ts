@@ -28,7 +28,7 @@ export async function getMasterSigner() {
 
   await network.provider.send("hardhat_setBalance", [
     masterAddress,
-    "0x21e19e0c9bab2400000", // 1e22 wei
+    "0x8ac7230489e80000", // 1e19 wei
   ]);
 
   return await ethers.getSigner(masterAddress);
