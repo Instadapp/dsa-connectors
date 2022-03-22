@@ -35,7 +35,7 @@ contract CompoundImportResolver is CompoundHelper {
         data = getBorrowAmounts(_importInputData, data);
         data = getSupplyAmounts(_importInputData, data);
 
-        _enterMarkets(_importInputData.userAccount);
+        _enterMarkets(_importInputData.cTokens);
 
         // pay back user's debt using flash loan funds
         _repayUserDebt(_importInputData.userAccount, data.borrowCtokens, data.borrowAmts);
