@@ -1,0 +1,114 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "token", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "tokenAmt", "type": "uint256" }
+    ],
+    "name": "LogFlashBorrow",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address[]", "name": "token", "type": "address[]" },
+      { "indexed": false, "internalType": "uint256[]", "name": "tokenAmts", "type": "uint256[]" }
+    ],
+    "name": "LogFlashMultiBorrow",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address[]", "name": "token", "type": "address[]" },
+      { "indexed": false, "internalType": "uint256[]", "name": "tokenAmts", "type": "uint256[]" }
+    ],
+    "name": "LogFlashMultiPayback",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "token", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "tokenAmt", "type": "uint256" }
+    ],
+    "name": "LogFlashPayback",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "uint256", "name": "amt", "type": "uint256" },
+      { "internalType": "uint256", "name": "route", "type": "uint256" },
+      { "internalType": "bytes", "name": "data", "type": "bytes" },
+      { "internalType": "bytes", "name": "extraData", "type": "bytes" }
+    ],
+    "name": "flashBorrowAndCast",
+    "outputs": [
+      { "internalType": "string", "name": "_eventName", "type": "string" },
+      { "internalType": "bytes", "name": "_eventParam", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address[]", "name": "tokens_", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "amts_", "type": "uint256[]" },
+      { "internalType": "uint256", "name": "route", "type": "uint256" },
+      { "internalType": "bytes", "name": "data", "type": "bytes" },
+      { "internalType": "bytes", "name": "extraData", "type": "bytes" }
+    ],
+    "name": "flashMultiBorrowAndCast",
+    "outputs": [
+      { "internalType": "string", "name": "_eventName", "type": "string" },
+      { "internalType": "bytes", "name": "_eventParam", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address[]", "name": "tokens_", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "amts_", "type": "uint256[]" },
+      { "internalType": "uint256[]", "name": "getIds", "type": "uint256[]" },
+      { "internalType": "uint256[]", "name": "setIds", "type": "uint256[]" }
+    ],
+    "name": "flashMultiPayback",
+    "outputs": [
+      { "internalType": "string", "name": "_eventName", "type": "string" },
+      { "internalType": "bytes", "name": "_eventParam", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "uint256", "name": "amt", "type": "uint256" },
+      { "internalType": "uint256", "name": "getId", "type": "uint256" },
+      { "internalType": "uint256", "name": "setId", "type": "uint256" }
+    ],
+    "name": "flashPayback",
+    "outputs": [
+      { "internalType": "string", "name": "_eventName", "type": "string" },
+      { "internalType": "bytes", "name": "_eventParam", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "instaPool",
+    "outputs": [{ "internalType": "contract InstaFlashV4Interface", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "name",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
