@@ -12,7 +12,8 @@
     "test:runner": "hardhat run scripts/tests/run-tests.ts",
     "typechain": "hardhat typechain",
     "compile": "hardhat compile",
-    "deploy:runner": "hardhat run scripts/deployment/deployConnectorsFromCmd.ts"
+    "deploy:runner": "hardhat run scripts/deployment/deployConnectorsFromCmd.ts",
+    "tests": "hardhat run_tests"
   },
   "repository": {
     "type": "git",

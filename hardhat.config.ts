@@ -6,7 +6,6 @@ import "@nomiclabs/hardhat-web3";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import "@typechain/hardhat";
-
 import { resolve } from "path";
 import { config as dotenvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
@@ -15,6 +14,7 @@ import { utils } from "ethers";
 import Web3 from "web3";
 import { network } from "hardhat";
 import bigNumber from "bignumber.js";
+import "./scripts/tests/run_test_through_cmd";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
