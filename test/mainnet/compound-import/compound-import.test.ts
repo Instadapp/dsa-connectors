@@ -132,13 +132,7 @@ describe("Import Compound", function () {
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
-  let snapshot: any;
-  // this.beforeAll(async () => {
-  //   snapshot = await ethers.provider.send("evm_snapshot", []);
-  // });
-  // this.afterAll(async () => {
-  //   snapshot = await ethers.provider.send("evm_revert", [snapshot]);
-  // });
+
   before(async () => {
     await hre.network.provider.request({
       method: "hardhat_reset",
