@@ -6,7 +6,7 @@ import "@nomiclabs/hardhat-web3";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import "@typechain/hardhat";
-
+import "./scripts/tests/run_test_through_cmd"
 import { resolve } from "path";
 import { config as dotenvConfig } from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
