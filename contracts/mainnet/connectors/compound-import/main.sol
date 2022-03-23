@@ -2,14 +2,14 @@
 pragma solidity ^0.7.6;
 pragma experimental ABIEncoderV2;
 
+/**
+ * @title Compound-Import.
+ * @dev Lending & Borrowing.
+ */
+
 import { TokenInterface, AccountInterface } from "../../common/interfaces.sol";
 import { CompoundHelper } from "./helpers.sol";
 import { Events } from "./events.sol";
-
-// 1. Get info for all the assets the user has supplied as collateral and the assets he borrowed.
-// 2. Using the flash loan funds, pay back the user's debt in the EOA account.
-// 3. After paying the debt, transfer the user's tokens from EOA to DSA.
-// 4. Then borrow debt of same tokens but include flash loan fee in it.
 
 contract CompoundImportResolver is CompoundHelper {
 	/**
