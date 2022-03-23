@@ -243,5 +243,12 @@ describe("Import Compound", function () {
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       const receipt = await tx.wait();
     });
+
+    it("Should check DSA COMPOUND position", async () => {
+      const ethExchangeRate = (await cEth.connect(wallet0).callStatic.exchangeRateCurrent()) / 1e28;
+      expect(new BigNumber(await cEth.connect(wallet0).balanceOf(dsaWallet0.address)).dividedBy(1e8).toFixed(0)).to.eq(
+        new BigNumber(9).dividedBy(ethExchangeRate).toFixed(0)
+      );
+    });
   });
 });
