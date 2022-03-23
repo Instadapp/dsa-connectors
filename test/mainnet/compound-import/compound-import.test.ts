@@ -4,7 +4,7 @@ import type { Signer, Contract } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { addresses } from "../../../scripts/tests/mainnet/addresses";
-import { deployAndEnableConnector, enableConnector } from "../../../scripts/tests/deployAndEnableConnector";
+import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { abis } from "../../../scripts/constant/abis";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { parseEther, parseUnits } from "ethers/lib/utils";
@@ -211,12 +211,11 @@ describe("Import Compound", function () {
   describe("Compound position migration", async () => {
     it("Should migrate Compound position", async () => {
       const amount = new BigNumber(ethers.utils.parseEther("100").toString()).multipliedBy(9).dividedBy(1e4);
-
       const flashSpells = [
         {
           connector: "COMPOUND-IMPORT-C",
           method: "importCompound",
-          args: [owner.address, ["ETH-A"], ["DAI-A"], [amount]]
+          args: [owner.address, ["ETH-A"], ["DAI-A"], [amount.toString()]]
         },
         {
           connector: "INSTAPOOL-C",
