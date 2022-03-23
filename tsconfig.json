@@ -21,6 +21,7 @@
     "tasks/**/*",
     "test/**/*",
     "typechain/**/*",
-    "types/**/*"
+    "types/**/*",
+    "status-checks/*"
   ]
 }

@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
@@ -23,7 +24,6 @@ abstract contract ZeroEx is Helpers {
      * @param callData Data from 0x API.
      * @param setId ID stores the amount of token brought.
      */
-
     function swap(
         address buyAddr,
         address sellAddr,

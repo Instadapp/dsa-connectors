@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 
 import checks from "./checks";
 
-const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+const [owner, repo] = String(process.env.GITHUB_REPOSITORY).split("/");
 
 function getCurrentCommitSha() {
   return cp
@@ -11,6 +11,7 @@ function getCurrentCommitSha() {
     .toString()
     .trim();
 }
+
 // The SHA provied by GITHUB_SHA is the merge (PR) commit.
 // We need to get the current commit sha ourself.
 const sha = getCurrentCommitSha();
@@ -45,7 +46,7 @@ async function setStatus(context: any, state: string, description: string) {
       try {
         const response = await callback();
         await setStatus(name, "success", response);
-      } catch (err) {
+      } catch (err: any) {
         const message = err ? err.message : "Something went wrong";
         await setStatus(name, "failure", message);
       }
