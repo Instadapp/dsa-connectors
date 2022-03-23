@@ -9,19 +9,17 @@ import { abis } from "../../../scripts/constant/abis";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
-
-import { ConnectV2CompoundImport__factory, ConnectV2InstaPoolV4__factory } from "../../../typechain";
+import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData";
+import { ConnectV2CompoundImport__factory } from "../../../typechain";
 const { provider } = waffle;
 
-const encodeFlashcastData = require("../../../scripts/tests/encodeFlashcastData").default;
 const cEthAddress = "0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5";
 const cDaiAddress = "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643";
 const daiAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 const comptrollerAddress = "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B";
 
 describe("Import Compound", function () {
-  const connectorName = "COMPOUND-IMPORT-C";
-  const account = "0x26eD8119c45E3871df446a13F7Fdc9E2C527DaCD";
+  const connectorName = "COMPOUND-IMPORT-X";
 
   const cEthAbi = [
     {
@@ -51,6 +49,18 @@ describe("Import Compound", function () {
       payable: false,
       stateMutability: "nonpayable",
       type: "function"
+    },
+    {
+      constant: false,
+      inputs: [
+        { internalType: "address", name: "usr", type: "address" },
+        { internalType: "uint256", name: "wad", type: "uint256" }
+      ],
+      name: "approve",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      payable: false,
+      stateMutability: "nonpayable",
+      type: "function"
     }
   ];
 
@@ -76,6 +86,15 @@ describe("Import Compound", function () {
       stateMutability: "nonpayable",
       type: "function",
       signature: "0xc5ebeaec"
+    },
+    {
+      constant: false,
+      inputs: [{ internalType: "address", name: "account", type: "address" }],
+      name: "borrowBalanceCurrent",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      payable: false,
+      stateMutability: "nonpayable",
+      type: "function"
     }
   ];
 
@@ -104,9 +123,7 @@ describe("Import Compound", function () {
     }
   ];
 
-  let connector2;
   let cEth: Contract, cDai: Contract, comptroller, Dai: any;
-  let owner: any;
 
   let dsaWallet0: any;
   let masterSigner: Signer;
@@ -115,7 +132,13 @@ describe("Import Compound", function () {
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
-
+  let snapshot: any;
+  // this.beforeAll(async () => {
+  //   snapshot = await ethers.provider.send("evm_snapshot", []);
+  // });
+  // this.afterAll(async () => {
+  //   snapshot = await ethers.provider.send("evm_revert", [snapshot]);
+  // });
   before(async () => {
     await hre.network.provider.request({
       method: "hardhat_reset",
@@ -124,7 +147,7 @@ describe("Import Compound", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 13300000
+            blockNumber: 14441991
           }
         }
       ]
@@ -141,39 +164,22 @@ describe("Import Compound", function () {
     });
     console.log("Connector address", connector.address);
 
-    connector2 = await deployAndEnableConnector({
-      connectorName: "INSTAPOOL-C",
-      contractArtifact: ConnectV2InstaPoolV4__factory,
-      signer: masterSigner,
-      connectors: instaConnectorsV2
-    });
-    console.log("Connector address", connector2.address);
-
-    await hre.network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [account]
-    });
-
-    await hre.network.provider.send("hardhat_setBalance", [account, ethers.utils.parseEther("100000").toHexString()]);
-
-    owner = await ethers.getSigner(account);
-
     cEth = new ethers.Contract(cEthAddress, cEthAbi);
     cDai = new ethers.Contract(cDaiAddress, cDaiAbi);
     Dai = new ethers.Contract(daiAddress, abis.basic.erc20);
     comptroller = new ethers.Contract(comptrollerAddress, comptrollerAbi);
 
     // deposit ether to Compound: ETH-A
-    await cEth.connect(owner).mint({
+    await cEth.connect(wallet0).mint({
       value: parseEther("9")
     });
 
     // enter markets with deposits
     const cTokens = [cEth.address];
-    await comptroller.connect(owner).enterMarkets(cTokens);
+    await comptroller.connect(wallet0).enterMarkets(cTokens);
 
     // borrow dai from Compound: DAI-A
-    await cDai.connect(owner).borrow(parseUnits("100"));
+    await cDai.connect(wallet0).borrow(parseUnits("100"));
   });
 
   describe("Deployment", async () => {
@@ -184,23 +190,22 @@ describe("Import Compound", function () {
 
   describe("checks", async () => {
     it("Should check user COMPOUND position", async () => {
-      const ethExchangeRate = (await cEth.connect(owner).callStatic.exchangeRateCurrent()) / 1e28;
-      expect(new BigNumber(await cEth.connect(owner).balanceOf(owner.address)).dividedBy(1e8).toFixed(0)).to.eq(
+      const ethExchangeRate = (await cEth.connect(wallet0).callStatic.exchangeRateCurrent()) / 1e28;
+      expect(new BigNumber(await cEth.connect(wallet0).balanceOf(wallet0.address)).dividedBy(1e8).toFixed(0)).to.eq(
         new BigNumber(9).dividedBy(ethExchangeRate).toFixed(0)
       );
-      expect(await Dai.connect(owner).balanceOf(owner.address)).to.eq("100000000000000000000");
+      expect(await Dai.connect(wallet0).balanceOf(wallet0.address)).to.eq("100000000000000000000");
     });
   });
 
   describe("DSA wallet setup", async () => {
     it("Should build DSA v2", async () => {
-      dsaWallet0 = await buildDSAv2(owner.address);
-      console.log(dsaWallet0.address);
+      dsaWallet0 = await buildDSAv2(wallet0.address);
       expect(!!dsaWallet0.address).to.be.true;
     });
 
     it("Deposit ETH into DSA wallet", async function () {
-      await owner.sendTransaction({
+      await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10")
       });
@@ -210,17 +215,27 @@ describe("Import Compound", function () {
 
   describe("Compound position migration", async () => {
     it("Should migrate Compound position", async () => {
-      const amount = new BigNumber(ethers.utils.parseEther("100").toString()).multipliedBy(9).dividedBy(1e4);
+      const tx0 = await cEth
+        .connect(wallet0)
+        .approve(dsaWallet0.address, await cEth.connect(wallet0).balanceOf(wallet0.address));
+
+      await tx0.wait();
+
+      // const amount0 = await cDai.connect(wallet0).callStatic.borrowBalanceCurrent(wallet0.address);
+      const amount0 = new BigNumber("100000007061117456728");
+      const amount = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
+
+      const amountWithFee = amount0.plus(amount);
       const flashSpells = [
         {
-          connector: "COMPOUND-IMPORT-C",
+          connector: "COMPOUND-IMPORT-X",
           method: "importCompound",
-          args: [owner.address, ["ETH-A"], ["DAI-A"], [amount.toString()]]
+          args: [wallet0.address, ["ETH-A"], ["DAI-A"], [amount.toFixed(0)]]
         },
         {
           connector: "INSTAPOOL-C",
           method: "flashPayback",
-          args: [daiAddress, amount, 0, 0]
+          args: [daiAddress, amountWithFee.toFixed(0), 0, 0]
         }
       ];
 
@@ -228,10 +243,10 @@ describe("Import Compound", function () {
         {
           connector: "INSTAPOOL-C",
           method: "flashBorrowAndCast",
-          args: [daiAddress, ethers.utils.parseEther("100"), 0, encodeFlashcastData(flashSpells), "0x"]
+          args: [daiAddress, amount0.toString(), 5, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
-      const tx = await dsaWallet0.connect(owner).cast(...encodeSpells(spells), owner.address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       const receipt = await tx.wait();
     });
   });
