@@ -1,4 +1,4 @@
-## How to add a new connector
+## How to add a new connector?
 
 You can create a new PR to add a new connector. To get the PR merged, certain requirements needs to be met which will be explained here.
 
