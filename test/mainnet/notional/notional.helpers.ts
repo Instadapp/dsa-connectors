@@ -95,7 +95,7 @@ const redeemNTokenRaw = async (
         {
             connector: "NOTIONAL-TEST-A",
             method: "redeemNTokenRaw",
-            args: [currencyId, sellTokenAssets, tokensToRedeem, 0, 0]
+            args: [currencyId, sellTokenAssets, tokensToRedeem, false, 0, 0]
         }
     ];
 

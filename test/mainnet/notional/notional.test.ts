@@ -52,7 +52,7 @@ describe("Notional", function () {
                     forking: {
                         //@ts-ignore
                         jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-                        blockNumber: 13798624,
+                        blockNumber: 14483893,
                     },
                 },
             ],
@@ -240,7 +240,7 @@ describe("Notional", function () {
             expect(
                 await daiToken.balanceOf(dsaWallet0.address),
                 "expect DSA wallet to contain borrowed balance minus fees"
-            ).to.be.gte(ethers.utils.parseEther("990"));
+            ).to.be.gte(ethers.utils.parseEther("985"));
         });
 
         it("test_deposit_ETH_and_borrow_DAI_asset", async function () {
@@ -256,7 +256,7 @@ describe("Notional", function () {
             expect(
                 await cdaiToken.balanceOf(dsaWallet0.address),
                 "expect DSA wallet to contain borrowed balance minus fees"
-            ).to.be.gte(ethers.utils.parseUnits("4500000000000", 0));
+            ).to.be.gte(ethers.utils.parseUnits("4490000000000", 0));
         });
 
         it("test_deposit_DAI_underlying_and_borrow_ETH", async function () {
