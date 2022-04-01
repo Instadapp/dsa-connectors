@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 
 /**
  * @title InstaLite Connector
- * @dev 
+ * @dev Supply and Withdraw
 
  */
 import { TokenInterface } from "../../common/interfaces.sol";
@@ -12,7 +12,7 @@ import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
 import { Helpers } from "./helpers.sol";
 
-abstract contract Resolver is Events, DSMath, Basic, Helpers {
+abstract contract InstaLiteConnector is Events, Basic, Helpers {
 	/**
 	 * @dev Supply
 	 * @notice Supply eth/weth/stEth tokens into instalite.
@@ -35,10 +35,10 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 	{
 		uint256 _amt = getUint(getId, amt);
 		bool isEth = token == ethAddr;
-
+		uint256 vTokenAmt;
 		if (isEth) {
 			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
-			uint256 vTokenAmt = instaLite.supplyEth{ value: amt }(to);
+			vTokenAmt = instaLite.supplyEth{ value: amt }(to);
 		} else {
 			TokenInterface tokenContract = TokenInterface(token);
 
@@ -47,13 +47,13 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 				: _amt;
 
 			approve(tokenContract, address(instaLite), _amt);
-			uint256 vTokenAmt = instaLite.supply(token, _amt, to);
+			vTokenAmt = instaLite.supply(token, _amt, to);
 		}
 
 		setUint(setId, _amt);
 
-		_eventName = "LogSupply(address,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, to, getId, setId);
+		_eventName = "LogSupply(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, vTokenAmt, _amt, to, getId, setId);
 	}
 
 	/**
@@ -76,15 +76,15 @@ abstract contract Resolver is Events, DSMath, Basic, Helpers {
 	{
 		uint256 _amt = getUint(getId, amt);
 
-		instaLite.withdraw(_amt, to);
+		unit256 vTokenAmt = instaLite.withdraw(_amt, to);
 
 		setUint(setId, _amt);
 
-		_eventName = "LogWithdraw(uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(_amt, to, getId, setId);
+		_eventName = "LogWithdraw(uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(_amt, vTokenAmt, to, getId, setId);
 	}
 }
 
-contract ConnectV2InstaLite is Resolver {
+contract ConnectV2InstaLiteVault1 is Resolver {
 	string public constant name = "instaLite-v1";
 }
