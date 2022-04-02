@@ -13,11 +13,11 @@ import { IInstaLite } from "./interface.sol";
 
 abstract contract InstaLiteConnector is Events, Basic {
 	/**
-	 * @dev Supply
-	 * @notice Supply eth/weth/stEth tokens into instalite.
+	 * @dev Supply ETH/ERC20
+	 * @notice Supply a token into Instalite.
 	 * @param vaultAddress Address of instaLite Contract.
-	 * @param token The address of token to be supplied.
-	 * @param amt The amount of token to be supplied.
+	 * @param token The address of the token to be supplied. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of token to be supplied. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setIds ID stores the amount of token deposited.
 	 */
