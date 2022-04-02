@@ -77,7 +77,7 @@ describe("instaLite", function () {
         {
           connector: connectorName,
           method: "supply",
-          args: [ethAddr, _amt, dsaWallet0.address, "0xc383a3833a87009fd9597f8184979af5edfad019", 0, [0, 0]]
+          args: ["0xc383a3833a87009fd9597f8184979af5edfad019", ethAddr, _amt, 0, [0, 0]]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
@@ -91,7 +91,7 @@ describe("instaLite", function () {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [_amt, dsaWallet0.address, "0xc383a3833a87009fd9597f8184979af5edfad019", 0, [0, 0]]
+          args: ["0xc383a3833a87009fd9597f8184979af5edfad019", _amt, 0, [0, 0]]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());

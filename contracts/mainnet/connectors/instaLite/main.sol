@@ -18,7 +18,6 @@ abstract contract InstaLiteConnector is Events, Basic {
 	 * @param vaultAddress Address of instaLite Contract.
 	 * @param token The address of token to be supplied.
 	 * @param amt The amount of token to be supplied.
-	 * @param to The address of the account on behalf of you want to supplied.
 	 * @param getId ID to retrieve amt.
 	 * @param setIds ID stores the amount of token deposited.
 	 */
@@ -26,7 +25,6 @@ abstract contract InstaLiteConnector is Events, Basic {
 		address vaultAddress,
 		address token,
 		uint256 amt,
-		address to,
 		uint256 getId,
 		uint256[] memory setIds
 	)
@@ -42,7 +40,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 
 		if (isEth) {
 			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
-			vTokenAmt = instaLite.supplyEth{ value: amt }(to);
+			vTokenAmt = instaLite.supplyEth{ value: amt }(address(this));
 		} else {
 			TokenInterface tokenContract = TokenInterface(token);
 
@@ -51,19 +49,18 @@ abstract contract InstaLiteConnector is Events, Basic {
 				: _amt;
 
 			approve(tokenContract, vaultAddress, _amt);
-			vTokenAmt = instaLite.supply(token, _amt, to);
+			vTokenAmt = instaLite.supply(token, _amt, address(this));
 		}
 
 		setUint(setIds[0], _amt);
 		setUint(setIds[1], vTokenAmt);
 
-		_eventName = "LogSupply(address,address,uint256,uint256,address,uint256,uint256[])";
+		_eventName = "LogSupply(address,address,uint256,uint256,uint256,uint256[])";
 		_eventParam = abi.encode(
 			vaultAddress,
 			token,
 			vTokenAmt,
 			_amt,
-			to,
 			getId,
 			setIds
 		);
@@ -74,14 +71,12 @@ abstract contract InstaLiteConnector is Events, Basic {
 	 * @notice Withdraw eth/stEth tokens from instalite contract.
 	 * @param vaultAddress Address of vaultAddress Contract.
 	 * @param amt The amount of the token to withdraw.
-	 * @param to The address of the account on behalf of you want to withdraw.
 	 * @param getId ID to retrieve amt.
 	 * @param setIds ID stores the amount of token withdrawn.
 	 */
 	function withdraw(
 		address vaultAddress,
 		uint256 amt,
-		address to,
 		uint256 getId,
 		uint256[] memory setIds
 	)
@@ -93,20 +88,13 @@ abstract contract InstaLiteConnector is Events, Basic {
 
 		IInstaLite instaLite = IInstaLite(vaultAddress);
 
-		uint256 vTokenAmt = instaLite.withdraw(_amt, to);
+		uint256 vTokenAmt = instaLite.withdraw(_amt, address(this));
 
 		setUint(setIds[0], _amt);
 		setUint(setIds[1], vTokenAmt);
 
-		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256[])";
-		_eventParam = abi.encode(
-			vaultAddress,
-			_amt,
-			vTokenAmt,
-			to,
-			getId,
-			setIds
-		);
+		_eventName = "LogWithdraw(address,uint256,uint256,uint256,uint256[])";
+		_eventParam = abi.encode(vaultAddress, _amt, vTokenAmt, getId, setIds);
 	}
 }
 
