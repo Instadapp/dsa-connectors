@@ -99,5 +99,5 @@ abstract contract InstaLiteConnector is Events, Basic {
 }
 
 contract ConnectV2InstaLiteVault1 is InstaLiteConnector {
-	string public constant name = "instaLite-v1";
+	string public constant name = "InstaLite-v1";
 }
