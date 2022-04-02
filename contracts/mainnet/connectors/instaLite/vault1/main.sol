@@ -58,8 +58,16 @@ abstract contract InstaLiteConnector is Events, Basic {
 		setUint(setId[0], _amt);
 		setUint(setId[1], vTokenAmt);
 
-		_eventName = "LogSupply(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, vTokenAmt, _amt, to, getId, setId);
+		_eventName = "LogSupply(address,uint256,uint256,address,address,uint256,uint256[])";
+		_eventParam = abi.encode(
+			token,
+			vTokenAmt,
+			_amt,
+			to,
+			instaLite,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -91,8 +99,8 @@ abstract contract InstaLiteConnector is Events, Basic {
 		setUint(setId[0], _amt);
 		setUint(setId[1], vTokenAmt);
 
-		_eventName = "LogWithdraw(uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(_amt, vTokenAmt, to, getId, setId);
+		_eventName = "LogWithdraw(uint256,uint256,address,address,uint256,uint256[])";
+		_eventParam = abi.encode(_amt, vTokenAmt, to, instaLite, getId, setId);
 	}
 }
 
