@@ -9,7 +9,7 @@ pragma solidity ^0.7.0;
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
-import { instaLiteInterface } from "./interface.sol";
+import { IInstaLite } from "./interface.sol";
 
 abstract contract InstaLiteConnector is Events, Basic {
 	/**
@@ -38,11 +38,11 @@ abstract contract InstaLiteConnector is Events, Basic {
 		bool isEth = token == ethAddr;
 		uint256 vTokenAmt;
 
-		instaLiteInterface instaLiteInstance = instaLiteInterface(vaultAddress);
+		IInstaLite instaLite = IInstaLite(vaultAddress);
 
 		if (isEth) {
 			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
-			vTokenAmt = instaLiteInstance.supplyEth{ value: amt }(to);
+			vTokenAmt = instaLite.supplyEth{ value: amt }(to);
 		} else {
 			TokenInterface tokenContract = TokenInterface(token);
 
@@ -51,7 +51,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 				: _amt;
 
 			approve(tokenContract, vaultAddress, _amt);
-			vTokenAmt = instaLiteInstance.supply(token, _amt, to);
+			vTokenAmt = instaLite.supply(token, _amt, to);
 		}
 
 		setUint(setIds[0], _amt);
@@ -91,9 +91,9 @@ abstract contract InstaLiteConnector is Events, Basic {
 	{
 		uint256 _amt = getUint(getId, amt);
 
-		instaLiteInterface instaLiteInstance = instaLiteInterface(vaultAddress);
+		IInstaLite instaLite = IInstaLite(vaultAddress);
 
-		uint256 vTokenAmt = instaLiteInstance.withdraw(_amt, to);
+		uint256 vTokenAmt = instaLite.withdraw(_amt, to);
 
 		setUint(setIds[0], _amt);
 		setUint(setIds[1], vTokenAmt);

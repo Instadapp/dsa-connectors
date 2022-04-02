@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-interface instaLiteInterface {
+interface IInstaLite {
 	function supplyEth(address to_) external payable returns (uint256);
 
 	function supply(
