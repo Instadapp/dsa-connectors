@@ -129,7 +129,6 @@ describe("Import Aave", function () {
     }
   ];
 
-  let aEth: Contract;
   let dsaWallet0: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
@@ -183,7 +182,7 @@ describe("Import Aave", function () {
     console.log("Supplied DAI on aave");
 
     //borrow USDC from aave
-    await aave.connect(wallet0).borrow(USDC, parseUnits("10", 6), 1, 3228, wallet.address);
+    await aave.connect(wallet0).borrow(USDC, parseUnits("10", 6), 2, 3228, wallet.address);
     console.log("Borrowed USDC from aave");
   });
 
@@ -226,9 +225,8 @@ describe("Import Aave", function () {
       const DOMAIN_SEPARATOR = await aDai.connect(wallet0).DOMAIN_SEPARATOR();
       const PERMIT_TYPEHASH = "0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9";
 
-      let nonces = await aDai.connect(wallet0).nonces(wallet.address);
-      let nonce = nonces.toNumber();
-      const amount = new BigNumber(await aDai.connect(wallet0).balanceOf(wallet.address));
+      let nonce = await aDai.connect(wallet0).nonces(wallet.address);
+      const amount = await aDai.connect(wallet0).balanceOf(wallet.address);
       const expiry = Date.now() + 20 * 60;
 
       const digest = keccak256(
@@ -250,27 +248,18 @@ describe("Import Aave", function () {
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
 
       const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(wallet.address));
-      const amountB = new BigNumber(amount0.toString()).multipliedBy(9).dividedBy(1e4);
+      const amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
 
       const flashSpells = [
         {
           connector: "AAVE-V3-IMPORT-PERMIT-X",
           method: "importAave",
-          args: [
-            wallet.address,
-            {
-              supplyTokens: [DAI],
-              borrowTokens: [USDC],
-              convertStable: false,
-              flashLoanFees: [amount.toFixed(0)]
-            },
-            { v: [v], r: [r], s: [s], expiry: [expiry] }
-          ]
+          args: [wallet.address, [[DAI], [USDC], false, [amount]], [[v], [r], [s], [expiry]]]
         },
         {
           connector: "INSTAPOOL-C",
-          method: "flashPayBack",
+          method: "flashPayback",
           args: [USDC, amountWithFee.toFixed(0), 0, 0]
         }
       ];
@@ -279,7 +268,7 @@ describe("Import Aave", function () {
         {
           connector: "INSTAPOOL-C",
           method: "flashBorrowAndCast",
-          args: [USDC, amount0.toString(), 0, encodeFlashcastData(flashSpells), "0x"]
+          args: [USDC, amount0.toString(), 5, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
