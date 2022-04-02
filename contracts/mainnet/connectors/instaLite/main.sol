@@ -67,12 +67,12 @@ abstract contract InstaLiteConnector is Events, Basic {
 	}
 
 	/**
-	 * @dev Withdraw
-	 * @notice Withdraw eth/stEth tokens from instalite contract.
+	 * @dev Withdraw ETH/ERC20
+	 * @notice Withdraw deposited tokens from Instalite.
 	 * @param vaultAddress Address of vaultAddress Contract.
 	 * @param amt The amount of the token to withdraw.
 	 * @param getId ID to retrieve amt.
-	 * @param setIds ID stores the amount of token withdrawn.
+	 * @param setIds array of IDs to stores the amount of tokens withdrawn.
 	 */
 	function withdraw(
 		address vaultAddress,
