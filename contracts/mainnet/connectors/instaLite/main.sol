@@ -99,6 +99,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 		setUint(setIds[0], _amt);
 		setUint(setIds[1], vTokenAmt);
 
+<<<<<<< HEAD:contracts/mainnet/connectors/instaLite/main.sol
 		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256[])";
 		_eventParam = abi.encode(
 			vaultAddress,
@@ -108,6 +109,10 @@ abstract contract InstaLiteConnector is Events, Basic {
 			getId,
 			setIds
 		);
+=======
+		_eventName = "LogWithdraw(uint256,uint256,address,address,uint256,uint256[])";
+		_eventParam = abi.encode(_amt, vTokenAmt, to, instaLite, getId, setId);
+>>>>>>> 8c668e6e2be93ef418eae3104cb4ee4c39f762b6:contracts/mainnet/connectors/instaLite/vault1/main.sol
 	}
 }
 
