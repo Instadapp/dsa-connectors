@@ -9,7 +9,7 @@ import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 import { abis } from "../../../scripts/constant/abis";
-import { ConnectV2InstaLite__factory } from "../../../typechain";
+import { ConnectV2InstaLiteVault1__factory } from "../../../typechain";
 // import lido_abi from "./abi.json";
 import type { Signer, Contract } from "ethers";
 import { parseEther } from "ethers/lib/utils";
@@ -41,7 +41,7 @@ describe("instaLite", function () {
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2InstaLite__factory,
+      contractArtifact: ConnectV2InstaLiteVault1__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
     });
@@ -77,7 +77,7 @@ describe("instaLite", function () {
         {
           connector: connectorName,
           method: "supply",
-          args: [ethAddr, _amt, dsaWallet0.address, 0, 0]
+          args: [ethAddr, _amt, dsaWallet0.address, "0xc383a3833a87009fd9597f8184979af5edfad019", 0, [0, 0]]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
@@ -91,7 +91,7 @@ describe("instaLite", function () {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [_amt, dsaWallet0.address, 0, 0]
+          args: [_amt, dsaWallet0.address, "0xc383a3833a87009fd9597f8184979af5edfad019", 0, [0, 0]]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
