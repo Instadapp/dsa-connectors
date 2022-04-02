@@ -19,7 +19,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 	 * @param token The address of the token to be supplied. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of token to be supplied. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
-	 * @param setIds ID stores the amount of token deposited.
+	 * @param setIds array of IDs to store the amount of tokens deposited.
 	 */
 	function supply(
 		address vaultAddress,
