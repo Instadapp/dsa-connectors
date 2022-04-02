@@ -7,7 +7,6 @@ pragma solidity ^0.7.0;
 
  */
 import { TokenInterface } from "../../common/interfaces.sol";
-import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
 import { instaLiteInterface } from "./interface.sol";
