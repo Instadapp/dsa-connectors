@@ -11,7 +11,7 @@ import { AaveInterface, ATokenInterface } from "./interface.sol";
 import "./helpers.sol";
 import "./events.sol";
 
-contract AaveV3ImportResolver is AaveHelpers {
+contract AaveV3ImportPermitResolver is AaveHelpers {
 	function _importAave(
 		address userAccount,
 		ImportInputData memory inputData,
@@ -121,6 +121,6 @@ contract AaveV3ImportResolver is AaveHelpers {
 	}
 }
 
-contract ConnectV2AaveV3ImportPolygon is AaveV3ImportResolver {
-	string public constant name = "Aave-v3-import-v1";
+contract ConnectV2AaveV3ImportPermitPolygon is AaveV3ImportPermitResolver {
+	string public constant name = "Aave-v3-import-permit-v1";
 }
