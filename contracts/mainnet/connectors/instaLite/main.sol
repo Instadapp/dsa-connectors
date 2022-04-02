@@ -6,9 +6,9 @@ pragma solidity ^0.7.0;
  * @dev Supply and Withdraw
 
  */
-import { TokenInterface } from "../../../common/interfaces.sol";
-import { DSMath } from "../../../common/math.sol";
-import { Basic } from "../../../common/basic.sol";
+import { TokenInterface } from "../../common/interfaces.sol";
+import { DSMath } from "../../common/math.sol";
+import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
 import { instaLiteInterface } from "./interface.sol";
 
@@ -16,20 +16,20 @@ abstract contract InstaLiteConnector is Events, Basic {
 	/**
 	 * @dev Supply
 	 * @notice Supply eth/weth/stEth tokens into instalite.
+	 * @param vaultAddress Address of instaLite Contract.
 	 * @param token The address of token to be supplied.
 	 * @param amt The amount of token to be supplied.
 	 * @param to The address of the account on behalf of you want to supplied.
-	 * @param instaLite Address of instaLite Contract.
 	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of token deposited.
+	 * @param setIds ID stores the amount of token deposited.
 	 */
 	function supply(
+		address vaultAddress,
 		address token,
 		uint256 amt,
 		address to,
-		address instaLite,
 		uint256 getId,
-		uint256[] memory setId
+		uint256[] memory setIds
 	)
 		public
 		payable
@@ -39,7 +39,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 		bool isEth = token == ethAddr;
 		uint256 vTokenAmt;
 
-		instaLiteInterface instaLiteInstance = instaLiteInterface(instaLite);
+		instaLiteInterface instaLiteInstance = instaLiteInterface(vaultAddress);
 
 		if (isEth) {
 			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
@@ -51,40 +51,40 @@ abstract contract InstaLiteConnector is Events, Basic {
 				? tokenContract.balanceOf(address(this))
 				: _amt;
 
-			approve(tokenContract, address(instaLite), _amt);
+			approve(tokenContract, vaultAddress, _amt);
 			vTokenAmt = instaLiteInstance.supply(token, _amt, to);
 		}
 
-		setUint(setId[0], _amt);
-		setUint(setId[1], vTokenAmt);
+		setUint(setIds[0], _amt);
+		setUint(setIds[1], vTokenAmt);
 
-		_eventName = "LogSupply(address,uint256,uint256,address,address,uint256,uint256[])";
+		_eventName = "LogSupply(address,address,uint256,uint256,address,uint256,uint256[])";
 		_eventParam = abi.encode(
+			vaultAddress,
 			token,
 			vTokenAmt,
 			_amt,
 			to,
-			instaLite,
 			getId,
-			setId
+			setIds
 		);
 	}
 
 	/**
 	 * @dev Withdraw
 	 * @notice Withdraw eth/stEth tokens from instalite contract.
+	 * @param vaultAddress Address of vaultAddress Contract.
 	 * @param amt The amount of the token to withdraw.
 	 * @param to The address of the account on behalf of you want to withdraw.
-	 * @param instaLite Address of instaLite Contract.
 	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of token withdrawn.
+	 * @param setIds ID stores the amount of token withdrawn.
 	 */
 	function withdraw(
+		address vaultAddress,
 		uint256 amt,
 		address to,
-		address instaLite,
 		uint256 getId,
-		uint256[] memory setId
+		uint256[] memory setIds
 	)
 		external
 		payable
@@ -92,15 +92,22 @@ abstract contract InstaLiteConnector is Events, Basic {
 	{
 		uint256 _amt = getUint(getId, amt);
 
-		instaLiteInterface instaLiteInstance = instaLiteInterface(instaLite);
+		instaLiteInterface instaLiteInstance = instaLiteInterface(vaultAddress);
 
 		uint256 vTokenAmt = instaLiteInstance.withdraw(_amt, to);
 
-		setUint(setId[0], _amt);
-		setUint(setId[1], vTokenAmt);
+		setUint(setIds[0], _amt);
+		setUint(setIds[1], vTokenAmt);
 
-		_eventName = "LogWithdraw(uint256,uint256,address,address,uint256,uint256[])";
-		_eventParam = abi.encode(_amt, vTokenAmt, to, instaLite, getId, setId);
+		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256[])";
+		_eventParam = abi.encode(
+			vaultAddress,
+			_amt,
+			vTokenAmt,
+			to,
+			getId,
+			setIds
+		);
 	}
 }
 
