@@ -31,83 +31,83 @@ const mnemonic = "test test test test test test test test test test test junk";
 
 const erc20Abi = [
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "_spender",
-        "type": "address"
+        name: "_spender",
+        type: "address"
       },
       {
-        "name": "_value",
-        "type": "uint256"
+        name: "_value",
+        type: "uint256"
       }
     ],
-    "name": "approve",
-    "outputs": [
+    name: "approve",
+    outputs: [
       {
-        "name": "",
-        "type": "bool"
+        name: "",
+        type: "bool"
       }
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "totalSupply",
-    "outputs": [
+    constant: true,
+    inputs: [],
+    name: "totalSupply",
+    outputs: [
       {
-        "name": "",
-        "type": "uint256"
+        name: "",
+        type: "uint256"
       }
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: "view",
+    type: "function"
   },
   {
-    "constant": true,
-    "inputs": [
+    constant: true,
+    inputs: [
       {
-        "name": "_owner",
-        "type": "address"
+        name: "_owner",
+        type: "address"
       }
     ],
-    "name": "balanceOf",
-    "outputs": [
+    name: "balanceOf",
+    outputs: [
       {
-        "name": "balance",
-        "type": "uint256"
+        name: "balance",
+        type: "uint256"
       }
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    payable: false,
+    stateMutability: "view",
+    type: "function"
   },
   {
-    "constant": false,
-    "inputs": [
+    constant: false,
+    inputs: [
       {
-        "name": "_to",
-        "type": "address"
+        name: "_to",
+        type: "address"
       },
       {
-        "name": "_value",
-        "type": "uint256"
+        name: "_value",
+        type: "uint256"
       }
     ],
-    "name": "transfer",
-    "outputs": [
+    name: "transfer",
+    outputs: [
       {
-        "name": "",
-        "type": "bool"
+        name: "",
+        type: "bool"
       }
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
   }
 ];
 
@@ -304,7 +304,7 @@ describe("Import Aave", function () {
     it("Should migrate Aave position", async () => {
       const DOMAIN_SEPARATOR = await aDai.connect(wallet0).DOMAIN_SEPARATOR();
       const PERMIT_TYPEHASH = "0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9";
-    
+
       let nonce = (await aDai.connect(wallet0).nonces(wallet.address)).toNumber();
       //Approving max amount
       const amount = ethers.constants.MaxUint256;
@@ -335,7 +335,11 @@ describe("Import Aave", function () {
         {
           connector: "AAVE-V3-IMPORT-PERMIT-X",
           method: "importAave",
-          args: [wallet.address, [[DAI], [USDC], false, [amountB.toFixed(0)]], [[ethers.utils.hexlify(v)], [ethers.utils.hexlify(r)], [ethers.utils.hexlify(s)], [expiry]]]
+          args: [
+            wallet.address,
+            [[DAI], [USDC], false, [amountB.toFixed(0)]],
+            [[ethers.utils.hexlify(v)], [ethers.utils.hexlify(r)], [ethers.utils.hexlify(s)], [expiry]]
+          ]
         },
         {
           connector: "INSTAPOOL-C",

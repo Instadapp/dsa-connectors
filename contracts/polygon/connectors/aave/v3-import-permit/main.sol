@@ -111,12 +111,20 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 	 * @param inputData The struct containing all the neccessary input data
 	 * @param permitData The struct containing signed permit data like v,r,s,expiry
 	 */
-	function importAave(address userAccount, ImportInputData memory inputData, signedPermits memory permitData)
+	function importAave(
+		address userAccount,
+		ImportInputData memory inputData,
+		signedPermits memory permitData
+	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(userAccount, inputData, permitData);
+		(_eventName, _eventParam) = _importAave(
+			userAccount,
+			inputData,
+			permitData
+		);
 	}
 }
 

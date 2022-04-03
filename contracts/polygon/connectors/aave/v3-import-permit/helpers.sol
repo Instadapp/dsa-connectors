@@ -239,8 +239,16 @@ contract AaveHelpers is Helper {
 		bytes32[] memory s,
 		uint256[] memory expiry
 	) internal {
-		for(uint256 i = 0; i < tokens.length; i++) {
-			aTokenContracts[i].permit(userAccount, address(this), uint(-1), expiry[i], v[i], r[i], s[i]);
+		for (uint256 i = 0; i < tokens.length; i++) {
+			aTokenContracts[i].permit(
+				userAccount,
+				address(this),
+				uint256(-1),
+				expiry[i],
+				v[i],
+				r[i],
+				s[i]
+			);
 		}
 	}
 
