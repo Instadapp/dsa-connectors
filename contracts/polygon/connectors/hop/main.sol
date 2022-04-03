@@ -21,7 +21,7 @@ abstract contract Resolver is Helpers {
 	 * @param bridgeToL1 bool to check which layer to migrate to
 	 * @param getId ID to retrieve amount from last spell.
 	 */
-	function sendToL1(
+	function bridge(
 		BridgeParams memory params,
 		bool bridgeToL1,
 		uint256 getId
