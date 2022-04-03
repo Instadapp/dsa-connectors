@@ -240,8 +240,7 @@ contract AaveHelpers is Helper {
 		uint256[] memory expiry
 	) internal {
 		for(uint256 i = 0; i < tokens.length; i++) {
-			ATokenInterface aTokenContracts = ATokenInterface(tokens[i]);
-			aTokenContracts.permit(userAccount, address(this), uint(-1), expiry[i], v[i], r[i], s[i]);
+			aTokenContracts[i].permit(userAccount, address(this), uint(-1), expiry[i], v[i], r[i], s[i]);
 		}
 	}
 
