@@ -2,20 +2,7 @@
 pragma solidity ^0.7.0;
 
 contract Events {
-	event LogSendToL1(
-		address token,
-		uint256 chainId,
-		address recipient,
-		uint256 amount,
-		uint256 bonderFee,
-		uint256 amountOutMin,
-		uint256 deadline,
-		uint256 destinationAmountOutMin,
-		uint256 destinationDeadline,
-		uint256 getId
-	);
-
-	event LogSendToL2(
+	event LogBridge(
 		address token,
 		uint256 chainId,
 		address recipient,
