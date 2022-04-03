@@ -141,3 +141,7 @@ abstract contract Resolver is Helpers {
 		);
 	}
 }
+
+contract ConnectV2HopPolygon is Resolver {
+	string public constant name = "Hop-v1.0";
+}
