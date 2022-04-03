@@ -478,12 +478,13 @@ describe("Import Aave", function () {
       const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(wallet.address));
       const amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
+      console.log(amountWithFee);
 
       const flashSpells = [
         {
           connector: "AAVE-V3-IMPORT-PERMIT-X",
           method: "importAave",
-          args: [wallet.address, [[DAI], [USDC], false, [amountB]], [[v], [r], [s], [expiry]]]
+          args: [wallet.address, [[DAI], [USDC], false, [amountB.toFixed(0)]], [[v], [ethers.utils.hexlify(r)], [ethers.utils.hexlify(s)], [expiry]]]
         },
         {
           connector: "INSTAPOOL-C",
