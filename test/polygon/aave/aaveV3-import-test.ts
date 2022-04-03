@@ -25,13 +25,237 @@ const ABI = [
 const aDaiAddress = "0x82E64f49Ed5EC1bC6e43DAD4FC8Af9bb3A2312EE";
 const aaveAddress = "0x794a61358D6845594F94dc1DB02A252b5b4814aD";
 const account = "0xf04adbf75cdfc5ed26eea4bbbb991db002036bdd";
+// const account = "0x44df7e55c643c3cB048465E176A443Ad5670A6fa";
 const DAI = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
 const USDC = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
 const mnemonic = "test test test test test test test test test test test junk";
 
-const token = new ethers.Contract(DAI, IERC20__factory.abi);
+const erc20Abi = [
+  
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "name",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_spender",
+        "type": "address"
+      },
+      {
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "approve",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "totalSupply",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "transferFrom",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_owner",
+        "type": "address"
+      }
+    ],
+    "name": "balanceOf",
+    "outputs": [
+      {
+        "name": "balance",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "symbol",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "transfer",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "name": "_spender",
+        "type": "address"
+      }
+    ],
+    "name": "allowance",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "fallback"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "Approval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "Transfer",
+    "type": "event"
+  }
+];
+const token = new ethers.Contract(DAI, erc20Abi);
 const aDai = new ethers.Contract(aDaiAddress, ABI);
-const usdcToken = new ethers.Contract(USDC, IERC20__factory.abi);
+const usdcToken = new ethers.Contract(USDC, erc20Abi);
 
 describe("Import Aave", function () {
   const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
@@ -160,7 +384,8 @@ describe("Import Aave", function () {
 
     signer = await ethers.getSigner(account);
 
-    await token.connect(signer).transfer(wallet0.address, ethers.utils.parseEther("100"));
+    console.log(await token.connect(signer).balanceOf(signer.address));
+    await token.connect(signer).transfer(wallet0.address, ethers.utils.parseEther("8"));
 
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
@@ -175,14 +400,14 @@ describe("Import Aave", function () {
     const aave = new ethers.Contract(aaveAddress, aaveAbi);
 
     // approve DAI to aavePool
-    await token.connect(wallet0).approve(aaveAddress, parseEther("100"));
+    await token.connect(wallet0).approve(aaveAddress, parseEther("8"));
 
     //deposit DAI in aave
-    await aave.connect(wallet0).supply(DAI, parseEther("100"), wallet.address, 3228);
+    await aave.connect(wallet0).supply(DAI, parseEther("8"), wallet.address, 3228);
     console.log("Supplied DAI on aave");
 
     //borrow USDC from aave
-    await aave.connect(wallet0).borrow(USDC, parseUnits("10", 6), 2, 3228, wallet.address);
+    await aave.connect(wallet0).borrow(USDC, parseUnits("5", 6), 2, 3228, wallet.address);
     console.log("Borrowed USDC from aave");
   });
 
@@ -201,21 +426,21 @@ describe("Import Aave", function () {
     it("Deposit ETH into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10")
+        value: ethers.utils.parseEther("5")
       });
 
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("5"));
     });
   });
 
   describe("check user AAVE position", async () => {
     it("Should check position of user", async () => {
       expect(await aDai.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(100).multipliedBy(1e18).toString()
+        new BigNumber(8).multipliedBy(1e18).toString()
       );
 
       expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(10).multipliedBy(1e6).toString()
+        new BigNumber(5).multipliedBy(1e6).toString()
       );
     });
   });
@@ -224,8 +449,8 @@ describe("Import Aave", function () {
     it("Should migrate Aave position", async () => {
       const DOMAIN_SEPARATOR = await aDai.connect(wallet0).DOMAIN_SEPARATOR();
       const PERMIT_TYPEHASH = "0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9";
-
-      let nonce = await aDai.connect(wallet0).nonces(wallet.address);
+    
+      let nonce = (await aDai.connect(wallet0).nonces(wallet.address)).toNumber();
       const amount = await aDai.connect(wallet0).balanceOf(wallet.address);
       const expiry = Date.now() + 20 * 60;
 
@@ -246,7 +471,10 @@ describe("Import Aave", function () {
         )
       );
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
-
+          // console.log(v);
+          // console.log(pubToAddress(ecrecover(Buffer.from(digest.slice(2),'hex'),v,r,s)));
+          // console.log(dsaWallet0.address);
+          // console.log(wallet.address);
       const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(wallet.address));
       const amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
@@ -255,7 +483,7 @@ describe("Import Aave", function () {
         {
           connector: "AAVE-V3-IMPORT-PERMIT-X",
           method: "importAave",
-          args: [wallet.address, [[DAI], [USDC], false, [amount]], [[v], [r], [s], [expiry]]]
+          args: [wallet.address, [[DAI], [USDC], false, [amountB]], [[v], [r], [s], [expiry]]]
         },
         {
           connector: "INSTAPOOL-C",
@@ -277,7 +505,7 @@ describe("Import Aave", function () {
 
     it("Should check DSA AAVE position", async () => {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
-        new BigNumber(100).multipliedBy(1e18).toString()
+        new BigNumber(8).multipliedBy(1e18).toString()
       );
     });
   });

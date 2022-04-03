@@ -52,7 +52,6 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 			userAccount,
 			data.aTokens,
 			data._supplyTokens,
-			data.supplyAmts,
 			permitData.v,
 			permitData.r,
 			permitData.s,

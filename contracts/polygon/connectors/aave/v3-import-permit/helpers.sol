@@ -7,6 +7,7 @@ import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol
 import { AaveInterface, AavePoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
 import "./events.sol";
 import "./interface.sol";
+import "hardhat/console.sol";
 
 abstract contract Helper is DSMath, Basic {
 	/**
@@ -234,14 +235,16 @@ contract AaveHelpers is Helper {
 		address userAccount,
 		ATokenInterface[] memory aTokenContracts,
 		address[] memory tokens,
-		uint256[] memory amts,
 		uint8[] memory v,
 		bytes32[] memory r,
 		bytes32[] memory s,
 		uint256[] memory expiry
 	) internal {
+		console.log("this");
+		console.log(address(this));
 		for(uint256 i = 0; i < tokens.length; i++) {
-			aTokenContracts[i].permit(userAccount, address(this), amts[i], expiry[i], v[i], r[i], s[i]);
+			ATokenInterface aTokenContracts = ATokenInterface(tokens[i]);
+			aTokenContracts.permit(userAccount, address(this), uint(-1), expiry[i], v[i], r[i], s[i]);
 		}
 	}
 
