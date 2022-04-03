@@ -14,6 +14,20 @@ import "./helpers.sol";
 import "./events.sol";
 
 abstract contract Resolver is Helpers {
+	/**
+	 * @dev Bridge Token.
+	 * @notice Bridge Token on HOP.
+	 * @param token The address of token to be bridged.(For USDC: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
+	 * @param chainId The Id of the destination chain.(For MAINNET : 1)
+	 * @param recipientOnL1 The address to recieve the token on destination chain (Layer 1).
+	 * @param amount The total amount sent by user (Includes bonder fee, destination chain Tx cost).
+	 * @param bonderFee The fee to be recieved by bonder at destination chain.
+	 * @param amountOutMin minimum amount of token out for swap
+	 * @param deadline The deadline for the transaction (Recommended - Date.now() + 604800 (1 week))
+	 * @param destinationAmountOutMin minimum amount of token out for bridge
+	 * @param destinationDeadline The deadline for the transaction (Recommended - Date.now() + 604800 (1 week))
+	 * @param getId ID to retrieve amtA.
+	 */
 	function sendToL1(
 		address token,
 		uint256 chainId,
@@ -82,6 +96,20 @@ abstract contract Resolver is Helpers {
 		);
 	}
 
+	/**
+	 * @dev Send to L2 .
+	 * @notice Bridge Token on HOP.
+	 * @param token The address of token to be bridged.(For USDC: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
+	 * @param chainId The Id of the destination chain.(For MAINNET : 1)
+	 * @param recipientOnL2 The address to recieve the token on destination chain (Layer 2).
+	 * @param amount The total amount sent by user (Includes bonder fee, destination chain Tx cost).
+	 * @param bonderFee The fee to be recieved by bonder at destination chain.
+	 * @param amountOutMin minimum amount of token out for swap
+	 * @param deadline The deadline for the transaction (Recommended - Date.now() + 604800 (1 week))
+	 * @param destinationAmountOutMin minimum amount of token out for bridge
+	 * @param destinationDeadline The deadline for the transaction (Recommended - Date.now() + 604800 (1 week))
+	 * @param getId ID to retrieve amtA.
+	 */
 	function sendToL2(
 		address token,
 		uint256 chainId,
