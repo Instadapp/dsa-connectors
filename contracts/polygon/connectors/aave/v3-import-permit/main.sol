@@ -15,7 +15,7 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 	function _importAave(
 		address userAccount,
 		ImportInputData memory inputData,
-		signedPermits memory permitData
+		SignedPermits memory permitData
 	) internal returns (string memory _eventName, bytes memory _eventParam) {
 		require(
 			AccountInterface(address(this)).isAuth(userAccount),
