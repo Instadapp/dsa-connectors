@@ -114,7 +114,7 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 	function importAave(
 		address userAccount,
 		ImportInputData memory inputData,
-		signedPermits memory permitData
+		SignedPermits memory permitData
 	)
 		external
 		payable
