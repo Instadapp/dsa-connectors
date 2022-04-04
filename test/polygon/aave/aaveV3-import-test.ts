@@ -115,7 +115,7 @@ const token = new ethers.Contract(DAI, erc20Abi);
 const aDai = new ethers.Contract(aDaiAddress, ABI);
 const usdcToken = new ethers.Contract(USDC, erc20Abi);
 
-describe("Import Aave", function () {
+describe("Import Aave V3 with Permit", function () {
   const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
   let signer: any, wallet0: any;
 
