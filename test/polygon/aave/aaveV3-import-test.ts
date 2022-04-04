@@ -210,7 +210,7 @@ const aDai = new ethers.Contract(aDaiAddress, ABI);
 const usdcToken = new ethers.Contract(USDC, erc20Abi);
 const aave = new ethers.Contract(aaveAddress, aaveAbi);
 
-describe("Import Aave", function () {
+describe("Import Aave v3 Position", function () {
   let dsaWallet0: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
@@ -251,7 +251,6 @@ describe("Import Aave", function () {
       signer: masterSigner,
       connectors: instaConnectorsV2
     });
-    
   });
 
   describe("check user AAVE position", async () => {
