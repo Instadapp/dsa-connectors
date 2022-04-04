@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 contract Events {
 	event LogAaveV3ImportWithPermit(
 		address indexed user,
-		address[] ctokens,
+		address[] atokens,
 		string[] supplyIds,
 		string[] borrowIds,
 		uint256[] flashLoanFees,
