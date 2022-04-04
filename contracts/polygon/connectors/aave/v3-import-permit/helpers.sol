@@ -55,7 +55,7 @@ abstract contract Helper is DSMath, Basic {
 		uint256[] flashLoanFees;
 	}
 
-	struct signedPermits {
+	struct SignedPermits {
 		uint8[] v;
 		bytes32[] r;
 		bytes32[] s;
