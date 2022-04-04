@@ -91,7 +91,7 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 			);
 		}
 
-		_eventName = "LogAaveV3Import(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveV3ImportWithPermit(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
 			inputData.convertStable,
