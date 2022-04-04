@@ -28,6 +28,100 @@ const account = "0xf04adbf75cdfc5ed26eea4bbbb991db002036bdd";
 const DAI = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
 const USDC = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
 const mnemonic = "test test test test test test test test test test test junk";
+const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
+let signer: any, wallet0: any;
+
+const aaveAbi = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "interestRateMode",
+        type: "uint256"
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16"
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address"
+      }
+    ],
+    name: "borrow",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address"
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16"
+      }
+    ],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address"
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16"
+      }
+    ],
+    name: "supply",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  }
+];
 
 const erc20Abi = [
   {
@@ -114,103 +208,9 @@ const erc20Abi = [
 const token = new ethers.Contract(DAI, erc20Abi);
 const aDai = new ethers.Contract(aDaiAddress, ABI);
 const usdcToken = new ethers.Contract(USDC, erc20Abi);
+const aave = new ethers.Contract(aaveAddress, aaveAbi);
 
-describe("Import Aave V3 with Permit", function () {
-  const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
-  let signer: any, wallet0: any;
-
-  const aaveAbi = [
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "asset",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256"
-        },
-        {
-          internalType: "uint256",
-          name: "interestRateMode",
-          type: "uint256"
-        },
-        {
-          internalType: "uint16",
-          name: "referralCode",
-          type: "uint16"
-        },
-        {
-          internalType: "address",
-          name: "onBehalfOf",
-          type: "address"
-        }
-      ],
-      name: "borrow",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "asset",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256"
-        },
-        {
-          internalType: "address",
-          name: "onBehalfOf",
-          type: "address"
-        },
-        {
-          internalType: "uint16",
-          name: "referralCode",
-          type: "uint16"
-        }
-      ],
-      name: "deposit",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "asset",
-          type: "address"
-        },
-        {
-          internalType: "uint256",
-          name: "amount",
-          type: "uint256"
-        },
-        {
-          internalType: "address",
-          name: "onBehalfOf",
-          type: "address"
-        },
-        {
-          internalType: "uint16",
-          name: "referralCode",
-          type: "uint16"
-        }
-      ],
-      name: "supply",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function"
-    }
-  ];
-
+describe("Import Aave", function () {
   let dsaWallet0: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
@@ -251,19 +251,32 @@ describe("Import Aave V3 with Permit", function () {
       signer: masterSigner,
       connectors: instaConnectorsV2
     });
+    
+  });
 
-    const aave = new ethers.Contract(aaveAddress, aaveAbi);
+  describe("check user AAVE position", async () => {
+    it("Should create Aave v3 position of DAI(collateral) and USDC(debt)", async () => {
+      // approve DAI to aavePool
+      await token.connect(wallet0).approve(aaveAddress, parseEther("8"));
 
-    // approve DAI to aavePool
-    await token.connect(wallet0).approve(aaveAddress, parseEther("8"));
+      //deposit DAI in aave
+      await aave.connect(wallet0).supply(DAI, parseEther("8"), wallet.address, 3228);
+      console.log("Supplied DAI on aave");
 
-    //deposit DAI in aave
-    await aave.connect(wallet0).supply(DAI, parseEther("8"), wallet.address, 3228);
-    console.log("Supplied DAI on aave");
+      //borrow USDC from aave
+      await aave.connect(wallet0).borrow(USDC, parseUnits("5", 6), 2, 3228, wallet.address);
+      console.log("Borrowed USDC from aave");
+    });
 
-    //borrow USDC from aave
-    await aave.connect(wallet0).borrow(USDC, parseUnits("5", 6), 2, 3228, wallet.address);
-    console.log("Borrowed USDC from aave");
+    it("Should check position of user", async () => {
+      expect(await aDai.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
+        new BigNumber(8).multipliedBy(1e18).toString()
+      );
+
+      expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
+        new BigNumber(5).multipliedBy(1e6).toString()
+      );
+    });
   });
 
   describe("Deployment", async () => {
@@ -285,18 +298,6 @@ describe("Import Aave V3 with Permit", function () {
       });
 
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("5"));
-    });
-  });
-
-  describe("check user AAVE position", async () => {
-    it("Should check position of user", async () => {
-      expect(await aDai.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(8).multipliedBy(1e18).toString()
-      );
-
-      expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(5).multipliedBy(1e6).toString()
-      );
     });
   });
 
