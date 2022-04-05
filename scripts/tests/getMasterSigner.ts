@@ -19,7 +19,6 @@ export async function getMasterSigner() {
     abis.core.instaIndex,
     wallet3
   );
-
   const masterAddress = await instaIndex.master();
   await network.provider.request({
     method: "hardhat_impersonateAccount",

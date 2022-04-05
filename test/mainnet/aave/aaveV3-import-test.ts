@@ -15,17 +15,19 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData";
 import { ConnectV2AaveV3ImportPermitMainnet__factory, IERC20__factory } from "../../../typechain";
 
+
+// TODO: UPDATE ADDRESSES FOR V3 MAINNET AND TEST
+
 const ABI = [
   "function DOMAIN_SEPARATOR() public view returns (bytes32)",
   "function balanceOf(address account) public view returns (uint256)",
-  "function _nonces(address owner) public view returns (uint256)"
+  "function nonces(address owner) public view returns (uint256)"
 ];
 
-//using V2 addresses
-const aDaiAddress = "0x028171bCA77440897B824Ca71D1c56caC55b68A3"; // TODO - change the address for v3
+const aDaiAddress = "0x028171bCA77440897B824Ca71D1c56caC55b68A3"; 
 const aaveAddress = "0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9";
 // const account = "0xf04adbf75cdfc5ed26eea4bbbb991db002036bdd";
-let account = "0x5d38b4e4783e34e2301a2a36c39a03c45798c4dd";
+let account = "0x7923ef1b53eb2cbbf8643f835aadd32f9f1dd240";
 const DAI = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const mnemonic = "test test test test test test test test test test test junk";
@@ -179,7 +181,8 @@ describe("Import Aave v3 Position's for Mainnet", function () {
 
     signer = await ethers.getSigner(account);
 
-    await token.connect(signer).transfer(wallet0.address, ethers.utils.parseEther("8"));
+    console.log(await token.connect(signer).balanceOf(signer.address));
+    await token.connect(signer).transfer(wallet0.address, ethers.utils.parseEther("5"));
 
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
@@ -193,24 +196,24 @@ describe("Import Aave v3 Position's for Mainnet", function () {
   describe("check user AAVE position", async () => {
     it("Should create Aave v3 position of DAI(collateral) and USDC(debt)", async () => {
       // approve DAI to aavePool
-      await token.connect(wallet0).approve(aaveAddress, parseEther("8"));
+      await token.connect(wallet0).approve(aaveAddress, parseEther("5"));
 
       //deposit DAI in aave
-      await aave.connect(wallet0).deposit(DAI, parseEther("8"), wallet.address, 3228);
+      await aave.connect(wallet0).deposit(DAI, parseEther("5"), wallet.address, 3228);
       console.log("Supplied DAI on aave");
 
       //borrow USDC from aave
-      await aave.connect(wallet0).borrow(USDC, parseUnits("5", 6), 2, 3228, wallet.address);
+      await aave.connect(wallet0).borrow(USDC, parseUnits("2", 6), 2, 3228, wallet.address);
       console.log("Borrowed USDC from aave");
     });
 
     it("Should check position of user", async () => {
       expect(await aDai.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(8).multipliedBy(1e18).toString()
+        new BigNumber(5).multipliedBy(1e18).toString()
       );
 
       expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(5).multipliedBy(1e6).toString()
+        new BigNumber(2).multipliedBy(1e6).toString()
       );
     });
   });
@@ -230,10 +233,10 @@ describe("Import Aave v3 Position's for Mainnet", function () {
     it("Deposit ETH into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("5")
+        value: ethers.utils.parseEther("2")
       });
 
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("5"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("2"));
     });
   });
 
@@ -298,7 +301,7 @@ describe("Import Aave v3 Position's for Mainnet", function () {
 
     it("Should check DSA AAVE position", async () => {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
-        new BigNumber(8).multipliedBy(1e18).toString()
+        new BigNumber(5).multipliedBy(1e18).toString()
       );
     });
   });

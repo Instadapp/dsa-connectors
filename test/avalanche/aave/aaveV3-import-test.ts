@@ -22,23 +22,43 @@ const ABI = [
 ];
 
 const aDaiAddress = "0x82E64f49Ed5EC1bC6e43DAD4FC8Af9bb3A2312EE"; 
-const aaveAddress = "0x794a61358D6845594F94dc1DB02A252b5b4814aD";
+const aaveAddress = "0x794a61358d6845594f94dc1db02a252b5b4814ad";
 // const account = "0xf04adbf75cdfc5ed26eea4bbbb991db002036bdd";
-let account = "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70";
+let account = "0x95eEA1Bdd19A8C40E9575048Dd0d6577D11a84e5";
 const DAI = "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70";
-const USDC = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8";
+const USDC = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E";
 const mnemonic = "test test test test test test test test test test test junk";
 const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
 let signer: any, wallet0: any;
 
-const aaveAbi = [
+const aaveAbi =[
   {
     inputs: [
-      { internalType: "address", name: "asset", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" },
-      { internalType: "uint256", name: "interestRateMode", type: "uint256" },
-      { internalType: "uint16", name: "referralCode", type: "uint16" },
-      { internalType: "address", name: "onBehalfOf", type: "address" }
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "interestRateMode",
+        type: "uint256"
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16"
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address"
+      }
     ],
     name: "borrow",
     outputs: [],
@@ -47,12 +67,56 @@ const aaveAbi = [
   },
   {
     inputs: [
-      { internalType: "address", name: "asset", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" },
-      { internalType: "address", name: "onBehalfOf", type: "address" },
-      { internalType: "uint16", name: "referralCode", type: "uint16" }
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address"
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16"
+      }
     ],
     name: "deposit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address"
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256"
+      },
+      {
+        internalType: "address",
+        name: "onBehalfOf",
+        type: "address"
+      },
+      {
+        internalType: "uint16",
+        name: "referralCode",
+        type: "uint16"
+      }
+    ],
+    name: "supply",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function"
@@ -81,20 +145,6 @@ const erc20Abi = [
     ],
     payable: false,
     stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "totalSupply",
-    outputs: [
-      {
-        name: "",
-        type: "uint256"
-      }
-    ],
-    payable: false,
-    stateMutability: "view",
     type: "function"
   },
   {
@@ -162,7 +212,7 @@ describe("Import Aave v3 Position", function () {
           forking: {
             //@ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 14524450
+            blockNumber: 13024200
           }
         }
       ]
@@ -179,7 +229,6 @@ describe("Import Aave v3 Position", function () {
     signer = await ethers.getSigner(account);
 
     await token.connect(signer).transfer(wallet0.address, ethers.utils.parseEther("8"));
-
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
@@ -195,11 +244,11 @@ describe("Import Aave v3 Position", function () {
       await token.connect(wallet0).approve(aaveAddress, parseEther("8"));
 
       //deposit DAI in aave
-      await aave.connect(wallet0).deposit(DAI, parseEther("8"), wallet.address, 3228);
+      await aave.connect(wallet0).supply(DAI, parseEther("8"), wallet.address, 3228);
       console.log("Supplied DAI on aave");
 
       //borrow USDC from aave
-      await aave.connect(wallet0).borrow(USDC, parseUnits("5", 6), 2, 3228, wallet.address);
+      await aave.connect(wallet0).borrow(USDC, parseUnits("3", 6), 2, 3228, wallet.address);
       console.log("Borrowed USDC from aave");
     });
 
@@ -209,7 +258,7 @@ describe("Import Aave v3 Position", function () {
       );
 
       expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
-        new BigNumber(5).multipliedBy(1e6).toString()
+        new BigNumber(3).multipliedBy(1e6).toString()
       );
     });
   });
@@ -229,10 +278,10 @@ describe("Import Aave v3 Position", function () {
     it("Deposit ETH into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("5")
+        value: ethers.utils.parseEther("3")
       });
 
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("5"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("3"));
     });
   });
 
@@ -264,7 +313,7 @@ describe("Import Aave v3 Position", function () {
       );
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
       const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(wallet.address));
-      const amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
+      const amountB = new BigNumber(amount0.toString()).multipliedBy(9).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
 
       const flashSpells = [
@@ -288,7 +337,7 @@ describe("Import Aave v3 Position", function () {
         {
           connector: "INSTAPOOL-C",
           method: "flashBorrowAndCast",
-          args: [USDC, amount0.toString(), 5, encodeFlashcastData(flashSpells), "0x"]
+          args: [USDC, amount0.toString(), 1, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
@@ -297,7 +346,7 @@ describe("Import Aave v3 Position", function () {
 
     it("Should check DSA AAVE position", async () => {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
-        new BigNumber(8).multipliedBy(1e18).toString()
+        new BigNumber(3).multipliedBy(1e18).toString()
       );
     });
   });
