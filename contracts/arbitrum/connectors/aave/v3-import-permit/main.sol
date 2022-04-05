@@ -108,6 +108,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
 	 * @param userAccount The address of the EOA from which aave position will be imported
 	 * @param inputData The struct containing all the neccessary input data
+	 * @param permitData The struct containing signed permit data like v,r,s,expiry
 	 */
 	function importAave(
 		address userAccount,
