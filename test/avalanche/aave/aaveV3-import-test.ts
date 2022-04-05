@@ -6,7 +6,7 @@ import { keccak256 } from "@ethersproject/keccak256";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { BigNumber } from "bignumber.js";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
-import { addresses } from "../../../scripts/tests/arbitrum/addresses";
+import { addresses } from "../../../scripts/tests/avalanche/addresses";
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { abis } from "../../../scripts/constant/abis";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
@@ -26,7 +26,7 @@ const aaveAddress = "0x794a61358d6845594f94dc1db02a252b5b4814ad";
 // const account = "0xf04adbf75cdfc5ed26eea4bbbb991db002036bdd";
 let account = "0x95eEA1Bdd19A8C40E9575048Dd0d6577D11a84e5";
 const DAI = "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70";
-const USDC = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E";
+const ETH = "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB";
 const mnemonic = "test test test test test test test test test test test junk";
 const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
 let signer: any, wallet0: any;
@@ -193,10 +193,10 @@ const erc20Abi = [
 
 const token = new ethers.Contract(DAI, erc20Abi);
 const aDai = new ethers.Contract(aDaiAddress, ABI);
-const usdcToken = new ethers.Contract(USDC, erc20Abi);
+const ethToken = new ethers.Contract(ETH, erc20Abi);
 const aave = new ethers.Contract(aaveAddress, aaveAbi);
 
-describe("Import Aave v3 Position", function () {
+describe("Import Aave v3 Position for Avalanche", function () {
   let dsaWallet0: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
@@ -248,7 +248,7 @@ describe("Import Aave v3 Position", function () {
       console.log("Supplied DAI on aave");
 
       //borrow USDC from aave
-      await aave.connect(wallet0).borrow(USDC, parseUnits("3", 6), 2, 3228, wallet.address);
+      await aave.connect(wallet0).borrow(ETH, parseUnits("3", 6), 2, 3228, wallet.address);
       console.log("Borrowed USDC from aave");
     });
 
@@ -257,7 +257,7 @@ describe("Import Aave v3 Position", function () {
         new BigNumber(8).multipliedBy(1e18).toString()
       );
 
-      expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
+      expect(await ethToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
         new BigNumber(3).multipliedBy(1e6).toString()
       );
     });
@@ -312,7 +312,7 @@ describe("Import Aave v3 Position", function () {
         )
       );
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
-      const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(wallet.address));
+      const amount0 = new BigNumber(await ethToken.connect(wallet0).balanceOf(wallet.address));
       const amountB = new BigNumber(amount0.toString()).multipliedBy(9).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
 
@@ -322,14 +322,14 @@ describe("Import Aave v3 Position", function () {
           method: "importAave",
           args: [
             wallet.address,
-            [[DAI], [USDC], false, [amountB.toFixed(0)]],
+            [[DAI], [ETH], false, [amountB.toFixed(0)]],
             [[v], [ethers.utils.hexlify(r)], [ethers.utils.hexlify(s)], [expiry]]
           ]
         },
         {
           connector: "INSTAPOOL-C",
           method: "flashPayback",
-          args: [USDC, amountWithFee.toFixed(0), 0, 0]
+          args: [ETH, amountWithFee.toFixed(0), 0, 0]
         }
       ];
 
@@ -337,7 +337,7 @@ describe("Import Aave v3 Position", function () {
         {
           connector: "INSTAPOOL-C",
           method: "flashBorrowAndCast",
-          args: [USDC, amount0.toString(), 1, encodeFlashcastData(flashSpells), "0x"]
+          args: [ETH, amount0.toString(), 1, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
