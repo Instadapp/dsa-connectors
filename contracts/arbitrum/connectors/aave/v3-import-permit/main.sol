@@ -2,16 +2,15 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 /**
- * @title Aave v3 import connector.
+ * @title Aave v3 import connector .
  * @dev  Import EOA's aave V3 position to DSA's aave v3 position
  */
-
 import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, ATokenInterface } from "./interface.sol";
 import "./helpers.sol";
 import "./events.sol";
 
-contract AaveV3ImportPermitResolver is AaveHelpers {
+contract AaveV3ImportResolver is AaveHelpers {
 	function _importAave(
 		address userAccount,
 		ImportInputData memory inputData,
@@ -91,7 +90,7 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 			);
 		}
 
-		_eventName = "LogAaveV3ImportWithPermit(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveV3ImportPermit(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
 			inputData.convertStable,
@@ -109,7 +108,6 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
 	 * @param userAccount The address of the EOA from which aave position will be imported
 	 * @param inputData The struct containing all the neccessary input data
-	 * @param permitData The struct containing signed permit data like v,r,s,expiry
 	 */
 	function importAave(
 		address userAccount,
@@ -128,6 +126,6 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 	}
 }
 
-contract ConnectV2AaveV3ImportPermitPolygon is AaveV3ImportPermitResolver {
+contract ConnectV2AaveV3ImportPermitArbitrum is AaveV3ImportResolver {
 	string public constant name = "Aave-v3-import-permit-v1";
 }

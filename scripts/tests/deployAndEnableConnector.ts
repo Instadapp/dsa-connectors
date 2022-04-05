@@ -39,7 +39,7 @@ export async function deployAndEnableConnector(
     .connect(signer)
     .addConnectors([connectorName], [connectorInstanace.address]);
 
-  getAddress(String(process.env.networkType)).connectors[connectorName] =
+    getAddress(String(process.env.networkType)).connectors[connectorName] =
     connectorInstanace.address;
   abis.connectors[connectorName] = contractArtifact.abi;
 
