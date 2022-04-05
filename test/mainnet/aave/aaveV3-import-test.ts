@@ -13,7 +13,7 @@ import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData";
-import { ConnectV2AaveV3ImportPermit__factory, IERC20__factory } from "../../../typechain";
+import { ConnectV2AaveV3ImportPermitMainnet__factory, IERC20__factory } from "../../../typechain";
 
 const ABI = [
   "function DOMAIN_SEPARATOR() public view returns (bytes32)",
@@ -184,7 +184,7 @@ describe("Import Aave v3 Position's for Mainnet", function () {
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2AaveV3ImportPermit__factory,
+      contractArtifact: ConnectV2AaveV3ImportPermitMainnet__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
     });

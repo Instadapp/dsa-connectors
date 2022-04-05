@@ -54,6 +54,13 @@ abstract contract Helper is DSMath, Basic {
 		bool convertStable;
 		uint256[] flashLoanFees;
 	}
+
+	struct SignedPermits {
+		uint8[] v;
+		bytes32[] r;
+		bytes32[] s;
+		uint256[] expiry;
+	}
 }
 
 contract AaveHelpers is Helper {
@@ -220,6 +227,28 @@ contract AaveHelpers is Helper {
 			if (amts[i] > 0) {
 				_paybackBehalfOne(aave, tokens[i], amts[i], 2, user);
 			}
+		}
+	}
+
+	function _PermitATokens(
+		address userAccount,
+		ATokenInterface[] memory aTokenContracts,
+		address[] memory tokens,
+		uint8[] memory v,
+		bytes32[] memory r,
+		bytes32[] memory s,
+		uint256[] memory expiry
+	) internal {
+		for (uint256 i = 0; i < tokens.length; i++) {
+			aTokenContracts[i].permit(
+				userAccount,
+				address(this),
+				uint256(-1),
+				expiry[i],
+				v[i],
+				r[i],
+				s[i]
+			);
 		}
 	}
 

@@ -11,10 +11,11 @@ import "./helpers.sol";
 import "./events.sol";
 
 contract AaveV3ImportResolver is AaveHelpers {
-	function _importAave(address userAccount, ImportInputData memory inputData)
-		internal
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
+	function _importAave(
+		address userAccount,
+		ImportInputData memory inputData,
+		SignedPermits memory permitData
+	) internal returns (string memory _eventName, bytes memory _eventParam) {
 		require(
 			AccountInterface(address(this)).isAuth(userAccount),
 			"user-account-not-auth"
@@ -43,6 +44,17 @@ contract AaveV3ImportResolver is AaveHelpers {
 			data._borrowTokens,
 			data.variableBorrowAmts,
 			userAccount
+		);
+
+		//permit this address to transfer aTokens
+		_PermitATokens(
+			userAccount,
+			data.aTokens,
+			data._supplyTokens,
+			permitData.v,
+			permitData.r,
+			permitData.s,
+			permitData.expiry
 		);
 
 		//  transfer atokens to this address;
@@ -78,7 +90,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 			);
 		}
 
-		_eventName = "LogAaveV3Import(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveV3ImportWithPermit(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			userAccount,
 			inputData.convertStable,
@@ -97,15 +109,23 @@ contract AaveV3ImportResolver is AaveHelpers {
 	 * @param userAccount The address of the EOA from which aave position will be imported
 	 * @param inputData The struct containing all the neccessary input data
 	 */
-	function importAave(address userAccount, ImportInputData memory inputData)
+	function importAave(
+		address userAccount,
+		ImportInputData memory inputData,
+		SignedPermits memory permitData
+	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(userAccount, inputData);
+		(_eventName, _eventParam) = _importAave(
+			userAccount,
+			inputData,
+			permitData
+		);
 	}
 }
 
-contract ConnectV2AaveV3Import is AaveV3ImportResolver {
-	string public constant name = "Aave-v3-import-v1";
+contract ConnectV2AaveV3ImportPermitMainnet is AaveV3ImportResolver {
+	string public constant name = "Aave-v3-import-permit-v1";
 }
