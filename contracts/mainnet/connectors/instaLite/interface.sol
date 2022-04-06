@@ -2,6 +2,7 @@
 pragma solidity ^0.7.0;
 
 interface IInstaLite {
+
 	function supplyEth(address to_) external payable returns (uint256);
 
 	function supply(
@@ -11,4 +12,7 @@ interface IInstaLite {
 	) external returns (uint256);
 
 	function withdraw(uint256 amount_, address to_) external returns (uint256);
+
+	function deleverage(uint amt_) external;
+
 }
