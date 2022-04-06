@@ -3,9 +3,9 @@ pragma solidity ^0.7.0;
 
 /**
  * @title InstaLite Connector
- * @dev Supply and Withdraw
-
+ * @dev Supply, Withdraw & Deleverage
  */
+
 import { TokenInterface } from "../../common/interfaces.sol";
 import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
@@ -97,12 +97,12 @@ abstract contract InstaLiteConnector is Events, Basic {
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20
-	 * @notice Withdraw deposited tokens from Instalite.
-	 * @param vaultAddr The amount of the token to withdraw.
-	 * @param amt The amount of the token to withdraw.
+	 * @dev Deleverage vault. Pays back ETH debt and get stETH collateral. 1:1 swap of ETH to stETH
+	 * @notice Deleverage Instalite vault.
+	 * @param vaultAddr Address of vaultAddress Contract.
+	 * @param amt The amount of the token to deleverage.
 	 * @param getId ID to retrieve amt.
-	 * @param setId ID to retrieve amt.
+	 * @param setId ID to set amt.
 	 */
 	function deleverage(
 		address vaultAddr,
@@ -131,6 +131,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 		_eventName = "LogDeleverage(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(vaultAddr, _amt, getId, setId);
 	}
+
 }
 
 contract ConnectV2InstaLiteVault1 is InstaLiteConnector {
