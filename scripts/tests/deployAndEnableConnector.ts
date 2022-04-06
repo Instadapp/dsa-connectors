@@ -3,6 +3,7 @@ import { addresses } from "./mainnet/addresses";
 import { abis } from "../constant/abis";
 import { addresses as addressesArbitrum } from "./arbitrum/addresses";
 import { addresses as addressesAvalanche } from "./avalanche/addresses";
+import { addresses as addressesOptimism } from "./optimism/addresses";
 
 import hre from "hardhat";
 import type { Signer, Contract } from "ethers";
@@ -22,6 +23,7 @@ function getAddress(network: string | undefined) {
   if (network === "polygon") return addressesPolygon;
   else if (network === "arbitrum") return addressesArbitrum;
   else if (network === "avalanche") return addressesAvalanche;
+  else if (network === "optimism") return addressesOptimism;
   else return addresses;
 }
 
