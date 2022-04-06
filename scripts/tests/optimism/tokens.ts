@@ -83,5 +83,5 @@ export const tokenMapping: Record<string, any> = {
   //     const contract = new ethers.Contract(this.address, this.abi, owner);
   //     await mineTx(contract.transfer(address, amt));
   //   },
-  },
+  // },
 };
