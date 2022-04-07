@@ -134,6 +134,6 @@ abstract contract InstaLiteConnector is Events, Basic {
 
 }
 
-contract ConnectV2InstaLiteVault1 is InstaLiteConnector {
+contract ConnectV2InstaLite is InstaLiteConnector {
 	string public constant name = "InstaLite-v1";
 }
