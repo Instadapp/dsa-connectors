@@ -4,6 +4,7 @@ import { impersonateAccounts } from "./impersonate";
 import { tokenMapping as mainnetMapping } from "./mainnet/tokens";
 import { tokenMapping as polygonMapping } from "./polygon/tokens";
 import { tokenMapping as avalancheMapping } from "./avalanche/tokens";
+import { tokenMapping as optimismMapping } from "./optimism/tokens";
 
 const mineTx = async (tx: any) => {
   await (await tx).wait();
@@ -12,7 +13,8 @@ const mineTx = async (tx: any) => {
 const tokenMapping: Record<string, Record<string, any>> = {
   mainnet: mainnetMapping,
   polygon: polygonMapping,
-  avalanche: avalancheMapping
+  avalanche: avalancheMapping,
+  optimism: optimismMapping
 };
 
 export async function addLiquidity(tokenName: string, address: any, amt: any) {
