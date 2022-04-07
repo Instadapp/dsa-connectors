@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 
 contract Events {
 	event LogSupply(
-		address vaultAddress,
+		address vaultAddr,
 		address token,
 		uint256 vTokenAmt,
 		uint256 amt,
@@ -11,10 +11,17 @@ contract Events {
 		uint256[] setIds
 	);
 	event LogWithdraw(
-		address vaultAddress,
+		address vaultAddr,
 		uint256 amt,
 		uint256 vTokenAmt,
 		uint256 getId,
 		uint256[] setIds
+	);
+
+	event LogDeleverage(
+		address vaultAddr,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
 	);
 }
