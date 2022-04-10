@@ -12,7 +12,7 @@ async function testRunner() {
       name: "chain",
       message: "What chain do you want to run tests on?",
       type: "list",
-      choices: ["mainnet", "polygon", "avalanche", "arbitrum"],
+      choices: ["mainnet", "polygon", "avalanche", "arbitrum", "optimism"],
     },
   ]);
   const testsPath = join(__dirname, "../../test", chain);
