@@ -252,6 +252,32 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
+	 * @dev Disable collateral
+	 * @notice Disable an array of tokens as collateral
+	 * @param tokens Array of tokens to disable as collateral
+	 */
+	function disableCollateral(address[] calldata tokens)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _length = tokens.length;
+		require(_length > 0, "0-tokens-not-allowed");
+
+		AaveInterface aave = AaveInterface(aaveProvider.getPool());
+
+		for (uint256 i = 0; i < _length; i++) {
+			address token = tokens[i];
+			if (getCollateralBalance(token) > 0 && getIsColl(token)) {
+				aave.setUserUseReserveAsCollateral(token, false);
+			}
+		}
+
+		_eventName = "LogDisableCollateral(address[])";
+		_eventParam = abi.encode(tokens);
+	}
+
+	/**
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
 	 * @param token The address of the token to swap borrow rate.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
