@@ -88,4 +88,32 @@ contract Events {
     );
 
     event LogBatchActionRaw(address indexed account);
+
+    event LogMintSNoteFromBPT(address indexed account, uint256 bptAmount);
+
+    event LogMintSNoteFromETH(
+        address indexed account,
+        uint256 noteAmount,
+        uint256 ethAmount,
+        uint256 minBPT
+    );
+
+    event LogMintSNoteFromWETH(
+        address indexed account,
+        uint256 noteAmount,
+        uint256 wethAmount,
+        uint256 minBPT
+    );
+
+    event LogStartCoolDown(address indexed account);
+
+    event LogStopCoolDown(address indexed account);
+
+    event LogRedeemSNote(
+        address indexed account,
+        uint256 sNOTEAmount,
+        uint256 minWETH,
+        uint256 minNOTE,
+        bool redeemWETH
+    );
 }

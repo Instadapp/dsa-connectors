@@ -2,6 +2,8 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
+import { TokenInterface } from "../../common/interfaces.sol";
+
 /// @notice Different types of internal tokens
 ///  - UnderlyingToken: underlying asset for a cToken (except for Ether)
 ///  - cToken: Compound interest bearing token
@@ -132,4 +134,27 @@ interface NotionalInterface {
 		address account,
 		BalanceActionWithTrades[] calldata actions
 	) external payable;
+}
+
+interface StakingInterface is TokenInterface {
+	function mintFromETH(uint256 noteAmount, uint256 minBPT) external payable;
+
+	function mintFromWETH(
+		uint256 noteAmount,
+		uint256 wethAmount,
+		uint256 minBPT
+	) external;
+
+	function mintFromBPT(uint256 bptAmount) external;
+
+	function startCoolDown() external;
+
+	function stopCoolDown() external;
+
+	function redeem(
+		uint256 sNOTEAmount,
+		uint256 minWETH,
+		uint256 minNOTE,
+		bool redeemWETH
+	) external;
 }

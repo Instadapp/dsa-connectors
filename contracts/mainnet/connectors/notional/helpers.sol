@@ -2,7 +2,7 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import { Token, NotionalInterface, BalanceAction, BalanceActionWithTrades, DepositActionType } from "./interface.sol";
+import { Token, NotionalInterface, StakingInterface, BalanceAction, BalanceActionWithTrades, DepositActionType } from "./interface.sol";
 import { Basic } from "../../common/basic.sol";
 import { DSMath } from "../../common/math.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
@@ -17,6 +17,22 @@ abstract contract Helpers is DSMath, Basic {
 	/// @dev Contract address is different on Kovan: 0x0EAE7BAdEF8f95De91fDDb74a89A786cF891Eb0e
 	NotionalInterface internal constant notional =
 		NotionalInterface(0x1344A36A1B56144C3Bc62E7757377D288fDE0369);
+
+	/// @dev sNOTE contract address
+	StakingInterface internal constant staking =
+		StakingInterface(0x38DE42F4BA8a35056b33A746A6b45bE9B1c3B9d2);
+
+	/// @dev sNOTE balancer pool token address
+	TokenInterface internal constant bpt =
+		TokenInterface(0x5122E01D819E58BB2E22528c0D68D310f0AA6FD7);
+
+	/// @dev NOTE token address
+	TokenInterface internal constant note =
+		TokenInterface(0xCFEAead4947f0705A14ec42aC3D44129E1Ef3eD5);
+
+	/// @dev WETH token address
+	TokenInterface internal constant weth =
+		TokenInterface(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
 	/// @notice Returns the address of the underlying token for a given currency id,
 	function getAssetOrUnderlyingToken(uint16 currencyId, bool underlying)

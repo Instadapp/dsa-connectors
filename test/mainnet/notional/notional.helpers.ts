@@ -200,6 +200,119 @@ const withdrawLend = async (
     await tx.wait()
 };
 
+const mintSNoteFromETH = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    noteAmount: BigNumber, 
+    ethAmount: BigNumber,
+    minBPT: BigNumber
+) => {
+    const spells = [
+        {
+            connector: "NOTIONAL-TEST-A",
+            method: "mintSNoteFromETH",
+            args: [noteAmount, ethAmount, minBPT]
+        }        
+    ]
+
+    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
+    await tx.wait()
+}
+
+const mintSNoteFromWETH = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    noteAmount: BigNumber,
+    wethAmount: BigNumber,
+    minBPT: BigNumber
+) => {
+    const spells = [
+        {
+            connector: "NOTIONAL-TEST-A",
+            method: "mintSNoteFromWETH",
+            args: [noteAmount, wethAmount, minBPT]
+        }        
+    ]
+
+    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
+    await tx.wait()
+}
+
+const mintSNoteFromBPT = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    bptAmount: BigNumber
+) => {
+    const spells = [
+        {
+            connector: "NOTIONAL-TEST-A",
+            method: "mintSNoteFromBPT",
+            args: [bptAmount]
+        }        
+    ]
+
+    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
+    await tx.wait()
+}
+
+const startCoolDown = async (
+    dsa: any,
+    authority: any,
+    referrer: any
+) => {
+    const spells = [
+        {
+            connector: "NOTIONAL-TEST-A",
+            method: "startCoolDown",
+            args: []
+        }        
+    ]
+
+    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
+    await tx.wait()
+}
+
+const stopCoolDown = async (
+    dsa: any,
+    authority: any,
+    referrer: any
+) => {
+    const spells = [
+        {
+            connector: "NOTIONAL-TEST-A",
+            method: "stopCoolDown",
+            args: []
+        }        
+    ]
+
+    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
+    await tx.wait()
+}
+
+const redeemSNote = async (
+    dsa: any,
+    authority: any,
+    referrer: any,
+    sNOTEAmount: BigNumber,
+    minWETH: BigNumber,
+    minNOTE: BigNumber,
+    redeemWETH: boolean
+) => {
+    const spells = [
+        {
+            connector: "NOTIONAL-TEST-A",
+            method: "redeemSNote",
+            args: [sNOTEAmount, minWETH, minNOTE, redeemWETH]
+        }        
+    ]
+
+    const tx = await dsa.connect(authority).cast(...encodeSpells(spells), referrer.address);
+    await tx.wait()
+}
+
 export default {
     depositCollteral,
     depositAndMintNToken,
@@ -209,5 +322,11 @@ export default {
     redeemNTokenRaw,
     redeemNTokenAndWithdraw,
     redeemNTokenAndDeleverage,
-    depositCollateralBorrowAndWithdraw
+    depositCollateralBorrowAndWithdraw,
+    mintSNoteFromETH,
+    mintSNoteFromWETH,
+    mintSNoteFromBPT,
+    startCoolDown,
+    stopCoolDown,
+    redeemSNote
 };
