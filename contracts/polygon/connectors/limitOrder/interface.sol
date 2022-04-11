@@ -4,8 +4,6 @@ pragma experimental ABIEncoderV2;
 
 interface IUniLimitOrder {
 
-    function token0to1(uint256) external view returns (bool);
-
     struct MintParams {
         address token0;
         address token1;
@@ -13,7 +11,7 @@ interface IUniLimitOrder {
         int24 tickLower;
         int24 tickUpper;
         uint256 amount;
-        bool token0To1;
+        bool tokenDirectn;
     }
 
     function createPosition(

@@ -16,7 +16,7 @@ contract Helpers is Basic {
         int24 tickLower;
         int24 tickUpper;
         uint256 amount;
-        bool token0to1;
+        bool tokenDirectn;
     }
 
     /**
@@ -37,7 +37,7 @@ contract Helpers is Basic {
             params_.token1
         );
 
-        if(params_.token0to1){
+        if(params_.tokenDirectn){
             amountSend_ = params_.amount == type(uint128).max ? getTokenBal(TokenInterface(params_.token0)) : params_.amount;
             convertMaticToWmatic(params_.token0 == maticAddr, token0_, amountSend_);
             approve(token0_, address(limitCon_), amountSend_);
@@ -55,7 +55,7 @@ contract Helpers is Basic {
                 params_.tickLower,
                 params_.tickUpper,
                 amountSend_,
-                params_.token0to1
+                params_.tokenDirectn
             );
 
         (tokenId_, liquidity_, mintAmount_) = limitCon_.createPosition(parameter);
