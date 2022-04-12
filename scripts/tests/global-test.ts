@@ -6,7 +6,7 @@ import { execScript } from "./command";
 let start: number, end: number;
 
 async function testRunner() {
-  const chain = ["avalanche", "mainnet", "polygon", "arbitrum"];
+  const chain = ["avalanche", "mainnet", "polygon", "arbitrum", "optimism"];
   start = Date.now();
 
   for (let ch of chain) {
