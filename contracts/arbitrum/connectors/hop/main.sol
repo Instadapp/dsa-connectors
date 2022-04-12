@@ -18,19 +18,14 @@ abstract contract Resolver is Helpers {
 	 * @dev Bridge Token.
 	 * @notice Bridge Token on HOP.
 	 * @param params BridgeParams struct for bridging
-	 * @param bridgeToL1 bool to check which layer to migrate to
 	 * @param getId ID to retrieve amount from last spell.
 	 */
-	function bridge(
-		BridgeParams memory params,
-		bool bridgeToL1,
-		uint256 getId
-	)
+	function bridge(BridgeParams memory params, uint256 getId)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (bridgeToL1) {
+		if (params.chainId == 1) {
 			require(
 				params.destinationAmountOutMin == 0,
 				"destinationAmountOutMin != 0, sending to L1"
