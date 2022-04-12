@@ -143,5 +143,105 @@ describe("Hop Connector", function () {
       expect(transferSentEvent[2].toLowerCase()).to.be.equals(wallet0.address.toLowerCase());
       console.log("TransferId", transferSentEvent[0]);
     });
+
+    it("should migrate from L2 to L2", async function () {
+      const amount = ethers.utils.parseEther("10");
+      const DAI_ADDR = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
+      const hDai = "0xb8901acB165ed027E32754E0FFe830802919727f";
+      const l2AmmWrapper = "0x28529fec439cfF6d7D1D5917e956dEE62Cd3BE5c";
+      const ABI = [
+        {
+          inputs: [{ internalType: "address", name: "tokenAddress", type: "address" }],
+          name: "getTokenIndex",
+          outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+          stateMutability: "view",
+          type: "function"
+        },
+        {
+          inputs: [
+            { internalType: "uint8", name: "tokenIndexFrom", type: "uint8" },
+            { internalType: "uint8", name: "tokenIndexTo", type: "uint8" },
+            { internalType: "uint256", name: "dx", type: "uint256" }
+          ],
+          name: "calculateSwap",
+          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+          stateMutability: "view",
+          type: "function"
+        }
+      ];
+
+      const saddleSwap = new ethers.Contract("0x25FB92E505F752F730cAD0Bd4fa17ecE4A384266", ABI);
+      const hDaiIdx = await saddleSwap.connect(wallet0).getTokenIndex(hDai);
+      const daiIdx = await saddleSwap.connect(wallet0).getTokenIndex(DAI_ADDR);
+      const amountWithSlippage = new BigNumber(amount.toString()).multipliedBy(0.99);
+      const destinationAmountOutMin = await saddleSwap
+        .connect(wallet0)
+        .calculateSwap(daiIdx, hDaiIdx, amountWithSlippage.toString());
+
+      const bonderFee = new BigNumber(1e9)
+        .multipliedBy(150000)
+        .multipliedBy(1.5)
+        .plus(new BigNumber(amount.toString()).multipliedBy(0.72));
+      const deadline = Date.now() + 604800;
+      const getId = "0";
+
+      const token = new ethers.Contract(DAI_ADDR, abis.basic.erc20);
+      await token.connect(wallet0).approve(l2AmmWrapper, amount.toString());
+
+      const params: any = [
+        DAI_ADDR,
+        l2AmmWrapper,
+        wallet0.address,
+        10,
+        amount.toString(),
+        bonderFee.toString(),
+        "0",
+        deadline,
+        destinationAmountOutMin.toString(),
+        deadline
+      ];
+
+      const spells = [
+        {
+          connector: connectorName,
+          method: "bridge",
+          args: [params, getId]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      let receipt = await tx.wait();
+      latestBlock = receipt.blockNumber;
+    });
+
+    it("Should fetch transferId from TransferSent Event", async function () {
+      const l2Bridge = "0xEcf268Be00308980B5b3fcd0975D47C4C8e1382a";
+      const ABI = [
+        {
+          anonymous: false,
+          inputs: [
+            { indexed: true, internalType: "bytes32", name: "transferId", type: "bytes32" },
+            { indexed: true, internalType: "uint256", name: "chainId", type: "uint256" },
+            { indexed: true, internalType: "address", name: "recipient", type: "address" },
+            { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
+            { indexed: false, internalType: "bytes32", name: "transferNonce", type: "bytes32" },
+            { indexed: false, internalType: "uint256", name: "bonderFee", type: "uint256" },
+            { indexed: false, internalType: "uint256", name: "index", type: "uint256" },
+            { indexed: false, internalType: "uint256", name: "amountOutMin", type: "uint256" },
+            { indexed: false, internalType: "uint256", name: "deadline", type: "uint256" }
+          ],
+          name: "TransferSent",
+          type: "event"
+        }
+      ];
+      const l2BridgeInstance = new ethers.Contract(l2Bridge, ABI);
+      const filter = l2BridgeInstance.connect(wallet0).filters.TransferSent();
+      const events = await l2BridgeInstance.connect(wallet0).queryFilter(filter, 27054896, latestBlock);
+
+      const transferSentEvent: any = events[1].args;
+
+      expect(transferSentEvent[2].toLowerCase()).to.be.equals(wallet0.address.toLowerCase());
+      console.log("TransferId", transferSentEvent[0]);
+    });
   });
 });
