@@ -25,6 +25,57 @@ describe("Hop Connector", function () {
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
+
+  const saddleSwapABI = [
+    {
+      inputs: [{ internalType: "address", name: "tokenAddress", type: "address" }],
+      name: "getTokenIndex",
+      outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+      stateMutability: "view",
+      type: "function"
+    },
+    {
+      inputs: [
+        { internalType: "uint8", name: "tokenIndexFrom", type: "uint8" },
+        { internalType: "uint8", name: "tokenIndexTo", type: "uint8" },
+        { internalType: "uint256", name: "dx", type: "uint256" }
+      ],
+      name: "calculateSwap",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function"
+    }
+  ];
+
+  const l2BridgeABI = [
+    {
+      anonymous: false,
+      inputs: [
+        { indexed: true, internalType: "bytes32", name: "transferId", type: "bytes32" },
+        { indexed: true, internalType: "uint256", name: "chainId", type: "uint256" },
+        { indexed: true, internalType: "address", name: "recipient", type: "address" },
+        { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
+        { indexed: false, internalType: "bytes32", name: "transferNonce", type: "bytes32" },
+        { indexed: false, internalType: "uint256", name: "bonderFee", type: "uint256" },
+        { indexed: false, internalType: "uint256", name: "index", type: "uint256" },
+        { indexed: false, internalType: "uint256", name: "amountOutMin", type: "uint256" },
+        { indexed: false, internalType: "uint256", name: "deadline", type: "uint256" }
+      ],
+      name: "TransferSent",
+      type: "event"
+    }
+  ];
+
+  const DAI_ADDR = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
+  const hDai = "0xb8901acB165ed027E32754E0FFe830802919727f";
+  const l2AmmWrapper = "0x28529fec439cfF6d7D1D5917e956dEE62Cd3BE5c";
+  const l2Bridge = "0xEcf268Be00308980B5b3fcd0975D47C4C8e1382a";
+  const saddleSwap = "0x25FB92E505F752F730cAD0Bd4fa17ecE4A384266";
+  const saddleSwapInstance = new ethers.Contract(saddleSwap, saddleSwapABI);
+
+  const token = new ethers.Contract(DAI_ADDR, abis.basic.erc20);
+  const l2BridgeInstance = new ethers.Contract(l2Bridge, l2BridgeABI);
+
   before(async () => {
     await hre.network.provider.request({
       method: "hardhat_reset",
@@ -76,17 +127,20 @@ describe("Hop Connector", function () {
   describe("Main", function () {
     it("should migrate from L2 to L1", async function () {
       const amount = ethers.utils.parseEther("10");
-      const DAI_ADDR = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
-      const l2AmmWrapper = "0x28529fec439cfF6d7D1D5917e956dEE62Cd3BE5c";
       const bonderFee = new BigNumber(100 * 1e9)
         .multipliedBy(150000)
         .multipliedBy(1.5)
-        .plus(new BigNumber(amount.toString()).multipliedBy(0.72));
+        .plus(new BigNumber(amount.toString()).multipliedBy(0.18));
       const deadline = Date.now() + 604800;
       const getId = "0";
 
-      const token = new ethers.Contract(DAI_ADDR, abis.basic.erc20);
       await token.connect(wallet0).approve(l2AmmWrapper, amount.toString());
+
+      const hDaiIdx = await saddleSwapInstance.connect(wallet0).getTokenIndex(hDai);
+      const daiIdx = await saddleSwapInstance.connect(wallet0).getTokenIndex(DAI_ADDR);
+
+      let amountOutMin = await saddleSwapInstance.connect(wallet0).calculateSwap(daiIdx, hDaiIdx, amount.toString());
+      amountOutMin = new BigNumber(amountOutMin.toString()).multipliedBy(0.99);
 
       const params: any = [
         DAI_ADDR,
@@ -95,7 +149,7 @@ describe("Hop Connector", function () {
         1,
         amount.toString(),
         bonderFee.toString(),
-        "0",
+        amountOutMin.toFixed(0),
         deadline,
         "0",
         "0"
@@ -115,26 +169,6 @@ describe("Hop Connector", function () {
     });
 
     it("Should fetch transferId from TransferSent Event", async function () {
-      const l2Bridge = "0xEcf268Be00308980B5b3fcd0975D47C4C8e1382a";
-      const ABI = [
-        {
-          anonymous: false,
-          inputs: [
-            { indexed: true, internalType: "bytes32", name: "transferId", type: "bytes32" },
-            { indexed: true, internalType: "uint256", name: "chainId", type: "uint256" },
-            { indexed: true, internalType: "address", name: "recipient", type: "address" },
-            { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
-            { indexed: false, internalType: "bytes32", name: "transferNonce", type: "bytes32" },
-            { indexed: false, internalType: "uint256", name: "bonderFee", type: "uint256" },
-            { indexed: false, internalType: "uint256", name: "index", type: "uint256" },
-            { indexed: false, internalType: "uint256", name: "amountOutMin", type: "uint256" },
-            { indexed: false, internalType: "uint256", name: "deadline", type: "uint256" }
-          ],
-          name: "TransferSent",
-          type: "event"
-        }
-      ];
-      const l2BridgeInstance = new ethers.Contract(l2Bridge, ABI);
       const filter = l2BridgeInstance.connect(wallet0).filters.TransferSent();
       const events = await l2BridgeInstance.connect(wallet0).queryFilter(filter, 27054896, latestBlock);
 
@@ -146,46 +180,25 @@ describe("Hop Connector", function () {
 
     it("should migrate from L2 to L2", async function () {
       const amount = ethers.utils.parseEther("10");
-      const DAI_ADDR = "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063";
-      const hDai = "0xb8901acB165ed027E32754E0FFe830802919727f";
-      const l2AmmWrapper = "0x28529fec439cfF6d7D1D5917e956dEE62Cd3BE5c";
-      const ABI = [
-        {
-          inputs: [{ internalType: "address", name: "tokenAddress", type: "address" }],
-          name: "getTokenIndex",
-          outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
-          stateMutability: "view",
-          type: "function"
-        },
-        {
-          inputs: [
-            { internalType: "uint8", name: "tokenIndexFrom", type: "uint8" },
-            { internalType: "uint8", name: "tokenIndexTo", type: "uint8" },
-            { internalType: "uint256", name: "dx", type: "uint256" }
-          ],
-          name: "calculateSwap",
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          stateMutability: "view",
-          type: "function"
-        }
-      ];
 
-      const saddleSwap = new ethers.Contract("0x25FB92E505F752F730cAD0Bd4fa17ecE4A384266", ABI);
-      const hDaiIdx = await saddleSwap.connect(wallet0).getTokenIndex(hDai);
-      const daiIdx = await saddleSwap.connect(wallet0).getTokenIndex(DAI_ADDR);
-      const amountWithSlippage = new BigNumber(amount.toString()).multipliedBy(0.99);
-      const destinationAmountOutMin = await saddleSwap
+      const hDaiIdx = await saddleSwapInstance.connect(wallet0).getTokenIndex(hDai);
+      const daiIdx = await saddleSwapInstance.connect(wallet0).getTokenIndex(DAI_ADDR);
+
+      let destinationAmountOutMin = await saddleSwapInstance
         .connect(wallet0)
-        .calculateSwap(daiIdx, hDaiIdx, amountWithSlippage.toString());
+        .calculateSwap(hDaiIdx, daiIdx, amount.toString());
+      destinationAmountOutMin = new BigNumber(destinationAmountOutMin.toString()).multipliedBy(0.99);
+
+      let amountOutMin = await saddleSwapInstance.connect(wallet0).calculateSwap(daiIdx, hDaiIdx, amount.toString());
+      amountOutMin = new BigNumber(amountOutMin.toString()).multipliedBy(0.99);
 
       const bonderFee = new BigNumber(1e9)
         .multipliedBy(150000)
         .multipliedBy(1.5)
-        .plus(new BigNumber(amount.toString()).multipliedBy(0.72));
+        .plus(new BigNumber(amount.toString()).multipliedBy(0.18));
       const deadline = Date.now() + 604800;
       const getId = "0";
 
-      const token = new ethers.Contract(DAI_ADDR, abis.basic.erc20);
       await token.connect(wallet0).approve(l2AmmWrapper, amount.toString());
 
       const params: any = [
@@ -195,9 +208,9 @@ describe("Hop Connector", function () {
         10,
         amount.toString(),
         bonderFee.toString(),
-        "0",
+        amountOutMin.toFixed(0),
         deadline,
-        destinationAmountOutMin.toString(),
+        destinationAmountOutMin.toFixed(0),
         deadline
       ];
 
@@ -215,26 +228,6 @@ describe("Hop Connector", function () {
     });
 
     it("Should fetch transferId from TransferSent Event", async function () {
-      const l2Bridge = "0xEcf268Be00308980B5b3fcd0975D47C4C8e1382a";
-      const ABI = [
-        {
-          anonymous: false,
-          inputs: [
-            { indexed: true, internalType: "bytes32", name: "transferId", type: "bytes32" },
-            { indexed: true, internalType: "uint256", name: "chainId", type: "uint256" },
-            { indexed: true, internalType: "address", name: "recipient", type: "address" },
-            { indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
-            { indexed: false, internalType: "bytes32", name: "transferNonce", type: "bytes32" },
-            { indexed: false, internalType: "uint256", name: "bonderFee", type: "uint256" },
-            { indexed: false, internalType: "uint256", name: "index", type: "uint256" },
-            { indexed: false, internalType: "uint256", name: "amountOutMin", type: "uint256" },
-            { indexed: false, internalType: "uint256", name: "deadline", type: "uint256" }
-          ],
-          name: "TransferSent",
-          type: "event"
-        }
-      ];
-      const l2BridgeInstance = new ethers.Contract(l2Bridge, ABI);
       const filter = l2BridgeInstance.connect(wallet0).filters.TransferSent();
       const events = await l2BridgeInstance.connect(wallet0).queryFilter(filter, 27054896, latestBlock);
 
