@@ -212,7 +212,7 @@ const mintSNoteFromETH = async (
         {
             connector: "NOTIONAL-TEST-A",
             method: "mintSNoteFromETH",
-            args: [noteAmount, ethAmount, minBPT]
+            args: [noteAmount, ethAmount, minBPT, 0]
         }        
     ]
 
@@ -232,7 +232,7 @@ const mintSNoteFromWETH = async (
         {
             connector: "NOTIONAL-TEST-A",
             method: "mintSNoteFromWETH",
-            args: [noteAmount, wethAmount, minBPT]
+            args: [noteAmount, wethAmount, minBPT, 0]
         }        
     ]
 

@@ -681,12 +681,14 @@ abstract contract NotionalResolver is Events, Helpers {
 	function mintSNoteFromETH(
 		uint256 noteAmount,
 		uint256 ethAmount,
-		uint256 minBPT
+		uint256 minBPT,
+		uint256 getId
 	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		noteAmount = getUint(getId, noteAmount);
 		if (noteAmount == type(uint256).max)
 			noteAmount = note.balanceOf(address(this));
 
@@ -708,12 +710,14 @@ abstract contract NotionalResolver is Events, Helpers {
 	function mintSNoteFromWETH(
 		uint256 noteAmount,
 		uint256 wethAmount,
-		uint256 minBPT
+		uint256 minBPT,
+		uint256 getId
 	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		noteAmount = getUint(getId, noteAmount);
 		if (noteAmount == type(uint256).max)
 			noteAmount = note.balanceOf(address(this));
 
