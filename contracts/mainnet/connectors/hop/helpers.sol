@@ -19,25 +19,25 @@ contract Helpers is DSMath, Basic {
 	struct BridgeParams {
 		address token;
 		address recipient;
-		address hopRouter;
-		uint256 chainId;
+		address router;
+		uint256 targetChainId;
 		uint256 amount;
-		uint256 amountOutMin;
-		uint256 deadline;
+		uint256 destinationAmountOutMin;
+		uint256 destinationDeadline;
 	}
 
 	function _sendToL2(BridgeParams memory params) internal {
-		IHopRouter router = IHopRouter(params.hopRouter);
+		IHopRouter router = IHopRouter(params.router);
 
 		TokenInterface tokenContract = TokenInterface(params.token);
-		approve(tokenContract, params.hopRouter, params.amount);
+		approve(tokenContract, params.router, params.amount);
 
 		router.sendToL2(
-			params.chainId,
+			params.targetChainId,
 			params.recipient,
 			params.amount,
-			params.amountOutMin,
-			params.deadline,
+			params.destinationAmountOutMin,
+			params.destinationDeadline,
 			address(0), // relayer address
 			0 // relayer fee
 		);

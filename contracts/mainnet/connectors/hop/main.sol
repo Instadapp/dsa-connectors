@@ -48,11 +48,11 @@ abstract contract Resolver is Helpers {
 		_eventName = "LogBridge(address,uint256,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			params.token,
-			params.chainId,
+			params.targetChainId,
 			params.recipient,
 			params.amount,
-			params.amountOutMin,
-			params.deadline,
+			params.destinationAmountOutMin,
+			params.destinationDeadline,
 			getId
 		);
 	}

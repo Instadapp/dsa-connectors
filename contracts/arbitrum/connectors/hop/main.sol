@@ -25,7 +25,7 @@ abstract contract Resolver is Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (params.chainId == 1) {
+		if (params.targetChainId == 1) {
 			require(
 				params.destinationAmountOutMin == 0,
 				"destinationAmountOutMin != 0, sending to L1"
@@ -59,12 +59,12 @@ abstract contract Resolver is Helpers {
 		_eventName = "LogBridge(address,uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			params.token,
-			params.chainId,
+			params.targetChainId,
 			params.recipient,
 			params.amount,
 			params.bonderFee,
-			params.amountOutMin,
-			params.deadline,
+			params.sourceAmountOutMin,
+			params.sourceDeadline,
 			params.destinationAmountOutMin,
 			params.destinationDeadline,
 			getId
