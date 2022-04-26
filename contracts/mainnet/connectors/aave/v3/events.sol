@@ -31,4 +31,10 @@ contract Events {
 	event LogEnableCollateral(address[] tokens);
 	event LogSwapRateMode(address indexed token, uint256 rateMode);
 	event LogSetUserEMode(uint8 categoryId);
+	event LogApproveDelegation(
+		address token,
+		uint16 debtType,
+		address delegateTo,
+		uint256 amount
+	);
 }
