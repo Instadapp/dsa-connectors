@@ -64,4 +64,21 @@ abstract contract Helpers is DSMath, Basic {
 			address(this)
 		);
 	}
+
+	/**
+	 * @dev Get debt token address for an asset
+	 * @param token token address of the asset
+	 * @param rateMode Debt type: stable-1, variable-2
+	 */
+	function getDTokenAddr(address token, uint16 rateMode)
+		internal
+		view
+		returns(address dToken)
+	{
+		if (rateMode == 1) {
+			(, dToken, ) = aaveData.getReserveTokensAddresses(token);
+		} else {
+			(, , dToken) = aaveData.getReserveTokensAddresses(token);
+		}
+	}
 }
