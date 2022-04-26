@@ -103,6 +103,10 @@ abstract contract AaveResolver is Events, Helpers {
 
 		aave.supply(_token, _amt, address(this), referralCode);
 
+		if (getCollateralBalance(_token) > 0 && getIsColl(token)) {
+			aave.setUserUseReserveAsCollateral(_token, false);
+		}
+
 		setUint(setId, _amt);
 
 		_eventName = "LogDeposit(address,uint256,uint256,uint256)";
