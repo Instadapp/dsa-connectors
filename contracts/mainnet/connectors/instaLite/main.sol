@@ -124,7 +124,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 
 		uint finalBal = astethToken.balanceOf(address(this));
 
-		require(amt <= (finalBal - initialBal), "lack-of-steth");
+		require(amt <= (1e9 + finalBal - initialBal), "lack-of-steth");
 
 		setUint(setId, _amt);
 
