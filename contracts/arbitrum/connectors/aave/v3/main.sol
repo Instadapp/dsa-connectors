@@ -223,7 +223,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 		setUint(setId, _amt);
 
-		_eventName = "LogBorrow(address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogBorrowOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, rateMode, getId, setId);
 	}
 
