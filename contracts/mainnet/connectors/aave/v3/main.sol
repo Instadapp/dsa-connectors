@@ -109,7 +109,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 		setUint(setId, _amt);
 
-		_eventName = "LogDeposit(address,uint256,uint256,uint256)";
+		_eventName = "LogDepositWithoutCollateral(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, getId, setId);
 	}
 
@@ -223,8 +223,8 @@ abstract contract AaveResolver is Events, Helpers {
 
 		setUint(setId, _amt);
 
-		_eventName = "LogBorrow(address,uint256,uint256,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, getId, setId);
+		_eventName = "LogBorrowOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
 	}
 
 	/**
@@ -384,25 +384,37 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @dev Approve Delegation
 	 * @notice Gives approval to delegate debt tokens
 	 * @param token The address of token
+	 * @param amount The amount
 	 * @param rateMode The type of borrow debt
 	 * @param delegateTo The address to whom the user is delegating
-	 * @param amount The amount 
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
 	 */
-	function approveDelegation(address token, uint16 rateMode, address delegateTo, uint256 amount)
+	function delegateBorrow(
+		address token,
+		uint256 amount,
+		uint256 rateMode,
+		address delegateTo,
+		uint256 getId,
+		uint256 setId
+	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		require(rateMode == 1 || rateMode == 2, "Invalid debt type");
+		uint256 _amt = getUint(getId, amount);
 
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
 
 		address _dToken = getDTokenAddr(_token, rateMode);
-		DTokenInterface(_dToken).approveDelegation(delegateTo, amount);
+		DTokenInterface(_dToken).approveDelegation(delegateTo, _amt);
 
-		_eventName = "LogApproveDelegation(address,uint16,address,uint256)";
-		_eventParam = abi.encode(token, rateMode, delegateTo, amount);
+		setUint(setId, _amt);
+
+		_eventName = "LogDelegateBorrow(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, delegateTo, getId, setId);
 
 	}
 }
