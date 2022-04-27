@@ -64,7 +64,7 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Deposit ETH/ERC20_Token.
+	 * @dev Deposit ETH/ERC20_Token without collateral
 	 * @notice Deposit a token to Aave v3 for lending / collaterization.
 	 * @param token The address of the token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
