@@ -109,7 +109,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 		setUint(setId, _amt);
 
-		_eventName = "LogDeposit(address,uint256,uint256,uint256)";
+		_eventName = "LogDepositWithoutCollateral(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, getId, setId);
 	}
 
