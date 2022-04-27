@@ -441,7 +441,6 @@ abstract contract AaveResolver is Events, Helpers {
 
 		_eventName = "LogDelegateBorrow(address,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, rateMode, delegateTo, getId, setId);
-
 	}
 }
 

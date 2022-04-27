@@ -34,7 +34,7 @@ contract Events {
 	event LogDelegateBorrow(
 		address token,
 		uint256 amount,
-		uint16 rateMode,
+		uint256 rateMode,
 		address delegateTo,
 		uint256 getId,
 		uint256 setId

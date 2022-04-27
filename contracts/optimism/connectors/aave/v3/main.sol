@@ -441,10 +441,9 @@ abstract contract AaveResolver is Events, Helpers {
 
 		_eventName = "LogDelegateBorrow(address,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, rateMode, delegateTo, getId, setId);
-
 	}
 }
 
 contract ConnectV2AaveV3Optimism is AaveResolver {
-	string public constant name = "AaveV3-v1.1";
+	string public constant name = "AaveV3-v1.2";
 }
