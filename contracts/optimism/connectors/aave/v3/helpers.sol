@@ -70,7 +70,7 @@ abstract contract Helpers is DSMath, Basic {
 	 * @param token token address of the asset
 	 * @param rateMode Debt type: stable-1, variable-2
 	 */
-	function getDTokenAddr(address token, uint16 rateMode)
+	function getDTokenAddr(address token, uint256 rateMode)
 		internal
 		view
 		returns(address dToken)

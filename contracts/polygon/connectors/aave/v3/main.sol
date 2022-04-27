@@ -446,5 +446,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV3Polygon is AaveResolver {
-	string public constant name = "AaveV3-v1.1";
+	string public constant name = "AaveV3-v1.2";
 }
