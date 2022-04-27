@@ -413,7 +413,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @param delegateTo The address to whom the user is delegating
 	 * @param amount The amount 
 	 */
-	function approveDelegation(address token, uint16 rateMode, address delegateTo, uint256 amount)
+	function approveDelegation(address token, , uint256 amount, uint256 rateMode, address delegateTo)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
