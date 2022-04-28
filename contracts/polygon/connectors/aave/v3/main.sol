@@ -314,7 +314,7 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Payback borrowed matic/ERC20_Token on behalf os a user.
+	 * @dev Payback borrowed matic/ERC20_Token on behalf of a user.
 	 * @notice Payback debt owed on behalf os a user.
 	 * @param token The address of the token to payback.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
