@@ -206,12 +206,21 @@ abstract contract UniswapResolver is Helpers, Events {
         _eventParam = abi.encode(tokenId);
     }
 
+    /**
+     * @dev Buy Function
+     * @notice Swap token(sellAddr) with token(buyAddr), buy token with minimum sell token
+     * @param buyAddr token to be bought
+     * @param sellAddr token to be sold
+     * @param fee pool fees for buyAddr-sellAddr token pair
+     * @param buyAmt amount of token to be bought
+     * @param getId Id to get buyAmt
+     * @param setId Id to store sellAmt
+     */
     function buy(
         address buyAddr,
         address sellAddr,
         uint24 fee,
         uint256 buyAmt,
-        uint256 unitAmt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -251,12 +260,21 @@ abstract contract UniswapResolver is Helpers, Events {
         _eventParam = abi.encode(buyAddr, sellAddr, _buyAmt, _sellAmt, getId, setId);
     }
 
+    /**
+     * @dev Sell Function
+     * @notice Swap token(sellAddr) with token(buyAddr), sell token to get maximum amount of buy token
+     * @param buyAddr token to be bought
+     * @param sellAddr token to be sold
+     * @param fee pool fees for buyAddr-sellAddr token pair
+     * @param sellAmt amount of token to be sold
+     * @param getId Id to get sellAmount
+     * @param setId Id to store buyAmount
+     */
     function sell(
         address buyAddr,
         address sellAddr,
         uint24 fee,
         uint256 sellAmt,
-        uint256 unitAmt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
