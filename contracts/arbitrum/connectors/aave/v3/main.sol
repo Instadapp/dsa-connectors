@@ -158,7 +158,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @notice Borrow a token using Aave v2
 	 * @param token The address of the token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to borrow.
-	 * @param rateMode The type of borrow debt. (For Stable: 1, Variable: 2)
+	 * @param rateMode The type of debt. (For Stable: 1, Variable: 2)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */

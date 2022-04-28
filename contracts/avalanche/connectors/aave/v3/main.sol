@@ -158,7 +158,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @notice Borrow a token using Aave v3
 	 * @param token The address of the token to borrow.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to borrow.
-	 * @param rateMode The type of borrow debt. (For Stable: 1, Variable: 2)
+	 * @param rateMode The type of debt. (For Stable: 1, Variable: 2)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */
@@ -194,7 +194,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @notice Borrow a token using Aave v3 on behalf of a user
 	 * @param token The address of the token to borrow.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to borrow.
-	 * @param rateMode The type of borrow debt. (For Stable: 1, Variable: 2)
+	 * @param rateMode The type of debt. (For Stable: 1, Variable: 2)
 	 * @param onBehalfOf The user who will incur the debt
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
@@ -454,10 +454,10 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @notice Gives approval to delegate debt tokens
 	 * @param token The address of token
 	 * @param amount The amount
-	 * @param rateMode The type of borrow debt
+	 * @param rateMode The type of debt
 	 * @param delegateTo The address to whom the user is delegating
 	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of tokens deposited.
+	 * @param setId ID stores the amount of tokens delegated.
 	 */
 	function approveDelegation(
 		address token,
