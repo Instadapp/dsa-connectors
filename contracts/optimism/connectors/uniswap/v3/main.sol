@@ -221,7 +221,6 @@ abstract contract UniswapResolver is Helpers, Events {
         address sellAddr,
         uint24 fee,
         uint256 buyAmt,
-        uint256 unitAmt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
@@ -276,7 +275,6 @@ abstract contract UniswapResolver is Helpers, Events {
         address sellAddr,
         uint24 fee,
         uint256 sellAmt,
-        uint256 unitAmt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
