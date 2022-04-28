@@ -357,48 +357,6 @@ describe("UniswapV3", function() {
         .cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
     });
-
-    it("Should buy successfully", async function() {
-      const daiAmount = ethers.utils.parseEther("400"); 
-      const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-      const getId = "0";
-      const setId = "0";
-
-      const spells = [
-        {
-          connector: connectorName,
-          method: "buy",
-          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, daiAmount, getId, setId],
-        },
-      ];
-
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
-      const receipt = await tx.wait();
-      console.log(receipt);
-    });
-
-    it("Should sell successfully", async function() {
-      const ethAmount = ethers.utils.parseEther("0.1");
-      const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-      const getId = "0";
-      const setId = "0";
-
-      const spells = [
-        {
-          connector: connectorName,
-          method: "sell",
-          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, ethAmount, getId, setId],
-        },
-      ];
-
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
-      const receipt = await tx.wait();
-      console.log(receipt);
-    });
   });
 });
 
