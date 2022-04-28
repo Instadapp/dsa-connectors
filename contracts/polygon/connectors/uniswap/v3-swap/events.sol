@@ -2,6 +2,14 @@
 pragma solidity ^0.7.0;
 
 contract Events {
+    event LogcreateAndInitializePool (
+        address tokenA,
+        address tokenB,
+        address pool,
+        uint24 fee,
+        int24 initialTick
+    );
+
     event LogMint(
         uint256 indexed tokenId,
         uint256 liquidity,
@@ -32,4 +40,22 @@ contract Events {
     );
 
     event LogBurnPosition(uint256 tokenId);
+
+    event LogBuy(
+        address indexed buyToken,
+        address indexed sellToken,
+        uint256 buyAmt,
+        uint256 sellAmt,
+        uint256 getId,
+        uint256 setId
+    );
+
+    event LogSell(
+        address indexed buyToken,
+        address indexed sellToken,
+        uint256 buyAmt,
+        uint256 sellAmt,
+        uint256 getId,
+        uint256 setId
+    );
 }

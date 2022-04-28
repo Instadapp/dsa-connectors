@@ -2,9 +2,9 @@
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
-import {TokenInterface} from "../../../common/interfaces.sol";
-import {DSMath} from "../../../common/math.sol";
-import {Basic} from "../../../common/basic.sol";
+import { TokenInterface}  from "../../../common/interfaces.sol";
+import { DSMath } from "../../../common/math.sol";
+import { Basic } from "../../../common/basic.sol";
 import "./interface.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
@@ -17,7 +17,9 @@ abstract contract Helpers is DSMath, Basic {
      */
     INonfungiblePositionManager constant nftManager =
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
-    
+    ISwapRouter constant swapRouter =
+        ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+
     struct MintParams {
         address tokenA;
         address tokenB;
@@ -52,6 +54,39 @@ abstract contract Helpers is DSMath, Basic {
         minAmt = convert18ToDec(token.decimals(), minAmt);
     }
 
+    function sortTokenAddress(address _token0, address _token1)
+        internal
+        view
+        returns (address token0, address token1)
+    {
+        if (_token0 > _token1) {
+            (token0, token1) = (_token1, _token0);
+        } else {
+            (token0, token1) = (_token0, _token1);
+        }
+    }
+
+    function _createAndInitializePoolIfNecessary (
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        int24 initialTick
+    ) internal returns (address pool) {
+        (TokenInterface token0Contract_, TokenInterface token1Contract_) = changeMaticAddress(
+            tokenA,
+            tokenB
+        );
+        
+        (address token0_, address token1_) =  sortTokenAddress(address(token0Contract_), address(token1Contract_));
+
+        return nftManager.createAndInitializePoolIfNecessary(
+            token0_,
+            token1_,
+            fee,
+            TickMath.getSqrtRatioAtTick(initialTick)
+        );
+    }
+
     /**
      * @dev Mint function which interact with Uniswap v3
      */
@@ -64,7 +99,7 @@ abstract contract Helpers is DSMath, Basic {
             uint256 amountB
         )
     {
-        (TokenInterface _token0, TokenInterface _token1) = changeEthAddress(
+        (TokenInterface _token0, TokenInterface _token1) = changeMaticAddress(
             params.tokenA,
             params.tokenB
         );
@@ -76,12 +111,23 @@ abstract contract Helpers is DSMath, Basic {
             ? getTokenBal(TokenInterface(params.tokenB))
             : params.amtB;
 
-        convertEthToWeth(address(_token0) == wethAddr, _token0, _amount0);
-        convertEthToWeth(address(_token1) == wethAddr, _token1, _amount1);
+        convertMaticToWmatic(address(_token0) == wmaticAddr, _token0, _amount0);
+        convertMaticToWmatic(address(_token1) == wmaticAddr, _token1, _amount1);
 
         approve(_token0, address(nftManager), _amount0);
         approve(_token1, address(nftManager), _amount1);
 
+        {
+            (address token0, ) = sortTokenAddress(
+                address(_token0),
+                address(_token1)
+            );
+
+            if (token0 != address(_token0)) {
+                (_token0, _token1) = (_token1, _token0);
+                (_amount0, _amount1) = (_amount1, _amount0);
+            }
+        }
         uint256 _minAmt0 = getMinAmount(_token0, _amount0, params.slippage);
         uint256 _minAmt1 = getMinAmount(_token1, _amount1, params.slippage);
 
@@ -130,19 +176,18 @@ abstract contract Helpers is DSMath, Basic {
     }
 
     /**
-     * @dev Check if token address is etherAddr and convert it to weth
+     * @dev Check if token address is maticAddr and convert it to wmatic
      */
-    function _checkETH(
+    function _checkMATIC(
         address _token0,
         address _token1,
         uint256 _amount0,
         uint256 _amount1
     ) internal {
-        
-        bool isEth0 = _token0 == wethAddr;
-        bool isEth1 = _token1 == wethAddr;
-        convertEthToWeth(isEth0, TokenInterface(_token0), _amount0);
-        convertEthToWeth(isEth1, TokenInterface(_token1), _amount1);
+        bool isMatic0 = _token0 == wmaticAddr;
+        bool isMatic1 = _token1 == wmaticAddr;
+        convertMaticToWmatic(isMatic0, TokenInterface(_token0), _amount0);
+        convertMaticToWmatic(isMatic1, TokenInterface(_token1), _amount1);
         approve(TokenInterface(_token0), address(nftManager), _amount0);
         approve(TokenInterface(_token1), address(nftManager), _amount1);
     }
@@ -193,7 +238,7 @@ abstract contract Helpers is DSMath, Basic {
             uint256 amount1
         )
     {
-        _checkETH(_token0, _token1, _amount0, _amount1);
+        _checkMATIC(_token0, _token1, _amount0, _amount1);
         uint256 _amount0Min = getMinAmount(
             TokenInterface(_token0),
             _amount0,
