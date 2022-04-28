@@ -64,7 +64,7 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Deposit ETH/ERC20_Token without collateral
+	 * @dev Deposit avax/ERC20_Token without collateral
 	 * @notice Deposit a token to Aave v3 without enabling it as collateral.
 	 * @param token The address of the token to deposit.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
@@ -219,7 +219,7 @@ abstract contract AaveResolver is Events, Helpers {
 		address _token = isAVAX ? wavaxAddr : token;
 
 		aave.borrow(_token, _amt, rateMode, referralCode, onBehalfOf);
-		convertAvaxToWavax(isAVAX, TokenInterface(_token), _amt);
+		convertWavaxToAvax(isAVAX, TokenInterface(_token), _amt);
 
 		setUint(setId, _amt);
 

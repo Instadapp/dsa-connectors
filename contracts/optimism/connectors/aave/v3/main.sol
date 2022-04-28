@@ -219,7 +219,7 @@ abstract contract AaveResolver is Events, Helpers {
 		address _token = isEth ? wethAddr : token;
 
 		aave.borrow(_token, _amt, rateMode, referralCode, onBehalfOf);
-		convertEthToWeth(isEth, TokenInterface(_token), _amt);
+		convertWethToEth(isEth, TokenInterface(_token), _amt);
 
 		setUint(setId, _amt);
 
@@ -429,7 +429,6 @@ abstract contract AaveResolver is Events, Helpers {
 	{
 		require(rateMode == 1 || rateMode == 2, "Invalid debt type");
 		uint256 _amt = getUint(getId, amount);
-
 
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
