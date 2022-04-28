@@ -458,7 +458,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @param rateMode The type of debt
 	 * @param delegateTo The address to whom the user is delegating
 	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of tokens deposited.
+	 * @param setId ID stores the amount of tokens delegated.
 	 */
 	function delegateBorrow(
 		address token,
