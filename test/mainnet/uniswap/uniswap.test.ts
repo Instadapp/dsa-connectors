@@ -18,13 +18,13 @@ import { ConnectV2UniswapV3__factory } from "../../../typechain";
 const FeeAmount = {
   LOW: 500,
   MEDIUM: 3000,
-  HIGH: 10000,
+  HIGH: 10000
 };
 
 const TICK_SPACINGS: Record<number, number> = {
   500: 10,
   3000: 60,
-  10000: 200,
+  10000: 200
 };
 
 const USDT_ADDR = "0xdac17f958d2ee523a2206206994597c13d831ec7";
@@ -34,7 +34,7 @@ let tokenIds: any[] = [];
 let liquidities: any[] = [];
 const abiCoder = ethers.utils.defaultAbiCoder;
 
-describe("UniswapV3", function() {
+describe("UniswapV3", function () {
   const connectorName = "UniswapV3-v1";
 
   let dsaWallet0: any;
@@ -53,76 +53,58 @@ describe("UniswapV3", function() {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 14674358,
-          },
-        },
-      ],
+            blockNumber: 14674358
+          }
+        }
+      ]
     });
     masterSigner = await getMasterSigner();
-    instaConnectorsV2 = await ethers.getContractAt(
-      abis.core.connectorsV2,
-      addresses.core.connectorsV2
-    );
-    nftManager = await ethers.getContractAt(
-      abi,
-      "0xC36442b4a4522E871399CD717aBDD847Ab11FE88"
-    );
+    instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
+    nftManager = await ethers.getContractAt(abi, "0xC36442b4a4522E871399CD717aBDD847Ab11FE88");
     connector = await deployAndEnableConnector({
       connectorName,
       contractArtifact: ConnectV2UniswapV3__factory,
       signer: masterSigner,
-      connectors: instaConnectorsV2,
+      connectors: instaConnectorsV2
     });
     console.log("Connector address", connector.address);
   });
 
-  it("Should have contracts deployed.", async function() {
+  it("Should have contracts deployed.", async function () {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
     expect(!!(await masterSigner.getAddress())).to.be.true;
   });
 
-  describe("DSA wallet setup", function() {
-    it("Should build DSA v2", async function() {
+  describe("DSA wallet setup", function () {
+    it("Should build DSA v2", async function () {
       dsaWallet0 = await buildDSAv2(wallet0.address);
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH & DAI into DSA wallet", async function() {
+    it("Deposit ETH & DAI into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10"),
+        value: ethers.utils.parseEther("10")
       });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseEther("10")
-      );
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
 
-      await addLiquidity(
-        "dai",
-        dsaWallet0.address,
-        ethers.utils.parseEther("100000")
-      );
+      await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("100000"));
     });
 
-    it("Deposit ETH & USDT into DSA wallet", async function() {
+    it("Deposit ETH & USDT into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10"),
+        value: ethers.utils.parseEther("10")
       });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseEther("10")
-      );
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
 
-      await addLiquidity(
-        "usdt",
-        dsaWallet0.address,
-        ethers.utils.parseEther("100000")
-      );
+      await addLiquidity("usdt", dsaWallet0.address, ethers.utils.parseEther("100000"));
     });
   });
 
-  describe("Main", function() {
-    it("Should mint successfully", async function() {
+  describe("Main", function () {
+    it("Should mint successfully", async function () {
       const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
       const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
       const usdtAmount = Number(ethers.utils.parseEther("400")) / Math.pow(10, 12); // 1 ETH
@@ -145,8 +127,8 @@ describe("UniswapV3", function() {
             daiAmount,
             "500000000000000000",
             getIds,
-            setId,
-          ],
+            setId
+          ]
         },
         {
           connector: connectorName,
@@ -161,8 +143,8 @@ describe("UniswapV3", function() {
             usdtAmount,
             "300000000000000000",
             getIds,
-            setId,
-          ],
+            setId
+          ]
         },
         {
           connector: connectorName,
@@ -177,14 +159,12 @@ describe("UniswapV3", function() {
             usdtAmount,
             "300000000000000000",
             getIds,
-            setId,
-          ],
-        },
+            setId
+          ]
+        }
       ];
 
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       let receipt = await tx.wait();
       let castEvent = new Promise((resolve, reject) => {
         dsaWallet0.on(
@@ -213,7 +193,7 @@ describe("UniswapV3", function() {
             event.removeListener();
 
             resolve({
-              eventNames,
+              eventNames
             });
           }
         );
@@ -230,7 +210,7 @@ describe("UniswapV3", function() {
       expect(data.liquidity).to.be.equals(liquidities[0]);
     }).timeout(10000000000);
 
-    it("Should deposit successfully", async function() {
+    it("Should deposit successfully", async function () {
       const daiAmount = ethers.utils.parseEther("400"); // 1 ETH
       const ethAmount = ethers.utils.parseEther("0.1"); // 1 ETH
 
@@ -241,20 +221,11 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "deposit",
-          args: [
-            tokenIds[0],
-            daiAmount,
-            ethAmount,
-            "500000000000000000",
-            getIds,
-            setId,
-          ],
-        },
+          args: [tokenIds[0], daiAmount, ethAmount, "500000000000000000", getIds, setId]
+        }
       ];
 
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
 
       let castEvent = new Promise((resolve, reject) => {
@@ -270,15 +241,12 @@ describe("UniswapV3", function() {
             eventParams: any,
             event: any
           ) => {
-            const params = abiCoder.decode(
-              ["uint256", "uint256", "uint256", "uint256"],
-              eventParams[0]
-            );
+            const params = abiCoder.decode(["uint256", "uint256", "uint256", "uint256"], eventParams[0]);
             liquidities[0] = liquidities[0].add(params[1]);
             event.removeListener();
 
             resolve({
-              eventNames,
+              eventNames
             });
           }
         );
@@ -294,7 +262,7 @@ describe("UniswapV3", function() {
       expect(data.liquidity).to.be.equals(liquidities[0]);
     });
 
-    it("Should withdraw successfully", async function() {
+    it("Should withdraw successfully", async function () {
       const getId = "0";
       const setIds = ["0", "0"];
 
@@ -305,25 +273,23 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokenIds[0], data.liquidity, 0, 0, getId, setIds],
+          args: [tokenIds[0], data.liquidity, 0, 0, getId, setIds]
         },
         {
           connector: connectorName,
           method: "withdraw",
-          args: [0, data1.liquidity, 0, 0, getId, setIds],
-        },
+          args: [0, data1.liquidity, 0, 0, getId, setIds]
+        }
       ];
 
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
 
       data1 = await nftManager.positions(tokenIds[1]);
       expect(data1.liquidity.toNumber()).to.be.equals(0);
     });
 
-    it("Should collect successfully", async function() {
+    it("Should collect successfully", async function () {
       const ethAmount = ethers.utils.parseEther("0.2"); // 1 ETH
       const daiAmount = ethers.utils.parseEther("800"); // 1 ETH
       const getIds = ["0", "0"];
@@ -333,34 +299,28 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "collect",
-          args: [tokenIds[0], daiAmount, ethAmount, getIds, setIds],
-        },
+          args: [tokenIds[0], daiAmount, ethAmount, getIds, setIds]
+        }
       ];
 
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
     });
 
-    it("Should burn successfully", async function() {
+    it("Should burn successfully", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "burn",
-          args: [tokenIds[0]],
-        },
+          args: [tokenIds[0]]
+        }
       ];
 
-      const tx = await dsaWallet0
-        .connect(wallet0)
-        .cast(...encodeSpells(spells), wallet1.address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
     });
   });
 });
 
-const getMinTick = (tickSpacing: number) =>
-  Math.ceil(-887272 / tickSpacing) * tickSpacing;
-const getMaxTick = (tickSpacing: number) =>
-  Math.floor(887272 / tickSpacing) * tickSpacing;
+const getMinTick = (tickSpacing: number) => Math.ceil(-887272 / tickSpacing) * tickSpacing;
+const getMaxTick = (tickSpacing: number) => Math.floor(887272 / tickSpacing) * tickSpacing;
