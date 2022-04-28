@@ -53,4 +53,12 @@ contract Events {
 		uint256 getId,
 		uint256 setId
 	);
+	event LogPaybackOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	);
 }
