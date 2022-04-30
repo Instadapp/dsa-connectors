@@ -16,30 +16,25 @@ abstract contract UniswapResolver is Helpers, Events {
 	/**
 	 * @dev Buy Function
 	 * @notice Swap token(sellAddr) with token(buyAddr), buy token with minimum sell token
-	 * @param buyAddr token to be bought
-	 * @param sellAddr token to be sold
-	 * @param fee pool fees for buyAddr-sellAddr token pair
-	 * @param buyAmt amount of token to be bought
-	 * @param getId Id to get buyAmt
-	 * @param setId Id to store sellAmt
+	  * @param buyData Data input for the buy action
 	 */
 	function buy(
-		address buyAddr,
-		address sellAddr,
-		uint24 fee,
-		uint256 buyAmt,
-		uint256 getId,
-		uint256 setId
+		BuyInfo memory buyData
 	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _buyAmt = getUint(getId, buyAmt);
+		uint256 _buyAmt = getUint(buyData.getId, buyData.buyAmt);
 		(
 			TokenInterface _buyAddr,
 			TokenInterface _sellAddr
-		) = changeMaticAddress(buyAddr, sellAddr);
+		) = changeMaticAddress(buyData.buyAddr, buyData.sellAddr);
+
+		uint _slippageAmt = convert18ToDec(_sellAddr.decimals(),
+		    wmul(buyData.unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
+		);
+        require(_slippageAmt >= buyData.expectedAmt, "Too much slippage");
 
 		bool isMatic = address(_sellAddr) == wmaticAddr;
 		convertMaticToWmatic(isMatic, _sellAddr, uint256(-1));
@@ -48,13 +43,13 @@ abstract contract UniswapResolver is Helpers, Events {
 
 		{
 			params = ISwapRouter.ExactOutputSingleParams({
-				tokenIn: sellAddr,
-				tokenOut: buyAddr,
-				fee: fee,
+				tokenIn: buyData.sellAddr,
+				tokenOut: buyData.buyAddr,
+				fee: buyData.fee,
 				recipient: address(this),
 				deadline: block.timestamp + 1,
 				amountOut: _buyAmt,
-				amountInMaximum: uint256(-1),
+				amountInMaximum: buyData.expectedAmt,
 				sqrtPriceLimitX96: 0
 			});
 		}
@@ -64,16 +59,16 @@ abstract contract UniswapResolver is Helpers, Events {
 		isMatic = address(_buyAddr) == wmaticAddr;
 		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
-		setUint(setId, _sellAmt);
+		setUint(buyData.setId, _sellAmt);
 
 		_eventName = "LogBuy(address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			buyAddr,
-			sellAddr,
+			buyData.buyAddr,
+			buyData.sellAddr,
 			_buyAmt,
 			_sellAmt,
-			getId,
-			setId
+			buyData.getId,
+			buyData.setId
 		);
 	}
 
