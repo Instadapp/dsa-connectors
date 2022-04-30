@@ -7,19 +7,12 @@ pragma abicoder v2;
  * @dev Decentralized Exchange.
  */
 
-import { TokenInterface } from "../../../common/interfaces.sol";
-import { Events } from "./events.sol";
-import { DSMath } from "../../../common/math.sol";
-import { Basic } from "../../../common/basic.sol";
+import {TokenInterface} from "../../../common/interfaces.sol";
+import {Helpers} from "./helpers.sol";
+import {Events} from "./events.sol";
 import "./interface.sol";
 
-abstract contract UniswapResolver is DSMath, Events, Basic {
-	/**
-	 * @dev uniswap v3 Swap Router
-	 */
-	ISwapRouter constant swapRouter =
-		ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
-
+abstract contract UniswapResolver is Helpers, Events {
 	/**
 	 * @dev Buy Function
 	 * @notice Swap token(sellAddr) with token(buyAddr), buy token with minimum sell token
@@ -43,17 +36,13 @@ abstract contract UniswapResolver is DSMath, Events, Basic {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _buyAmt = getUint(getId, buyAmt);
-		(TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(
-			buyAddr,
-			sellAddr
-		);
+		(
+			TokenInterface _buyAddr,
+			TokenInterface _sellAddr
+		) = changeMaticAddress(buyAddr, sellAddr);
 
-		// uint _slippageAmt = convert18ToDec(_sellAddr.decimals(),
-		//     wmul(unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
-		// );
-
-		bool isEth = address(_sellAddr) == wethAddr;
-		convertEthToWeth(isEth, _sellAddr, uint256(-1));
+		bool isMatic = address(_sellAddr) == wmaticAddr;
+		convertMaticToWmatic(isMatic, _sellAddr, uint256(-1));
 		approve(_sellAddr, address(swapRouter), uint256(-1));
 		ISwapRouter.ExactOutputSingleParams memory params;
 
@@ -72,8 +61,8 @@ abstract contract UniswapResolver is DSMath, Events, Basic {
 
 		uint256 _sellAmt = swapRouter.exactOutputSingle(params);
 
-		isEth = address(_buyAddr) == wethAddr;
-		convertWethToEth(isEth, _buyAddr, _buyAmt);
+		isMatic = address(_buyAddr) == wmaticAddr;
+		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
 		setUint(setId, _sellAmt);
 
@@ -111,24 +100,19 @@ abstract contract UniswapResolver is DSMath, Events, Basic {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _sellAmt = getUint(getId, sellAmt);
-		(TokenInterface _buyAddr, TokenInterface _sellAddr) = changeEthAddress(
-			buyAddr,
-			sellAddr
-		);
+		(
+			TokenInterface _buyAddr,
+			TokenInterface _sellAddr
+		) = changeMaticAddress(buyAddr, sellAddr);
 
 		if (_sellAmt == uint256(-1)) {
-			_sellAmt = sellAddr == ethAddr
+			_sellAmt = sellAddr == maticAddr
 				? address(this).balance
 				: _sellAddr.balanceOf(address(this));
 		}
 
-		// uint _slippageAmt = convert18ToDec(_buyAddr.decimals(),
-		//     wmul(unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt))
-		// );
-		// require(_slippageAmt <= _expectedAmt, "Too much slippage");
-
-		bool isEth = address(_sellAddr) == wethAddr;
-		convertEthToWeth(isEth, _sellAddr, _sellAmt);
+		bool isMatic = address(_sellAddr) == wmaticAddr;
+		convertMaticToWmatic(isMatic, _sellAddr, _sellAmt);
 		approve(_sellAddr, address(swapRouter), _sellAmt);
 		ISwapRouter.ExactInputSingleParams memory params;
 
@@ -147,8 +131,8 @@ abstract contract UniswapResolver is DSMath, Events, Basic {
 
 		uint256 _buyAmt = swapRouter.exactInputSingle(params);
 
-		isEth = address(_buyAddr) == wethAddr;
-		convertWethToEth(isEth, _buyAddr, _buyAmt);
+		isMatic = address(_buyAddr) == wmaticAddr;
+		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
 		setUint(setId, _buyAmt);
 
@@ -164,6 +148,6 @@ abstract contract UniswapResolver is DSMath, Events, Basic {
 	}
 }
 
-contract ConnectV2UniswapV3Arbitrum is UniswapResolver {
+contract ConnectV2UniswapV3Polygon is UniswapResolver {
 	string public constant name = "UniswapV3-v1";
 }

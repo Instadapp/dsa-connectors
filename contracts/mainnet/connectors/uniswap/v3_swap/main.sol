@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 pragma abicoder v2;
 
@@ -7,18 +7,12 @@ pragma abicoder v2;
  * @dev Decentralized Exchange.
  */
 
-import { TokenInterface } from "../../../common/interfaces.sol";
-import { DSMath } from "../../../common/math.sol";
-import { Basic } from "../../../common/basic.sol";
-import { Events } from "./events.sol";
+import {TokenInterface} from "../../../common/interfaces.sol";
+import {Helpers} from "./helpers.sol";
+import {Events} from "./events.sol";
 import "./interface.sol";
 
-abstract contract UniswapResolver is DSMath, Events, Basic {
-	/**
-	 * @dev uniswap v3 Swap Router
-	 */
-	ISwapRouter constant swapRouter =
-		ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+abstract contract UniswapResolver is Helpers, Events {
 
 	/**
 	 * @dev Buy Function
@@ -164,6 +158,6 @@ abstract contract UniswapResolver is DSMath, Events, Basic {
 	}
 }
 
-contract ConnectV2UniswapV3Optimism is UniswapResolver {
+contract ConnectV2UniswapV3 is UniswapResolver {
 	string public constant name = "UniswapV3-v1";
 }
