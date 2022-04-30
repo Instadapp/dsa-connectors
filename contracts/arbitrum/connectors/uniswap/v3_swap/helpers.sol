@@ -18,7 +18,7 @@ abstract contract Helpers is DSMath, Basic {
 		address buyAddr;		//token to be bought		
 		address sellAddr;		//token to be sold
 		uint24 fee;				//pool fees for buyAddr-sellAddr token pair
-        uint256 unitAmt;		//The unit amount of sellAMt/buyAmt with slippage
+		uint256 unitAmt;		//The unit amount of sellAMt/buyAmt with slippage
 		uint256 expectedAmt;	//The amount that is expected to be returned after the swap
 		uint256 buyAmt;			//amount of token to be bought
 		uint256 getId;			//Id to get buyAmt
