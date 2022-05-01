@@ -34,11 +34,10 @@ abstract contract UniswapResolver is Helpers, Events {
 		uint _slippageAmt = convert18ToDec(_sellAddr.decimals(),
 		    wmul(buyData.unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
 		);
-        require(_slippageAmt >= buyData.expectedAmt, "Too much slippage");
 
 		bool isMatic = address(_sellAddr) == wmaticAddr;
-		convertMaticToWmatic(isMatic, _sellAddr, uint256(-1));
-		approve(_sellAddr, address(swapRouter), uint256(-1));
+		convertMaticToWmatic(isMatic, _sellAddr, _slippageAmt);
+		approve(_sellAddr, address(swapRouter), _slippageAmt);
 		ISwapRouter.ExactOutputSingleParams memory params;
 
 		{
@@ -49,12 +48,13 @@ abstract contract UniswapResolver is Helpers, Events {
 				recipient: address(this),
 				deadline: block.timestamp + 1,
 				amountOut: _buyAmt,
-				amountInMaximum: buyData.expectedAmt,
+				amountInMaximum: _slippageAmt,
 				sqrtPriceLimitX96: 0
 			});
 		}
 
 		uint256 _sellAmt = swapRouter.exactOutputSingle(params);
+		require(_slippageAmt >= _sellAmt, "Too much slippage");
 
 		isMatic = address(_buyAddr) == wmaticAddr;
 		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
@@ -74,37 +74,31 @@ abstract contract UniswapResolver is Helpers, Events {
 
 	/**
 	 * @dev Sell Function
-	 * @notice Swap token(sellAddr) with token(buyAddr), sell token to get maximum amount of buy token
-	 * @param buyAddr token to be bought
-	 * @param sellAddr token to be sold
-	 * @param fee pool fees for buyAddr-sellAddr token pair
-	 * @param sellAmt amount of token to be sold
-	 * @param getId Id to get sellAmount
-	 * @param setId Id to store buyAmount
+	 * @notice Swap token(sellAddr) with token(buyAddr), to get max buy tokens
+	 * @param sellData Data input for the buy action
 	 */
 	function sell(
-		address buyAddr,
-		address sellAddr,
-		uint24 fee,
-		uint256 sellAmt,
-		uint256 getId,
-		uint256 setId
+		SellInfo memory sellData
 	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _sellAmt = getUint(getId, sellAmt);
+		uint256 _sellAmt = getUint(sellData.getId, sellData.sellAmt);
 		(
 			TokenInterface _buyAddr,
 			TokenInterface _sellAddr
-		) = changeMaticAddress(buyAddr, sellAddr);
+		) = changeMaticAddress(sellData.buyAddr, sellData.sellAddr);
 
-		if (_sellAmt == uint256(-1)) {
-			_sellAmt = sellAddr == maticAddr
+		if (_sellAmt == uint256(-1)) {	
+			_sellAmt = sellData.sellAddr == maticAddr
 				? address(this).balance
 				: _sellAddr.balanceOf(address(this));
 		}
+
+		uint _slippageAmt = convert18ToDec(_buyAddr.decimals(),
+		    wmul(sellData.unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt))
+		);
 
 		bool isMatic = address(_sellAddr) == wmaticAddr;
 		convertMaticToWmatic(isMatic, _sellAddr, _sellAmt);
@@ -113,32 +107,33 @@ abstract contract UniswapResolver is Helpers, Events {
 
 		{
 			params = ISwapRouter.ExactInputSingleParams({
-				tokenIn: sellAddr,
-				tokenOut: buyAddr,
-				fee: fee,
+				tokenIn: sellData.sellAddr,
+				tokenOut: sellData.buyAddr,
+				fee: sellData.fee,
 				recipient: address(this),
 				deadline: block.timestamp + 1,
 				amountIn: _sellAmt,
-				amountOutMinimum: 0,
+				amountOutMinimum: _slippageAmt,
 				sqrtPriceLimitX96: 0
 			});
 		}
 
 		uint256 _buyAmt = swapRouter.exactInputSingle(params);
+		require(_slippageAmt <= _buyAmt, "Too much slippage");
 
 		isMatic = address(_buyAddr) == wmaticAddr;
 		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
-		setUint(setId, _buyAmt);
+		setUint(sellData.setId, _buyAmt);
 
 		_eventName = "LogSell(address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			buyAddr,
-			sellAddr,
+			sellData.buyAddr,
+			sellData.sellAddr,
 			_buyAmt,
 			_sellAmt,
-			getId,
-			setId
+			sellData.getId,
+			sellData.setId
 		);
 	}
 }
