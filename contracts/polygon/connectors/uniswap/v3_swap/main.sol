@@ -48,7 +48,7 @@ abstract contract UniswapResolver is Helpers, Events {
 				recipient: address(this),
 				deadline: block.timestamp + 1,
 				amountOut: _buyAmt,
-				amountInMaximum: _slippageAmt,
+				amountInMaximum: _slippageAmt,		//require(_sellAmt <= amountInMaximum)
 				sqrtPriceLimitX96: 0
 			});
 		}
@@ -90,7 +90,7 @@ abstract contract UniswapResolver is Helpers, Events {
 			TokenInterface _sellAddr
 		) = changeMaticAddress(sellData.buyAddr, sellData.sellAddr);
 
-		if (_sellAmt == uint256(-1)) {	
+		if (_sellAmt == uint(-1)) {	
 			_sellAmt = sellData.sellAddr == maticAddr
 				? address(this).balance
 				: _sellAddr.balanceOf(address(this));
@@ -113,7 +113,7 @@ abstract contract UniswapResolver is Helpers, Events {
 				recipient: address(this),
 				deadline: block.timestamp + 1,
 				amountIn: _sellAmt,
-				amountOutMinimum: _slippageAmt,
+				amountOutMinimum: _slippageAmt,		//require(_buyAmt >= amountOutMinimum)
 				sqrtPriceLimitX96: 0
 			});
 		}
