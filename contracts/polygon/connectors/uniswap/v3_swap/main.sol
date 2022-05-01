@@ -77,6 +77,6 @@ abstract contract UniswapResolver is Helpers, Events {
     
 }
 
-contract ConnectV2UniswapV3Polygon is UniswapResolver {
-	string public constant name = "UniswapV3-v1";
+contract ConnectV2UniswapV3SwapPolygon is UniswapResolver {
+	string public constant name = "UniswapV3-Swap-v1";
 }
