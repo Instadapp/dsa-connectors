@@ -32,4 +32,34 @@ contract Events {
 	event LogDisableCollateral(address[] tokens);
 	event LogSwapRateMode(address indexed token, uint256 rateMode);
 	event LogSetUserEMode(uint8 categoryId);
+	event LogDelegateBorrow(
+		address token,
+		uint256 amount,
+		uint256 rateMode,
+		address delegateTo,
+		uint256 getId,
+		uint256 setId
+	);
+	event LogDepositWithoutCollateral(
+		address token,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	);
+	event LogBorrowOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	);
+	event LogPaybackOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	);
 }

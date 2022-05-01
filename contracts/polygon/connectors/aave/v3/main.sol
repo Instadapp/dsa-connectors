@@ -10,7 +10,7 @@ import { TokenInterface } from "../../../common/interfaces.sol";
 import { Stores } from "../../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
-import { AaveInterface } from "./interface.sol";
+import { AaveInterface, DTokenInterface } from "./interface.sol";
 
 abstract contract AaveResolver is Events, Helpers {
 	/**
@@ -60,6 +60,56 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogDeposit(address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, getId, setId);
+	}
+
+	/**
+	 ** @dev Deposit Matic/ERC20_Token without collateral
+	 * @notice Deposit a token to Aave v3 without enabling it as collateral.
+	 * @param token The address of the token to deposit.(For Matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
+	function depositWithoutCollateral(
+		address token,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amt);
+
+		AaveInterface aave = AaveInterface(aaveProvider.getPool());
+
+		bool isMatic = token == maticAddr;
+		address _token = isMatic ? wmaticAddr : token;
+
+		TokenInterface tokenContract = TokenInterface(_token);
+
+		if (isMatic) {
+			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
+			convertMaticToWmatic(isMatic, tokenContract, _amt);
+		} else {
+			_amt = _amt == uint256(-1)
+				? tokenContract.balanceOf(address(this))
+				: _amt;
+		}
+
+		approve(tokenContract, address(aave), _amt);
+
+		aave.supply(_token, _amt, address(this), referralCode);
+
+		if (getCollateralBalance(_token) > 0 && getIsColl(token)) {
+			aave.setUserUseReserveAsCollateral(_token, false);
+		}
+
+		setUint(setId, _amt);
+
+		_eventName = "LogDepositWithoutCollateral(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, getId, setId);
 	}
 
@@ -137,6 +187,44 @@ abstract contract AaveResolver is Events, Helpers {
 
 		_eventName = "LogBorrow(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, rateMode, getId, setId);
+	}
+
+	/**
+	 * @dev Borrow matic/ERC20_Token on behalf of a user.
+	 * @notice Borrow a token using Aave v3 on behalf of a user
+	 * @param token The address of the token to borrow.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to borrow.
+	 * @param rateMode The type of borrow debt. (For Stable: 1, Variable: 2)
+	 * @param onBehalfOf The user who will incur the debt
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens borrowed.
+	 */
+	function borrowOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amt);
+
+		AaveInterface aave = AaveInterface(aaveProvider.getPool());
+
+		bool isMatic = token == maticAddr;
+		address _token = isMatic ? wmaticAddr : token;
+
+		aave.borrow(_token, _amt, rateMode, referralCode, onBehalfOf);
+		convertWmaticToMatic(isMatic, TokenInterface(_token), _amt);
+
+		setUint(setId, _amt);
+
+		_eventName = "LogBorrowOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
 	}
 
 	/**
@@ -223,6 +311,51 @@ abstract contract AaveResolver is Events, Helpers {
 
 		_eventName = "LogPayback(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(token, _amt, rateMode, getId, setId);
+	}
+
+	/**
+	 * @dev Payback borrowed matic/ERC20_Token on behalf of a user.
+	 * @notice Payback debt owed on behalf os a user.
+	 * @param token The address of the token to payback.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
+	 * @param onBehalfOf Address of user who's debt to repay.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens paid back.
+	 */
+	function paybackOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amt);
+
+		AaveInterface aave = AaveInterface(aaveProvider.getPool());
+
+		bool isMatic = token == maticAddr;
+		address _token = isMatic ? wmaticAddr : token;
+
+		TokenInterface tokenContract = TokenInterface(_token);
+
+		_amt = _amt == uint256(-1) ? getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf) : _amt;
+
+		if (isMatic) convertMaticToWmatic(isMatic, tokenContract, _amt);
+
+		approve(tokenContract, address(aave), _amt);
+
+		aave.repay(_token, _amt, rateMode, onBehalfOf);
+
+		setUint(setId, _amt);
+
+		_eventName = "LogPaybackOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
 	}
 
 	/**
@@ -317,8 +450,45 @@ abstract contract AaveResolver is Events, Helpers {
 		_eventName = "LogSetUserEMode(uint8)";
 		_eventParam = abi.encode(categoryId);
 	}
+
+	/**
+	 * @dev Approve Delegation
+	 * @notice Gives approval to delegate debt tokens
+	 * @param token The address of token
+	 * @param amount The amount
+	 * @param rateMode The type of borrow debt
+	 * @param delegateTo The address to whom the user is delegating
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
+	function delegateBorrow(
+		address token,
+		uint256 amount,
+		uint256 rateMode,
+		address delegateTo,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		require(rateMode == 1 || rateMode == 2, "Invalid debt type");
+		uint256 _amt = getUint(getId, amount);
+
+		bool isMatic = token == maticAddr;
+		address _token = isMatic ? wmaticAddr : token;
+
+		address _dToken = getDTokenAddr(_token, rateMode);
+		DTokenInterface(_dToken).approveDelegation(delegateTo, _amt);
+
+		setUint(setId, _amt);
+
+		_eventName = "LogDelegateBorrow(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, delegateTo, getId, setId);
+	}
 }
 
 contract ConnectV2AaveV3Polygon is AaveResolver {
-	string public constant name = "AaveV3-v1.1";
+	string public constant name = "AaveV3-v1.2";
 }

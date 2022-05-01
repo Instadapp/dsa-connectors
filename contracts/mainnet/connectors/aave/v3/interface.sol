@@ -90,3 +90,7 @@ interface AaveAddressProviderRegistryInterface {
 interface ATokenInterface {
 	function balanceOf(address _user) external view returns (uint256);
 }
+
+interface DTokenInterface {
+	function approveDelegation(address delegatee, uint256 amount) external;
+}

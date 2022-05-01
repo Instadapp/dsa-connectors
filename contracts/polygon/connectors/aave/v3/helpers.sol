@@ -25,7 +25,7 @@ abstract contract Helpers is DSMath, Basic {
 
 	/**
 	 * @dev Checks if collateral is enabled for an asset
-	 * @param token token address of the asset.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token token address of the asset.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 */
 
 	function getIsColl(address token) internal view returns (bool isCol) {
@@ -37,7 +37,7 @@ abstract contract Helpers is DSMath, Basic {
 
 	/**
 	 * @dev Get total debt balance & fee for an asset
-	 * @param token token address of the debt.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token token address of the debt.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param rateMode Borrow rate mode (Stable = 1, Variable = 2)
 	 */
 	function getPaybackBalance(address token, uint256 rateMode)
@@ -51,8 +51,23 @@ abstract contract Helpers is DSMath, Basic {
 	}
 
 	/**
+	 * @dev Get OnBehalfOf user's total debt balance & fee for an asset
+	 * @param token token address of the debt.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param rateMode Borrow rate mode (Stable = 1, Variable = 2)
+	 */
+	function getOnBehalfOfPaybackBalance(address token, uint256 rateMode, address onBehalfOf)
+		internal
+		view
+		returns (uint256)
+	{
+		(, uint256 stableDebt, uint256 variableDebt, , , , , , ) = aaveData
+			.getUserReserveData(token, onBehalfOf);
+		return rateMode == 1 ? stableDebt : variableDebt;
+	}
+
+	/**
 	 * @dev Get total collateral balance for an asset
-	 * @param token token address of the collateral.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param token token address of the collateral.(For matic: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 */
 	function getCollateralBalance(address token)
 		internal
@@ -63,5 +78,22 @@ abstract contract Helpers is DSMath, Basic {
 			token,
 			address(this)
 		);
+	}
+
+	/**
+	 * @dev Get debt token address for an asset
+	 * @param token token address of the asset
+	 * @param rateMode Debt type: stable-1, variable-2
+	 */
+	function getDTokenAddr(address token, uint256 rateMode)
+		internal
+		view
+		returns(address dToken)
+	{
+		if (rateMode == 1) {
+			(, dToken, ) = aaveData.getReserveTokensAddresses(token);
+		} else {
+			(, , dToken) = aaveData.getReserveTokensAddresses(token);
+		}
 	}
 }
