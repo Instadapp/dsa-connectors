@@ -199,11 +199,11 @@ abstract contract AaveResolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
-        if (_amt == uint(-1)) {
-            uint _amtDSA = isEth ? onBehalfOf.balance : tokenContract.balanceOf(onBehalfOf);
-            uint _amtDebt = getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf);
-            _amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
-        }
+		if (_amt == uint(-1)) {
+			uint _amtDSA = isEth ? onBehalfOf.balance : tokenContract.balanceOf(onBehalfOf);
+			uint _amtDebt = getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf);
+			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+		}
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
 
