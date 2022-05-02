@@ -41,6 +41,21 @@ abstract contract Helpers is DSMath, Basic {
     }
 
     /**
+	 * @dev Get OnBehalfOf user's total debt balance & fee for an asset
+	 * @param token token address of the debt.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param rateMode Borrow rate mode (Stable = 1, Variable = 2)
+	 */
+	function getOnBehalfOfPaybackBalance(address token, uint256 rateMode, address onBehalfOf)
+		internal
+		view
+		returns (uint256)
+	{
+		(, uint256 stableDebt, uint256 variableDebt, , , , , , ) = aaveData
+			.getUserReserveData(token, onBehalfOf);
+		return rateMode == 1 ? stableDebt : variableDebt;
+	}
+
+    /**
      * @dev Get total collateral balance for an asset
      * @param token token address of the collateral.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
     */

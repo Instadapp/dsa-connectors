@@ -150,7 +150,11 @@ abstract contract AaveResolver is Events, Helpers {
 
         TokenInterface tokenContract = TokenInterface(_token);
 
-        _amt = _amt == uint(-1) ? getPaybackBalance(_token, rateMode) : _amt;
+        if (_amt == uint(-1)) {
+            uint _amtDSA = tokenContract.balanceOf(address(this));
+            uint _amtDebt = getPaybackBalance(_token, rateMode);
+            _amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+        }
 
         if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
 
@@ -163,6 +167,55 @@ abstract contract AaveResolver is Events, Helpers {
         _eventName = "LogPayback(address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(token, _amt, rateMode, getId, setId);
     }
+
+    /**
+	 * @dev Payback borrowed ETH/ERC20_Token on behalf of a user.
+	 * @notice Payback debt owed on behalf os a user.
+	 * @param token The address of the token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
+	 * @param onBehalfOf Address of user who's debt to repay.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens paid back.
+	 */
+	function paybackOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amt);
+
+		AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
+
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
+
+		TokenInterface tokenContract = TokenInterface(_token);
+
+        if (_amt == uint(-1)) {
+            uint _amtDSA = tokenContract.balanceOf(onBehalfOf);
+            uint _amtDebt = getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf);
+            _amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+        }
+
+		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
+
+		approve(tokenContract, address(aave), _amt);
+
+		aave.repay(_token, _amt, rateMode, onBehalfOf);
+
+		setUint(setId, _amt);
+
+		_eventName = "LogPaybackOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
+	}
 
     /**
      * @dev Enable collateral
