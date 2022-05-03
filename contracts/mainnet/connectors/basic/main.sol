@@ -48,7 +48,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     /**
      * @dev Deposit Assets To Smart Account From any user.
      * @notice Deposit a token to DSA from any user. 
-     * @param token The address of the token to deposit.<br>(For <b>ETH</b>: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE and need to pass `value` parameter equal to `amt` in cast function ```dsa.cast({..., value: amt})```.<br>For <b>ERC20</b>: Need to give allowance prior casting spells.)
+     * @param token The address of the token to deposit. (Note: ETH is not supported)
      * @param amt The amount of tokens to deposit. (For max: `uint256(-1)` (Not valid for ETH))
      * @param from The address depositing the token.
      * @param getId ID to retrieve amt.
