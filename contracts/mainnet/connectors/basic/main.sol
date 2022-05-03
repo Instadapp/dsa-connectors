@@ -62,7 +62,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
         uint256 setId
     ) public payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
-        require(token != ethAddr, "Use deposit function to send ether");
+        require(token != ethAddr, "eth-not-supported");
         IERC20 tokenContract = IERC20(token);
         _amt = _amt == uint(-1) ? tokenContract.balanceOf(from) : _amt;
         tokenContract.safeTransferFrom(from, address(this), _amt);
