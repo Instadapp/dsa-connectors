@@ -16,13 +16,13 @@ abstract contract UniswapResolver is Helpers, Events {
     /**
      * @dev Buy Function
      * @notice Swap token(sellAddr) with token(buyAddr), buy token with minimum sell token
-     * @param buyAddr token to be bought
-     * @param sellAddr token to be sold
-     * @param fee pool fees for buyAddr-sellAddr token pair
-	 * @param unitAmt The unit amount of sellAmt/buyAmt with slippage
-     * @param buyAmt amount of token to be bought
-     * @param getId Id to get buyAmt
-     * @param setId Id to store sellAmt
+     * @param _buyAddr token to be bought
+     * @param _sellAddr token to be sold
+     * @param _fee pool fees for buyAddr-sellAddr token pair
+	 * @param _unitAmt The unit amount of sellAmt/buyAmt with slippage
+     * @param _buyAmt amount of token to be bought
+     * @param _getId Id to get buyAmt
+     * @param _setId Id to store sellAmt
      */
     function buy(
         address _buyAddr,
@@ -47,13 +47,13 @@ abstract contract UniswapResolver is Helpers, Events {
 	/**
      * @dev Sell Function
      * @notice Swap token(sellAddr) with token(buyAddr), buy token with minimum sell token
-     * @param buyAddr token to be bought
-     * @param sellAddr token to be sold
-     * @param fee pool fees for buyAddr-sellAddr token pair
-	 * @param unitAmt The unit amount of buyAmt/sellAmt with slippage
-     * @param sellAmt amount of token to be sold
-     * @param getId Id to get sellAmt
-     * @param setId Id to store buyAmt
+     * @param _buyAddr token to be bought
+     * @param _sellAddr token to be sold
+     * @param _fee pool fees for buyAddr-sellAddr token pair
+	 * @param _unitAmt The unit amount of buyAmt/sellAmt with slippage
+     * @param _sellAmt amount of token to be sold
+     * @param _getId Id to get sellAmt
+     * @param _setId Id to store buyAmt
      */
     function sell(
         address _buyAddr,

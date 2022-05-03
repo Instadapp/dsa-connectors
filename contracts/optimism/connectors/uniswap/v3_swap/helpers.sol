@@ -43,7 +43,6 @@ abstract contract Helpers is DSMath, Basic {
 		BuyInfo memory buyData
 	)
 		internal
-		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _buyAmt = getUint(buyData.getId, buyData.buyAmt);
@@ -102,7 +101,6 @@ abstract contract Helpers is DSMath, Basic {
 		SellInfo memory sellData
 	)
 		internal
-		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _sellAmt = getUint(sellData.getId, sellData.sellAmt);
