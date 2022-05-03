@@ -106,5 +106,5 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 }
 
 contract ConnectV2Basic is BasicResolver {
-    string constant public name = "Basic-v1";
+    string constant public name = "Basic-v1.1";
 }
