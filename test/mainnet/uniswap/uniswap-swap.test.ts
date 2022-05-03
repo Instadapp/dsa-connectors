@@ -13,7 +13,7 @@ import { abis } from "../../../scripts/constant/abis";
 import type { Signer, Contract } from "ethers";
 
 import { abi } from "@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json";
-import { ConnectV2UniswapV3__factory } from "../../../typechain";
+import { ConnectV2UniswapV3Swap__factory } from "../../../typechain";
 
 const FeeAmount = {
   LOW: 500,
@@ -35,7 +35,7 @@ let liquidities: any[] = [];
 const abiCoder = ethers.utils.defaultAbiCoder;
 
 describe("UniswapV3", function() {
-  const connectorName = "UniswapV3-v1";
+  const connectorName = "UniswapV3-Swap-v1";
 
   let dsaWallet0: any;
   let masterSigner: Signer;
@@ -69,7 +69,7 @@ describe("UniswapV3", function() {
     );
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2UniswapV3__factory,
+      contractArtifact: ConnectV2UniswapV3Swap__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
@@ -128,20 +128,12 @@ describe("UniswapV3", function() {
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
-      // const _expectedAmt = 
-      const data = {
-        buyAddr: DAI_ADDR,
-        sellAddr: ethAddress,
-        fee: FeeAmount.MEDIUM,
-        unitAmt: "0",
-
-      }
 
       const spells = [
         {
           connector: connectorName,
           method: "buy",
-          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, daiAmount, getId, setId],
+          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, "0", daiAmount, getId, setId],
         },
       ];
 
@@ -162,7 +154,7 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "sell",
-          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, ethAmount, getId, setId],
+          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, "0", ethAmount, getId, setId],
         },
       ];
 
