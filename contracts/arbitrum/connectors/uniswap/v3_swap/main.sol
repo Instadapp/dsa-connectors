@@ -33,7 +33,7 @@ abstract contract UniswapResolver is Helpers, Events {
         uint256 _getId,
         uint256 _setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
-        return _buy(BuyInfo({
+		return _buy(BuyInfo({
 			buyAddr: _buyAddr,		
 			sellAddr: _sellAddr,	
 			fee: _fee,
@@ -68,7 +68,7 @@ abstract contract UniswapResolver is Helpers, Events {
 			buyAddr: _buyAddr,		
 			sellAddr: _sellAddr,	
 			fee: _fee,
-            unitAmt: _unitAmt,
+			unitAmt: _unitAmt,
 			sellAmt: _sellAmt,
 			getId: _getId,
 			setId: _setId
