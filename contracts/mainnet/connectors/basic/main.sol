@@ -49,7 +49,7 @@ abstract contract BasicResolver is Events, DSMath, Basic {
      * @dev Deposit Assets To Smart Account From any user.
      * @notice Deposit a token to DSA from any user. 
      * @param token The address of the token to deposit. (Note: ETH is not supported)
-     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)` (Not valid for ETH))
+     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)`)
      * @param from The address depositing the token.
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens deposited.
