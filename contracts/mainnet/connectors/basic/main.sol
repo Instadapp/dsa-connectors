@@ -46,37 +46,6 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     }
 
     /**
-     * @dev Deposit Assets To Smart Account From any user.
-     * @notice Deposit a token to DSA from any user. 
-     * @param token The address of the token to deposit.<br>(For <b>ETH</b>: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE and need to pass `value` parameter equal to `amt` in cast function ```dsa.cast({..., value: amt})```.<br>For <b>ERC20</b>: Need to give allowance prior casting spells.)
-     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)` (Not valid for ETH))
-     * @param from The address depositing the token.
-     * @param getId ID to retrieve amt.
-     * @param setId ID stores the amount of tokens deposited.
-     */
-    function depositFrom(
-        address token,
-        uint256 amt,
-        address from,
-        uint256 getId,
-        uint256 setId
-    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
-        uint _amt = getUint(getId, amt);
-        if (token != ethAddr) {
-            IERC20 tokenContract = IERC20(token);
-            _amt = _amt == uint(-1) ? tokenContract.balanceOf(from) : _amt;
-            tokenContract.safeTransferFrom(from, address(this), _amt);
-        } else {
-            require(msg.value == _amt || _amt == uint(-1), "invalid-ether-amount");
-            _amt = msg.value;
-        }
-        setUint(setId, _amt);
-
-        _eventName = "LogDepositFrom(address,uint256,address,uint256,uint256)";
-        _eventParam = abi.encode(token, _amt, from, getId, setId);
-    }
-
-    /**
      * @dev Withdraw Assets from Smart  Account
      * @notice Withdraw a token from DSA
      * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
