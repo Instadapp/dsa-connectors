@@ -37,7 +37,7 @@ abstract contract UniswapResolver is Helpers, Events {
 			buyAddr: _buyAddr,		
 			sellAddr: _sellAddr,	
 			fee: _fee,
-            unitAmt: _unitAmt,
+			unitAmt: _unitAmt,
 			buyAmt: _buyAmt,
 			getId: _getId,
 			setId: _setId
@@ -68,7 +68,7 @@ abstract contract UniswapResolver is Helpers, Events {
 			buyAddr: _buyAddr,		
 			sellAddr: _sellAddr,	
 			fee: _fee,
-            unitAmt: _unitAmt,
+			unitAmt: _unitAmt,
 			sellAmt: _sellAmt,
 			getId: _getId,
 			setId: _setId
