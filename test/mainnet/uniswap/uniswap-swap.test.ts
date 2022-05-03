@@ -124,7 +124,8 @@ describe("UniswapV3", function() {
   describe("Main", function() {
 
     it("Should buy successfully", async function() {
-      const daiAmount = ethers.utils.parseEther("400"); 
+      const ethAmount = ethers.utils.parseEther("0.1"); 
+      const unitAmt = ethers.utils.parseEther("400")
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
@@ -133,7 +134,7 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "buy",
-          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, "0", daiAmount, getId, setId],
+          args: [ethAddress, DAI_ADDR, FeeAmount.MEDIUM, unitAmt, ethAmount, getId, setId],
         },
       ];
 
