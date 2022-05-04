@@ -125,7 +125,7 @@ describe("UniswapV3", function() {
 
     it("Should buy successfully", async function() {
       const ethAmount = ethers.utils.parseEther("0.1"); 
-      const unitAmt = ethers.utils.parseEther("400")
+      const unitAmt = ethers.utils.parseEther("2994.474881115") 
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
@@ -147,6 +147,7 @@ describe("UniswapV3", function() {
 
     it("Should sell successfully", async function() {
       const ethAmount = ethers.utils.parseEther("0.1");
+      const unitAmt = ethers.utils.parseEther("2693.010801400")
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
@@ -155,7 +156,7 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "sell",
-          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, "0", ethAmount, getId, setId],
+          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, unitAmt, ethAmount, getId, setId],
         },
       ];
 
@@ -172,3 +173,6 @@ const getMinTick = (tickSpacing: number) =>
   Math.ceil(-887272 / tickSpacing) * tickSpacing;
 const getMaxTick = (tickSpacing: number) =>
   Math.floor(887272 / tickSpacing) * tickSpacing;
+
+
+  
