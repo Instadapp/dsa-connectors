@@ -57,8 +57,8 @@ abstract contract Helpers is DSMath, Basic {
 		convertMaticToWmatic(isMatic, _sellAddr, _slippageAmt);
 		approve(_sellAddr, address(swapRouter), _slippageAmt);
 		ExactOutputSingleParams memory params = ExactOutputSingleParams({
-			tokenIn: buyData.sellAddr,
-			tokenOut: buyData.buyAddr,
+			tokenIn: address(_sellAddr),
+			tokenOut: address(_buyAddr),
 			fee: buyData.fee,
 			recipient: address(this),
 			deadline: block.timestamp + 1,
@@ -119,8 +119,8 @@ abstract contract Helpers is DSMath, Basic {
 		convertMaticToWmatic(isMatic, _sellAddr, _sellAmt);
 		approve(_sellAddr, address(swapRouter), _sellAmt);
 		ExactInputSingleParams memory params = ExactInputSingleParams({
-			tokenIn: sellData.sellAddr,
-			tokenOut: sellData.buyAddr,
+			tokenIn: address(_sellAddr),
+			tokenOut: address(_buyAddr),
 			fee: sellData.fee,
 			recipient: address(this),
 			deadline: block.timestamp + 1,

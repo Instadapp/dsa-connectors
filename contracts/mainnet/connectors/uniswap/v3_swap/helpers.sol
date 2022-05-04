@@ -58,8 +58,8 @@ abstract contract Helpers is DSMath, Basic {
 		approve(_sellAddr, address(swapRouter), _slippageAmt);
 
 		ExactOutputSingleParams memory params = ExactOutputSingleParams({
-			tokenIn: buyData.sellAddr,
-			tokenOut: buyData.buyAddr,
+			tokenIn: address(_sellAddr),
+			tokenOut: address(_buyAddr),
 			fee: buyData.fee,
 			recipient: address(this),
 			deadline: block.timestamp + 1,
@@ -67,7 +67,6 @@ abstract contract Helpers is DSMath, Basic {
 			amountInMaximum: _slippageAmt, //require(_sellAmt <= amountInMaximum)
 			sqrtPriceLimitX96: 0
 		});
-
 		uint256 _sellAmt = swapRouter.exactOutputSingle(params);
 		require(_slippageAmt >= _sellAmt, "Too much slippage");
 
@@ -120,8 +119,8 @@ abstract contract Helpers is DSMath, Basic {
 		convertEthToWeth(isEth, _sellAddr, _sellAmt);
 		approve(_sellAddr, address(swapRouter), _sellAmt);
 		ExactInputSingleParams memory params = ExactInputSingleParams({
-			tokenIn: sellData.sellAddr,
-			tokenOut: sellData.buyAddr,
+			tokenIn: address(_sellAddr),
+			tokenOut: address(_buyAddr),
 			fee: sellData.fee,
 			recipient: address(this),
 			deadline: block.timestamp + 1,
@@ -129,7 +128,6 @@ abstract contract Helpers is DSMath, Basic {
 			amountOutMinimum: _slippageAmt, //require(_buyAmt >= amountOutMinimum)
 			sqrtPriceLimitX96: 0
 		});
-
 		uint256 _buyAmt = swapRouter.exactInputSingle(params);
 		require(_slippageAmt <= _buyAmt, "Too much slippage");
 
