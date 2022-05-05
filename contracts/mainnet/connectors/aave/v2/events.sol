@@ -8,4 +8,12 @@ contract Events {
     event LogPayback(address indexed token, uint256 tokenAmt, uint256 indexed rateMode, uint256 getId, uint256 setId);
     event LogEnableCollateral(address[] tokens);
     event LogSwapRateMode(address indexed token, uint256 rateMode);
+    event LogPaybackOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	);
 }

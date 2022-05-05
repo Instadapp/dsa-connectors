@@ -46,6 +46,34 @@ abstract contract BasicResolver is Events, DSMath, Basic {
     }
 
     /**
+     * @dev Deposit Assets To Smart Account From any user.
+     * @notice Deposit a token to DSA from any user. 
+     * @param token The address of the token to deposit. (Note: ETH is not supported. Use `deposit()`)
+     * @param amt The amount of tokens to deposit. (For max: `uint256(-1)`)
+     * @param from The address depositing the token.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens deposited.
+     */
+    function depositFrom(
+        address token,
+        uint256 amt,
+        address from,
+        uint256 getId,
+        uint256 setId
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _amt = getUint(getId, amt);
+        require(token != ethAddr, "eth-not-supported");
+        IERC20 tokenContract = IERC20(token);
+        _amt = _amt == uint(-1) ? tokenContract.balanceOf(from) : _amt;
+        tokenContract.safeTransferFrom(from, address(this), _amt);
+        
+        setUint(setId, _amt);
+
+        _eventName = "LogDepositFrom(address,uint256,address,uint256,uint256)";
+        _eventParam = abi.encode(token, _amt, from, getId, setId);
+    }
+
+    /**
      * @dev Withdraw Assets from Smart  Account
      * @notice Withdraw a token from DSA
      * @param token The address of the token to withdraw. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -78,5 +106,5 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 }
 
 contract ConnectV2Basic is BasicResolver {
-    string constant public name = "Basic-v1";
+    string constant public name = "Basic-v1.1";
 }
