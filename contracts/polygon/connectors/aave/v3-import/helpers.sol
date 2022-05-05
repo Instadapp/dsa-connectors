@@ -260,7 +260,7 @@ contract AaveHelpers is Helper {
 		address userAccount
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0 && colEnable[i]) {
+			if (amts[i] > 0) {
 				uint256 _amt = amts[i];
 				require(
 					atokenContracts[i].transferFrom(
@@ -272,7 +272,7 @@ contract AaveHelpers is Helper {
 				);
 
 				if (!getIsColl(tokens[i], address(this))) {
-					aave.setUserUseReserveAsCollateral(tokens[i], true);
+					aave.setUserUseReserveAsCollateral(tokens[i], colEnable[i]);
 				}
 			}
 		}

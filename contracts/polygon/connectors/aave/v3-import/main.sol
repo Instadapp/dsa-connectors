@@ -102,6 +102,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 		);
 
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
+		require(enableCollateral.length == inputData.supplyTokens.length, "lengths-not-same");
 
 		ImportData memory data;
 
@@ -205,5 +206,5 @@ contract AaveV3ImportResolver is AaveHelpers {
 }
 
 contract ConnectV2AaveV3ImportPolygon is AaveV3ImportResolver {
-	string public constant name = "Aave-v3-import-v1";
+	string public constant name = "Aave-v3-import-v1.1";
 }
