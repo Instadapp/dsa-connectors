@@ -127,12 +127,13 @@ contract AaveV3ImportResolver is AaveHelpers {
 		);
 
 		//  transfer atokens to this address;
-		_TransferAtokens(
+		_TransferAtokensWithCollateral(
 			data._supplyTokens.length,
 			aave,
 			data.aTokens,
 			data.supplyAmts,
 			data._supplyTokens,
+			enableCollateral,
 			userAccount
 		);
 
