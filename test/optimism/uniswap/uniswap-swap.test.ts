@@ -104,7 +104,7 @@ describe("UniswapV3", function() {
 
     it("Should buy successfully", async function() {
       const ethAmount = ethers.utils.parseEther("0.1"); 
-      const unitAmt = ethers.utils.parseEther("600") 
+      const unitAmt = ethers.utils.parseEther("3078") 
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
@@ -126,7 +126,7 @@ describe("UniswapV3", function() {
 
     it("Should sell successfully", async function() {
       const ethAmount = ethers.utils.parseEther("0.1");
-      const unitAmt = ethers.utils.parseEther("400")
+      const unitAmt = ethers.utils.parseEther("2784")
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";

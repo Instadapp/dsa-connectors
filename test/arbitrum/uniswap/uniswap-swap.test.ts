@@ -27,7 +27,6 @@ const TICK_SPACINGS: Record<number, number> = {
   10000: 200,
 };
 
-const USDT_ADDR = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
 const DAI_ADDR = "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1";
 
 let tokenIds: any[] = [];
@@ -53,7 +52,7 @@ describe("UniswapV3", function() {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 11201540,
+            blockNumber: 11201500,
           },
         },
       ],
@@ -105,7 +104,7 @@ describe("UniswapV3", function() {
 
     it("Should buy successfully", async function() {
       const ethAmount = ethers.utils.parseEther("0.1"); 
-      const unitAmt = ethers.utils.parseEther("296") 
+      const unitAmt = ethers.utils.parseEther("0.000359232717483266") 
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
@@ -114,7 +113,7 @@ describe("UniswapV3", function() {
         {
           connector: connectorName,
           method: "buy",
-          args: [ethAddress, DAI_ADDR, FeeAmount.MEDIUM, unitAmt, ethAmount, getId, setId],
+          args: [DAI_ADDR, ethAddress, FeeAmount.MEDIUM, unitAmt, ethAmount, getId, setId],
         },
       ];
 
@@ -127,7 +126,7 @@ describe("UniswapV3", function() {
 
     it("Should sell successfully", async function() {
       const ethAmount = ethers.utils.parseEther("0.1");
-      const unitAmt = ethers.utils.parseEther("294");
+      const unitAmt = ethers.utils.parseEther("2770.23");
       const ethAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
       const getId = "0";
       const setId = "0";
