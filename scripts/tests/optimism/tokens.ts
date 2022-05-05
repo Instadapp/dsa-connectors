@@ -28,6 +28,13 @@ export const tokens = {
     address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
     decimals: 6,
   },
+  usdt: {
+    type: "token",
+    symbol: "USDT",
+    name: "Tether USD Coin",
+    address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+    decimals: 6,
+  }
 };
 
 export const tokenMapping: Record<string, any> = {
@@ -44,7 +51,7 @@ export const tokenMapping: Record<string, any> = {
     },
   },
   dai: {
-    impersonateSigner: "0x31efc4aeaa7c39e54a33fdc3c46ee2bd70ae0a09",
+    impersonateSigner: "0x360537542135943E8Fc1562199AEA6d0017F104B",
     address: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
     abi: ["function transfer(address to, uint value)"],
     process: async function (owner: Signer | Provider, to: any, amt: any) {
@@ -53,7 +60,7 @@ export const tokenMapping: Record<string, any> = {
     },
   },
   usdt: {
-    impersonateSigner: "0x31efc4aeaa7c39e54a33fdc3c46ee2bd70ae0a09",
+    impersonateSigner: "0xc858a329bf053be78d6239c4a4343b8fbd21472b",
     address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
     abi: [
       "function issue(uint amount)",
@@ -61,7 +68,6 @@ export const tokenMapping: Record<string, any> = {
     ],
     process: async function (owner: Signer | Provider, address: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
-
       await mineTx(contract.issue(amt));
       await mineTx(contract.transfer(address, amt));
     },
