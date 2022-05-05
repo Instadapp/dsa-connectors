@@ -160,7 +160,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 			);
 		}
 
-		_eventName = "LogAaveV3ImportWithCollateral(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
+		_eventName = "LogAaveV3ImportWithCollateral(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[],bool[])";
 		_eventParam = abi.encode(
 			userAccount,
 			inputData.convertStable,
