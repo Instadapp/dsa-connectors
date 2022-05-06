@@ -12,4 +12,14 @@ contract Events {
 		uint256[] supplyAmts,
 		uint256[] borrowAmts
 	);
+	event LogAaveV3ImportWithCollateral(
+		address indexed user,
+		address[] atokens,
+		string[] supplyIds,
+		string[] borrowIds,
+		uint256[] flashLoanFees,
+		uint256[] supplyAmts,
+		uint256[] borrowAmts,
+		bool[] enableCollateral
+	);
 }
