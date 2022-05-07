@@ -9,5 +9,4 @@ contract Events {
         uint256 getId,
         uint256 setId
     );
-    event LogWithdraw(bytes proof);
 }

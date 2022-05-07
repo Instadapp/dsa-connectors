@@ -4,7 +4,6 @@ pragma solidity ^0.7.0;
 contract Events {
     event LogOpen(uint256 indexed safe, bytes32 indexed collateralType);
     event LogClose(uint256 indexed safe, bytes32 indexed collateralType);
-    event LogTransfer(uint256 indexed safe, bytes32 indexed collateralType, address newOwner);
     event LogDeposit(uint256 indexed safe, bytes32 indexed collateralType, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogWithdraw(uint256 indexed safe, bytes32 indexed collateralType, uint256 tokenAmt, uint256 getId, uint256 setId);
     event LogBorrow(uint256 indexed safe, bytes32 indexed collateralType, uint256 tokenAmt, uint256 getId, uint256 setId);
