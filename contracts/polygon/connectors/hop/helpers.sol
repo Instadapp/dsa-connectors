@@ -18,6 +18,7 @@ contract Helpers is DSMath, Basic {
 	 * @param sourceDeadline The deadline for the source chain transaction (Recommended - Date.now() + 604800 (1 week))
 	 * @param destinationAmountOutMin minimum amount of token out for bridge on target chain, zero for L1 bridging
 	 * @param destinationDeadline The deadline for the target chain transaction (Recommended - Date.now() + 604800 (1 week)), zero for L1 bridging
+	 * @param isWrapped if the token to transfer if wrapped token of native chain token (ex. WETH)
 	 */
 	struct BridgeParams {
 		address token;
@@ -30,10 +31,26 @@ contract Helpers is DSMath, Basic {
 		uint256 sourceDeadline;
 		uint256 destinationAmountOutMin;
 		uint256 destinationDeadline;
+		bool isWrapped;
 	}
 
-	function _swapAndSend(BridgeParams memory params) internal {
+	function _swapAndSend(BridgeParams memory params, bool isNative) internal {
 		IHopRouter router = IHopRouter(params.router);
+
+		if (isNative) {
+			router.swapAndSend{ value: params.amount }(
+				params.targetChainId,
+				params.recipient,
+				params.amount,
+				params.bonderFee,
+				params.sourceAmountOutMin,
+				params.sourceDeadline,
+				params.destinationAmountOutMin,
+				params.destinationDeadline
+			);
+
+			return;
+		}
 
 		TokenInterface tokenContract = TokenInterface(params.token);
 		approve(tokenContract, params.router, params.amount);

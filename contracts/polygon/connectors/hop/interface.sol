@@ -13,5 +13,5 @@ interface IHopRouter {
 		uint256 deadline,
 		uint256 destinationAmountOutMin,
 		uint256 destinationDeadline
-	) external;
+	) external payable;
 }
