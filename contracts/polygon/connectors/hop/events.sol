@@ -4,7 +4,6 @@ pragma solidity ^0.7.0;
 contract Events {
 	event LogBridge(
 		address token,
-		bool isWrapped,
 		uint256 chainId,
 		address recipient,
 		uint256 amount,

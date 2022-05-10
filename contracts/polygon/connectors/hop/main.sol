@@ -39,12 +39,8 @@ abstract contract Resolver is Helpers {
 		params.amount = getUint(getId, params.amount);
 		TokenInterface tokenContract = TokenInterface(params.token);
 
-		if (params.isWrapped) {
-			convertWmaticToMatic(
-				params.isWrapped,
-				tokenContract,
-				params.amount
-			);
+		if (params.token == wmaticAddr) {
+			convertWmaticToMatic(true, tokenContract, params.amount);
 			params.token = maticAddr;
 		}
 
@@ -62,10 +58,9 @@ abstract contract Resolver is Helpers {
 
 		_swapAndSend(params, isNative);
 
-		_eventName = "LogBridge(address,bool,uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogBridge(address,uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			params.token,
-			params.isWrapped,
 			params.targetChainId,
 			params.recipient,
 			params.amount,
