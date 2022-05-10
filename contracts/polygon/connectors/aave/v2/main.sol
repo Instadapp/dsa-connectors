@@ -146,14 +146,18 @@ abstract contract AaveResolver is Events, Helpers {
 
         AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 
-        bool isEth = token == maticAddr;
-        address _token = isEth ? wmaticAddr : token;
+        bool isMatic = token == maticAddr;
+        address _token = isMatic ? wmaticAddr : token;
 
         TokenInterface tokenContract = TokenInterface(_token);
 
-        _amt = _amt == uint(-1) ? getPaybackBalance(_token, rateMode) : _amt;
+        if (_amt == uint(-1)) {
+            uint _amtDSA = isMatic ? address(this).balance : tokenContract.balanceOf(address(this));
+            uint _amtDebt = getPaybackBalance(_token, rateMode);
+            _amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+        }
 
-        if (isEth) convertMaticToWmatic(isEth, tokenContract, _amt);
+        if (isMatic) convertMaticToWmatic(isMatic, tokenContract, _amt);
 
         approve(tokenContract, address(aave), _amt);
 
@@ -164,6 +168,55 @@ abstract contract AaveResolver is Events, Helpers {
         _eventName = "LogPayback(address,uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(token, _amt, rateMode, getId, setId);
     }
+
+    /**
+	 * @dev Payback borrowed MATIC/ERC20_Token on behalf of a user.
+	 * @notice Payback debt owed on behalf os a user.
+	 * @param token The address of the token to payback.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+	 * @param rateMode The type of debt paying back. (For Stable: 1, Variable: 2)
+	 * @param onBehalfOf Address of user who's debt to repay.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens paid back.
+	 */
+	function paybackOnBehalfOf(
+		address token,
+		uint256 amt,
+		uint256 rateMode,
+		address onBehalfOf,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amt);
+
+		AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
+
+		bool isMatic = token == maticAddr;
+        address _token = isMatic ? wmaticAddr : token;
+
+		TokenInterface tokenContract = TokenInterface(_token);
+
+        if (_amt == uint(-1)) {
+            uint _amtDSA = isMatic ? address(this).balance : tokenContract.balanceOf(address(this));
+            uint _amtDebt = getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf);
+            _amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+        }
+
+		if (isMatic) convertMaticToWmatic(isMatic, tokenContract, _amt);
+
+		approve(tokenContract, address(aave), _amt);
+
+		aave.repay(_token, _amt, rateMode, onBehalfOf);
+
+		setUint(setId, _amt);
+
+		_eventName = "LogPaybackOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
+	}
 
     /**
      * @dev Enable collateral
@@ -213,5 +266,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV2Polygon is AaveResolver {
-    string constant public name = "AaveV2-v1";
+    string constant public name = "AaveV2-v1.1";
 }
