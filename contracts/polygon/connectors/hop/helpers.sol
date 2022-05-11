@@ -36,8 +36,10 @@ contract Helpers is DSMath, Basic {
 		IHopRouter router = IHopRouter(params.router);
 
 		uint256 nativeTokenAmt = isNative ? params.amount : 0;
-		TokenInterface tokenContract = TokenInterface(params.token);
-		approve(tokenContract, params.router, params.amount);
+		if (!isNative) {
+			TokenInterface tokenContract = TokenInterface(params.token);
+			approve(tokenContract, params.router, params.amount);
+		}
 
 		router.swapAndSend{ value: nativeTokenAmt }(
 			params.targetChainId,
