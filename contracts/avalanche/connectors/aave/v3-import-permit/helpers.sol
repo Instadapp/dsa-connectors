@@ -281,6 +281,34 @@ contract AaveHelpers is Helper {
 		}
 	}
 
+	function _TransferAtokensWithCollateral(
+		uint256 _length,
+		AaveInterface aave,
+		ATokenInterface[] memory atokenContracts,
+		uint256[] memory amts,
+		address[] memory tokens,
+		bool[] memory colEnable,
+		address userAccount
+	) internal {
+		for (uint256 i = 0; i < _length; i++) {
+			if (amts[i] > 0) {
+				uint256 _amt = amts[i];
+				require(
+					atokenContracts[i].transferFrom(
+						userAccount,
+						address(this),
+						_amt
+					),
+					"allowance?"
+				);
+
+				if (!getIsColl(tokens[i], address(this))) {
+					aave.setUserUseReserveAsCollateral(tokens[i], colEnable[i]);
+				}
+			}
+		}
+	}
+
 	function _BorrowVariable(
 		uint256 _length,
 		AaveInterface aave,
