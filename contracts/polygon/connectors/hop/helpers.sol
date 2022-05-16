@@ -32,13 +32,16 @@ contract Helpers is DSMath, Basic {
 		uint256 destinationDeadline;
 	}
 
-	function _swapAndSend(BridgeParams memory params) internal {
+	function _swapAndSend(BridgeParams memory params, bool isNative) internal {
 		IHopRouter router = IHopRouter(params.router);
 
-		TokenInterface tokenContract = TokenInterface(params.token);
-		approve(tokenContract, params.router, params.amount);
+		uint256 nativeTokenAmt = isNative ? params.amount : 0;
+		if (!isNative) {
+			TokenInterface tokenContract = TokenInterface(params.token);
+			approve(tokenContract, params.router, params.amount);
+		}
 
-		router.swapAndSend(
+		router.swapAndSend{ value: nativeTokenAmt }(
 			params.targetChainId,
 			params.recipient,
 			params.amount,
