@@ -12,5 +12,5 @@ interface IHopRouter {
 		uint256 deadline,
 		address relayer,
 		uint256 relayerFee
-	) external;
+	) external payable;
 }
