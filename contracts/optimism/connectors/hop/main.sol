@@ -37,24 +37,26 @@ abstract contract Resolver is Helpers {
 		}
 
 		params.amount = getUint(getId, params.amount);
+		TokenInterface tokenContract = TokenInterface(params.token);
+
+		if (params.token == wethAddr) {
+			convertWethToEth(true, tokenContract, params.amount);
+			params.token = ethAddr;
+		}
 
 		bool isEth = params.token == ethAddr;
-		params.token = params.token == ethAddr ? wethAddr : params.token;
-
-		TokenInterface tokenContract = TokenInterface(params.token);
 
 		if (isEth) {
 			params.amount = params.amount == uint256(-1)
 				? address(this).balance
 				: params.amount;
-			convertEthToWeth(isEth, tokenContract, params.amount);
 		} else {
 			params.amount = params.amount == uint256(-1)
 				? tokenContract.balanceOf(address(this))
 				: params.amount;
 		}
 
-		_swapAndSend(params);
+		_swapAndSend(params, isEth);
 
 		_eventName = "LogBridge(address,uint256,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
