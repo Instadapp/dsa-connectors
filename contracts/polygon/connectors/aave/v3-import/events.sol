@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 contract Events {
 	event LogAaveV3Import(
+		bool isDsa,
 		address indexed user,
 		address[] atokens,
 		string[] supplyIds,
@@ -21,15 +22,5 @@ contract Events {
 		uint256[] supplyAmts,
 		uint256[] borrowAmts,
 		bool[] enableCollateral
-	);
-	event LogAaveV3ImportWithMerge(
-		address indexed dsa,
-		address indexed user,
-		address[] atokens,
-		string[] supplyIds,
-		string[] borrowIds,
-		uint256[] flashLoanFees,
-		uint256[] supplyAmts,
-		uint256[] borrowAmts
 	);
 }

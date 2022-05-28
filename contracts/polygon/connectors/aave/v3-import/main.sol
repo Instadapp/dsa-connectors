@@ -12,15 +12,17 @@ import "./helpers.sol";
 import "./events.sol";
 
 contract AaveV3ImportResolver is AaveHelpers {
-	function _importAave(address userAccount, ImportInputData memory inputData)
-		internal
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		require(
-			AccountInterface(address(this)).isAuth(userAccount),
-			"user-account-not-auth"
-		);
-
+	function _importAave(
+		bool isDsa,
+		address userAccount,
+		ImportInputData memory inputData
+	) internal returns (string memory _eventName, bytes memory _eventParam) {
+		if (!isDsa) {
+			require(
+				AccountInterface(address(this)).isAuth(userAccount),
+				"user-account-not-auth"
+			);
+		}
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
 
 		ImportData memory data;
@@ -53,7 +55,8 @@ contract AaveV3ImportResolver is AaveHelpers {
 			data.aTokens,
 			data.supplyAmts,
 			data._supplyTokens,
-			userAccount
+			userAccount,
+			isDsa
 		);
 
 		// borrow assets after migrating position
@@ -81,6 +84,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 
 		_eventName = "LogAaveV3Import(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
+			isDsa,
 			userAccount,
 			inputData.convertStable,
 			inputData.supplyTokens,
@@ -92,17 +96,21 @@ contract AaveV3ImportResolver is AaveHelpers {
 		);
 	}
 
-	function _importAaveWithCollateral(address userAccount, ImportInputData memory inputData, bool[] memory enableCollateral)
-		internal
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
+	function _importAaveWithCollateral(
+		address userAccount,
+		ImportInputData memory inputData,
+		bool[] memory enableCollateral
+	) internal returns (string memory _eventName, bytes memory _eventParam) {
 		require(
 			AccountInterface(address(this)).isAuth(userAccount),
 			"user-account-not-auth"
 		);
 
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
-		require(enableCollateral.length == inputData.supplyTokens.length, "lengths-not-same");
+		require(
+			enableCollateral.length == inputData.supplyTokens.length,
+			"lengths-not-same"
+		);
 
 		ImportData memory data;
 
@@ -175,103 +183,23 @@ contract AaveV3ImportResolver is AaveHelpers {
 		);
 	}
 
-	function _importAaveWithMerge(address userAccount, address dsaAccount, ImportInputData memory inputData)
-		internal
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		require(
-			AccountInterface(address(this)).isAuth(userAccount),
-			"user-account-not-auth"
-		);
-		require(
-			AccountInterface(dsaAccount).isAuth(userAccount),
-			"user-account-not-auth"
-		);
-
-		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
-
-		ImportData memory data;
-
-		AaveInterface aave = AaveInterface(aaveProvider.getPool());
-
-		data = getBorrowAmounts(userAccount, aave, inputData, data);
-		data = getSupplyAmounts(userAccount, inputData, data);
-
-		//  payback borrowed amount;
-		_PaybackStable(
-			data._borrowTokens.length,
-			aave,
-			data._borrowTokens,
-			data.stableBorrowAmts,
-			userAccount
-		);
-		_PaybackVariable(
-			data._borrowTokens.length,
-			aave,
-			data._borrowTokens,
-			data.variableBorrowAmts,
-			userAccount
-		);
-
-		//  transfer atokens to this address;
-		_TransferAtokensWithMerge(
-			data._supplyTokens.length,
-			aave,
-			data.supplyAmts,
-			data._supplyTokens,
-			dsaAccount,
-			userAccount
-		);
-
-		// borrow assets after migrating position
-		if (data.convertStable) {
-			_BorrowVariable(
-				data._borrowTokens.length,
-				aave,
-				data._borrowTokens,
-				data.totalBorrowAmtsWithFee
-			);
-		} else {
-			_BorrowStable(
-				data._borrowTokens.length,
-				aave,
-				data._borrowTokens,
-				data.stableBorrowAmtsWithFee
-			);
-			_BorrowVariable(
-				data._borrowTokens.length,
-				aave,
-				data._borrowTokens,
-				data.variableBorrowAmtsWithFee
-			);
-		}
-
-		_eventName = "LogAaveV3ImportWithMerge(address, address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
-		_eventParam = abi.encode(
-			dsaAccount,
-			userAccount,
-			inputData.convertStable,
-			inputData.supplyTokens,
-			inputData.borrowTokens,
-			inputData.flashLoanFees,
-			data.supplyAmts,
-			data.stableBorrowAmts,
-			data.variableBorrowAmts
-		);
-	}
-
 	/**
 	 * @dev Import aave V3 position .
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
-	 * @param userAccount The address of the EOA from which aave position will be imported
+	 * @param isDsa True if the userAccount is DSA, false for EOA
+	 * @param userAccount The address of the EOA from which aave position will be imported or address of the DSA to which the DSA positions will be merged
 	 * @param inputData The struct containing all the neccessary input data
 	 */
-	function importAave(address userAccount, ImportInputData memory inputData)
+	function importAave(
+		bool isDsa,
+		address userAccount,
+		ImportInputData memory inputData
+	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(userAccount, inputData);
+		(_eventName, _eventParam) = _importAave(isDsa, userAccount, inputData);
 	}
 
 	/**
@@ -281,27 +209,20 @@ contract AaveV3ImportResolver is AaveHelpers {
 	 * @param inputData The struct containing all the neccessary input data
 	 * @param enableCollateral The boolean array to enable selected collaterals in the imported position
 	 */
-	function importAaveWithCollateral(address userAccount, ImportInputData memory inputData, bool[] memory enableCollateral)
+	function importAaveWithCollateral(
+		address userAccount,
+		ImportInputData memory inputData,
+		bool[] memory enableCollateral
+	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAaveWithCollateral(userAccount, inputData, enableCollateral);
-	}
-
-	/**
-	 * @dev Import aave V3 position .
-	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
-	 * @param userAccount The address of the EOA to which aave position will be imported
-	 * @param dsaAccount The address of the DSA to which aave position will be imported
-	 * @param inputData The struct containing all the neccessary input data
-	 */
-	function importAaveWithMerge(address userAccount, address dsaAccount, ImportInputData memory inputData)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		(_eventName, _eventParam) = _importAaveWithMerge(userAccount, dsaAccount, inputData);
+		(_eventName, _eventParam) = _importAaveWithCollateral(
+			userAccount,
+			inputData,
+			enableCollateral
+		);
 	}
 }
 

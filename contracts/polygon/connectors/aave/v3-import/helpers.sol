@@ -230,62 +230,46 @@ contract AaveHelpers is Helper {
 		ATokenInterface[] memory atokenContracts,
 		uint256[] memory amts,
 		address[] memory tokens,
-		address userAccount
+		address userAccount,
+		bool isDsa
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {
 				uint256 _amt = amts[i];
-				require(
-					atokenContracts[i].transferFrom(
+				if (isDsa) {
+					require(
+						atokenContracts[i].transferFrom(
+							userAccount,
+							address(this),
+							_amt
+						),
+						"allowance?"
+					);
+				} else {
+					string[] memory _targets = new string[](1);
+					bytes[] memory _data = new bytes[](1);
+
+					_targets[0] = "BASIC-A";
+					bytes4 basicWithdraw = bytes4(
+						keccak256(
+							"withdraw(address,uint256,address,uint256,uint256)"
+						)
+					);
+
+					_data[0] = abi.encodeWithSelector(
+						basicWithdraw,
+						tokens[i],
+						_amt,
 						userAccount,
-						address(this),
-						_amt
-					),
-					"allowance?"
-				);
-
-				if (!getIsColl(tokens[i], address(this))) {
-					aave.setUserUseReserveAsCollateral(tokens[i], true);
+						0,
+						0
+					);
+					AccountInterface(address(this)).cast(
+						_targets,
+						_data,
+						address(0)
+					);
 				}
-			}
-		}
-	}
-
-	function _TransferAtokensWithMerge(
-		uint256 _length,
-		AaveInterface aave,
-		uint256[] memory amts,
-		address[] memory tokens,
-		address dsaAccount,
-		address userAccount
-	) internal {
-		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0) {
-				uint256 _amt = amts[i];
-
-				string[] memory _targets = new string[](1);
-				bytes[] memory _data = new bytes[](1);
-
-				_targets[0] = "BASIC-A";
-				bytes4 basicWithdraw = bytes4(
-					keccak256(
-						"withdraw(address,uint256,address,uint256,uint256)"
-					)
-				);
-
-				_data[0] = abi.encodeWithSelector(
-					basicWithdraw,
-					tokens[i],
-					_amt,
-					dsaAccount,
-					0,
-					0
-				);
-				AccountInterface(address(this)).cast(
-					_targets,
-					_data,
-					address(0)
-				);
 
 				if (!getIsColl(tokens[i], address(this))) {
 					aave.setUserUseReserveAsCollateral(tokens[i], true);
