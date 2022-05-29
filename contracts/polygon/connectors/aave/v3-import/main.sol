@@ -6,18 +6,17 @@ pragma experimental ABIEncoderV2;
  * @dev  Import EOA's / withdraw DSA's aave V3 position to DSA's aave v3 position
  */
 
-import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
+import { TokenInterface, AccountInterface, ListInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, ATokenInterface } from "./interface.sol";
 import "./helpers.sol";
 import "./events.sol";
 
 contract AaveV3ImportResolver is AaveHelpers {
 	function _importAave(
-		bool isDsa,
 		address userAccount,
 		ImportInputData memory inputData
 	) internal returns (string memory _eventName, bytes memory _eventParam) {
-		if (!isDsa) {
+		if (!ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556).accountID(userAccount))
 			require(
 				AccountInterface(address(this)).isAuth(userAccount),
 				"user-account-not-auth"
@@ -84,7 +83,6 @@ contract AaveV3ImportResolver is AaveHelpers {
 
 		_eventName = "LogAaveV3Import(address,bool,address[],address[],uint256[],uint256[],uint256[],uint256[])";
 		_eventParam = abi.encode(
-			isDsa,
 			userAccount,
 			inputData.convertStable,
 			inputData.supplyTokens,
@@ -186,12 +184,10 @@ contract AaveV3ImportResolver is AaveHelpers {
 	/**
 	 * @dev Import aave V3 position .
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
-	 * @param isDsa True if the userAccount is DSA, false for EOA
 	 * @param userAccount The address of the EOA from which aave position will be imported or address of the DSA to which the DSA positions will be merged
 	 * @param inputData The struct containing all the neccessary input data
 	 */
 	function importAave(
-		bool isDsa,
 		address userAccount,
 		ImportInputData memory inputData
 	)
@@ -199,7 +195,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAave(isDsa, userAccount, inputData);
+		(_eventName, _eventParam) = _importAave(userAccount, inputData);
 	}
 
 	/**

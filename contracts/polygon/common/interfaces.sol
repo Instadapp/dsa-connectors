@@ -33,3 +33,7 @@ interface AccountInterface {
     ) external payable returns (bytes32[] memory responses);
 }
 
+interface ListInterface {
+    function accountID(address) public returns (uint64);
+}
+

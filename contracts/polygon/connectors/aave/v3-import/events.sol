@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 
 contract Events {
 	event LogAaveV3Import(
-		bool isDsa,
 		address indexed user,
 		address[] atokens,
 		string[] supplyIds,

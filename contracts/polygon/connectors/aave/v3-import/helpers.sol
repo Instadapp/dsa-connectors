@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
-import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
+import { TokenInterface, AccountInterface, ListInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, AavePoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
 import "./events.sol";
 import "./interface.sol";
@@ -26,6 +26,12 @@ abstract contract Helper is DSMath, Basic {
 	 */
 	AaveDataProviderInterface internal constant aaveData =
 		AaveDataProviderInterface(0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654);
+
+	/**
+	 * @dev InstaList
+	 */
+	ListInterface internal constant instaList =
+		ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556);
 
 	function getIsColl(address token, address user)
 		internal
@@ -230,13 +236,12 @@ contract AaveHelpers is Helper {
 		ATokenInterface[] memory atokenContracts,
 		uint256[] memory amts,
 		address[] memory tokens,
-		address userAccount,
-		bool isDsa
+		address userAccount
 	) internal {
-		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0) {
-				uint256 _amt = amts[i];
-				if (isDsa) {
+		if (instaList.accountID(userAccount) == 0) {
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
 					require(
 						atokenContracts[i].transferFrom(
 							userAccount,
@@ -245,36 +250,36 @@ contract AaveHelpers is Helper {
 						),
 						"allowance?"
 					);
-				} else {
-					string[] memory _targets = new string[](1);
-					bytes[] memory _data = new bytes[](1);
+				}
+			}
+		} else {
+			string[] memory _targets = new string[](_length);
+			bytes[] memory _data = new bytes[](_length);
+			bytes4 basicWithdraw = bytes4(
+				keccak256("withdraw(address,uint256,address,uint256,uint256)")
+			);
 
-					_targets[0] = "BASIC-A";
-					bytes4 basicWithdraw = bytes4(
-						keccak256(
-							"withdraw(address,uint256,address,uint256,uint256)"
-						)
-					);
-
-					_data[0] = abi.encodeWithSelector(
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
+					address _token = tokens[i];
+					_targets[i] = "BASIC-A";
+					_data[i] = abi.encodeWithSelector(
 						basicWithdraw,
-						tokens[i],
+						_token,
 						_amt,
 						userAccount,
 						0,
 						0
 					);
-					AccountInterface(address(this)).cast(
-						_targets,
-						_data,
-						address(0)
-					);
-				}
-
-				if (!getIsColl(tokens[i], address(this))) {
-					aave.setUserUseReserveAsCollateral(tokens[i], true);
 				}
 			}
+
+			AccountInterface(address(this)).cast(_targets, _data, address(0));
+		}
+
+		if (!getIsColl(tokens[i], address(this))) {
+			aave.setUserUseReserveAsCollateral(tokens[i], true);
 		}
 	}
 
