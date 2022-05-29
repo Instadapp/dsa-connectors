@@ -250,6 +250,9 @@ contract AaveHelpers is Helper {
 						),
 						"allowance?"
 					);
+					if (!getIsColl(tokens[i], address(this))) {
+						aave.setUserUseReserveAsCollateral(tokens[i], true);
+					}
 				}
 			}
 		} else {
@@ -272,14 +275,13 @@ contract AaveHelpers is Helper {
 						0,
 						0
 					);
+					if (!getIsColl(_token, address(this))) {
+						aave.setUserUseReserveAsCollateral(_token, true);
+					}
 				}
 			}
 
 			AccountInterface(address(this)).cast(_targets, _data, address(0));
-		}
-
-		if (!getIsColl(tokens[i], address(this))) {
-			aave.setUserUseReserveAsCollateral(tokens[i], true);
 		}
 	}
 

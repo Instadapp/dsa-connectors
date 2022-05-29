@@ -12,11 +12,15 @@ import "./helpers.sol";
 import "./events.sol";
 
 contract AaveV3ImportResolver is AaveHelpers {
-	function _importAave(
-		address userAccount,
-		ImportInputData memory inputData
-	) internal returns (string memory _eventName, bytes memory _eventParam) {
-		if (!ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556).accountID(userAccount))
+	function _importAave(address userAccount, ImportInputData memory inputData)
+		internal
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		if (
+			ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556).accountID(
+				userAccount
+			) == 0
+		) {
 			require(
 				AccountInterface(address(this)).isAuth(userAccount),
 				"user-account-not-auth"
@@ -54,8 +58,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 			data.aTokens,
 			data.supplyAmts,
 			data._supplyTokens,
-			userAccount,
-			isDsa
+			userAccount
 		);
 
 		// borrow assets after migrating position
@@ -187,10 +190,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 	 * @param userAccount The address of the EOA from which aave position will be imported or address of the DSA to which the DSA positions will be merged
 	 * @param inputData The struct containing all the neccessary input data
 	 */
-	function importAave(
-		address userAccount,
-		ImportInputData memory inputData
-	)
+	function importAave(address userAccount, ImportInputData memory inputData)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)

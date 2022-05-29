@@ -34,6 +34,6 @@ interface AccountInterface {
 }
 
 interface ListInterface {
-    function accountID(address) public returns (uint64);
+    function accountID(address) external returns (uint64);
 }
 
