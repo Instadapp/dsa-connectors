@@ -281,7 +281,7 @@ contract AaveHelpers is Helper {
 				}
 			}
 
-			AccountInterface(address(this)).cast(_targets, _data, address(0));
+			AccountInterface(userAccount).cast(_targets, _data, address(0));
 		}
 	}
 
