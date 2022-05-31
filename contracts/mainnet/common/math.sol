@@ -44,6 +44,11 @@ contract DSMath {
     require(y >= 0, "int-overflow");
   }
 
+  function toUint(int256 x) internal pure returns (uint256) {
+      require(x >= 0, "int-overflow");
+      return uint256(x);
+  }
+
   function toRad(uint wad) internal pure returns (uint rad) {
     rad = mul(wad, 10 ** 27);
   }
