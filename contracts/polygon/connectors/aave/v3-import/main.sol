@@ -32,17 +32,8 @@ contract AaveV3ImportResolver is AaveHelpers {
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		if (
-			ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556).accountID(
-				userAccount
-			) == 0
-		) {
-			data = getBorrowAmounts(userAccount, aave, inputData, data);
-			data = getSupplyAmounts(userAccount, inputData, data);
-		} else {
-			data = getBorrowAmounts(address(this), aave, inputData, data);
-			data = getSupplyAmounts(address(this), inputData, data);
-		}
+		data = getBorrowAmounts(userAccount, aave, inputData, data);
+		data = getSupplyAmounts(userAccount, inputData, data);
 
 		//  payback borrowed amount;
 		_PaybackStable(

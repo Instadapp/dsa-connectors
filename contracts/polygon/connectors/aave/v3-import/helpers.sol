@@ -199,9 +199,6 @@ contract AaveHelpers is Helper {
 		uint256 rateMode,
 		address user
 	) private {
-		if (instaList.accountID(user) != 0) {
-			user = address(this);
-		}
 		aave.repay(token, amt, rateMode, user);
 	}
 
@@ -266,11 +263,10 @@ contract AaveHelpers is Helper {
 			);
 
 			for (uint256 i = 0; i < _length; i++) {
-				uint256 _amt = amts[i];
-				address _token = tokens[i];
-				_targets[i] = "BASIC-A";
-
 				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
+					address _token = tokens[i];
+					_targets[i] = "BASIC-A";
 					_data[i] = abi.encodeWithSelector(
 						basicWithdraw,
 						_token,
@@ -279,7 +275,7 @@ contract AaveHelpers is Helper {
 						0,
 						0
 					);
-					if (!getIsColl(_token, userAccount)) {
+					if (!getIsColl(_token, address(this))) {
 						aave.setUserUseReserveAsCollateral(_token, true);
 					}
 				}
