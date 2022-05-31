@@ -220,6 +220,7 @@ describe("Import Aave v3 Position", function () {
   let dsaWallet0: any;
   let dsaWallet1: any;
   let dsaWallet2: any;
+  let walletB: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
   let connector: any;
@@ -298,10 +299,11 @@ describe("Import Aave v3 Position", function () {
     it("Should build DSA v2", async () => {
       dsaWallet0 = await buildDSAv2(wallet.address);
       expect(!!dsaWallet0.address).to.be.true;
-      dsaWallet2 = await buildDSAv2(wallet.address);
-      expect(!!dsaWallet2.address).to.be.true;
-      dsaWallet1 = await buildDSAv2(dsaWallet2.address);
+      dsaWallet1 = await buildDSAv2(wallet.address);
+      walletB = await ethers.getSigner(dsaWallet1.address);
       expect(!!dsaWallet1.address).to.be.true;
+      dsaWallet2 = await buildDSAv2(dsaWallet1.address);
+      expect(!!dsaWallet2.address).to.be.true;
     });
 
     it("Deposit ETH into DSA wallet", async function () {
@@ -325,7 +327,8 @@ describe("Import Aave v3 Position", function () {
     it("Should create DSA Aave v3 position of DAI(collateral) and USDC(debt)", async () => {
       await token.connect(signer).transfer(dsaWallet2.address, ethers.utils.parseEther("10"));
       console.log(await token.connect(signer).balanceOf(dsaWallet2.address));
-
+      console.log(dsaWallet1.address);
+      console.log(walletB.address);
       const spells = [
         //deposit DAI in aave
         {
@@ -340,7 +343,7 @@ describe("Import Aave v3 Position", function () {
           args: [USDC, parseUnits("3", 6), 2, 0, 0]
         }
       ];
-      const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
+      const tx = await dsaWallet2.connect(walletB).cast(...encodeSpells(spells), walletB.address);
       const receipt = await tx.wait();
     });
 
@@ -410,7 +413,7 @@ describe("Import Aave v3 Position", function () {
         {
           connector: "AAVE-V3-IMPORT-X",
           method: "importAave",
-          args: [dsaWallet1.address, [[DAI], [USDC], false, [amountB.toFixed(0)]]]
+          args: [dsaWallet2.address, [[DAI], [USDC], false, [amountB.toFixed(0)]]]
         },
         {
           connector: "INSTAPOOL-C",
@@ -426,7 +429,7 @@ describe("Import Aave v3 Position", function () {
           args: [USDC, amount0.toString(), 5, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
-      const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
+      const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
       const receipt = await tx.wait();
     });
 

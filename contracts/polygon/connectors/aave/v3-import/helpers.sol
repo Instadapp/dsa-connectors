@@ -263,10 +263,10 @@ contract AaveHelpers is Helper {
 			);
 
 			for (uint256 i = 0; i < _length; i++) {
+			_targets[i] = "BASIC-A";
 				if (amts[i] > 0) {
 					uint256 _amt = amts[i];
 					address _token = tokens[i];
-					_targets[i] = "BASIC-A";
 					_data[i] = abi.encodeWithSelector(
 						basicWithdraw,
 						_token,
