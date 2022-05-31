@@ -324,7 +324,7 @@ describe("Import Aave v3 Position", function () {
 
     it("Should create DSA Aave v3 position of DAI(collateral) and USDC(debt)", async () => {
       await token.connect(signer).transfer(dsaWallet2.address, ethers.utils.parseEther("10"));
-      console.log(await token.connect(signer).balanceOf(dsaWallet2.address).toFixed(0));
+      console.log(await token.connect(signer).balanceOf(dsaWallet2.address));
 
       const spells = [
         //deposit DAI in aave
@@ -337,7 +337,7 @@ describe("Import Aave v3 Position", function () {
         {
           connector: "AAVE-V3-A",
           method: "borrow",
-          args: [USDC, parseUnits("3", 6), 0, 0]
+          args: [USDC, parseUnits("3", 6), 2, 0, 0]
         }
       ];
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
@@ -352,6 +352,7 @@ describe("Import Aave v3 Position", function () {
       expect(await usdcToken.connect(wallet0).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(3).multipliedBy(1e6).toString()
       );
+      console.log(await usdcToken.connect(wallet0).balanceOf(dsaWallet2.address).toString());
     });
   });
 
@@ -393,7 +394,6 @@ describe("Import Aave v3 Position", function () {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
         new BigNumber(8).multipliedBy(1e18).toString()
       );
-      console.log(await usdcToken.connect(wallet0).balanceOf(dsaWallet0.address));
     });
 
     it("Should merge Aave position", async () => {
@@ -432,7 +432,7 @@ describe("Import Aave v3 Position", function () {
 
     it("Should check DSA-2 AAVE position", async () => {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(
-        new BigNumber(8).multipliedBy(1e18).toString()
+        new BigNumber(10).multipliedBy(1e18).toString()
       );
     });
   });
