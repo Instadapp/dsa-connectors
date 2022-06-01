@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 /**
  * @title Aave v3 import connector .
- * @dev  Import EOA's / withdraw DSA's aave V3 position to DSA's aave v3 position
+ * @dev  Import EOA's / External DSA's aave V3 position to DSA's aave v3 position
  */
 
 import { TokenInterface, AccountInterface, ListInterface } from "../../../common/interfaces.sol";
