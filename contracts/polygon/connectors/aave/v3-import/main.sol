@@ -16,11 +16,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 		internal
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (
-			ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556).accountID(
-				userAccount
-			) == 0
-		) {
+		if (instaList.accountID(userAccount) == 0) {
 			require(
 				AccountInterface(address(this)).isAuth(userAccount),
 				"user-account-not-auth"

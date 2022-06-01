@@ -221,6 +221,7 @@ describe("Import Aave v3 Position", function () {
   let dsaWallet1: any;
   let dsaWallet2: any;
   let walletB: any;
+  let walletBsigner: any;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
   let connector: any;
@@ -325,6 +326,13 @@ describe("Import Aave v3 Position", function () {
     });
 
     it("Should create DSA Aave v3 position of DAI(collateral) and USDC(debt)", async () => {
+      await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [walletB.address]
+      });
+
+      walletBsigner = await ethers.getSigner(walletB.address);
+
       await token.connect(signer).transfer(dsaWallet2.address, ethers.utils.parseEther("10"));
       console.log(await token.connect(signer).balanceOf(dsaWallet2.address));
       console.log(dsaWallet1.address);
@@ -343,7 +351,7 @@ describe("Import Aave v3 Position", function () {
           args: [USDC, parseUnits("3", 6), 2, 0, 0]
         }
       ];
-      const tx = await dsaWallet2.connect(walletB).cast(...encodeSpells(spells), walletB.address);
+      const tx = await dsaWallet2.connect(walletBsigner).cast(...encodeSpells(spells), walletB.address);
       const receipt = await tx.wait();
     });
 
@@ -351,6 +359,7 @@ describe("Import Aave v3 Position", function () {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(10).multipliedBy(1e18).toString()
       );
+      console.log((await aDai.connect(wallet0).balanceOf(dsaWallet2.address)).toString());
 
       expect(await usdcToken.connect(wallet0).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(3).multipliedBy(1e6).toString()
@@ -395,7 +404,7 @@ describe("Import Aave v3 Position", function () {
 
     it("Should check DSA-1 AAVE position", async () => {
       expect(await aDai.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
-        new BigNumber(8).multipliedBy(1e18).toString()
+        new BigNumber(10).multipliedBy(1e18).toString()
       );
     });
 
@@ -413,7 +422,7 @@ describe("Import Aave v3 Position", function () {
         {
           connector: "AAVE-V3-IMPORT-X",
           method: "importAave",
-          args: [dsaWallet2.address, [[DAI], [USDC], false, [amountB.toFixed(0)]]]
+          args: [dsaWallet2.address, [[DAI], [USDC], false, [amountB.toFixed(0)]]]  //dsaWallet2 --> DSA_A DSA with aave position
         },
         {
           connector: "INSTAPOOL-C",
@@ -429,6 +438,7 @@ describe("Import Aave v3 Position", function () {
           args: [USDC, amount0.toString(), 5, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
+      //merge to dsaWallet1
       const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
       const receipt = await tx.wait();
     });
