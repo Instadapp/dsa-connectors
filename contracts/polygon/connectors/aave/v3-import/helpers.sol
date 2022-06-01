@@ -277,7 +277,7 @@ contract AaveHelpers is Helper {
 					_targets[_cntr] = "BASIC-A";
 					_data[_cntr] = abi.encodeWithSelector(
 						basicWithdraw,
-						tokens[i],
+						_token,
 						_amt,
 						address(this),
 						0,
@@ -349,7 +349,7 @@ contract AaveHelpers is Helper {
 					_targets[_cntr] = "BASIC-A";
 					_data[_cntr] = abi.encodeWithSelector(
 						basicWithdraw,
-						tokens[i],
+						_token,
 						_amt,
 						address(this),
 						0,
