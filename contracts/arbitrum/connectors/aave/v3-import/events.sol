@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 contract Events {
 	event LogAaveV3Import(
 		address indexed user,
-		address[] ctokens,
+		address[] atokens,
 		string[] supplyIds,
 		string[] borrowIds,
 		uint256[] flashLoanFees,
@@ -14,7 +14,7 @@ contract Events {
 	);
 	event LogAaveV3ImportWithCollateral(
 		address indexed user,
-		address[] ctokens,
+		address[] atokens,
 		string[] supplyIds,
 		string[] borrowIds,
 		uint256[] flashLoanFees,
