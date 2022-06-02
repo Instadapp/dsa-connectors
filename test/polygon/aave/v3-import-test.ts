@@ -334,8 +334,7 @@ describe("Import Aave v3 Position", function () {
       walletBsigner = await ethers.getSigner(walletB.address);
 
       await token.connect(signer).transfer(dsaWallet2.address, ethers.utils.parseEther("10"));
-      console.log(dsaWallet1.address);
-      console.log(walletB.address);
+
       const spells = [
         //deposit DAI in aave
         {
@@ -410,18 +409,18 @@ describe("Import Aave v3 Position", function () {
     it("Should merge Aave position", async () => {
       //Approving max amount
       const amount = ethers.constants.MaxUint256;
-      const tx0 = await aDai.connect(wallet0).approve(dsaWallet1.address, amount);
+      const tx0 = await aDai.connect(walletBsigner).approve(dsaWallet1.address, amount);
 
-      const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(dsaWallet2.address));
+      const amount0 = new BigNumber(await usdcToken.connect(walletBsigner).balanceOf(dsaWallet2.address));
       const amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
-      console.log(amount0.toFixed(0));
+      console.log(amountWithFee.toString());
 
       const flashSpells = [
         {
           connector: "AAVE-V3-IMPORT-X",
           method: "importAave",
-          args: [dsaWallet2.address, [[DAI], [USDC], false, [amountB.toFixed(0)]]]  //dsaWallet2 --> DSA_A DSA with aave position
+          args: [dsaWallet2.address, [[DAI], [USDC], false, [amountB.toFixed(0)]]] //dsaWallet2 --> DSA_A DSA with aave position
         },
         {
           connector: "INSTAPOOL-C",

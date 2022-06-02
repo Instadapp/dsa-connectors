@@ -273,7 +273,7 @@ contract AaveHelpers is Helper {
 			for (uint256 i = 0; i < _length; i++) {
 				if (amts[i] > 0) {
 					uint256 _amt = amts[i];
-					address _token = tokens[i];
+					address _token = address(atokenContracts[i]);
 					_targets[_cntr] = "BASIC-A";
 					_data[_cntr] = abi.encodeWithSelector(
 						basicWithdraw,
@@ -345,7 +345,7 @@ contract AaveHelpers is Helper {
 			for (uint256 i = 0; i < _length; i++) {
 				if (amts[i] > 0) {
 					uint256 _amt = amts[i];
-					address _token = tokens[i];
+					address _token = address(atokenContracts[i]);
 					_targets[_cntr] = "BASIC-A";
 					_data[_cntr] = abi.encodeWithSelector(
 						basicWithdraw,
