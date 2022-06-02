@@ -334,7 +334,6 @@ describe("Import Aave v3 Position", function () {
       walletBsigner = await ethers.getSigner(walletB.address);
 
       await token.connect(signer).transfer(dsaWallet2.address, ethers.utils.parseEther("10"));
-      console.log(await token.connect(signer).balanceOf(dsaWallet2.address));
       console.log(dsaWallet1.address);
       console.log(walletB.address);
       const spells = [
@@ -356,15 +355,15 @@ describe("Import Aave v3 Position", function () {
     });
 
     it("Should check position of dsa", async () => {
-      expect(await aDai.connect(wallet0).balanceOf(dsaWallet2.address)).to.be.gte(
+      expect(await aDai.connect(walletBsigner).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(10).multipliedBy(1e18).toString()
       );
-      console.log((await aDai.connect(wallet0).balanceOf(dsaWallet2.address)).toString());
+      console.log((await aDai.connect(walletBsigner).balanceOf(dsaWallet2.address)).toString());
 
-      expect(await usdcToken.connect(wallet0).balanceOf(dsaWallet2.address)).to.be.gte(
+      expect(await usdcToken.connect(walletBsigner).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(3).multipliedBy(1e6).toString()
       );
-      console.log(await usdcToken.connect(wallet0).balanceOf(dsaWallet2.address).toString());
+      console.log((await usdcToken.connect(walletBsigner).balanceOf(dsaWallet2.address)).toString());
     });
   });
 
