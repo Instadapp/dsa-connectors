@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
-import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
+import { TokenInterface, AccountInterface, ListInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, AavePoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
 import "./events.sol";
 import "./interface.sol";
@@ -25,6 +26,12 @@ abstract contract Helper is DSMath, Basic {
 	 */
 	AaveDataProviderInterface internal constant aaveData =
 		AaveDataProviderInterface(0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654);
+
+	/**
+	 * @dev InstaList
+	 */
+	ListInterface internal constant instaList =
+		ListInterface(0x10e166c3FAF887D8a61dE6c25039231eE694E926);
 
 	function getIsColl(address token, address user)
 		internal
@@ -231,20 +238,60 @@ contract AaveHelpers is Helper {
 		address[] memory tokens,
 		address userAccount
 	) internal {
-		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0) {
-				uint256 _amt = amts[i];
-				require(
-					atokenContracts[i].transferFrom(
-						userAccount,
-						address(this),
-						_amt
-					),
-					"allowance?"
-				);
+		if (instaList.accountID(userAccount) == 0) {
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
+					require(
+						atokenContracts[i].transferFrom(
+							userAccount,
+							address(this),
+							_amt
+						),
+						"allowance?"
+					);
+					if (!getIsColl(tokens[i], address(this))) {
+						aave.setUserUseReserveAsCollateral(tokens[i], true);
+					}
+				}
+			}
+		} else {
+			uint256 _len = 0;
+			uint256 _cntr = 0;
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					_len++;
+				}
+			}
+			string[] memory _targets = new string[](_len);
+			bytes[] memory _data = new bytes[](_len);
+			address[] memory _tokens = new address[](_len);
+			bytes4 basicWithdraw = bytes4(
+				keccak256("withdraw(address,uint256,address,uint256,uint256)")
+			);
 
-				if (!getIsColl(tokens[i], address(this))) {
-					aave.setUserUseReserveAsCollateral(tokens[i], true);
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
+					address _token = address(atokenContracts[i]);
+					_targets[_cntr] = "BASIC-A";
+					_data[_cntr] = abi.encodeWithSelector(
+						basicWithdraw,
+						_token,
+						_amt,
+						address(this),
+						0,
+						0
+					);
+					_tokens[_cntr] = tokens[i];
+					_cntr++;
+				}
+			}
+
+			AccountInterface(userAccount).cast(_targets, _data, address(this));
+			for (uint256 i = 0; i < _len; i++) {
+				if (!getIsColl(_tokens[i], address(this))) {
+					aave.setUserUseReserveAsCollateral(_tokens[i], true);
 				}
 			}
 		}
@@ -259,20 +306,67 @@ contract AaveHelpers is Helper {
 		bool[] memory colEnable,
 		address userAccount
 	) internal {
-		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0) {
-				uint256 _amt = amts[i];
-				require(
-					atokenContracts[i].transferFrom(
-						userAccount,
-						address(this),
-						_amt
-					),
-					"allowance?"
-				);
+		if (instaList.accountID(userAccount) == 0) {
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
+					require(
+						atokenContracts[i].transferFrom(
+							userAccount,
+							address(this),
+							_amt
+						),
+						"allowance?"
+					);
 
-				if (!getIsColl(tokens[i], address(this))) {
-					aave.setUserUseReserveAsCollateral(tokens[i], colEnable[i]);
+					if (!getIsColl(tokens[i], address(this))) {
+						aave.setUserUseReserveAsCollateral(
+							tokens[i],
+							colEnable[i]
+						);
+					}
+				}
+			}
+		} else {
+			uint256 _len = 0;
+			uint256 _cntr = 0;
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					_len++;
+				}
+			}
+			string[] memory _targets = new string[](_len);
+			bytes[] memory _data = new bytes[](_len);
+			address[] memory _tokens = new address[](_len);
+			bytes4 basicWithdraw = bytes4(
+				keccak256("withdraw(address,uint256,address,uint256,uint256)")
+			);
+
+			for (uint256 i = 0; i < _length; i++) {
+				if (amts[i] > 0) {
+					uint256 _amt = amts[i];
+					address _token = address(atokenContracts[i]);
+					_targets[_cntr] = "BASIC-A";
+					_data[_cntr] = abi.encodeWithSelector(
+						basicWithdraw,
+						_token,
+						_amt,
+						address(this),
+						0,
+						0
+					);
+					_tokens[_cntr] = tokens[i];
+					_cntr++;
+				}
+			}
+
+			AccountInterface(userAccount).cast(_targets, _data, address(this));
+			for (uint256 i = 0; i < _len; i++) {
+				if (!getIsColl(_tokens[i], address(this))) {
+					aave.setUserUseReserveAsCollateral(
+						_tokens[i],
+						colEnable[i]
+					);
 				}
 			}
 		}
