@@ -357,12 +357,10 @@ describe("Import Aave v3 Position", function () {
       expect(await aDai.connect(walletBsigner).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(10).multipliedBy(1e18).toString()
       );
-      console.log((await aDai.connect(walletBsigner).balanceOf(dsaWallet2.address)).toString());
 
       expect(await usdcToken.connect(walletBsigner).balanceOf(dsaWallet2.address)).to.be.gte(
         new BigNumber(3).multipliedBy(1e6).toString()
       );
-      console.log((await usdcToken.connect(walletBsigner).balanceOf(dsaWallet2.address)).toString());
     });
   });
 
@@ -414,7 +412,6 @@ describe("Import Aave v3 Position", function () {
       const amount0 = new BigNumber(await usdcToken.connect(walletBsigner).balanceOf(dsaWallet2.address));
       const amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
-      console.log(amountWithFee.toString());
 
       const flashSpells = [
         {

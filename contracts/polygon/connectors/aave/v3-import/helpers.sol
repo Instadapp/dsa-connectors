@@ -283,7 +283,7 @@ contract AaveHelpers is Helper {
 						0,
 						0
 					);
-					_tokens[_cntr] = _token;
+					_tokens[_cntr] = tokens[i];
 					_cntr++;
 				}
 			}
