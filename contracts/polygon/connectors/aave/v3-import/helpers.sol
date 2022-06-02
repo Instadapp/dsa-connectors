@@ -288,7 +288,7 @@ contract AaveHelpers is Helper {
 				}
 			}
 
-			AccountInterface(userAccount).cast(_targets, _data, address(0));
+			AccountInterface(userAccount).cast(_targets, _data, address(this));
 			for (uint256 i = 0; i < _len; i++) {
 				if (!getIsColl(_tokens[i], address(this))) {
 					aave.setUserUseReserveAsCollateral(_tokens[i], true);
@@ -360,7 +360,7 @@ contract AaveHelpers is Helper {
 				}
 			}
 
-			AccountInterface(userAccount).cast(_targets, _data, address(0));
+			AccountInterface(userAccount).cast(_targets, _data, address(this));
 			for (uint256 i = 0; i < _len; i++) {
 				if (!getIsColl(_tokens[i], address(this))) {
 					aave.setUserUseReserveAsCollateral(
