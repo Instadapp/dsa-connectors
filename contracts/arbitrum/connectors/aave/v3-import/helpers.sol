@@ -31,7 +31,7 @@ abstract contract Helper is DSMath, Basic {
 	 * @dev InstaList
 	 */
 	ListInterface internal constant instaList =
-		ListInterface(0x839c2D3aDe63DF5b0b8F3E57D5e145057Ab41556);
+		ListInterface(0x3565F6057b7fFE36984779A507fC87b31EFb0f09);
 
 	function getIsColl(address token, address user)
 		internal
