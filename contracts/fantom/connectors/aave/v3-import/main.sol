@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 /**
  * @title Aave v3 import connector .
- * @dev  Import EOA's / External DSA's aave V3 position to DSA's aave v3 position
+ * @dev  Import EOA's aave V3 position to DSA's aave v3 position
  */
 
 import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
@@ -16,17 +16,10 @@ contract AaveV3ImportResolver is AaveHelpers {
 		internal
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (instaList.accountID(userAccount) == 0) {
-			require(
-				AccountInterface(address(this)).isAuth(userAccount),
-				"user-account-not-auth"
-			);
-		} else {
-			require(
-				AccountInterface(userAccount).isAuth(address(this)),
-				"user-account-not-auth"
-			);
-		}
+		require(
+			AccountInterface(address(this)).isAuth(userAccount),
+			"user-account-not-auth"
+		);
 
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
 
@@ -99,29 +92,18 @@ contract AaveV3ImportResolver is AaveHelpers {
 		);
 	}
 
-	function _importAaveWithCollateral(
-		address userAccount,
-		ImportInputData memory inputData,
-		bool[] memory enableCollateral
-	) internal returns (string memory _eventName, bytes memory _eventParam) {
-		if (instaList.accountID(userAccount) == 0) {
-			require(
-				AccountInterface(address(this)).isAuth(userAccount),
-				"user-account-not-auth"
-			);
-		} else {
-			require(
-				AccountInterface(userAccount).isAuth(address(this)),
-				"user-account-not-auth"
-			);
-		}
-
-		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
+	function _importAaveWithCollateral(address userAccount, ImportInputData memory inputData, bool[] memory enableCollateral)
+		internal
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		require(
-			enableCollateral.length == inputData.supplyTokens.length,
-			"lengths-not-same"
+			AccountInterface(address(this)).isAuth(userAccount),
+			"user-account-not-auth"
 		);
 
+		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
+		require(enableCollateral.length == inputData.supplyTokens.length, "lengths-not-same");
+		
 		ImportData memory data;
 
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
@@ -196,7 +178,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 	/**
 	 * @dev Import aave V3 position .
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
-	 * @param userAccount The address of the EOA from which Aave position will be imported or the address of the DSA to which the DSA's Aave position will be merged
+	 * @param userAccount The address of the EOA from which aave position will be imported
 	 * @param inputData The struct containing all the neccessary input data
 	 */
 	function importAave(address userAccount, ImportInputData memory inputData)
@@ -210,27 +192,19 @@ contract AaveV3ImportResolver is AaveHelpers {
 	/**
 	 * @dev Import aave V3 position (with collateral).
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
-	 * @param userAccount The address of the EOA from which Aave position will be imported or the address of the DSA to which the DSA's Aave position will be merged
+	 * @param userAccount The address of the EOA from which aave position will be imported
 	 * @param inputData The struct containing all the neccessary input data
 	 * @param enableCollateral The boolean array to enable selected collaterals in the imported position
 	 */
-	function importAaveWithCollateral(
-		address userAccount,
-		ImportInputData memory inputData,
-		bool[] memory enableCollateral
-	)
+	function importAaveWithCollateral(address userAccount, ImportInputData memory inputData, bool[] memory enableCollateral)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(_eventName, _eventParam) = _importAaveWithCollateral(
-			userAccount,
-			inputData,
-			enableCollateral
-		);
+		(_eventName, _eventParam) = _importAaveWithCollateral(userAccount, inputData, enableCollateral);
 	}
 }
 
 contract ConnectV2AaveV3ImportFantom is AaveV3ImportResolver {
-	string public constant name = "Aave-v3-import-v1.2";
+	string public constant name = "Aave-v3-import-v1.1";
 }
