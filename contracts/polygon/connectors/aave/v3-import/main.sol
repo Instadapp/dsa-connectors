@@ -21,6 +21,11 @@ contract AaveV3ImportResolver is AaveHelpers {
 				AccountInterface(address(this)).isAuth(userAccount),
 				"user-account-not-auth"
 			);
+		} else {
+			require(
+				AccountInterface(userAccount).isAuth(address(this)),
+				"user-account-not-auth"
+			);
 		}
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
 
@@ -98,10 +103,17 @@ contract AaveV3ImportResolver is AaveHelpers {
 		ImportInputData memory inputData,
 		bool[] memory enableCollateral
 	) internal returns (string memory _eventName, bytes memory _eventParam) {
-		require(
-			AccountInterface(address(this)).isAuth(userAccount),
-			"user-account-not-auth"
-		);
+		if (instaList.accountID(userAccount) == 0) {
+			require(
+				AccountInterface(address(this)).isAuth(userAccount),
+				"user-account-not-auth"
+			);
+		} else {
+			require(
+				AccountInterface(userAccount).isAuth(address(this)),
+				"user-account-not-auth"
+			);
+		}
 
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
 		require(
