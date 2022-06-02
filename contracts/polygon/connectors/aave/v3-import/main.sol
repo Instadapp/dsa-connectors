@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
  * @dev  Import EOA's / External DSA's aave V3 position to DSA's aave v3 position
  */
 
-import { TokenInterface, AccountInterface, ListInterface } from "../../../common/interfaces.sol";
+import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, ATokenInterface } from "./interface.sol";
 import "./helpers.sol";
 import "./events.sol";
@@ -209,7 +209,7 @@ contract AaveV3ImportResolver is AaveHelpers {
 	/**
 	 * @dev Import aave V3 position (with collateral).
 	 * @notice Import EOA's aave V3 position to DSA's aave v3 position
-	 * @param userAccount The address of the EOA from which aave position will be imported
+	 * @param userAccount The address of the EOA from which aave position will be imported or the address of the DSA to which the DSA's Aave position will be merged
 	 * @param inputData The struct containing all the neccessary input data
 	 * @param enableCollateral The boolean array to enable selected collaterals in the imported position
 	 */
