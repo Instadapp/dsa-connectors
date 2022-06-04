@@ -23,7 +23,7 @@ abstract contract Helper {
 
 contract SwapHelpers is Helper {
 	/**
-	 *@dev Performs the swap usign the dex aggregators.
+	 *@dev Swap using the dex aggregators.
 	 *@param _connectors name of the connectors in preference order.
 	 *@param _inputData data for the swap cast.
 	 */

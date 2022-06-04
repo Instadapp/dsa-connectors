@@ -14,7 +14,7 @@ import { Events } from "./events.sol";
 abstract contract Swap is SwapHelpers, Events {
 	/**
 	 * @dev Swap ETH/ERC20_Token using dex aggregators.
-	 * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
+	 * @notice Swap tokens from exchanges like 1INCH, 0x etc, with calculation done off-chain.
 	 * @param _connectors The name of the connectors like 1INCH-A, 0x etc, in order of their priority.
 	 * @param buyAddr The address of the token to buy.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param sellAddr The address of the token to sell.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
