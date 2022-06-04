@@ -57,11 +57,7 @@ abstract contract Swap is SwapHelpers, Events {
 		if (!success) {
 			revert("swap-failed");
 		} else {
-			(, _eventParam) = abi.decode(returnData, (string, bytes));
-			(, , _buyAmt, _sellAmt, , ) = abi.decode(
-				_eventParam,
-				(address, address, uint256, uint256, uint256, uint256)
-			);
+			(_buyAmt, _sellAmt) = decodeEvents(_connector, returnData);
 		}
 
 		_eventName = "LogSwap(string,address,address,uint256,uint256,uint256,uint256)";
@@ -77,6 +73,6 @@ abstract contract Swap is SwapHelpers, Events {
 	}
 }
 
-contract ConnectV2Swap is Swap {
+contract ConnectV2SwapPolygon is Swap {
 	string public name = "Swap-v1";
 }

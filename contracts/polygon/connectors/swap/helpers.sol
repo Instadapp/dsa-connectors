@@ -45,9 +45,9 @@ contract SwapHelpers is Helper {
 			"callDatas-length-invalid"
 		);
 
+		// require _connectors[i] == "1INCH-A" || "ZEROX-A" || "PARASWAP-A" || similar connectors 
+
 		for (uint256 i = 0; i < _connectors.length; i++) {
-			string[] memory _target = new string[](1);
-			bytes[] memory _data = new bytes[](1);
 			bytes4 swapData = bytes4(
 				keccak256("swap(address,address,uint256,uint256,bytes,uint256)")
 			);
@@ -61,8 +61,7 @@ contract SwapHelpers is Helper {
 				);
 			}
 
-			_target[0] = _connectors[i];
-			_data[0] = abi.encodeWithSelector(
+			bytes memory _data = abi.encodeWithSelector(
 				swapData,
 				_inputData.buyAddr,
 				_inputData.sellAddr,
@@ -72,24 +71,33 @@ contract SwapHelpers is Helper {
 				_inputData.setId
 			);
 
-			bytes4 _castData = bytes4(
-				keccak256("cast(string[],bytes[],address)")
-			);
-			bytes memory castData = abi.encodeWithSelector(
-				_castData,
-				_target,
-				_data,
-				address(0)
-			);
-
 			(success, returnData) = instaConnectors
 				.connectors(_connectors[i])
-				.delegatecall(castData);
+				.delegatecall(_data);
 
 			if (success) {
 				_connector = _connectors[i];
 				break;
 			}
+		}
+	}
+
+	function decodeEvents(string memory _connector, bytes memory returnData)
+		internal
+		view
+		returns (uint256 _buyAmt, uint256 _sellAmt)
+	{
+		(, bytes memory _eventParam) = abi.decode(returnData, (string, bytes));
+		if (keccak256(bytes(_connector)) == keccak256(bytes("PARASWAP-A"))) {
+			(, , _buyAmt, _sellAmt, ) = abi.decode(
+				_eventParam,
+				(address, address, uint256, uint256, uint256)
+			);
+		} else {
+			(, , _buyAmt, _sellAmt, , ) = abi.decode(
+				_eventParam,
+				(address, address, uint256, uint256, uint256, uint256)
+			);
 		}
 	}
 }
