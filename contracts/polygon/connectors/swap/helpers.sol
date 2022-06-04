@@ -22,10 +22,11 @@ abstract contract Helper {
 }
 
 contract SwapHelpers is Helper {
-    /**
-     *@param _connectors name of the connectors in preference order.
-     *@param _inputData data for the swap cast.
-     */
+	/**
+	 *@dev Performs the swap usign the dex aggregators.
+	 *@param _connectors name of the connectors in preference order.
+	 *@param _inputData data for the swap cast.
+	 */
 	function _swap(string[] memory _connectors, InputData memory _inputData)
 		internal
 		returns (
@@ -51,7 +52,7 @@ contract SwapHelpers is Helper {
 				keccak256("swap(address,address,uint256,uint256,bytes,uint256)")
 			);
 
-            string memory _1INCH = "1INCH-A";
+			string memory _1INCH = "1INCH-A";
 			if (keccak256(bytes(_connectors[i])) == keccak256(bytes(_1INCH))) {
 				swapData = bytes4(
 					keccak256(
