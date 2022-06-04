@@ -21,3 +21,7 @@ interface AccountInterface {
     function disable(address) external;
     function isAuth(address) external view returns (bool);
 }
+
+interface InstaConnectors {
+    function connectors(string memory) external returns (address);
+}
