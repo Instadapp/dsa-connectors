@@ -167,7 +167,7 @@ describe("Swap | Avalanche", function () {
         "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70" // usdt address
       );
 
-      expect(await usdtToken.balanceOf(dsaWallet0.address)).to.be.gte(buyTokenAmountZeroX);
+      expect(await usdtToken.balanceOf(dsaWallet0.address)).to.be.gte(buyTokenAmountParaswap);
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
     });
   });
