@@ -45,7 +45,7 @@ contract SwapHelpers is Helper {
 			"callDatas-length-invalid"
 		);
 
-		// require _connectors[i] == "1INCH-A" || "ZEROX-A" || "PARASWAP-A" || similar connectors 
+		// require _connectors[i] == "1INCH-A" || "ZEROX-A" || "PARASWAP-A" || similar connectors
 
 		for (uint256 i = 0; i < _connectors.length; i++) {
 			bytes4 swapData = bytes4(
