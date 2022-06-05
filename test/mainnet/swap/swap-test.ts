@@ -76,25 +76,26 @@ describe("Swap | Mainnet", function () {
       let buyTokenAmount1Inch: any;
       let buyTokenAmountParaswap: any;
       async function getArg() {
-        // const slippage = 0.5;
-        /* matic -> usdt */
-        const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // matic,  decimals 18
+        const slippage = 0.5;
+        /* eth -> dai */
+        const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // eth,  decimals 18
         const sellTokenDecimals = 18;
-        const buyTokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT, decimals 6
-        const buyTokenDecimals = 6;
-        const amount = 2;
+        const buyTokenAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F"; // DAI, decimals 6
+        const buyTokenDecimals = 18;
+        const amount = 1;
 
         const srcAmount = new BigNumber(amount).times(new BigNumber(10).pow(sellTokenDecimals)).toFixed(0);
 
         let zeroXUrl = `https://api.0x.org/swap/v1/quote`;
+        let inchUrl = `https://api.1inch.exchange/v4.0/1/swap`;
         let paraswapUrl1 = `https://apiv5.paraswap.io/prices/`;
         let paraswapUrl2 = `https://apiv5.paraswap.io/transactions/1?ignoreChecks=true`;
 
         //zeroX
         const paramsZeroX = {
-          buyToken: "USDT",
+          buyToken: "DAI",
           sellToken: "ETH",
-          sellAmount: "2000000000000000000" // Always denominated in wei
+          sellAmount: "1000000000000000000" // Always denominated in wei
         };
 
         const responseZeroX = await axios.get(zeroXUrl, { params: paramsZeroX }).then((data: any) => data);
@@ -128,6 +129,24 @@ describe("Swap | Mainnet", function () {
         };
         const calldataPara = (await axios.post(paraswapUrl2, txConfig)).data.data;
 
+        //1inch
+        const paramDaiUsdc = {
+            buyToken: buyTokenAddress,
+            sellToken: sellTokenAddress,
+            sellAmount: "1000000000000000000",
+            dsaAddress: dsaWallet0.address
+          }
+          const response1 = await axios.get("https://api.instadapp.io/defi/mainnet/1inch/swap", {
+              params: paramDaiUsdc
+          });
+          
+          const data1 = response1.data;
+          // console.log(data1);
+          let unitAmt1Inch = data1.unitAmt;
+          const calldata1Inch = data1.calldata;
+          buyTokenAmount1Inch = data1.buyTokenAmount;
+          console.log(buyTokenAmount1Inch);
+
         let calculateUnitAmt = (buyAmount: any) => {
           const buyTokenAmountRes = new BigNumber(buyAmount)
             .dividedBy(new BigNumber(10).pow(buyTokenDecimals))
@@ -142,10 +161,10 @@ describe("Swap | Mainnet", function () {
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
 
-        let unitAmts = [unitAmt0x, unitAmtParaswap];
-        let calldatas = [calldataZeroX, calldataPara];
+        let unitAmts = [unitAmt1Inch, unitAmt0x, unitAmtParaswap];
+        let calldatas = [calldata1Inch, calldataZeroX, calldataPara];
 
-        let connectors = ["ZEROX-A", "PARASWAP-A"];
+        let connectors = ["1INCH-A","ZEROX-A", "PARASWAP-A"];
 
         return [connectors, buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, calldatas, 0];
       }
@@ -161,12 +180,12 @@ describe("Swap | Mainnet", function () {
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet1.getAddress());
       const receipt = await tx.wait();
 
-      const usdtToken = await ethers.getContractAt(
+      const daiToken = await ethers.getContractAt(
         er20abi,
-        "0xdAC17F958D2ee523a2206206994597C13D831ec7" // dai address
+        "0x6B175474E89094C44Da98b954EedeAC495271d0F" // dai address
       );
 
-      expect(await usdtToken.balanceOf(dsaWallet0.address)).to.be.gte(buyTokenAmountZeroX);
+      expect(await daiToken.balanceOf(dsaWallet0.address)).to.be.gte(buyTokenAmount1Inch);
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("9"));
     });
   });
