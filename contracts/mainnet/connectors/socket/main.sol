@@ -10,6 +10,7 @@ pragma experimental ABIEncoderV2;
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./events.sol";
 
 abstract contract SocketConnector is Basic {
 
@@ -37,15 +38,13 @@ abstract contract SocketConnector is Basic {
             require(success);
 
         } else {
-
             IERC20 _tokenContract = IERC20(_params.token);
-
             _params.amount = _params.amount == uint256(-1)
 				? _tokenContract.balanceOf(address(this))
 				: _params.amount;
 
 
-            _tokenContract.approve(_params.allowanceTarget, _params.amount);
+            _tokenContract.approve(_params.to, _params.amount);
             (bool success, ) = _params.to.call(_params.txData);
             require(success);
         }
@@ -60,7 +59,6 @@ abstract contract SocketConnector is Basic {
 			_getId
 		);
     }
-
 }
 
 contract ConnectV2Socket is SocketConnector {
