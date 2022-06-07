@@ -187,13 +187,13 @@ describe("Socket Connector", function () {
       const quote = await getQuote(fromChainId, DAI_ADDR_ETH, toChainId, DAI_ADDR_POLYGON, "10000000000000000000", dsaWallet0.address, recipient, "true");
       console.log("quote: ", quote)
       const route = quote.result.routes[0];
-      console.log("route: ", route[0])
+      console.log("route: ", quote.result.routes[0])
       const apiReturnData = await getRouteTransactionData(route);
       console.log("build-tx: ", apiReturnData)
       const { allowanceTarget, minimumApprovalAmount } = apiReturnData.result.approvalData;
 
       const dsa_signer = await ethers.getSigner(dsaWallet0.address)
-      const _params: any = [recipient, apiReturnData.result?.txData, DAI_ADDR_ETH, allowanceTarget, "10000000000000000000"];
+      const _params: any = [apiReturnData.result.txTarget, apiReturnData.result?.txData, DAI_ADDR_ETH, allowanceTarget, "10000000000000000000"];
 
       const spells = [
         {
@@ -209,8 +209,9 @@ describe("Socket Connector", function () {
 
       if (allowanceTarget !== null) {
         const allowanceCheckStatus = await checkAllowance(fromChainId, dsaWallet0.address, allowanceTarget, DAI_ADDR_ETH)
+        console.log("allowanceCheckStatus: ", allowanceCheckStatus);
         const allowanceValue = allowanceCheckStatus.result?.value;
-        console.log("allowanceValue: ", allowanceValue);
+        // console.log("allowanceValue: ", allowanceValue);
 
         if (minimumApprovalAmount > allowanceValue) {
             const approvalTransactionData = await getApprovalTransactionData(fromChainId, dsaWallet0.address, allowanceTarget, DAI_ADDR_ETH, minimumApprovalAmount);

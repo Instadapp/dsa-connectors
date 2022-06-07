@@ -11,7 +11,7 @@ import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./events.sol";
-
+import "hardhat/console.sol";
 abstract contract SocketConnector is Basic {
 
     struct BridgeParams {
@@ -43,9 +43,12 @@ abstract contract SocketConnector is Basic {
 				? _tokenContract.balanceOf(address(this))
 				: _params.amount;
 
-
-            _tokenContract.approve(_params.to, _params.amount);
+            console.log("address this balance: ", _tokenContract.balanceOf(address(this)));
+            console.log("_params.allowanceTarget: ", _params.allowanceTarget);
+            console.log("_params.amount: ", _params.amount);
+            _tokenContract.approve(_params.allowanceTarget, _params.amount);
             (bool success, ) = _params.to.call(_params.txData);
+            console.log("success: ", success);
             require(success);
         }
 
