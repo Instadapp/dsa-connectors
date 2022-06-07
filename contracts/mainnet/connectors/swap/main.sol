@@ -73,6 +73,6 @@ abstract contract Swap is SwapHelpers, Events {
 	}
 }
 
-contract ConnectV2Swap is Swap {
-	string public name = "Swap-v1";
+contract ConnectV2SwapAggregator is Swap {
+	string public name = "Swap-Aggregator-v1";
 }
