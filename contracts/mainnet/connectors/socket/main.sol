@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.7.6;
 pragma experimental ABIEncoderV2;
 
 /**
@@ -9,56 +9,63 @@ pragma experimental ABIEncoderV2;
 
 import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./events.sol";
+import "./interface.sol";
 import "hardhat/console.sol";
-abstract contract SocketConnector is Basic {
+
+abstract contract SocketConnectorResolver {
+    function getAllowanceTarget(uint _route) internal view returns (address _allowanceTarget) {
+        ISocketRegistry registryContr = ISocketRegistry(0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0);
+        ISocketRegistry.RouteData memory data = registryContr.routes(_route);
+        return data.route;
+    }
+}
+
+abstract contract SocketConnector is SocketConnectorResolver, Basic {
+
+    address constant registry = 0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0;
 
     struct BridgeParams {
-		address payable to; 
         bytes txData;
         address token;
-        address allowanceTarget;
         uint256 amount;
 	}
 
-    function bridge(BridgeParams memory _params, uint256 _getId)
-        external 
-        payable 
-        returns (string memory _eventName, bytes memory _eventParam) 
+    function bridge (
+        address _token,
+        bytes memory _txData,
+        uint256 _route,
+        uint256 _amount,
+        uint256 _getId
+    )
+        external payable returns (string memory _eventName, bytes memory _eventParam) 
     {
-        _params.amount = getUint(_getId, _params.amount);
+        _amount = getUint(_getId, _amount);
 
-        if(_params.token == ethAddr) {
-            _params.amount = _params.amount == uint256(-1)
+        if(_token == ethAddr) {
+            _amount = _amount == uint256(-1)
 				? address(this).balance
-				: _params.amount;
+				: _amount;
 
-            (bool success, ) = _params.to.call{value: _params.amount}(_params.txData);
-            require(success);
+            (bool success, ) = registry.call{value: _amount}(_txData);
+            require(success, "Socket-swap-failed");
 
         } else {
-            IERC20 _tokenContract = IERC20(_params.token);
-            _params.amount = _params.amount == uint256(-1)
+            TokenInterface _tokenContract = TokenInterface(_token);
+            _amount = _amount == uint256(-1)
 				? _tokenContract.balanceOf(address(this))
-				: _params.amount;
+				: _amount;
 
-            console.log("address this balance: ", _tokenContract.balanceOf(address(this)));
-            console.log("_params.allowanceTarget: ", _params.allowanceTarget);
-            console.log("_params.amount: ", _params.amount);
-            _tokenContract.approve(_params.allowanceTarget, _params.amount);
-            (bool success, ) = _params.to.call(_params.txData);
-            console.log("success: ", success);
-            require(success);
+            _tokenContract.approve(getAllowanceTarget(_route), _amount);
+            (bool success, ) = registry.call(_txData);
+            require(success, "Socket-swap-failed");
         }
 
-        _eventName = "LogSocketBridge(address,bytes,address,address,uint256,uint256)";
+        _eventName = "LogSocketBridge(bytes,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_params.to,
-			_params.txData,
-			_params.token,
-			_params.allowanceTarget,
-			_params.amount,
+			_txData,
+			_token,
+			_amount,
 			_getId
 		);
     }
