@@ -2,7 +2,6 @@ import { expect } from "chai";
 import hre from "hardhat";
 const { waffle, ethers } = hre;
 const { provider } = waffle;
-import axios from "axios";
 import fetch from "node-fetch";
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
@@ -22,18 +21,18 @@ describe("Socket Connector", function () {
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
   let connector: Contract;
-  let build_tx_data, quote, allowance, sender
+  let build_tx_data, quote
 
   const fromChainId = "1"
   const toChainId = "137"
   const recipient = "0xD625c7458Da1a0758dA8d3AC7f2c10180Bf0E506"
-  const _getId = "0";
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
   const API_KEY = '645b2c8c-5825-4930-baf3-d9b997fcd88c';
 
   const DAI_ADDR_ETH = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+  const ETHADDR = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
   const DAI_ADDR_POLYGON = "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063";
 
   const token = new ethers.Contract(DAI_ADDR_ETH, abis.basic.erc20);
@@ -82,12 +81,10 @@ describe("Socket Connector", function () {
         value: ethers.utils.parseEther("10")
       });
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
-
       await addLiquidity("dai", dsaWallet0.address, ethers.utils.parseEther("10000"));
     });
   });
 
-  //##1
   async function getQuote(
     fromChainId: any,
     fromTokenAddress: any,
@@ -109,7 +106,6 @@ describe("Socket Connector", function () {
     return(quote)
   }
 
-  //##2
   async function getRouteTransactionData(route: any) {
     const response = await fetch('https://api.socket.tech/v2/build-tx', {
             method: 'POST',
@@ -124,50 +120,9 @@ describe("Socket Connector", function () {
     return(build_tx_data)
   }
 
-  //##3
-  async function checkAllowance(
-    chainId: any,
-    owner: any,
-    allowanceTarget: any,
-    tokenAddress: any)
-  {
-      const response = await fetch(`https://api.socket.tech/v2/approval/check-allowance?chainID=${chainId}&owner=${owner}&allowanceTarget=${allowanceTarget}&tokenAddress=${tokenAddress}`, {
-      method: 'GET',
-      headers: {
-          'API-KEY': API_KEY,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-      }
-      });
-      const allowance = await response.json();
-      return allowance;
-  }
-
-  //##4
-  async function getApprovalTransactionData(
-    chainId: any,
-    owner: any,
-    allowanceTarget: any,
-    tokenAddress: any,
-    amount: any)
-  {
-    const response = await fetch(`https://api.socket.tech/v2/approval/build-tx?chainID=${chainId}&owner=${owner}&allowanceTarget=${allowanceTarget}&tokenAddress=${tokenAddress}&amount=${amount}`, {
-          method: 'GET',
-          headers: {
-              'API-KEY': API_KEY,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-          }
-      });
-      const approvalTransactionData = await response.json();
-      sender = await approvalTransactionData.result?.from;
-      return approvalTransactionData;
-  }
-
-  //##5
   async function getBridgeStatus(
     transactionHash: any, 
-    fromChainId: any, 
+    fromChainId: any,
     toChainId: any)
   {
     const response = await fetch(`https://api.socket.tech/v2/bridge-status?transactionHash=${transactionHash}&fromChainId=${fromChainId}&toChainId=${toChainId}`, {
@@ -182,79 +137,110 @@ describe("Socket Connector", function () {
     return status;
 }
 
-  describe("Main", function () {
-    it("should send DAI from ETH to Polygon", async function () {
-      const quote = await getQuote(fromChainId, DAI_ADDR_ETH, toChainId, DAI_ADDR_POLYGON, "10000000000000000000", dsaWallet0.address, recipient, "true");
-      console.log("quote: ", quote)
-      const route = quote.result.routes[0];
-      console.log("route: ", quote.result.routes[0])
-      const apiReturnData = await getRouteTransactionData(route);
-      console.log("build-tx: ", apiReturnData)
-      const { allowanceTarget, minimumApprovalAmount } = apiReturnData.result.approvalData;
+  let getRouteToPass = (pathArray: Array<number>) => {
+    if(pathArray[0] == 0) {
+      let routeNum : number = pathArray[1]
+      return routeNum
+    } else {
+      let routeNum : number = pathArray[0]
+      return routeNum
+    }
+  }
 
-      const dsa_signer = await ethers.getSigner(dsaWallet0.address)
-      const _params: any = [apiReturnData.result.txTarget, apiReturnData.result?.txData, DAI_ADDR_ETH, allowanceTarget, "10000000000000000000"];
+  describe("Main", function () {
+
+    it("should send DAI from ETH to Polygon", async function () {
+
+      const quote = await getQuote(
+        fromChainId, 
+        DAI_ADDR_ETH, 
+        toChainId,
+        DAI_ADDR_POLYGON,
+        "1000000000000000000",
+        dsaWallet0.address,
+        wallet0.address, 
+        "true"
+      );
+      const route = quote.result.routes[0]
+      const splitArr = route.userTxs[0].routePath.split("-");
+      const routeToPass : number = getRouteToPass(splitArr);
+      console.log("routeToPass: ", routeToPass);
+
+      let apiReturnData = await getRouteTransactionData(route);
 
       const spells = [
         {
           connector: connectorName,
           method: "bridge",
-          args: [_params, _getId]
+          args: [DAI_ADDR_ETH, apiReturnData.result.txData, routeToPass, "1000000000000000000", '0']
         }
       ];
 
-      const txn = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
-      let receipt = await txn.wait();
-      // console.log("receipt: ", receipt);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
+      let receipt = await tx.wait();
+      const txHash = receipt.transactionHash;
 
-      if (allowanceTarget !== null) {
-        const allowanceCheckStatus = await checkAllowance(fromChainId, dsaWallet0.address, allowanceTarget, DAI_ADDR_ETH)
-        console.log("allowanceCheckStatus: ", allowanceCheckStatus);
-        const allowanceValue = allowanceCheckStatus.result?.value;
-        // console.log("allowanceValue: ", allowanceValue);
+      console.log('Bridging Transaction : ', receipt.transactionHash);
 
-        if (minimumApprovalAmount > allowanceValue) {
-            const approvalTransactionData = await getApprovalTransactionData(fromChainId, dsaWallet0.address, allowanceTarget, DAI_ADDR_ETH, minimumApprovalAmount);
-            console.log("approvalTransactionData: ", approvalTransactionData);
-          };
-    }
-
-    const gasPrice = await dsa_signer.getGasPrice();
-    console.log("gasPrice: ", gasPrice)
-
-    // const gasEstimate = await provider.estimateGas({
-    //     from: dsaWallet0.address,
-    //     to: apiReturnData.result.txTarget,
-    //     value: apiReturnData.result.value,
-    //     data: apiReturnData.result.txData,
-    //     gasPrice: gasPrice
-    // });
-    // console.log("gasEstimate: ", gasEstimate)
-
-    const tx = await dsa_signer.sendTransaction({
-        from: dsaWallet0.address,
-        to: apiReturnData.result.txTarget,
-        data: apiReturnData.result.txData,
-        value: apiReturnData.result.value,
-        gasPrice: gasPrice
-        // gasLimit: gasEstimate
-    });
-
-    const receiptn = await tx.wait();
-    const txHash = receiptn.transactionHash;
-    console.log('Bridging Transaction : ', receipt.transactionHash);
-
-    // Checks status of transaction every 20 secs
-    const txStatus = setInterval(async () => {
+      const txStatus = setInterval(async () => {
         const status = await getBridgeStatus(txHash, fromChainId, toChainId);
-
         console.log(`SOURCE TX : ${status.result.sourceTxStatus}\nDEST TX : ${status.result.destinationTxStatus}`)
 
         if (status.result.destinationTxStatus == "COMPLETED") {
             console.log('DEST TX HASH :', status.result.destinationTransactionHash);
             clearInterval(txStatus);
         }
-    }, 20000);
+      }, 80000);
+    });
+
+    it("should migrate ETH from Eth to Polygon", async function () {
+      const quote = await getQuote(
+        fromChainId, 
+        ETHADDR, 
+        toChainId, 
+        DAI_ADDR_POLYGON, 
+        "1000000000000000000", 
+        dsaWallet0.address, 
+        wallet0.address, 
+        "true"
+      );
+      const route = quote.result.routes[0]
+      const splitArr = route.userTxs[0].routePath.split("-");
+
+      const routeToPass = getRouteToPass(splitArr);
+      console.log("routeToPass: ", routeToPass);
+
+      let apiReturnData = await getRouteTransactionData(route);
+
+      const params: any = [
+        apiReturnData.result.txData,
+        ETHADDR,
+        "1000000000000000000"
+      ];
+
+      const spells = [
+        {
+          connector: connectorName,
+          method: "bridge",
+          args: [ETHADDR, apiReturnData.result.txData, routeToPass, "1000000000000000000", '0']
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
+      let receipt = await tx.wait();
+      const txHash = receipt.transactionHash;
+
+      console.log('Bridging Transaction : ', receipt.transactionHash);
+
+      const txStatus = setInterval(async () => {
+        const status = await getBridgeStatus(txHash, fromChainId, toChainId);
+        console.log(`SOURCE TX : ${status.result.sourceTxStatus}\nDEST TX : ${status.result.destinationTxStatus}`)
+
+        if (status.result.destinationTxStatus == "COMPLETED") {
+            console.log('DEST TX HASH :', status.result.destinationTransactionHash);
+            clearInterval(txStatus);
+        }
+    }, 80000);
     });
   });
 });

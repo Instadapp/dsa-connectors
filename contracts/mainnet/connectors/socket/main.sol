@@ -11,9 +11,13 @@ import { Basic } from "../../common/basic.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import "./events.sol";
 import "./interface.sol";
-import "hardhat/console.sol";
 
 abstract contract SocketConnectorResolver {
+
+    /**
+     * @dev Gets Allowance target from registry.
+     * @param _route route number
+     */
     function getAllowanceTarget(uint _route) internal view returns (address _allowanceTarget) {
         ISocketRegistry registryContr = ISocketRegistry(0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0);
         ISocketRegistry.RouteData memory data = registryContr.routes(_route);
@@ -31,6 +35,15 @@ abstract contract SocketConnector is SocketConnectorResolver, Basic {
         uint256 amount;
 	}
 
+    /**
+	 * @dev Bridge Token.
+	 * @notice Bridge Token on Socket.
+	 * @param _token token address on source chain
+     * @param _txData tx data for calling
+     * @param _route route number
+     * @param _amount amount to bridge
+	 * @param _getId ID to retrieve amount from last spell.
+	 */
     function bridge (
         address _token,
         bytes memory _txData,
