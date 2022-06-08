@@ -9,7 +9,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addresses } from "../../../scripts/tests/avalanche/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { ConnectV2SwapAvalanche__factory } from "../../../typechain";
+import { ConnectV2SwapAggregatorAvalanche__factory } from "../../../typechain";
 import er20abi from "../../../scripts/constant/abi/basics/erc20.json";
 import type { Signer, Contract } from "ethers";
 
@@ -40,7 +40,7 @@ describe("Swap | Avalanche", function () {
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2SwapAvalanche__factory,
+      contractArtifact: ConnectV2SwapAggregatorAvalanche__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
     });

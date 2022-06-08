@@ -9,7 +9,7 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { abis } from "../../../scripts/constant/abis";
-import { ConnectV2Swap__factory } from "../../../typechain";
+import { ConnectV2SwapAggregator__factory } from "../../../typechain";
 import er20abi from "../../../scripts/constant/abi/basics/erc20.json";
 import type { Signer, Contract } from "ethers";
 
@@ -40,7 +40,7 @@ describe("Swap | Mainnet", function () {
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2Swap__factory,
+      contractArtifact: ConnectV2SwapAggregator__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
     });

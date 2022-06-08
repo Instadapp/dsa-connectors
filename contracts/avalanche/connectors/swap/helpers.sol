@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import { InstaConnectors } from "../../common/interfaces.sol";
 
-abstract contract Helper {
+contract SwapHelpers {
 	/**
 	 * @dev Instadapp Connectors Registry
 	 */
@@ -19,9 +19,7 @@ abstract contract Helper {
 		bytes[] callDatas;
 		uint256 setId;
 	}
-}
 
-contract SwapHelpers is Helper {
 	/**
 	 *@dev Swap using the dex aggregators.
 	 *@param _connectors name of the connectors in preference order.
@@ -35,25 +33,27 @@ contract SwapHelpers is Helper {
 			string memory _connector
 		)
 	{
-		require(_connectors.length > 0, "zero-length-not-allowed");
+		uint256 _length = _connectors.length;
+		require(_length > 0, "zero-length-not-allowed");
 		require(
-			_inputData.unitAmts.length == _connectors.length,
+			_inputData.unitAmts.length == _length,
 			"unitAmts-length-invalid"
 		);
 		require(
-			_inputData.callDatas.length == _connectors.length,
+			_inputData.callDatas.length == _length,
 			"callDatas-length-invalid"
 		);
 
 		// require _connectors[i] == "1INCH-A" || "ZEROX-A" || "PARASWAP-A" || similar connectors
 
-		for (uint256 i = 0; i < _connectors.length; i++) {
+		for (uint256 i = 0; i < _length; i++) {
 			bytes4 swapData = bytes4(
 				keccak256("swap(address,address,uint256,uint256,bytes,uint256)")
 			);
 
-			string memory _1INCH = "1INCH-A";
-			if (keccak256(bytes(_connectors[i])) == keccak256(bytes(_1INCH))) {
+			if (
+				keccak256(bytes(_connectors[i])) == keccak256(bytes("1INCH-A"))
+			) {
 				swapData = bytes4(
 					keccak256(
 						"sell(address,address,uint256,uint256,bytes,uint256)"

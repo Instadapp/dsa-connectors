@@ -60,14 +60,13 @@ abstract contract Swap is SwapHelpers, Events {
 			(_buyAmt, _sellAmt) = decodeEvents(_connector, returnData);
 		}
 
-		_eventName = "LogSwap(string,address,address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogSwapAggregator(string,address,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_connector,
 			buyAddr,
 			sellAddr,
 			_buyAmt,
 			_sellAmt,
-			0,
 			setId
 		);
 	}
