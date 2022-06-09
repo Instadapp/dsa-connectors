@@ -179,18 +179,8 @@ describe("Socket Connector", function () {
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
       const txHash = receipt.transactionHash;
-
+      console.log("Receipt confimation: ", await receipt.confirmations);
       console.log('Bridging Transaction : ', receipt.transactionHash);
-
-      const txStatus = setInterval(async () => {
-        const status = await getBridgeStatus(txHash, fromChainId, toChainId);
-        console.log(`SOURCE TX : ${status.result.sourceTxStatus}\nDEST TX : ${status.result.destinationTxStatus}`)
-
-        if (status.result.destinationTxStatus == "COMPLETED") {
-            console.log('DEST TX HASH :', status.result.destinationTransactionHash);
-            clearInterval(txStatus);
-        }
-      }, 80000);
     });
 
     it("should migrate ETH from Eth to Polygon", async function () {
@@ -229,18 +219,8 @@ describe("Socket Connector", function () {
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
       const txHash = receipt.transactionHash;
-
+      console.log("Receipt confimation: ", await receipt.confirmations);
       console.log('Bridging Transaction : ', receipt.transactionHash);
-
-      const txStatus = setInterval(async () => {
-        const status = await getBridgeStatus(txHash, fromChainId, toChainId);
-        console.log(`SOURCE TX : ${status.result.sourceTxStatus}\nDEST TX : ${status.result.destinationTxStatus}`)
-
-        if (status.result.destinationTxStatus == "COMPLETED") {
-            console.log('DEST TX HASH :', status.result.destinationTransactionHash);
-            clearInterval(txStatus);
-        }
-    }, 80000);
     });
   });
 });
