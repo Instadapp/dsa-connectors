@@ -14,6 +14,10 @@ import { IInstaLite } from "./interface.sol";
 abstract contract InstaLiteConnector is Events, Basic {
 	TokenInterface internal constant astethToken =
 		TokenInterface(0x1982b2F5814301d4e9a8b0201555376e62F82428);
+	TokenInterface internal constant stethToken =
+		TokenInterface(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
+	address internal constant ethVaultAddr =
+		0xc383a3833a87009fd9597f8184979af5edfad019;
 
 	/**
 	 * @dev Supply ETH/ERC20
@@ -59,8 +63,10 @@ abstract contract InstaLiteConnector is Events, Basic {
 			);
 		}
 
-		setUint(setIds[0], _amt);
-		setUint(setIds[1], vTokenAmt);
+		if (setIds.length >= 2) {
+			setUint(setIds[0], _amt);
+			setUint(setIds[1], vTokenAmt);
+		}
 
 		_eventName = "LogSupply(address,address,uint256,uint256,uint256,uint256[])";
 		_eventParam = abi.encode(
@@ -95,8 +101,10 @@ abstract contract InstaLiteConnector is Events, Basic {
 
 		uint256 vTokenAmt = IInstaLite(vaultAddr).withdraw(_amt, address(this));
 
-		setUint(setIds[0], _amt);
-		setUint(setIds[1], vTokenAmt);
+		if (setIds.length >= 2) {
+			setUint(setIds[0], _amt);
+			setUint(setIds[1], vTokenAmt);
+		}
 
 		_eventName = "LogWithdraw(address,uint256,uint256,uint256,uint256[])";
 		_eventParam = abi.encode(vaultAddr, _amt, vTokenAmt, getId, setIds);
@@ -162,40 +170,69 @@ abstract contract InstaLiteConnector is Events, Basic {
 		uint256 _deleverageAmt = getUint(getIds[0], deleverageAmount);
 		uint256 _withdrawAmount = getUint(getIds[1], withdrawAmount);
 
-		TokenInterface tokenContract = 0xc383a3833A87009fD9597F8184979AF5eDFad019 ==
-				vaultAddr
-				? TokenInterface(wethAddr)
-				: TokenInterface(IInstaLite(vaultAddr).token());
-
-		uint256 initialBalStETH = astethToken.balanceOf(address(this));
-		uint256 initialBalToken = tokenContract.balanceOf(address(this));
+		uint256 _astethAmt;
+		uint256 _ethAmt;
+		uint256 _stethAmt;
+		uint256 _tokenAmt;
 
 		approve(TokenInterface(wethAddr), vaultAddr, _deleverageAmt);
+		if (vaultAddr == ethVaultAddr) {
+			uint256 initialBalAsteth = astethToken.balanceOf(address(this));
+			uint256 initialBalEth = address(this).balance;
+			uint256 initialBalSteth = stethToken.balanceOf(address(this));
 
-		IInstaLite(vaultAddr).deleverageAndWithdraw(
-			_deleverageAmt,
-			_withdrawAmount,
-			address(this)
-		);
+			IInstaLite(vaultAddr).deleverageAndWithdraw(
+				_deleverageAmt,
+				_withdrawAmount,
+				address(this)
+			);
 
-		uint256 _stETHAmt = astethToken.balanceOf(address(this)) -
-			initialBalStETH;
-		uint256 _tokenAmt = tokenContract.balanceOf(address(this)) -
-			initialBalToken;
+			_astethAmt = astethToken.balanceOf(address(this)) -
+				initialBalStETH;
+			_ethAmt = address(this).balance - initialBalEth;
+			_stethAmt = stethToken.balanceOf(address(this));
+			require(_deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
 
-		// TODO: add require conditions
-		if (setIds.length >= 2) {
-			setUint(setIds[0], _stETHAmt);
-			setUint(setIds[1], _tokenAmt);
+			if (setIds.length >= 3) {
+				setUint(setIds[0], _astethAmt);
+				setUint(setIds[1], _ethAmt);
+				setUint(setIds[2], _stethAmt);
+			}
+		} else {
+			TokenInterface tokenContract = TokenInterface(
+				IInstaLite(vaultAddr).token()
+			);
+
+			uint256 initialBalAsteth = astethToken.balanceOf(address(this));
+			uint256 initialBalToken = tokenContract.balanceOf(address(this));
+
+			IInstaLite(vaultAddr).deleverageAndWithdraw(
+				_deleverageAmt,
+				_withdrawAmount,
+				address(this)
+			);
+
+			_astethAmt = astethToken.balanceOf(address(this)) -
+				initialBalAsteth;
+			_tokenAmt = tokenContract.balanceOf(address(this)) -
+				initialBalToken;
+			require(_deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
+
+			if (setIds.length >= 2) {
+				setUint(setIds[0], _astethAmt);
+				setUint(setIds[1], _tokenAmt);
+			}
 		}
 
-		_eventName = "LogDeleverageAndWithdraw(address,uint256,uint256,uint256,uint256,uint256[],uint256[])";
+		_eventName = "LogDeleverageAndWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])";
 		_eventParam = abi.encode(
 			vaultAddr,
 			_deleverageAmt,
 			_withdrawAmount,
-			_stETHAmt,
-			_tokenAmt,
+			_astethAmt;
+			_ethAmt;
+			_stethAmt;
+			_tokenAmt;
 			getIds,
 			setIds
 		);
