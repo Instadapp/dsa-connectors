@@ -187,10 +187,11 @@ abstract contract InstaLiteConnector is Events, Basic {
 				address(this)
 			);
 
-			_astethAmt = astethToken.balanceOf(address(this)) -
-				initialBalStETH;
+			_astethAmt =
+				astethToken.balanceOf(address(this)) -
+				initialBalAsteth;
 			_ethAmt = address(this).balance - initialBalEth;
-			_stethAmt = stethToken.balanceOf(address(this));
+			_stethAmt = stethToken.balanceOf(address(this)) - initialBalSteth;
 			require(_deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
 
 			if (setIds.length >= 3) {
@@ -212,9 +213,11 @@ abstract contract InstaLiteConnector is Events, Basic {
 				address(this)
 			);
 
-			_astethAmt = astethToken.balanceOf(address(this)) -
+			_astethAmt =
+				astethToken.balanceOf(address(this)) -
 				initialBalAsteth;
-			_tokenAmt = tokenContract.balanceOf(address(this)) -
+			_tokenAmt =
+				tokenContract.balanceOf(address(this)) -
 				initialBalToken;
 			require(_deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
 
@@ -229,10 +232,10 @@ abstract contract InstaLiteConnector is Events, Basic {
 			vaultAddr,
 			_deleverageAmt,
 			_withdrawAmount,
-			_astethAmt;
-			_ethAmt;
-			_stethAmt;
-			_tokenAmt;
+			_astethAmt,
+			_ethAmt,
+			_stethAmt,
+			_tokenAmt,
 			getIds,
 			setIds
 		);
