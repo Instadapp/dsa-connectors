@@ -77,7 +77,7 @@ abstract contract SocketConnector is SocketConnectorResolver {
 
         socketBridge(_txData, _ethAmt);
 
-        _eventName = "LogSocketBridge(bytes,address,uint256,uint256)";
+        _eventName = "LogSocketBridge(address,uint256,uint256,uint256,address)";
 		_eventParam = abi.encode(
 			_token,
 			_amount,
