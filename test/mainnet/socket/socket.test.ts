@@ -25,7 +25,6 @@ describe("Socket Connector", function () {
 
   const fromChainId = "1"
   const toChainId = "137"
-  const recipient = "0xD625c7458Da1a0758dA8d3AC7f2c10180Bf0E506"
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
@@ -172,7 +171,7 @@ describe("Socket Connector", function () {
         {
           connector: connectorName,
           method: "bridge",
-          args: [DAI_ADDR_ETH, apiReturnData.result.txData, routeToPass, "1000000000000000000", '0']
+          args: [DAI_ADDR_ETH, apiReturnData.result.txData, routeToPass, "1000000000000000000", fromChainId, toChainId, wallet0.address]
         }
       ];
 
@@ -189,7 +188,7 @@ describe("Socket Connector", function () {
         ETHADDR, 
         toChainId, 
         DAI_ADDR_POLYGON, 
-        "1000000000000000000", 
+        "1000000000000000000",
         dsaWallet0.address, 
         wallet0.address, 
         "true"
@@ -212,7 +211,7 @@ describe("Socket Connector", function () {
         {
           connector: connectorName,
           method: "bridge",
-          args: [ETHADDR, apiReturnData.result.txData, routeToPass, "1000000000000000000", '0']
+          args: [ETHADDR, apiReturnData.result.txData, routeToPass, "1000000000000000000", fromChainId, toChainId, wallet0.address]
         }
       ];
 

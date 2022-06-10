@@ -12,7 +12,25 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import "./events.sol";
 import "./interface.sol";
 
-abstract contract SocketConnectorResolver {
+abstract contract SocketConnectorBridge is Basic {
+
+    address constant registry = 0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0;
+
+    /**
+     * @dev socket API bridge handler
+     * @param _txData - contains data returned from socket build-tx API. Struct defined in interfaces.sol
+     * @param _ethAmt - Eth to bridge for .value()
+     */
+    function socketBridge(
+        bytes memory _txData,
+        uint _ethAmt
+    ) internal returns (bool _success) {
+        (_success, ) = registry.call{value: _ethAmt}(_txData);
+        require(_success, "Socket-swap-failed");
+    }
+}
+
+abstract contract SocketConnectorResolver is SocketConnectorBridge {
 
     /**
      * @dev Gets Allowance target from registry.
@@ -25,15 +43,7 @@ abstract contract SocketConnectorResolver {
     }
 }
 
-abstract contract SocketConnector is SocketConnectorResolver, Basic {
-
-    address constant registry = 0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0;
-
-    struct BridgeParams {
-        bytes txData;
-        address token;
-        uint256 amount;
-	}
+abstract contract SocketConnector is SocketConnectorResolver {
 
     /**
      * @dev Bridge Token.
@@ -42,44 +52,40 @@ abstract contract SocketConnector is SocketConnectorResolver, Basic {
      * @param _txData tx data for calling
      * @param _route route number
      * @param _amount amount to bridge
-     * @param _getId ID to retrieve amount from last spell.
+     * @param _sourceChain Source chain id
+     * @param _targetChain Source chain id
+     * @param _recipient address of recipient
     */
     function bridge (
         address _token,
         bytes memory _txData,
         uint256 _route,
         uint256 _amount,
-        uint256 _getId
+        uint256 _sourceChain,
+        uint256 _targetChain,
+        address _recipient
     )
         external payable returns (string memory _eventName, bytes memory _eventParam) 
     {
-        _amount = getUint(_getId, _amount);
+        uint _ethAmt;
 
         if(_token == ethAddr) {
-            _amount = _amount == uint256(-1)
-				? address(this).balance
-				: _amount;
-
-            (bool success, ) = registry.call{value: _amount}(_txData);
-            require(success, "Socket-swap-failed");
+            _ethAmt = _amount;
 
         } else {
             TokenInterface _tokenContract = TokenInterface(_token);
-            _amount = _amount == uint256(-1)
-				? _tokenContract.balanceOf(address(this))
-				: _amount;
-
             _tokenContract.approve(getAllowanceTarget(_route), _amount);
-            (bool success, ) = registry.call(_txData);
-            require(success, "Socket-swap-failed");
         }
+
+        socketBridge(_txData, _ethAmt);
 
         _eventName = "LogSocketBridge(bytes,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_txData,
 			_token,
 			_amount,
-			_getId
+            _sourceChain,
+			_targetChain,
+            _recipient
 		);
     }
 }
