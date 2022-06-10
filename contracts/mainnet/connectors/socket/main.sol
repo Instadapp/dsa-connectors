@@ -71,7 +71,6 @@ abstract contract SocketConnector is SocketConnectorResolver {
 
         if(_token == ethAddr) {
             _ethAmt = _amount;
-
         } else {
             TokenInterface _tokenContract = TokenInterface(_token);
             _tokenContract.approve(getAllowanceTarget(_route), _amount);
