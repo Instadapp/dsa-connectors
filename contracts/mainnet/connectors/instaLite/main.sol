@@ -143,7 +143,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 	 * @notice Deleverage Instalite vault.
 	 * @param vaultAddr Address of vaultAddress Contract.
 	 * @param deleverageAmount The amount of the token to deleverage.
-	 * @param withdrawAmount The amount of the token to deleverage.
+	 * @param withdrawAmount The amount of the token to withdraw.
 	 * @param getIds ID to retrieve amt.
 	 * @param setIds ID to set amt.
 	 */
