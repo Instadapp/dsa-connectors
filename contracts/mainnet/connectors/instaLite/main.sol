@@ -17,7 +17,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 	TokenInterface internal constant stethToken =
 		TokenInterface(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84);
 	address internal constant ethVaultAddr =
-		0xc383a3833a87009fd9597f8184979af5edfad019;
+		0xc383a3833A87009fD9597F8184979AF5eDFad019;
 
 	/**
 	 * @dev Supply ETH/ERC20
