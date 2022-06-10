@@ -80,7 +80,7 @@ abstract contract SocketConnector is SocketConnectorResolver {
 		_eventParam = abi.encode(
 			_token,
 			_amount,
-			_sourceChain,
+			block.chainid,
 			_targetChain,
 			_recipient
 		);
