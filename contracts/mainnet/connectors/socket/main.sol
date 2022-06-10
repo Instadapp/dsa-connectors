@@ -61,7 +61,6 @@ abstract contract SocketConnector is SocketConnectorResolver {
         bytes memory _txData,
         uint256 _route,
         uint256 _amount,
-        uint256 _sourceChain,
         uint256 _targetChain,
         address _recipient
     )
