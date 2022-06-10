@@ -4,9 +4,10 @@ pragma experimental ABIEncoderV2;
 
 contract Events {
     event LogSocketBridge (
-        bytes txData,
         address token,
         uint256 amount,
-        uint256 getId
+        uint256 sourceChain,
+        uint256 targetChain,
+        address recipient
     );
 }
