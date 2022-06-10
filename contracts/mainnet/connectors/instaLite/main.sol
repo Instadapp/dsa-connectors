@@ -158,7 +158,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		require(getIds.length > 2, "invalid get-ids length");
+		require(getIds.length >= 2, "invalid get-ids length");
 		uint256 _deleverageAmt = getUint(getIds[0], deleverageAmount);
 		uint256 _withdrawAmount = getUint(getIds[1], withdrawAmount);
 
