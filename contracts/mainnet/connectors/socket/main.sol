@@ -36,14 +36,14 @@ abstract contract SocketConnector is SocketConnectorResolver, Basic {
 	}
 
     /**
-	 * @dev Bridge Token.
-	 * @notice Bridge Token on Socket.
-	 * @param _token token address on source chain
+     * @dev Bridge Token.
+     * @notice Bridge Token on Socket.
+     * @param _token token address on source chain
      * @param _txData tx data for calling
      * @param _route route number
      * @param _amount amount to bridge
-	 * @param _getId ID to retrieve amount from last spell.
-	 */
+     * @param _getId ID to retrieve amount from last spell.
+    */
     function bridge (
         address _token,
         bytes memory _txData,
