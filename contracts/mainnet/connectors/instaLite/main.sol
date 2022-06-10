@@ -132,8 +132,59 @@ abstract contract InstaLiteConnector is Events, Basic {
 		_eventParam = abi.encode(vaultAddr, _amt, getId, setId);
 	}
 
+	/**
+	 * @dev Deleverage and Withdraw vault. Pays back weth debt and get stETH/WETH collateral.
+	 * @notice Deleverage Instalite vault.
+	 * @param vaultAddr Address of vaultAddress Contract.
+	 * @param deleverageAmount The amount of the token to deleverage.
+     * @param withdrawAmount The amount of the token to deleverage.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID to set amt.
+	 */
+	function deleverageAndWithdraw(
+		address vaultAddr,
+		uint256 deleverageAmount,
+        uint256 withdrawAmount,
+		uint256[] memory getIds,
+		uint256[] memory setIds
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{	
+		if (getIds.length > 2) {
+			uint256 _deleverageAmt = getUint(getIds[0], deleverageAmount);
+			uint256 _withdrawAmount = getUint(getIds[1], withdrawAmount);
+		}
+
+		TokenInterface tokenContract = 
+			0xc383a3833A87009fD9597F8184979AF5eDFad019 == vaultAddr ?
+				TokenInterface(wethAddr) :
+				TokenInterface(IInstaLite(vaultAddr).token());
+		
+		uint initialBalStETH = astethToken.balanceOf(address(this));
+		uint initialBalToken = tokenContract.balanceOf(address(this));
+
+		approve(TokenInterface(wethAddr), vaultAddr, _amt);
+
+		IInstaLite(vaultAddr).deleverageAndWithdraw(_deleverageAmt, _withdrawAmount, address(this));
+
+		uint _stETHAmt = astethToken.balanceOf(address(this)) - initialBalStETH;
+		uint _tokenAmt = tokenContract.balanceOf(address(this)) - initialBalToken;
+
+		// TODO: add require conditions
+
+		if (setIds.length > 2) {
+			setUint(setIds[0], _stETHAmt);
+			setUint(setIds[1], _tokenAmt);
+		}
+
+		_eventName = "LogDeleverageAndWithdraw(address,uint256,uint256,uint256,uint256,uint256[],uint256[])";
+		_eventParam = abi.encode(vaultAddr, _deleverageAmt, _withdrawAmount, _stETHAmt, _tokenAmt, getIds, setIds);
+	}
+
 }
 
 contract ConnectV2InstaLite is InstaLiteConnector {
-	string public constant name = "InstaLite-v1";
+	string public constant name = "InstaLite-v1.1";
 }
