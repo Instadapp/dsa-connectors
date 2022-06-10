@@ -10,5 +10,5 @@ interface ISocketRegistry {
         bool isMiddleware;
     }
 
-	function routes(uint256) external view returns(RouteData memory);
+    function routes(uint256) external view returns(RouteData memory);
 }
