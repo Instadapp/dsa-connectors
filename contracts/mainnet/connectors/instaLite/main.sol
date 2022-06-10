@@ -184,7 +184,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 			initialBalToken;
 
 		// TODO: add require conditions
-		if (setIds.length > 2) {
+		if (setIds.length >= 2) {
 			setUint(setIds[0], _stETHAmt);
 			setUint(setIds[1], _tokenAmt);
 		}
