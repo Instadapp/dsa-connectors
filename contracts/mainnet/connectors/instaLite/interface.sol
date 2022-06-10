@@ -20,5 +20,5 @@ interface IInstaLite {
 		address to_
 	) external;
 
-	function token() external returns (address);
+	function token() external view returns (address);
 }
