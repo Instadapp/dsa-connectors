@@ -38,6 +38,7 @@ abstract contract SocketConnectorResolver is SocketConnectorBridge {
      */
     function getAllowanceTarget(uint _route) internal view returns (address _allowanceTarget) {
         ISocketRegistry.RouteData memory data =  ISocketRegistry(registry).routes(_route);
+        require(data.route != address(0), "allowanceTarget-not-valid");
         return data.route;
     }
 }
