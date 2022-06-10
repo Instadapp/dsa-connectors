@@ -37,8 +37,7 @@ abstract contract SocketConnectorResolver is SocketConnectorBridge {
      * @param _route route number
      */
     function getAllowanceTarget(uint _route) internal view returns (address _allowanceTarget) {
-        ISocketRegistry registryContr = ISocketRegistry(0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0);
-        ISocketRegistry.RouteData memory data = registryContr.routes(_route);
+        ISocketRegistry.RouteData memory data =  ISocketRegistry(registry).routes(_route);
         return data.route;
     }
 }
