@@ -51,9 +51,8 @@ abstract contract SocketConnector is SocketConnectorResolver {
      * @param _txData tx data for calling
      * @param _route route number
      * @param _amount amount to bridge
-     * @param _sourceChain Source chain id
-     * @param _targetChain Source chain id
-     * @param _recipient address of recipient
+     * @param _targetChain Target chain ID
+     * @param _recipient address of the recipient on the target chain
     */
     function bridge (
         address _token,
