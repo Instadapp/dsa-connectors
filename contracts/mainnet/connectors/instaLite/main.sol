@@ -147,18 +147,18 @@ abstract contract InstaLiteConnector is Events, Basic {
 	}
 
 	/**
-	 * @dev Deleverage and Withdraw vault. Pays back weth debt and get stETH/WETH collateral.
+	 * @dev Deleverage and Withdraw vault. Pays back weth debt and gets steth collateral (aSteth).
 	 * @notice Deleverage Instalite vault.
 	 * @param vaultAddr Address of vaultAddress Contract.
-	 * @param deleverageAmount The amount of the token to deleverage.
-	 * @param withdrawAmount The amount of the token to withdraw.
-	 * @param getIds ID to retrieve amt.
-	 * @param setIds ID to set amt.
+	 * @param deleverageAmt The amount of the weth to deleverage.
+	 * @param withdrawAmt The amount of the token to withdraw.
+	 * @param getIds IDs to retrieve amts.
+	 * @param setIds IDs to set amts.
 	 */
 	function deleverageAndWithdraw(
 		address vaultAddr,
-		uint256 deleverageAmount,
-		uint256 withdrawAmount,
+		uint256 deleverageAmt,
+		uint256 withdrawAmt,
 		uint256[] memory getIds,
 		uint256[] memory setIds
 	)
@@ -166,24 +166,25 @@ abstract contract InstaLiteConnector is Events, Basic {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		require(getIds.length >= 2, "invalid get-ids length");
-		uint256 _deleverageAmt = getUint(getIds[0], deleverageAmount);
-		uint256 _withdrawAmount = getUint(getIds[1], withdrawAmount);
+		if (getIds.length >= 2) {
+			deleverageAmt = getUint(getIds[0], deleverageAmt);
+			withdrawAmt = getUint(getIds[1], withdrawAmt);
+		}
 
 		uint256 _astethAmt;
 		uint256 _ethAmt;
 		uint256 _stethAmt;
 		uint256 _tokenAmt;
 
-		approve(TokenInterface(wethAddr), vaultAddr, _deleverageAmt);
+		approve(TokenInterface(wethAddr), vaultAddr, deleverageAmt);
 		if (vaultAddr == ethVaultAddr) {
 			uint256 initialBalAsteth = astethToken.balanceOf(address(this));
 			uint256 initialBalEth = address(this).balance;
 			uint256 initialBalSteth = stethToken.balanceOf(address(this));
 
 			IInstaLite(vaultAddr).deleverageAndWithdraw(
-				_deleverageAmt,
-				_withdrawAmount,
+				deleverageAmt,
+				withdrawAmt,
 				address(this)
 			);
 
@@ -192,7 +193,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 				initialBalAsteth;
 			_ethAmt = address(this).balance - initialBalEth;
 			_stethAmt = stethToken.balanceOf(address(this)) - initialBalSteth;
-			require(_deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
+			require(deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
 
 			if (setIds.length >= 3) {
 				setUint(setIds[0], _astethAmt);
@@ -208,8 +209,8 @@ abstract contract InstaLiteConnector is Events, Basic {
 			uint256 initialBalToken = tokenContract.balanceOf(address(this));
 
 			IInstaLite(vaultAddr).deleverageAndWithdraw(
-				_deleverageAmt,
-				_withdrawAmount,
+				deleverageAmt,
+				withdrawAmt,
 				address(this)
 			);
 
@@ -219,7 +220,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 			_tokenAmt =
 				tokenContract.balanceOf(address(this)) -
 				initialBalToken;
-			require(_deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
+			require(deleverageAmt <= (1e9 + _astethAmt), "lack-of-steth");
 
 			if (setIds.length >= 2) {
 				setUint(setIds[0], _astethAmt);
@@ -230,8 +231,8 @@ abstract contract InstaLiteConnector is Events, Basic {
 		_eventName = "LogDeleverageAndWithdraw(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256[],uint256[])";
 		_eventParam = abi.encode(
 			vaultAddr,
-			_deleverageAmt,
-			_withdrawAmount,
+			deleverageAmt,
+			withdrawAmt,
 			_astethAmt,
 			_ethAmt,
 			_stethAmt,
