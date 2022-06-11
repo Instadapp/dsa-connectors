@@ -4,13 +4,20 @@ pragma experimental ABIEncoderV2;
 
 // import { Helpers } from "./helpers.sol";
 import { Basic } from "../../common/basic.sol";
-import { Token, NotionalInterface, BalanceAction, BalanceActionWithTrades, DepositActionType, AaveV2LendingPoolProviderInterface, AaveV2DataProviderInterface, AaveV2Interface } from "./interface.sol";
+import { Token, NotionalInterface, BalanceAction, BalanceActionWithTrades, DepositActionType, AaveV2LendingPoolProviderInterface, AaveV2DataProviderInterface, AaveV2Interface, AaveV3PoolProviderInterface, AaveV3Interface, AaveV3DataProviderInterface } from "./interface.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Helpers is Basic {
 	using SafeERC20 for IERC20;
+
+	enum Protocol {
+		AaveV2,
+		AaveV3,
+		Compound,
+		Notional
+	}
 
 	uint256 internal constant LEND_TRADE = 0;
 	uint256 internal constant BORROW_TRADE = 1;
@@ -21,7 +28,7 @@ contract Helpers is Basic {
 	address payable constant feeCollector =
 		0xb1DC62EC38E6E3857a887210C38418E4A17Da5B2;
 
-	AaveV2DataProviderInterface internal constant aaveData =
+	AaveV2DataProviderInterface internal constant aaveV2Data =
 		AaveV2DataProviderInterface(0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d);
 
 	NotionalInterface internal constant notional =
@@ -34,6 +41,17 @@ contract Helpers is Basic {
 		AaveV2LendingPoolProviderInterface(
 			0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5
 		);
+	/**
+	 * @dev Aave V3 Pool Provider
+	 */
+	AaveV3PoolProviderInterface internal constant getAaveV3Provider =
+		AaveV3PoolProviderInterface(0xA55125A90d75a95EC00130E8E8C197dB5641Eb19); //rinkeby address
+
+	/**
+	 * @dev Aave V3 Pool Data Provider
+	 */
+	AaveV3DataProviderInterface internal constant aaveV3Data =
+		AaveV3DataProviderInterface(0x256bBbeDbA70a1240a1EB64210abB1b063267408); //rinkeby address
 
 	/**
 	 * @dev get Referral Code
@@ -41,6 +59,9 @@ contract Helpers is Basic {
 	uint16 internal constant getReferralCode = 3228;
 
 	struct NotionalBorrowData {
+		// refinance to Notional from source
+		Protocol source;
+		// length of tokens
 		uint256 length;
 		// debt fee
 		uint256 fee;
@@ -65,6 +86,17 @@ contract Helpers is Basic {
 	// withdraw balance of Aave v2
 	function getWithdrawBalanceV2(
 		AaveV2DataProviderInterface aaveData,
+		address token
+	) internal view returns (uint256 bal) {
+		(bal, , , , , , , , ) = aaveData.getUserReserveData(
+			token,
+			address(this)
+		);
+	}
+
+	// withdraw balance of Aave v3
+	function getWithdrawBalanceV3(
+		AaveV3DataProviderInterface aaveData,
 		address token
 	) internal view returns (uint256 bal) {
 		(bal, , , , , , , , ) = aaveData.getUserReserveData(
@@ -109,12 +141,29 @@ contract Helpers is Basic {
 		returns (uint256 bal)
 	{
 		if (rateMode == 1) {
-			(, bal, , , , , , , ) = aaveData.getUserReserveData(
+			(, bal, , , , , , , ) = aaveV2Data.getUserReserveData(
 				token,
 				address(this)
 			);
 		} else {
-			(, , bal, , , , , , ) = aaveData.getUserReserveData(
+			(, , bal, , , , , , ) = aaveV2Data.getUserReserveData(
+				token,
+				address(this)
+			);
+		}
+	}
+
+	function getAaveV3PaybackAmt(uint256 rateMode, address token)
+		internal
+		returns (uint256 bal)
+	{
+		if (rateMode == 1) {
+			(, bal, , , , , , , ) = aaveV3Data.getUserReserveData(
+				token,
+				address(this)
+			);
+		} else {
+			(, , bal, , , , , , ) = aaveV3Data.getUserReserveData(
 				token,
 				address(this)
 			);

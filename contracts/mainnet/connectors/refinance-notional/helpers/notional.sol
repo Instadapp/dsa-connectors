@@ -52,7 +52,16 @@ contract NotionalHelpers is Helpers {
 
 			//calculating payback amounts for Aave v2
 			if (_amt == uint256(-1)) {
-				_amt = getAaveV2PaybackAmt(data.rateModes[i], data.tokens[i]);
+				if (data.source == Protocol.AaveV2)
+					_amt = getAaveV2PaybackAmt(
+						data.rateModes[i],
+						data.tokens[i]
+					);
+				else if(data.source == Protocol.AaveV3)
+					_amt = getAaveV3PaybackAmt(
+						data.rateModes[i],
+						data.tokens[i]
+					);
 			}
 			finalAmts[i] = _amt;
 

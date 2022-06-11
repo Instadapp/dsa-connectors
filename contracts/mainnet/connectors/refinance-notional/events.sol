@@ -5,6 +5,8 @@ import { TokenInterface } from "./interface.sol";
 
 contract Events {
 	event LogRefinance(
+		uint256 indexed source,
+		uint256 indexed target,
 		uint256 collateralFee,
 		uint256 debtFee,
 		address[] tokens,
