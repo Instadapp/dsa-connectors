@@ -52,5 +52,30 @@ contract DSMath {
   function toRad(uint wad) internal pure returns (uint rad) {
     rad = mul(wad, 10 ** 27);
   }
+  
+	function toUint96(uint256 value) internal pure returns (uint96) {
+		require(value <= type(uint96).max, "uint96 value overflow");
+		return uint96(value);
+	}
+
+	function toUint88(uint256 value) internal pure returns (uint88) {
+		require(value <= type(uint88).max, "uint88-overflow");
+		return uint88(value);
+	}
+
+	function toUint32(uint256 value) internal pure returns (uint32) {
+		require(value <= type(uint32).max, "uint32-overflow");
+		return uint32(value);
+	}
+
+	function toUint16(uint256 value) internal pure returns (uint16) {
+		require(value <= type(uint16).max, "uint16-overflow");
+		return uint16(value);
+	}
+
+	function toUint8(uint256 value) internal pure returns (uint8) {
+		require(value <= type(uint8).max, "uint8-overflow");
+		return uint8(value);
+	}
 
 }

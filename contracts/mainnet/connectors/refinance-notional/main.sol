@@ -6,11 +6,11 @@ pragma experimental ABIEncoderV2;
  * @title Refinance.
  * @dev Refinancing among Notional, Aave v2, Aave v3.
  */
-import { AaveV2Interface, AaveV2DataProviderInterface, AaveV2LendingPoolProviderInterface, AaveV3Interface, AaveV3DataProviderInterface, AaveV3PoolProviderInterface } from "./interface.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import { AaveV2Helpers } from "./helpers/aaveV2.sol";
 import { AaveV3Helpers } from "./helpers/aaveV3.sol";
 import { NotionalHelpers } from "./helpers/notional.sol";
+import "./interface.sol";
 
 contract RefinanceResolver is AaveV2Helpers, AaveV3Helpers, NotionalHelpers {
 	struct RefinanceData {
@@ -79,7 +79,7 @@ contract RefinanceResolver is AaveV2Helpers, AaveV3Helpers, NotionalHelpers {
 
 		// Aave v2 to Notional
 		if (
-			data.source == Protocol.AaveV2 && data.target == Protocol.Notional
+			data.source == Protocol.AAVEV2 && data.target == Protocol.NOTIONAL
 		) {
 			NotionalBorrowData memory _notionalBorrowData;
 
@@ -128,7 +128,7 @@ contract RefinanceResolver is AaveV2Helpers, AaveV3Helpers, NotionalHelpers {
 		}
 		// Aave v3 to Notional
 		else if (
-			data.source == Protocol.AaveV3 && data.target == Protocol.Notional
+			data.source == Protocol.AAVEV3 && data.target == Protocol.NOTIONAL
 		) {
 			NotionalBorrowData memory _notionalBorrowData;
 

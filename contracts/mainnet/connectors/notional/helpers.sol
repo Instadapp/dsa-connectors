@@ -71,16 +71,6 @@ abstract contract Helpers is DSMath, Basic {
 		}
 	}
 
-	function toUint96(uint256 value) internal pure returns (uint96) {
-		require(value <= type(uint96).max, "uint96 value overflow");
-		return uint96(value);
-	}
-
-	function toUint88(uint256 value) internal pure returns (uint88) {
-		require(value <= type(uint88).max, "uint88 value overflow");
-		return uint88(value);
-	}
-
 	function getMsgValue(
 		uint16 currencyId,
 		bool useUnderlying,

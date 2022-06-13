@@ -2,21 +2,21 @@
 pragma solidity ^0.7.6;
 pragma experimental ABIEncoderV2;
 
-// import { Helpers } from "./helpers.sol";
+import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
-import { Token, NotionalInterface, BalanceAction, BalanceActionWithTrades, DepositActionType, AaveV2LendingPoolProviderInterface, AaveV2DataProviderInterface, AaveV2Interface, AaveV3PoolProviderInterface, AaveV3Interface, AaveV3DataProviderInterface } from "./interface.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interface.sol";
 
-contract Helpers is Basic {
+contract Helpers is DSMath, Basic {
 	using SafeERC20 for IERC20;
 
 	enum Protocol {
-		AaveV2,
-		AaveV3,
-		Compound,
-		Notional
+		AAVEV2,
+		AAVEV3,
+		COMPOUND,
+		NOTIONAL
 	}
 
 	uint256 internal constant LEND_TRADE = 0;
@@ -114,26 +114,6 @@ contract Helpers is Basic {
 		(Token memory assetToken, Token memory underlyingToken) = notional.getCurrency(currencyId);
 		return
 			underlying ? underlyingToken.tokenAddress : assetToken.tokenAddress;
-	}
-
-	function toUint88(uint256 value) internal pure returns (uint88) {
-		require(value <= type(uint88).max, "uint88 value overflow");
-		return uint88(value);
-	}
-
-	function toUint32(uint256 value) internal pure returns (uint32) {
-		require(value <= type(uint32).max, "uint32 value overflow");
-		return uint32(value);
-	}
-
-	function toUint16(uint256 value) internal pure returns (uint16) {
-		require(value <= type(uint16).max, "uint16 value overflow");
-		return uint16(value);
-	}
-
-	function toUint8(uint256 value) internal pure returns (uint8) {
-		require(value <= type(uint8).max, "uint8 value overflow");
-		return uint8(value);
 	}
 
 	function getAaveV2PaybackAmt(uint256 rateMode, address token)

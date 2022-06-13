@@ -3,9 +3,8 @@ pragma solidity ^0.7.6;
 pragma experimental ABIEncoderV2;
 
 import { Helpers } from "../helpers.sol";
-
-import { AaveV3DataProviderInterface, AaveV3PoolProviderInterface, AaveV3Interface } from "../interface.sol";
 import { TokenInterface } from "../../../common/interfaces.sol";
+import  "../interface.sol";
 
 contract AaveV3Helpers is Helpers {
 	// payback token to Aave V2, amts sent already checked for MAX
