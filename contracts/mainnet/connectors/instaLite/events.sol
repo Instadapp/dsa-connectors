@@ -24,4 +24,14 @@ contract Events {
 		uint256 getId,
 		uint256 setId
 	);
+
+	event LogDeleverageAndWithdraw(
+		address vaultAddr,
+		uint256 deleverageAmt,
+		uint256 withdrawAmount,
+		uint256 stETHAmt,
+		uint256 tokenAmt,
+		uint256[] getIds,
+		uint256[] setIds
+	);
 }
