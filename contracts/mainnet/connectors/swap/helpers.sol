@@ -19,6 +19,7 @@ contract SwapHelpers {
 		bytes[] callDatas;
 		uint256 setId;
 	}
+
 	/**
 	 *@dev Swap using the dex aggregators.
 	 *@param _connectors name of the connectors in preference order.
@@ -46,17 +47,18 @@ contract SwapHelpers {
 		// require _connectors[i] == "1INCH-A" || "ZEROX-A" || "PARASWAP-A" || similar connectors
 
 		for (uint256 i = 0; i < _length; i++) {
-			bytes4 swapData = bytes4(
-				keccak256("swap(address,address,uint256,uint256,bytes,uint256)")
-			);
-
-			if (keccak256(bytes(_connectors[i])) == keccak256(bytes("1INCH-A"))) {
-				swapData = bytes4(
+			bytes4 swapData = (keccak256(bytes(_connectors[i])) ==
+				keccak256(bytes("1INCH-A")))
+				? bytes4(
 					keccak256(
 						"sell(address,address,uint256,uint256,bytes,uint256)"
 					)
+				)
+				: bytes4(
+					keccak256(
+						"swap(address,address,uint256,uint256,bytes,uint256)"
+					)
 				);
-			}
 
 			bytes memory _data = abi.encodeWithSelector(
 				swapData,

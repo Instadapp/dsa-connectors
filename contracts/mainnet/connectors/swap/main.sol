@@ -54,11 +54,8 @@ abstract contract Swap is SwapHelpers, Events {
 		uint256 _buyAmt;
 		uint256 _sellAmt;
 
-		if (!success) {
-			revert("swap-failed");
-		} else {
-			(_buyAmt, _sellAmt) = decodeEvents(_connector, returnData);
-		}
+		require(success, "swap-Aggregator-failed");
+		(_buyAmt, _sellAmt) = decodeEvents(_connector, returnData);
 
 		_eventName = "LogSwapAggregator(string,address,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
