@@ -75,6 +75,22 @@ describe("Swap | Avalanche", function () {
       let buyTokenAmountZeroX: any;
       // let buyTokenAmount1Inch: any;
       let buyTokenAmountParaswap: any;
+
+      async function getSelector(connector: string) {
+        var abi = [
+          "function swap(address,address,uint256,uint256,bytes,uint256)",
+          "function sell(address,address,uint256,uint256,bytes,uint256)"
+        ];
+        var iface = new ethers.utils.Interface(abi);
+        var id;
+        if (connector == "1INCH-A") {
+          id = iface.getSighash("sell");
+        } else {
+          id = iface.getSighash("swap");
+        }
+
+        return id;
+      }
       async function getArg() {
         // const slippage = 0.5;
         /* avax -> usdt */
@@ -89,7 +105,6 @@ describe("Swap | Avalanche", function () {
         let zeroXUrl = `https://avalanche.api.0x.org/swap/v1/quote`;
         let paraswapUrl1 = `https://apiv5.paraswap.io/prices/`;
         let paraswapUrl2 = `https://apiv5.paraswap.io/transactions/43114?ignoreChecks=true`;
-
 
         //paraswap
         let paramsPara = {
@@ -117,7 +132,7 @@ describe("Swap | Avalanche", function () {
           userAddress: dsaWallet0.address
         };
         const calldataPara = (await axios.post(paraswapUrl2, txConfig)).data.data;
-        
+
         // zeroX
         const paramsZeroX = {
           buyToken: buyTokenAddress,
@@ -142,13 +157,15 @@ describe("Swap | Avalanche", function () {
         };
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
-
-        let unitAmts = [ unitAmtParaswap, unitAmt0x];
-        let calldatas = [ calldataPara, calldataZeroX];
+        let swapDataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A"));
+        let swapDataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A"));
+        let unitAmts = [unitAmtParaswap, unitAmt0x];
+        let calldatas = [calldataPara, calldataZeroX];
+        let swapDatas = [swapDataPara, swapDataZeroX];
 
         let connectors = ["PARASWAP-A", "ZEROX-A"];
 
-        return [connectors, buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, calldatas, 0];
+        return [buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, swapDatas, calldatas, connectors, 0];
       }
 
       let arg = await getArg();

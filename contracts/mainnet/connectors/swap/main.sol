@@ -20,16 +20,18 @@ abstract contract Swap is SwapHelpers, Events {
 	 * @param sellAddr The address of the token to sell.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param sellAmt The amount of the token to sell.
 	 * @param unitAmts The amount of buyAmt/sellAmt with slippage for respective DEXs.
+	 * @param swapDatas The function selectors of swap methods of the DEXs.
 	 * @param callDatas Data from APIs for respective DEXs.
 	 * @param setId ID stores the amount of token brought.
 	 */
 	function swap(
-		string[] memory _connectors,
 		address buyAddr,
 		address sellAddr,
 		uint256 sellAmt,
 		uint256[] memory unitAmts,
+		bytes4[] memory swapDatas,
 		bytes[] calldata callDatas,
+		string[] memory _connectors,
 		uint256 setId
 	)
 		external
@@ -41,31 +43,15 @@ abstract contract Swap is SwapHelpers, Events {
 			sellAddr: sellAddr,
 			sellAmt: sellAmt,
 			unitAmts: unitAmts,
+			swapDatas: swapDatas,
 			callDatas: callDatas,
 			setId: setId
 		});
 
-		(
-			bool success,
-			bytes memory returnData,
-			string memory _connector
-		) = _swap(_connectors, inputData);
-
-		uint256 _buyAmt;
-		uint256 _sellAmt;
+		(bool success, bytes memory returnData) = _swap(_connectors, inputData);
 
 		require(success, "swap-Aggregator-failed");
-		(_buyAmt, _sellAmt) = decodeEvents(_connector, returnData);
-
-		_eventName = "LogSwapAggregator(string,address,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(
-			_connector,
-			buyAddr,
-			sellAddr,
-			_buyAmt,
-			_sellAmt,
-			setId
-		);
+		(_eventName, _eventParam) = abi.decode(returnData, (string, bytes));
 	}
 }
 

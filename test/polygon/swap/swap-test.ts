@@ -63,7 +63,7 @@ describe("Swap", function () {
     it("Deposit matic into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10")
+        value: ethers.utils.parseEther("50")
       });
 
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
@@ -75,6 +75,23 @@ describe("Swap", function () {
       let buyTokenAmountZeroX: any;
       let buyTokenAmount1Inch: any;
       let buyTokenAmountParaswap: any;
+
+      async function getSelector(connector: string) {
+        var abi = [
+          "function swap(address,address,uint256,uint256,bytes,uint256)",
+          "function sell(address,address,uint256,uint256,bytes,uint256)"
+        ];
+        var iface = new ethers.utils.Interface(abi);
+        var id;
+        if (connector == "1INCH-A") {
+          id = iface.getSighash("sell");
+        } else {
+          id = iface.getSighash("swap");
+        }
+
+        return id;
+      }
+
       async function getArg() {
         // const slippage = 0.5;
         /* matic -> usdt */
@@ -82,7 +99,7 @@ describe("Swap", function () {
         const sellTokenDecimals = 18;
         const buyTokenAddress = "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"; // USDT, decimals 6
         const buyTokenDecimals = 6;
-        const amount = 2;
+        const amount = 1;
 
         const srcAmount = new BigNumber(amount).times(new BigNumber(10).pow(sellTokenDecimals)).toFixed(0);
 
@@ -94,7 +111,7 @@ describe("Swap", function () {
         const paramsZeroX = {
           buyToken: "USDT",
           sellToken: "MATIC",
-          sellAmount: "2000000000000000000" // Always denominated in wei
+          sellAmount: "1000000000000000000" // Always denominated in wei
         };
 
         const responseZeroX = await axios.get(zeroXUrl, { params: paramsZeroX }).then((data: any) => data);
@@ -142,12 +159,16 @@ describe("Swap", function () {
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
 
+        let swapDataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A"));
+        let swapDataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A"));
+
         let unitAmts = [unitAmt0x, unitAmtParaswap];
         let calldatas = [calldataZeroX, calldataPara];
+        let swapDatas = [swapDataZeroX, swapDataPara];
 
         let connectors = ["ZEROX-A", "PARASWAP-A"];
 
-        return [connectors, buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, calldatas, 0];
+        return [buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, swapDatas, calldatas, connectors, 0];
       }
 
       let arg = await getArg();

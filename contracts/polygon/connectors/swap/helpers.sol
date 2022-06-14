@@ -16,6 +16,7 @@ contract SwapHelpers {
 		address sellAddr;
 		uint256 sellAmt;
 		uint256[] unitAmts;
+		bytes4[] swapDatas;
 		bytes[] callDatas;
 		uint256 setId;
 	}
@@ -27,11 +28,7 @@ contract SwapHelpers {
 	 */
 	function _swap(string[] memory _connectors, InputData memory _inputData)
 		internal
-		returns (
-			bool success,
-			bytes memory returnData,
-			string memory _connector
-		)
+		returns (bool success, bytes memory returnData)
 	{
 		uint256 _length = _connectors.length;
 		require(_length > 0, "zero-length-not-allowed");
@@ -43,25 +40,16 @@ contract SwapHelpers {
 			_inputData.callDatas.length == _length,
 			"callDatas-length-invalid"
 		);
+		require(
+			_inputData.swapDatas.length == _length,
+			"swapDatas-length-invalid"
+		);
 
 		// require _connectors[i] == "1INCH-A" || "ZEROX-A" || "PARASWAP-A" || similar connectors
 
 		for (uint256 i = 0; i < _length; i++) {
-			bytes4 swapData = (keccak256(bytes(_connectors[i])) ==
-				keccak256(bytes("1INCH-A")))
-				? bytes4(
-					keccak256(
-						"sell(address,address,uint256,uint256,bytes,uint256)"
-					)
-				)
-				: bytes4(
-					keccak256(
-						"swap(address,address,uint256,uint256,bytes,uint256)"
-					)
-				);
-
 			bytes memory _data = abi.encodeWithSelector(
-				swapData,
+				_inputData.swapDatas[i],
 				_inputData.buyAddr,
 				_inputData.sellAddr,
 				_inputData.sellAmt,
@@ -73,30 +61,9 @@ contract SwapHelpers {
 			(success, returnData) = instaConnectors
 				.connectors(_connectors[i])
 				.delegatecall(_data);
-
 			if (success) {
-				_connector = _connectors[i];
 				break;
 			}
-		}
-	}
-
-	function decodeEvents(string memory _connector, bytes memory returnData)
-		internal
-		view
-		returns (uint256 _buyAmt, uint256 _sellAmt)
-	{
-		(, bytes memory _eventParam) = abi.decode(returnData, (string, bytes));
-		if (keccak256(bytes(_connector)) == keccak256(bytes("PARASWAP-A"))) {
-			(, , _buyAmt, _sellAmt, ) = abi.decode(
-				_eventParam,
-				(address, address, uint256, uint256, uint256)
-			);
-		} else {
-			(, , _buyAmt, _sellAmt, , ) = abi.decode(
-				_eventParam,
-				(address, address, uint256, uint256, uint256, uint256)
-			);
 		}
 	}
 }

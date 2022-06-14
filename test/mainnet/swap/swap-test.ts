@@ -75,6 +75,23 @@ describe("Swap | Mainnet", function () {
       let buyTokenAmountZeroX: any;
       let buyTokenAmount1Inch: any;
       let buyTokenAmountParaswap: any;
+
+      async function getSelector(connector: string) {
+        var abi = [
+          "function swap(address,address,uint256,uint256,bytes,uint256)",
+          "function sell(address,address,uint256,uint256,bytes,uint256)"
+        ];
+        var iface = new ethers.utils.Interface(abi);
+        var id;
+        if (connector == "1INCH-A") {
+          id = iface.getSighash("sell");
+        } else {
+          id = iface.getSighash("swap");
+        }
+
+        return id;
+      }
+
       async function getArg() {
         const slippage = 0.5;
         /* eth -> dai */
@@ -131,21 +148,21 @@ describe("Swap | Mainnet", function () {
 
         //1inch
         const paramDaiUsdc = {
-            buyToken: buyTokenAddress,
-            sellToken: sellTokenAddress,
-            sellAmount: "1000000000000000000",
-            dsaAddress: dsaWallet0.address
-          }
-          const response1 = await axios.get("https://api.instadapp.io/defi/mainnet/1inch/swap", {
-              params: paramDaiUsdc
-          });
-          
-          const data1 = response1.data;
-          // console.log(data1);
-          let unitAmt1Inch = data1.unitAmt;
-          const calldata1Inch = data1.calldata;
-          buyTokenAmount1Inch = data1.buyTokenAmount;
-          console.log(buyTokenAmount1Inch);
+          buyToken: buyTokenAddress,
+          sellToken: sellTokenAddress,
+          sellAmount: "1000000000000000000",
+          dsaAddress: dsaWallet0.address
+        };
+        const response1 = await axios.get("https://api.instadapp.io/defi/mainnet/1inch/swap", {
+          params: paramDaiUsdc
+        });
+
+        const data1 = response1.data;
+        // console.log(data1);
+        let unitAmt1Inch = data1.unitAmt;
+        const calldata1Inch = data1.calldata;
+        buyTokenAmount1Inch = data1.buyTokenAmount;
+        console.log(buyTokenAmount1Inch);
 
         let calculateUnitAmt = (buyAmount: any) => {
           const buyTokenAmountRes = new BigNumber(buyAmount)
@@ -161,12 +178,17 @@ describe("Swap | Mainnet", function () {
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
 
+        let swapDataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A"));
+        let swapDataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A"));
+        let swapData1Inch = ethers.utils.hexlify(await getSelector("1INCH-A"));
+
         let unitAmts = [unitAmt1Inch, unitAmt0x, unitAmtParaswap];
         let calldatas = [calldata1Inch, calldataZeroX, calldataPara];
+        let swapDatas = [swapData1Inch, swapDataZeroX, swapDataPara];
 
-        let connectors = ["1INCH-A","ZEROX-A", "PARASWAP-A"];
+        let connectors = ["1INCH-A", "ZEROX-A", "PARASWAP-A"];
 
-        return [connectors, buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, calldatas, 0];
+        return [buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, swapDatas, calldatas, connectors, 0];
       }
 
       let arg = await getArg();
