@@ -18,7 +18,11 @@ contract SwapHelpers {
 	 */
 	function _swap(string[] memory _connectors, bytes[] memory _data)
 		internal
-		returns (bool success, bytes memory returnData)
+		returns (
+			bool success,
+			bytes memory returnData,
+			string memory connector
+		)
 	{
 		uint256 _length = _connectors.length;
 		require(_length > 0, "zero-length-not-allowed");
@@ -28,7 +32,10 @@ contract SwapHelpers {
 			(success, returnData) = instaConnectors
 				.connectors(_connectors[i])
 				.delegatecall(_data[i]);
-			if (success) break;
+			if (success) {
+				connector = _connectors[i];
+				break;
+			}
 		}
 	}
 }
