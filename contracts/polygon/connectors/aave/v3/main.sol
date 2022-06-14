@@ -390,9 +390,11 @@ abstract contract AaveResolver is Events, Helpers {
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
 		for (uint256 i = 0; i < _length; i++) {
-			address token = tokens[i];
-			if (getCollateralBalance(token) > 0 && !getIsColl(token)) {
-				aave.setUserUseReserveAsCollateral(token, true);
+			bool isMatic = tokens[i] == maticAddr;
+			address _token = isMatic ? wmaticAddr : tokens[i];
+
+			if (getCollateralBalance(_token) > 0 && !getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, true);
 			}
 		}
 
@@ -416,9 +418,11 @@ abstract contract AaveResolver is Events, Helpers {
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
 		for (uint256 i = 0; i < _length; i++) {
-			address token = tokens[i];
-			if (getCollateralBalance(token) > 0 && getIsColl(token)) {
-				aave.setUserUseReserveAsCollateral(token, false);
+			bool isMatic = tokens[i] == maticAddr;
+			address _token = isMatic ? wmaticAddr : tokens[i];
+
+			if (getCollateralBalance(_token) > 0 && getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, false);
 			}
 		}
 
@@ -441,8 +445,11 @@ abstract contract AaveResolver is Events, Helpers {
 
 		uint256 currentRateMode = rateMode == 1 ? 2 : 1;
 
-		if (getPaybackBalance(token, currentRateMode) > 0) {
-			aave.swapBorrowRateMode(token, rateMode);
+		bool isMatic = token == maticAddr;
+		address _token = isMatic ? wmaticAddr : token;
+
+		if (getPaybackBalance(_token, currentRateMode) > 0) {
+			aave.swapBorrowRateMode(_token, rateMode);
 		}
 
 		_eventName = "LogSwapRateMode(address,uint256)";
