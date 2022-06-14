@@ -75,6 +75,8 @@ describe("Swap", function () {
       let buyTokenAmountZeroX: any;
       let buyTokenAmount1Inch: any;
       let buyTokenAmountParaswap: any;
+      let unitAmount1Inch: any;
+      let calldata1Inch: any;
 
       async function getSelector(connector: string) {
         var abi = [
@@ -159,16 +161,41 @@ describe("Swap", function () {
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
 
-        let swapDataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A"));
-        let swapDataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A"));
-
-        let unitAmts = [unitAmt0x, unitAmtParaswap];
-        let calldatas = [calldataZeroX, calldataPara];
-        let swapDatas = [swapDataZeroX, swapDataPara];
+        function getCallData(connector: string, unitAmt: any, callData: any) {
+          var abi = [
+            "function swap(address,address,uint256,uint256,bytes,uint256)",
+            "function sell(address,address,uint256,uint256,bytes,uint256)"
+          ];
+          var iface = new ethers.utils.Interface(abi);
+          var data;
+          if (connector == "1INCH-A") {
+            data = iface.encodeFunctionData("sell", [
+              buyTokenAddress,
+              sellTokenAddress,
+              srcAmount,
+              unitAmt,
+              callData,
+              0
+            ]);
+          } else {
+            data = iface.encodeFunctionData("swap", [
+              buyTokenAddress,
+              sellTokenAddress,
+              srcAmount,
+              unitAmt,
+              callData,
+              0
+            ]);
+          }
+          return data;
+        }
+        let dataPara = ethers.utils.hexlify(await getCallData("PARASWAP-A", unitAmtParaswap, calldataPara));
+        let dataZeroX = ethers.utils.hexlify(await getCallData("ZEROX-A", unitAmt0x, calldataZeroX));
+        let datas = [dataZeroX, dataPara];
 
         let connectors = ["ZEROX-A", "PARASWAP-A"];
 
-        return [buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, swapDatas, calldatas, connectors, 0];
+        return [connectors, datas];
       }
 
       let arg = await getArg();

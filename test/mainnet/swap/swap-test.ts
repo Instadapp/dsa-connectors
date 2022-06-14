@@ -76,22 +76,6 @@ describe("Swap | Mainnet", function () {
       let buyTokenAmount1Inch: any;
       let buyTokenAmountParaswap: any;
 
-      async function getSelector(connector: string) {
-        var abi = [
-          "function swap(address,address,uint256,uint256,bytes,uint256)",
-          "function sell(address,address,uint256,uint256,bytes,uint256)"
-        ];
-        var iface = new ethers.utils.Interface(abi);
-        var id;
-        if (connector == "1INCH-A") {
-          id = iface.getSighash("sell");
-        } else {
-          id = iface.getSighash("swap");
-        }
-
-        return id;
-      }
-
       async function getArg() {
         const slippage = 0.5;
         /* eth -> dai */
@@ -178,17 +162,42 @@ describe("Swap | Mainnet", function () {
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
 
-        let swapDataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A"));
-        let swapDataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A"));
-        let swapData1Inch = ethers.utils.hexlify(await getSelector("1INCH-A"));
+        function getSelector(connector: string, unitAmt: any, callData: any) {
+          var abi = [
+            "function swap(address,address,uint256,uint256,bytes,uint256)",
+            "function sell(address,address,uint256,uint256,bytes,uint256)"
+          ];
+          var iface = new ethers.utils.Interface(abi);
+          var data;
+          if (connector == "1INCH-A") {
+            data = iface.encodeFunctionData("sell", [
+              buyTokenAddress,
+              sellTokenAddress,
+              srcAmount,
+              unitAmt,
+              callData,
+              0
+            ]);
+          } else {
+            data = iface.encodeFunctionData("swap", [
+              buyTokenAddress,
+              sellTokenAddress,
+              srcAmount,
+              unitAmt,
+              callData,
+              0
+            ]);
+          }
+          return data;
+        }
+        let data1Inch = ethers.utils.hexlify(await getSelector("1INCH-A", unitAmt1Inch, calldata1Inch));
+        let dataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A", unitAmtParaswap, calldataPara));
+        let dataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A", unitAmt0x, calldataZeroX));
+        let datas = [data1Inch, dataPara, dataZeroX];
 
-        let unitAmts = [unitAmt1Inch, unitAmt0x, unitAmtParaswap];
-        let calldatas = [calldata1Inch, calldataZeroX, calldataPara];
-        let swapDatas = [swapData1Inch, swapDataZeroX, swapDataPara];
+        let connectors = ["1INCH-A", "PARASWAP-A", "ZEROX-A"];
 
-        let connectors = ["1INCH-A", "ZEROX-A", "PARASWAP-A"];
-
-        return [buyTokenAddress, sellTokenAddress, srcAmount, unitAmts, swapDatas, calldatas, connectors, 0];
+        return [connectors, datas];
       }
 
       let arg = await getArg();
