@@ -146,36 +146,18 @@ describe("Swap | Avalanche", function () {
         let unitAmt0x = calculateUnitAmt(buyTokenAmountZeroX);
         let unitAmtParaswap = calculateUnitAmt(buyTokenAmountParaswap);
 
-        function getSelector(connector: string, unitAmt: any, callData: any) {
+        function getCallData(connector: string, unitAmt: any, callData: any) {
           var abi = [
             "function swap(address,address,uint256,uint256,bytes,uint256)",
             "function sell(address,address,uint256,uint256,bytes,uint256)"
           ];
           var iface = new ethers.utils.Interface(abi);
-          var data;
-          if (connector == "1INCH-A") {
-            data = iface.encodeFunctionData("sell", [
-              buyTokenAddress,
-              sellTokenAddress,
-              srcAmount,
-              unitAmt,
-              callData,
-              0
-            ]);
-          } else {
-            data = iface.encodeFunctionData("swap", [
-              buyTokenAddress,
-              sellTokenAddress,
-              srcAmount,
-              unitAmt,
-              callData,
-              0
-            ]);
-          }
+          const spell = connector === "1INCH-A" ? "sell" : "swap";
+          let data = iface.encodeFunctionData(spell, [buyTokenAddress, sellTokenAddress, srcAmount, unitAmt, callData, 0]);
           return data;
         }
-        let dataPara = ethers.utils.hexlify(await getSelector("PARASWAP-A", unitAmtParaswap, calldataPara));
-        let dataZeroX = ethers.utils.hexlify(await getSelector("ZEROX-A", unitAmt0x, calldataZeroX));
+        let dataPara = ethers.utils.hexlify(await getCallData("PARASWAP-A", unitAmtParaswap, calldataPara));
+        let dataZeroX = ethers.utils.hexlify(await getCallData("ZEROX-A", unitAmt0x, calldataZeroX));
         let datas = [dataPara, dataZeroX];
 
         let connectors = ["PARASWAP-A", "ZEROX-A"];
