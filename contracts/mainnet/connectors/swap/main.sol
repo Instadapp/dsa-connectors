@@ -9,9 +9,8 @@ pragma experimental ABIEncoderV2;
 
 // import files
 import { SwapHelpers } from "./helpers.sol";
-import { Events } from "./events.sol";
 
-abstract contract Swap is SwapHelpers, Events {
+abstract contract Swap is SwapHelpers {
 	/**
 	 * @dev Swap ETH/ERC20_Token using dex aggregators.
 	 * @notice Swap tokens from exchanges like 1INCH, 0x etc, with calculation done off-chain.
