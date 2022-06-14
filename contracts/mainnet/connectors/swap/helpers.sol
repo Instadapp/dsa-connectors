@@ -28,9 +28,7 @@ contract SwapHelpers {
 			(success, returnData) = instaConnectors
 				.connectors(_connectors[i])
 				.delegatecall(_data[i]);
-			if (success) {
-				break;
-			}
+			if (success) break;
 		}
 	}
 }
