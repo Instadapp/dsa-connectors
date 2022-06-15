@@ -81,7 +81,7 @@ describe("Swap | Mainnet", function () {
         /* eth -> dai */
         const sellTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // eth,  decimals 18
         const sellTokenDecimals = 18;
-        const buyTokenAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F"; // DAI, decimals 6
+        const buyTokenAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F"; // DAI, decimals 18
         const buyTokenDecimals = 18;
         const amount = 1;
 
@@ -169,7 +169,14 @@ describe("Swap | Mainnet", function () {
           ];
           var iface = new ethers.utils.Interface(abi);
           const spell = connector === "1INCH-A" ? "sell" : "swap";
-          let data = iface.encodeFunctionData(spell, [buyTokenAddress, sellTokenAddress, srcAmount, unitAmt, callData, 0]);
+          let data = iface.encodeFunctionData(spell, [
+            buyTokenAddress,
+            sellTokenAddress,
+            srcAmount,
+            unitAmt,
+            callData,
+            0
+          ]);
           return data;
         }
         let data1Inch = ethers.utils.hexlify(await getCallData("1INCH-A", unitAmt1Inch, calldata1Inch));
@@ -178,7 +185,6 @@ describe("Swap | Mainnet", function () {
         let datas = [data1Inch, dataPara, dataZeroX];
 
         let connectors = ["1INCH-A", "PARASWAP-A", "ZEROX-A"];
-
         return [connectors, datas];
       }
 
