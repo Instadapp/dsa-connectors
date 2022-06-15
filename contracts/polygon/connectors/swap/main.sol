@@ -16,16 +16,16 @@ abstract contract Swap is SwapHelpers, Events {
 	 * @dev Swap ETH/ERC20_Token using dex aggregators.
 	 * @notice Swap tokens from exchanges like 1INCH, 0x etc, with calculation done off-chain.
 	 * @param _connectors The name of the connectors like 1INCH-A, 0x etc, in order of their priority.
-	 * @param _data Encoded function call data including function selector encoded with parameters.
+	 * @param _datas Encoded function call data including function selector encoded with parameters.
 	 */
-	function swap(string[] memory _connectors, bytes[] memory _data)
+	function swap(string[] memory _connectors, bytes[] memory _datas)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		(bool success, bytes memory returnData, string memory connector) = _swap(
 			_connectors,
-			_data
+			_datas
 		);
 
 		require(success, "swap-Aggregator-failed");

@@ -14,9 +14,9 @@ contract SwapHelpers {
 	/**
 	 *@dev Swap using the dex aggregators.
 	 *@param _connectors name of the connectors in preference order.
-	 *@param _data data for the swap cast.
+	 *@param _datas data for the swap cast.
 	 */
-	function _swap(string[] memory _connectors, bytes[] memory _data)
+	function _swap(string[] memory _connectors, bytes[] memory _datas)
 		internal
 		returns (
 			bool success,
@@ -26,12 +26,12 @@ contract SwapHelpers {
 	{
 		uint256 _length = _connectors.length;
 		require(_length > 0, "zero-length-not-allowed");
-		require(_data.length == _length, "calldata-length-invalid");
+		require(_datas.length == _length, "calldata-length-invalid");
 
 		for (uint256 i = 0; i < _length; i++) {
 			(success, returnData) = instaConnectors
 				.connectors(_connectors[i])
-				.delegatecall(_data[i]);
+				.delegatecall(_datas[i]);
 			if (success) {
 				connector = _connectors[i];
 				break;
