@@ -28,10 +28,13 @@ contract SwapHelpers {
 		require(_length > 0, "zero-length-not-allowed");
 		require(_datas.length == _length, "calldata-length-invalid");
 
+		(bool isOk, address[] memory connectors) = instaConnectors.isConnectors(
+			_connectors
+		);
+		require(isOk, "connector-names-invalid");
+
 		for (uint256 i = 0; i < _length; i++) {
-			(success, returnData) = instaConnectors
-				.connectors(_connectors[i])
-				.delegatecall(_datas[i]);
+			(success, returnData) = connectors[i].delegatecall(_datas[i]);
 			if (success) {
 				connector = _connectors[i];
 				break;

@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
+pragma abicoder v2;
 
 interface TokenInterface {
     function approve(address, uint256) external;
@@ -29,5 +30,5 @@ interface AccountInterface {
 }
 
 interface InstaConnectors {
-    function connectors(string memory) external returns (address);
+    function isConnectors(string[] calldata) external returns (bool, address[] memory);
 }
