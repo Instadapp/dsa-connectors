@@ -6,6 +6,7 @@ import { tokenMapping as polygonMapping } from "./polygon/tokens";
 import { tokenMapping as avalancheMapping } from "./avalanche/tokens";
 import { tokenMapping as optimismMapping } from "./optimism/tokens";
 import { tokenMapping as arbitrumMapping } from "./arbitrum/tokens";
+import { tokenMapping as fantomMapping } from "./fantom/tokens";
 
 const mineTx = async (tx: any) => {
   await (await tx).wait();
@@ -16,7 +17,8 @@ const tokenMapping: Record<string, Record<string, any>> = {
   polygon: polygonMapping,
   avalanche: avalancheMapping,
   optimism: optimismMapping,
-  arbitrum: arbitrumMapping
+  arbitrum: arbitrumMapping,
+  fantom: fantomMapping
 };
 
 export async function addLiquidity(tokenName: string, address: any, amt: any) {
