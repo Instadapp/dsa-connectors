@@ -18,7 +18,7 @@ abstract contract OneInchResolver is Helpers, Events {
 	/**
 	 * @dev 1inch API swap handler
 	 * @param oneInchData - contains data returned from 1inch API. Struct defined in interfaces.sol
-	 * @param ftmAmt - Eth to swap for .value()
+	 * @param ftmAmt - Ftm to swap for .value()
 	 */
 	function oneInchSwap(OneInchData memory oneInchData, uint256 ftmAmt)
 		internal
@@ -83,7 +83,7 @@ abstract contract OneInchResolverHelpers is OneInchResolver {
 
 abstract contract OneInch is OneInchResolverHelpers {
 	/**
-	 * @dev Sell ETH/ERC20_Token using 1Inch.
+	 * @dev Sell FTM/ERC20_Token using 1Inch.
 	 * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
 	 * @param buyAddr The address of the token to buy.(For FTM: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param sellAddr The address of the token to sell.(For FTM: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
