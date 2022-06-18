@@ -282,9 +282,9 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
 	 * @param token The address of the token to swap borrow rate.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param currentRateMode Current Rate mode. (Stable = 1, Variable = 2)
+	 * @param rateMode Current Rate mode. (Stable = 1, Variable = 2)
 	 */
-	function swapBorrowRateMode(address token, uint256 currentRateMode)
+	function swapBorrowRateMode(address token, uint256 rateMode)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
@@ -294,12 +294,12 @@ abstract contract AaveResolver is Events, Helpers {
 		bool isAVAX = token == avaxAddr;
 		address _token = isAVAX ? wavaxAddr : token;
 
-		if (getPaybackBalance(_token, currentRateMode) > 0) {
-			aave.swapBorrowRateMode(_token, currentRateMode);
+		if (getPaybackBalance(_token, rateMode) > 0) {
+			aave.swapBorrowRateMode(_token, rateMode);
 		}
 
 		_eventName = "LogSwapRateMode(address,uint256)";
-		_eventParam = abi.encode(token, currentRateMode);
+		_eventParam = abi.encode(token, rateMode);
 	}
 }
 
