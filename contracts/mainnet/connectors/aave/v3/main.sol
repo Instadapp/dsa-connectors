@@ -224,7 +224,14 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogBorrowOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
+		_eventParam = abi.encode(
+			token,
+			_amt,
+			rateMode,
+			onBehalfOf,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -344,7 +351,9 @@ abstract contract AaveResolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		_amt = _amt == uint256(-1) ? getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf) : _amt;
+		_amt = _amt == uint256(-1)
+			? getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf)
+			: _amt;
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
 
@@ -355,9 +364,15 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogPaybackOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
+		_eventParam = abi.encode(
+			token,
+			_amt,
+			rateMode,
+			onBehalfOf,
+			getId,
+			setId
+		);
 	}
-
 
 	/**
 	 * @dev Enable collateral
@@ -463,8 +478,14 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogDelegateBorrow(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, delegateTo, getId, setId);
-
+		_eventParam = abi.encode(
+			token,
+			_amt,
+			rateMode,
+			delegateTo,
+			getId,
+			setId
+		);
 	}
 }
 
