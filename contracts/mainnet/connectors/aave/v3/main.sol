@@ -103,7 +103,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 		aave.supply(_token, _amt, address(this), referralCode);
 
-		if (getCollateralBalance(_token) > 0 && getIsColl(token)) {
+		if (getCollateralBalance(_token) > 0 && getIsColl(_token)) {
 			aave.setUserUseReserveAsCollateral(_token, false);
 		}
 
@@ -375,9 +375,11 @@ abstract contract AaveResolver is Events, Helpers {
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
 		for (uint256 i = 0; i < _length; i++) {
-			address token = tokens[i];
-			if (getCollateralBalance(token) > 0 && !getIsColl(token)) {
-				aave.setUserUseReserveAsCollateral(token, true);
+			bool isEth = tokens[i] == ethAddr;
+			address _token = isEth ? wethAddr : tokens[i];
+
+			if (getCollateralBalance(_token) > 0 && !getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, true);
 			}
 		}
 
@@ -389,7 +391,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
 	 * @param token The address of the token to swap borrow rate.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
+	 * @param rateMode Current rate mode. (Stable = 1, Variable = 2)
 	 */
 	function swapBorrowRateMode(address token, uint256 rateMode)
 		external
@@ -398,10 +400,11 @@ abstract contract AaveResolver is Events, Helpers {
 	{
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		uint256 currentRateMode = rateMode == 1 ? 2 : 1;
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
 
-		if (getPaybackBalance(token, currentRateMode) > 0) {
-			aave.swapBorrowRateMode(token, rateMode);
+		if (getPaybackBalance(_token, rateMode) > 0) {
+			aave.swapBorrowRateMode(_token, rateMode);
 		}
 
 		_eventName = "LogSwapRateMode(address,uint256)";
