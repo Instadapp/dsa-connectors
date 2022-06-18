@@ -245,22 +245,23 @@ abstract contract AaveResolver is Events, Helpers {
      * @dev Swap borrow rate mode
      * @notice Swaps user borrow rate mode between variable and stable
      * @param token The address of the token to swap borrow rate.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
+     * @param currentRateMode Current Rate mode. (Stable = 1, Variable = 2)
     */
     function swapBorrowRateMode(
         address token,
-        uint rateMode
+        uint currentRateMode
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 
-        uint currentRateMode = rateMode == 1 ? 2 : 1;
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
 
-        if (getPaybackBalance(token, currentRateMode) > 0) {
-            aave.swapBorrowRateMode(token, rateMode);
+        if (getPaybackBalance(_token, currentRateMode) > 0) {
+            aave.swapBorrowRateMode(_token, currentRateMode);
         }
 
         _eventName = "LogSwapRateMode(address,uint256)";
-        _eventParam = abi.encode(token, rateMode);
+        _eventParam = abi.encode(token, currentRateMode);
     }
 }
 

@@ -276,28 +276,29 @@ abstract contract AaveResolver is Events, Helpers {
 		_eventParam = abi.encode(tokens);
 	}
 
-	/**
-	 * @dev Swap borrow rate mode
-	 * @notice Swaps user borrow rate mode between variable and stable
-	 * @param token The address of the token to swap borrow rate.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
-	 */
-	function swapBorrowRateMode(address token, uint256 rateMode)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 
-		uint256 currentRateMode = rateMode == 1 ? 2 : 1;
+    /**
+     * @dev Swap borrow rate mode
+     * @notice Swaps user borrow rate mode between variable and stable
+     * @param token The address of the token to swap borrow rate.(For AVAX: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param currentRateMode Current Rate mode. (Stable = 1, Variable = 2)
+    */
+    function swapBorrowRateMode(
+        address token,
+        uint currentRateMode
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 
-		if (getPaybackBalance(token, currentRateMode) > 0) {
-			aave.swapBorrowRateMode(token, rateMode);
-		}
+		bool isAVAX = token == avaxAddr;
+		address _token = isAVAX ? wavaxAddr : token;
 
-		_eventName = "LogSwapRateMode(address,uint256)";
-		_eventParam = abi.encode(token, rateMode);
-	}
+        if (getPaybackBalance(_token, currentRateMode) > 0) {
+            aave.swapBorrowRateMode(_token, currentRateMode);
+        }
+
+        _eventName = "LogSwapRateMode(address,uint256)";
+        _eventParam = abi.encode(token, currentRateMode);
+    }
 }
 
 contract ConnectV2AaveV2Avalanche is AaveResolver {
