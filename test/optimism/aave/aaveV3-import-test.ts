@@ -353,5 +353,112 @@ describe("Import Aave v3 Position for Optimism", function () {
         new BigNumber(10).multipliedBy(1e18).toString()
       );
     });
+
+    describe("check user AAVE position", async () => {
+      it("Should create Aave v3 position of DAI(collateral),  and USDC(debt)", async () => {
+        await token.connect(signer).transfer(wallet0.address, ethers.utils.parseEther("10"));
+        // approve DAI to aavePool
+        await token.connect(wallet0).approve(aaveAddress, parseEther("10"));
+
+        //deposit DAI in aave
+        await aave.connect(wallet0).supply(DAI, parseEther("10"), wallet.address, 3228);
+        console.log("\tSupplied DAI on aave");
+
+        //borrow USDC from aave
+        await aave.connect(wallet0).borrow(USDC, parseUnits("1", 6), 1, 3228, wallet.address);
+        console.log("\tBorrowed USDC from aave");
+      });
+
+      it("Should check position of user", async () => {
+        expect(await aDai.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
+          new BigNumber(10).multipliedBy(1e18).toString()
+        );
+
+        expect(await usdcToken.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
+          new BigNumber(1).multipliedBy(1e6).toString()
+        );
+      });
+    });
+  });
+  describe("Aave position import with collateral", async () => {
+    it("Should migrate Aave position", async () => {
+      const DOMAIN_SEPARATOR = await aDai.connect(wallet0).DOMAIN_SEPARATOR();
+      const PERMIT_TYPEHASH = "0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9";
+
+      let nonce = (await aDai.connect(wallet0).nonces(wallet.address)).toNumber();
+      //Approving max amount
+      const amount = ethers.constants.MaxUint256;
+      const expiry = Date.now() + 20 * 60;
+
+      const digest = keccak256(
+        ethers.utils.solidityPack(
+          ["bytes1", "bytes1", "bytes32", "bytes32"],
+          [
+            "0x19",
+            "0x01",
+            DOMAIN_SEPARATOR,
+            keccak256(
+              defaultAbiCoder.encode(
+                ["bytes32", "address", "address", "uint256", "uint256", "uint256"],
+                [PERMIT_TYPEHASH, wallet.address, dsaWallet0.address, amount, nonce, expiry]
+              )
+            )
+          ]
+        )
+      );
+      const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
+
+      const amount0 = new BigNumber(
+        new BigNumber((await aave.connect(wallet0).getUserAccountData(wallet.address)).totalDebtBase)
+      );
+      let params = {
+        tokens: [USDC],
+        amounts: [amount0.toFixed(0)]
+      };
+      const flashData = (
+        await axios.get("https://api.instadapp.io/defi/optimism/flashloan/v2", {
+          params: params
+        })
+      ).data;
+
+      const fees = flashData.bestFee;
+      const amountB = new BigNumber(amount0.toString()).multipliedBy(fees).dividedBy(1e4);
+      const amountWithFee = amount0.plus(amountB);
+      const data = flashData.bestData[0];
+
+      const flashSpells = [
+        {
+          connector: "AAVE-V3-IMPORT-PERMIT-X",
+          method: "importAaveWithCollateral",
+          args: [
+            wallet.address,
+            [[DAI], [USDC], false, [amountB.toFixed(0)]],
+            [[v], [ethers.utils.hexlify(r)], [ethers.utils.hexlify(s)], [expiry]],
+            [true]
+          ]
+        },
+        {
+          connector: "INSTAPOOL-C",
+          method: "flashPayback",
+          args: [USDC, amountWithFee.toFixed(0), 0, 0]
+        }
+      ];
+
+      const spells = [
+        {
+          connector: "INSTAPOOL-C",
+          method: "flashBorrowAndCast",
+          args: [USDC, amount0.toFixed(0), flashData.bestRoutes[0], encodeFlashcastData(flashSpells), data.toString()]
+        }
+      ];
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
+      const receipt = await tx.wait();
+    });
+
+    it("Should check DSA AAVE position", async () => {
+      expect(await aDai.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
+        new BigNumber(10).multipliedBy(1e18).toString()
+      );
+    });
   });
 });
