@@ -33,7 +33,7 @@ interface AccountInterface {
     ) external payable returns (bytes32[] memory responses);
 }
 
-interface InstaConnectors {
-    function isConnectors(string[] calldata) external returns (bool, address[] memory);
+interface ListInterface {
+    function accountID(address) external returns (uint64);
 }
 
