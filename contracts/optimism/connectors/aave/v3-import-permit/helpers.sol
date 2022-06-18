@@ -5,7 +5,6 @@ import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
 import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, AavePoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
-import "hardhat/console.sol";
 import "./events.sol";
 import "./interface.sol";
 
@@ -120,9 +119,9 @@ contract AaveHelpers is Helper {
 				}
 			}
 			for (uint256 i = 0; i < inputData.borrowTokens.length; i++) {
-				address _token = inputData.supplyTokens[i] == ethAddr
-				? wethAddr
-				: inputData.supplyTokens[i];
+				address _token = inputData.borrowTokens[i] == ethAddr
+					? wethAddr
+					: inputData.borrowTokens[i];
 				data._borrowTokens[i] = _token;
 
 				(
@@ -261,15 +260,9 @@ contract AaveHelpers is Helper {
 		address[] memory tokens,
 		address userAccount
 	) internal {
-		(,uint256 totaldebt,,,,) = aave.getUserAccountData(userAccount);
-		console.log(totaldebt);
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {
 				uint256 _amt = amts[i];
-				// console.log(userAccount);
-				// console.log(address(this));
-				// console.log(_amt);
-				// console.log(atokenContracts[i].balanceOf(address(this)));
 				require(
 					atokenContracts[i].transferFrom(
 						userAccount,
@@ -278,8 +271,6 @@ contract AaveHelpers is Helper {
 					),
 					"allowance?"
 				);
-
-				// console.log(atokenContracts[i].balanceOf(address(this)));
 
 				if (!getIsColl(tokens[i], address(this))) {
 					aave.setUserUseReserveAsCollateral(tokens[i], true);

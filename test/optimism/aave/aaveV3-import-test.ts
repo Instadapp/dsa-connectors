@@ -14,40 +14,21 @@ import { parseEther, parseUnits } from "ethers/lib/utils";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData";
 import { ConnectV2AaveV3ImportPermitOptimism__factory, IERC20__factory } from "../../../typechain";
-import { Hex } from "web3/utils";
+import axios from "axios";
 
 const aDaiAddress = "0x82E64f49Ed5EC1bC6e43DAD4FC8Af9bb3A2312EE";
 const aaveAddress = "0x794a61358D6845594F94dc1DB02A252b5b4814aD";
 let account = "0x31efc4aeaa7c39e54a33fdc3c46ee2bd70ae0a09";
 const DAI = "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1";
 const USDC = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
-const flashAddress = "0x810D6b2425Dc5523525D1F45CC548ae9a085F5Ea";
 const mnemonic = "test test test test test test test test test test test junk";
-// const mnemonic = "announce room limb pattern dry unit scale effort smooth jazz weasel alcohol";
 const connectorName = "AAVE-V3-IMPORT-PERMIT-X";
-let signer: any, wallet0: any, wallet:any;
+let signer: any, wallet0: any, wallet: any;
 
 const ABI = [
   "function DOMAIN_SEPARATOR() public view returns (bytes32)",
   "function balanceOf(address account) public view returns (uint256)",
   "function nonces(address owner) public view returns (uint256)"
-];
-
-const flashAbi = [
-  {
-    inputs: [
-      { internalType: "address[]", name: "_tokens", type: "address[]" },
-      { internalType: "uint256[]", name: "_amounts", type: "uint256[]" }
-    ],
-    name: "getBestRoutes",
-    outputs: [
-      { internalType: "uint16[]", name: "", type: "uint16[]" },
-      { internalType: "uint256", name: "", type: "uint256" },
-      { internalType: "bytes[]", name: "", type: "bytes[]" }
-    ],
-    stateMutability: "view",
-    type: "function"
-  }
 ];
 
 const aaveAbi = [
@@ -187,15 +168,13 @@ const erc20Abi = [
     payable: false,
     stateMutability: "nonpayable",
     type: "function"
-  },
-
+  }
 ];
 
 const token = new ethers.Contract(DAI, erc20Abi);
 const aDai = new ethers.Contract(aDaiAddress, ABI);
 const usdcToken = new ethers.Contract(USDC, erc20Abi);
 const aave = new ethers.Contract(aaveAddress, aaveAbi);
-const flashLoan = new ethers.Contract(flashAddress, flashAbi);
 
 describe("Import Aave v3 Position for Optimism", function () {
   let dsaWallet0: any;
@@ -220,7 +199,6 @@ describe("Import Aave v3 Position for Optimism", function () {
     });
     masterSigner = await getMasterSigner();
     [wallet0] = await ethers.getSigners();
-    console.log(wallet.address);
     await hre.network.provider.send("hardhat_setBalance", [account, ethers.utils.parseEther("10").toHexString()]);
 
     await hre.network.provider.request({
@@ -242,23 +220,20 @@ describe("Import Aave v3 Position for Optimism", function () {
   });
 
   describe("check user AAVE position", async () => {
-    it("Should create Aave v3 position of DAI(collateral) and USDC(debt)", async () => {
+    it("Should create Aave v3 position of DAI(collateral),  and USDC(debt)", async () => {
       // approve DAI to aavePool
       await token.connect(wallet0).approve(aaveAddress, parseEther("10"));
 
-      console.log(`totalDebtBase: ${(await aave.connect(wallet0).getUserAccountData(wallet.address)).totalDebtBase.toString()}`);
       //deposit DAI in aave
       await aave.connect(wallet0).supply(DAI, parseEther("10"), wallet.address, 3228);
-      // console.log("Supplied DAI on aave");
+      console.log("\tSupplied DAI on aave");
 
       //borrow USDC from aave
       await aave.connect(wallet0).borrow(USDC, parseUnits("1", 6), 1, 3228, wallet.address);
-      // console.log("Borrowed USDC from aave");
-      console.log(`totalDebtBase: ${(await aave.connect(wallet0).getUserAccountData(wallet.address)).totalDebtBase.toString()}`);
+      console.log("\tBorrowed USDC from aave");
     });
 
     it("Should check position of user", async () => {
-      console.log(`Borrowed usdc: ${(await usdcToken.connect(wallet0).balanceOf(wallet.address)).toString()}`);
       expect(await aDai.connect(wallet0).balanceOf(wallet.address)).to.be.gte(
         new BigNumber(10).multipliedBy(1e18).toString()
       );
@@ -293,7 +268,9 @@ describe("Import Aave v3 Position for Optimism", function () {
 
   describe("User's borrows", async () => {
     it("Should check the totalDebtBase of user", async () => {
-      console.log(`totalDebtBase: ${(await aave.connect(wallet0).getUserAccountData(wallet.address)).totalDebtBase.toString()}`);
+      console.log(
+        `\ttotalDebtBase: ${(await aave.connect(wallet0).getUserAccountData(wallet.address)).totalDebtBase.toString()}`
+      );
     });
   });
 
@@ -324,20 +301,24 @@ describe("Import Aave v3 Position for Optimism", function () {
         )
       );
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
-    //   const addr = ecrecover(Buffer.from(digest.slice(2),'hex'), v,r,s);
-    // console.log(pubToAddress(addr)); 
-      const amount0 = new BigNumber(await usdcToken.connect(wallet0).balanceOf(wallet.address));
-      let flashData = await flashLoan.connect(signer).getBestRoutes([USDC], [amount0.toFixed(0)]);
-      const fees = flashData[1].toNumber();
+
+      const amount0 = new BigNumber(
+        new BigNumber((await aave.connect(wallet0).getUserAccountData(wallet.address)).totalDebtBase)
+      );
+      let params = {
+        tokens: [USDC],
+        amounts: [amount0.toFixed(0)]
+      };
+      const flashData = (
+        await axios.get("https://api.instadapp.io/defi/optimism/flashloan/v2", {
+          params: params
+        })
+      ).data;
+
+      const fees = flashData.bestFee;
       const amountB = new BigNumber(amount0.toString()).multipliedBy(fees).dividedBy(1e4);
       const amountWithFee = amount0.plus(amountB);
-      const data = flashData[2][0];
-      // console.log(wallet0.address);
-      // console.log(wallet.address);
-      // console.log(dsaWallet0.address);
-      // console.log(connector.address);
-      // console.log(data.toString());
-      // console.log(amountWithFee.toFixed(0));
+      const data = flashData.bestData[0];
 
       const flashSpells = [
         {
@@ -360,7 +341,7 @@ describe("Import Aave v3 Position for Optimism", function () {
         {
           connector: "INSTAPOOL-C",
           method: "flashBorrowAndCast",
-          args: [USDC, amount0.toString(), 8, encodeFlashcastData(flashSpells), data.toString()]
+          args: [USDC, amount0.toFixed(0), flashData.bestRoutes[0], encodeFlashcastData(flashSpells), data.toString()]
         }
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet.address);
