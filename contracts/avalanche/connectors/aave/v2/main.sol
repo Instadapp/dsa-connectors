@@ -266,16 +266,17 @@ abstract contract AaveResolver is Events, Helpers {
 		AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 
 		for (uint256 i = 0; i < _length; i++) {
-			address token = tokens[i];
-			if (getCollateralBalance(token) > 0 && !getIsColl(token)) {
-				aave.setUserUseReserveAsCollateral(token, true);
+			bool isAvax = tokens[i] == avaxAddr;
+		    address _token = isAvax ? wavaxAddr : tokens[i];
+
+			if (getCollateralBalance(_token) > 0 && !getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, true);
 			}
 		}
 
 		_eventName = "LogEnableCollateral(address[])";
 		_eventParam = abi.encode(tokens);
 	}
-
 
     /**
      * @dev Swap borrow rate mode

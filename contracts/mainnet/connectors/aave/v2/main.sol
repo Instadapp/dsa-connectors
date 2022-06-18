@@ -231,9 +231,11 @@ abstract contract AaveResolver is Events, Helpers {
         AaveInterface aave = AaveInterface(aaveProvider.getLendingPool());
 
         for (uint i = 0; i < _length; i++) {
-            address token = tokens[i];
-            if (getCollateralBalance(token) > 0 && !getIsColl(token)) {
-                aave.setUserUseReserveAsCollateral(token, true);
+		    bool isEth = tokens[i] == ethAddr;
+		    address _token = isEth ? wethAddr : tokens[i];
+
+            if (getCollateralBalance(_token) > 0 && !getIsColl(_token)) {
+                aave.setUserUseReserveAsCollateral(_token, true);
             }
         }
 
