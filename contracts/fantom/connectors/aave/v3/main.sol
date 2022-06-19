@@ -432,7 +432,7 @@ abstract contract AaveResolver is Events, Helpers {
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
 	 * @param token The address of the token to swap borrow rate.(For ftm: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
+	 * @param rateMode Current rate mode. (Stable = 1, Variable = 2)
 	 */
 	function swapBorrowRateMode(address token, uint256 rateMode)
 		external
@@ -441,11 +441,10 @@ abstract contract AaveResolver is Events, Helpers {
 	{
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		uint256 currentRateMode = rateMode == 1 ? 2 : 1;
 		bool isFTM = token == ftmAddr;
 		address _token = isFTM ? wftmAddr : token;
 
-		if (getPaybackBalance(_token, currentRateMode) > 0) {
+		if (getPaybackBalance(_token, rateMode) > 0) {
 			aave.swapBorrowRateMode(_token, rateMode);
 		}
 
