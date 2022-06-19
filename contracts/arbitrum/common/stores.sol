@@ -27,9 +27,9 @@ abstract contract Stores {
   ListInterface internal constant instaList = ListInterface(0x3565F6057b7fFE36984779A507fC87b31EFb0f09);
 
   /**
-	 * @dev Return connectors Registry Address
+	 * @dev Return connectors registry address
 	 */
-  InstaConnectors internal constant instaConnectors =	InstaConnectors(0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B);
+	InstaConnectors internal constant instaConnectors =	InstaConnectors(0x67fCE99Dd6d8d659eea2a1ac1b8881c57eb6592B);
 
   /**
    * @dev Get Uint value from InstaMemory Contract.
