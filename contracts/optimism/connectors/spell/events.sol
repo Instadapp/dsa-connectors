@@ -4,8 +4,9 @@ pragma abicoder v2;
 
 contract Events {
 	event LogCastDSA(
-        address indexed targetDSA,
+		address indexed targetDSA,
 		string[] connectors,
 		bytes[] datas
 	);
+	event LogCastSpells(string[] eventNames, bytes[] eventParams);
 }
