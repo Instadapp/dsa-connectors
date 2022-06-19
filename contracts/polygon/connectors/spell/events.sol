@@ -3,10 +3,10 @@ pragma solidity ^0.7.0;
 pragma abicoder v2;
 
 contract Events {
-	event LogCastDSA(
+	event LogCastOnDSA(
 		address indexed targetDSA,
 		string[] connectors,
 		bytes[] datas
 	);
-	event LogCastSpells(string[] eventNames, bytes[] eventParams);
+	event LogRetrySpell(string[] eventNames, bytes[] eventParams);
 }

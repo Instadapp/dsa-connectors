@@ -19,7 +19,7 @@ abstract contract DSASpell is Events, Stores {
 	 *@param connectors Array of connector names.
 	 *@param datas Array of connector calldatas.
 	 */
-	function castDSA(
+	function castOnDSA(
 		address targetDSA,
 		string[] memory connectors,
 		bytes[] memory datas
@@ -32,7 +32,7 @@ abstract contract DSASpell is Events, Stores {
 
 		AccountInterface(targetDSA).cast(connectors, datas, address(this));
 
-		_eventName = "LogCastDSA(address,string[],bytes[])";
+		_eventName = "LogCastOnDSA(address,string[],bytes[])";
 		_eventParam = abi.encode(targetDSA, connectors, datas);
 	}
 
@@ -41,7 +41,7 @@ abstract contract DSASpell is Events, Stores {
 	 *@param connectors Array of connector names.
 	 *@param datas Array of connector calldatas.
 	 */
-	function castSpells(string[] memory connectors, bytes[] memory datas)
+	function retrySpell(string[] memory connectors, bytes[] memory datas)
 		external
 		payable
 		returns (string memory eventName, bytes memory eventParam)
@@ -60,14 +60,16 @@ abstract contract DSASpell is Events, Stores {
 		for (uint256 i = 0; i < _length; i++) {
 			(bool success, bytes memory returnData) = _connectors[i]
 				.delegatecall(datas[i]);
-			require(success, "spells-failed");
-			(_eventNames[i], _eventParams[i]) = abi.decode(
-				returnData,
-				(string, bytes)
-			);
+
+			if (success) {
+				(_eventNames[i], _eventParams[i]) = abi.decode(
+					returnData,
+					(string, bytes)
+				);
+			}
 		}
 
-		eventName = "LogCastSpells(string[],bytes[])";
+		eventName = "LogRetrySpell(string[],bytes[])";
 		eventParam = abi.encode(_eventNames, _eventParams);
 	}
 }
