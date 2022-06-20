@@ -47,7 +47,7 @@ abstract contract InstaDexSimulationResolver is Events, Helpers {
 			approve(tokenContract, address(dexSimulation), sellAmount);
 		}
 
-		InstaDexSimulation(dexSimulation).swap{ value: sellAmount }(
+		InstaDexSimulation(dexSimulation).swap{ value: nativeAmount }(
 			sellToken,
 			buyToken,
 			sellAmount,
