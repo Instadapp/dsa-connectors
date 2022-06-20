@@ -37,6 +37,7 @@ abstract contract InstaDexSimulationResolver is Events, Helpers {
 			sellAmount = sellAmount == uint256(-1)
 				? address(this).balance
 				: sellAmount;
+			nativeAmount = sellAmount;
 		} else {
 			TokenInterface tokenContract = TokenInterface(sellToken);
 
