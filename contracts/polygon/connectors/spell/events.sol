@@ -8,5 +8,5 @@ contract Events {
 		string[] connectors,
 		bytes[] datas
 	);
-	event LogRetrySpell(string[] eventNames, bytes[] eventParams);
+	event LogSpellFactory(string[] eventNames, bytes[] eventParams);
 }

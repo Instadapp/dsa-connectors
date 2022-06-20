@@ -12,7 +12,7 @@ import { AccountInterface } from "../../common/interfaces.sol";
 import { Stores } from "../../common/stores.sol";
 import { Events } from "./events.sol";
 
-abstract contract DSASpell is Events, Stores {
+abstract contract DSASpellsResolver is Events, Stores {
 	/**
 	 *@dev Cast spells on DSA.
 	 *@param targetDSA target DSA to cast spells on.
@@ -41,7 +41,7 @@ abstract contract DSASpell is Events, Stores {
 	 *@param connectors Array of connector names.
 	 *@param datas Array of connector calldatas.
 	 */
-	function retrySpell(string[] memory connectors, bytes[] memory datas)
+	function spellFactory(string[] memory connectors, bytes[] memory datas)
 		external
 		payable
 		returns (string memory eventName, bytes memory eventParam)
@@ -69,11 +69,11 @@ abstract contract DSASpell is Events, Stores {
 			}
 		}
 
-		eventName = "LogRetrySpell(string[],bytes[])";
+		eventName = "LogSpellFactory(string[],bytes[])";
 		eventParam = abi.encode(_eventNames, _eventParams);
 	}
 }
 
-contract ConnectV2DSASpellArbitrum is DSASpell {
+contract ConnectV2DSASpellArbitrum is DSASpellsResolver {
 	string public name = "DSA-Spell-v1.0";
 }
