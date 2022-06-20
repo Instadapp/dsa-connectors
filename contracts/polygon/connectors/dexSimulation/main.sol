@@ -24,12 +24,15 @@ abstract contract InstaDexSimulationResolver is Events, Helpers {
 		address buyToken,
 		uint256 sellAmount,
 		uint256 buyAmount,
-		uint256 setId
+		uint256 setId,
+		uint256 getId
 	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		sellAmount = getUint(getId, buyAmount);
+
 		if (sellToken == maticAddr) {
 			sellAmount = sellAmount == uint256(-1)
 				? address(this).balance
