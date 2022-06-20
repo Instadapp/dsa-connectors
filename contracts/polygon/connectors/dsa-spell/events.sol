@@ -8,5 +8,11 @@ contract Events {
 		string[] connectors,
 		bytes[] datas
 	);
-	event LogSpellFactory(string[] eventNames, bytes[] eventParams);
+	event LogCastAny(
+		string indexed connector,
+		string connectorName,
+		string[] connectors,
+		string eventName,
+		bytes eventParam
+	);
 }
