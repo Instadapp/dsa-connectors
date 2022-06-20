@@ -11,6 +11,14 @@ import { Events } from "./events.sol";
 import "./helpers.sol";
 
 abstract contract InstaDexSimulationResolver is Events, Helpers {
+	/**
+	 * @dev Simulation swap using Insta dex swap contract
+	 * @param sellToken The token to sell/swap
+	 * @param buyToken The token to buy
+	 * @param sellAmount The sell token amount
+	 * @param buyAmount The buy token amount
+	 * @param setId Set token amount at this ID in `InstaMemory` Contract.
+	 */
 	function swap(
 		address sellToken,
 		address buyToken,
