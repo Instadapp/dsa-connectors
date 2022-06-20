@@ -76,11 +76,10 @@ abstract contract DSASpellsResolver is Events, Stores {
 		}
 		require(success, "dsa-spells-failed");
 
-		eventName = "LogCastAny(string,string,string[],string,bytes)";
+		eventName = "LogCastAny(string[],string,string,bytes)";
 		eventParam = abi.encode(
-			_connectorName,
-			_connectorName,
 			connectors,
+			_connectorName,
 			_eventName,
 			_eventParam
 		);

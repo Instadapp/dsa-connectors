@@ -9,9 +9,8 @@ contract Events {
 		bytes[] datas
 	);
 	event LogCastAny(
-		string indexed connector,
-		string connectorName,
 		string[] connectors,
+		string connectorName,
 		string eventName,
 		bytes eventParam
 	);
