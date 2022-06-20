@@ -64,6 +64,6 @@ abstract contract InstaDexSimulationResolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2InstaDexSimulation is InstaDexSimulationResolver {
+contract ConnectV2InstaDexSimulationPolygon is InstaDexSimulationResolver {
 	string public name = "Instadapp-DEX-Simulation-v1";
 }
