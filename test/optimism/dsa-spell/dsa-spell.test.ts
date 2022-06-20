@@ -10,6 +10,7 @@ import { addresses } from "../../../scripts/tests/optimism/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2DSASpellOptimism__factory } from "../../../typechain";
 import type { Signer, Contract } from "ethers";
+import BigNumber from "bignumber.js";
 
 describe("DSA Spell", function () {
   const connectorName = "dsa-spell-test";
@@ -87,6 +88,8 @@ describe("DSA Spell", function () {
     let ETH = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
     let USDC = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
     let usdc = new ethers.Contract(USDC, abis.basic.erc20);
+    let aETH = "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8";
+    let aEth = new ethers.Contract(aETH, abis.basic.aToken);
     var abi = [
       "function withdraw(address,uint256,address,uint256,uint256)",
       "function deposit(address,uint256,uint256,uint256)",
@@ -128,12 +131,16 @@ describe("DSA Spell", function () {
     });
 
     it("should check balances after cast on DSA", async function () {
-      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.lte(ethers.utils.parseEther("0"));
-      expect(await usdc.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(ethers.utils.parseUnits("1", 6));
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("12"));
+      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.lte(0);
+      expect(await usdc.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(
+        new BigNumber(1).multipliedBy(1e6).toString()
+      );
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
+        new BigNumber(12).multipliedBy(1e18).toString()
+      );
     });
 
-    it("should retry spells", async function () {
+    it("should cast spell on the first successful", async function () {
       async function getArg(connectors: any, spells: any, params: any) {
         let datas = [];
         for (let i = 0; i < connectors.length; i++) {
@@ -142,32 +149,32 @@ describe("DSA Spell", function () {
         return [connectors, datas];
       }
 
-      let connectors = ["BASIC-A", "BASIC-A", "AAVE-V3-A", "AAVE-V3-A"];
-      let methods = ["deposit", "withdraw", "deposit", "borrow"];
+      let connectors = ["AAVE-V3-A"];
+      let methods = ["deposit"];
       let params = [
-        [ETH, ethers.utils.parseEther("1"), 0, 0],
-        [ETH, ethers.utils.parseEther("2"), dsaWallet1.address, 0, 0],
-        [ETH, ethers.utils.parseEther("10"), 0, 0],
-        [USDC, ethers.utils.parseUnits("3", 6), 2, 0, 0]
+        [ETH, ethers.utils.parseEther("10"), 0, 0]
       ];
       let arg = await getArg(connectors, methods, params);
       const spells = [
         {
           connector: connectorName,
-          method: "spellFactory",
+          method: "castAny",
           args: arg
         }
       ];
       const tx = await dsaWallet0
         .connect(wallet0)
-        .cast(...encodeSpells(spells), await wallet0.getAddress(), { value: ethers.utils.parseEther("1") });
+        .cast(...encodeSpells(spells), await wallet0.getAddress());
       const receipt = await tx.wait();
     });
 
     it("should check balances after spells on DSA", async function () {
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("1"));
-      expect(await usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(ethers.utils.parseUnits("3", 6));
-      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("2"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
+        new BigNumber(2).multipliedBy(1e18).toString()
+      );
+      expect(await aEth.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
+        new BigNumber(10).multipliedBy(1e18).toString()
+      );
     });
   });
 });
