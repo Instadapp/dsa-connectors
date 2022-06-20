@@ -18,6 +18,7 @@ abstract contract InstaDexSimulationResolver is Events, Helpers {
 	 * @param sellAmount The sell token amount
 	 * @param buyAmount The buy token amount
 	 * @param setId Set token amount at this ID in `InstaMemory` Contract.
+	 * @param getId Get token amount at this ID in `InstaMemory` Contract.
 	 */
 	function swap(
 		address sellToken,
