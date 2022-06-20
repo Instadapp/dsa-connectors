@@ -90,33 +90,37 @@ describe("DSA Spell", function () {
 
   describe("Main", function () {
     let AVAX = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+    let USDC = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E";
+    let usdc = new ethers.Contract(USDC, abis.basic.erc20);
+    var abi = [
+      "function withdraw(address,uint256,address,uint256,uint256)",
+      "function deposit(address,uint256,uint256,uint256)",
+      "function borrow(address,uint256,uint256,uint256,uint256)"
+    ];
+    function getCallData(spell: string, params: any) {
+      var iface = new ethers.utils.Interface(abi);
+      let data = iface.encodeFunctionData(spell, params);
+      return ethers.utils.hexlify(data);
+    }
+
     it("should cast spells", async function () {
-      await hre.network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [walletB.address]
-      });
-
-      walletBsigner = await ethers.getSigner(walletB.address);
-      async function getArg() {
-        var abi = [
-          "function withdraw(address,uint256,address,uint256,uint256)",
-          "function deposit(address,uint256,uint256,uint256)"
-        ];
-        function getCallData(connector: string, spell: string, params: any) {
-          var iface = new ethers.utils.Interface(abi);
-          let data = iface.encodeFunctionData(spell, params);
-          return data;
+      async function getArg(connectors: any, spells: any, params: any) {
+        let datas = [];
+        for (let i = 0; i < connectors.length; i++) {
+          datas.push(getCallData(spells[i], params[i]));
         }
-        let basicParams = [AVAX, ethers.utils.parseEther("2"), dsaWallet0.address, 0, 0];
-        let dataBasic = ethers.utils.hexlify(await getCallData("BASIC-A", "withdraw", basicParams));
-        let datas = [dataBasic];
-
-        let connectors = ["BASIC-A"];
-
         return [dsaWallet1.address, connectors, datas];
       }
 
-      let arg = await getArg();
+      let connectors = ["BASIC-A", "AAVE-V3-A", "AAVE-V3-A"];
+      let methods = ["withdraw", "deposit", "borrow"];
+      let params = [
+        [AVAX, ethers.utils.parseEther("2"), dsaWallet0.address, 0, 0],
+        [AVAX, ethers.constants.MaxUint256, 0, 0],
+        [USDC, ethers.utils.parseUnits("1", 6), 2, 0, 0]
+      ];
+      let arg = await getArg(connectors, methods, params);
+
       const spells = [
         {
           connector: connectorName,
@@ -126,44 +130,36 @@ describe("DSA Spell", function () {
       ];
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), await wallet0.getAddress());
       const receipt = await tx.wait();
+    });
 
-      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.lte(ethers.utils.parseEther("8"));
+    it("should check balances after cast on DSA", async function () {
+      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.lte(ethers.utils.parseEther("0"));
+      expect(await usdc.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(ethers.utils.parseUnits("1", 6));
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("12"));
     });
 
     it("should retry spells", async function () {
-      await hre.network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [walletB.address]
-      });
-
-      walletBsigner = await ethers.getSigner(walletB.address);
-      async function getArg() {
-        var abi = [
-          "function withdraw(address,uint256,address,uint256,uint256)",
-          "function deposit(address,uint256,uint256,uint256)"
-        ];
-        function getCallData(spell: string, params: any) {
-          var iface = new ethers.utils.Interface(abi);
-          let data = iface.encodeFunctionData(spell, params);
-          return data;
+      async function getArg(connectors: any, spells: any, params: any) {
+        let datas = [];
+        for (let i = 0; i < connectors.length; i++) {
+          datas.push(getCallData(spells[i], params[i]));
         }
-        let basicParams = [AVAX, ethers.utils.parseEther("1"), 0, 0];
-        let dataBasic = ethers.utils.hexlify(await getCallData("deposit", basicParams));
-        let basicWithdraw = [AVAX, ethers.utils.parseEther("2"), dsaWallet1.address, 0, 0];
-        let dataWithdraw = ethers.utils.hexlify(await getCallData("withdraw", basicWithdraw));
-        let datas = [dataBasic, dataWithdraw];
-
-        let connectors = ["BASIC-A", "BASIC-A"];
-
         return [connectors, datas];
       }
 
-      let arg = await getArg();
+      let connectors = ["BASIC-A", "BASIC-A", "AAVE-V3-A", "AAVE-V3-A"];
+      let methods = ["deposit", "withdraw", "deposit", "borrow"];
+      let params = [
+        [AVAX, ethers.utils.parseEther("1"), 0, 0],
+        [AVAX, ethers.utils.parseEther("2"), dsaWallet1.address, 0, 0],
+        [AVAX, ethers.utils.parseEther("10"), 0, 0],
+        [USDC, ethers.utils.parseUnits("3", 6), 2, 0, 0]
+      ];
+      let arg = await getArg(connectors, methods, params);
       const spells = [
         {
           connector: connectorName,
-          method: "retrySpell",
+          method: "spellFactory",
           args: arg
         }
       ];
@@ -171,9 +167,12 @@ describe("DSA Spell", function () {
         .connect(wallet0)
         .cast(...encodeSpells(spells), await wallet0.getAddress(), { value: ethers.utils.parseEther("1") });
       const receipt = await tx.wait();
+    });
 
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("11"));
-      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("10"));
+    it("should check balances after spells on DSA", async function () {
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("1"));
+      expect(await usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(ethers.utils.parseUnits("3", 6));
+      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("2"));
     });
   });
 });
