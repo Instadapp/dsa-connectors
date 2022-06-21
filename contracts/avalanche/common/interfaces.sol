@@ -21,6 +21,15 @@ interface AccountInterface {
     function enable(address) external;
     function disable(address) external;
     function isAuth(address) external view returns (bool);
+    function cast(
+        string[] calldata _targetNames,
+        bytes[] calldata _datas,
+        address _origin
+    ) external payable returns (bytes32[] memory responses);
+}
+
+interface ListInterface {
+    function accountID(address) external returns (uint64);
 }
 
 interface InstaConnectors {

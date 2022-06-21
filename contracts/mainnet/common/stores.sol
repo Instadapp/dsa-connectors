@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import { MemoryInterface, InstaMapping } from "./interfaces.sol";
+import { MemoryInterface, InstaMapping, ListInterface, InstaConnectors } from "./interfaces.sol";
 
 
 abstract contract Stores {
@@ -25,6 +25,16 @@ abstract contract Stores {
    * @dev Return InstaDApp Mapping Addresses
    */
   InstaMapping constant internal instaMapping = InstaMapping(0xe81F70Cc7C0D46e12d70efc60607F16bbD617E88);
+
+  /**
+   * @dev Return InstaList Address
+   */
+  ListInterface internal constant instaList = ListInterface(0x4c8a1BEb8a87765788946D6B19C6C6355194AbEb);
+
+  /**
+	 * @dev Return connectors registry address
+	 */
+	InstaConnectors internal constant instaConnectors = InstaConnectors(0x97b0B3A8bDeFE8cB9563a3c610019Ad10DB8aD11);
 
   /**
    * @dev Get Uint value from InstaMemory Contract.
