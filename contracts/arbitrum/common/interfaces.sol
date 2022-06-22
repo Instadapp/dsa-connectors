@@ -36,3 +36,7 @@ interface AccountInterface {
 interface ListInterface {
     function accountID(address) external returns (uint64);
 }
+
+interface InstaConnectors {
+    function isConnectors(string[] calldata) external returns (bool, address[] memory);
+}
