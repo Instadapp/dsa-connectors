@@ -27,12 +27,6 @@ abstract contract Helper is DSMath, Basic {
 	AaveDataProviderInterface internal constant aaveData =
 		AaveDataProviderInterface(0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654);
 
-	/**
-	 * @dev InstaList
-	 */
-	ListInterface internal constant instaList =
-		ListInterface(0x10e166c3FAF887D8a61dE6c25039231eE694E926);
-
 	function getIsColl(address token, address user)
 		internal
 		view
