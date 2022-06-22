@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import { MemoryInterface } from "./interfaces.sol";
+import { MemoryInterface, ListInterface, InstaConnectors } from "./interfaces.sol";
 
 abstract contract Stores {
 	/**
@@ -21,6 +21,16 @@ abstract contract Stores {
 	 */
 	MemoryInterface internal constant instaMemory =
 		MemoryInterface(0x56439117379A53bE3CC2C55217251e2481B7a1C8);
+
+	/**
+	 * @dev Return InstaList address
+	 */
+	ListInterface internal constant instaList = ListInterface(0x10e166c3FAF887D8a61dE6c25039231eE694E926);
+
+	/**
+	 * @dev Return connectors registry address
+	 */
+	InstaConnectors internal constant instaConnectors = InstaConnectors(0x819910794a030403F69247E1e5C0bBfF1593B968);
 
 	/**
 	 * @dev Get Uint value from InstaMemory Contract.

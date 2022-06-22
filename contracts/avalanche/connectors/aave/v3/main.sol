@@ -103,7 +103,7 @@ abstract contract AaveResolver is Events, Helpers {
 
 		aave.supply(_token, _amt, address(this), referralCode);
 
-		if (getCollateralBalance(_token) > 0 && getIsColl(token)) {
+		if (getCollateralBalance(_token) > 0 && getIsColl(_token)) {
 			aave.setUserUseReserveAsCollateral(_token, false);
 		}
 
@@ -224,7 +224,14 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogBorrowOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
+		_eventParam = abi.encode(
+			token,
+			_amt,
+			rateMode,
+			onBehalfOf,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -344,7 +351,9 @@ abstract contract AaveResolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		_amt = _amt == uint256(-1) ? getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf) : _amt;
+		_amt = _amt == uint256(-1)
+			? getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf)
+			: _amt;
 
 		if (isAVAX) convertAvaxToWavax(isAVAX, tokenContract, _amt);
 
@@ -355,7 +364,14 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogPaybackOnBehalfOf(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, onBehalfOf, getId, setId);
+		_eventParam = abi.encode(
+			token,
+			_amt,
+			rateMode,
+			onBehalfOf,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -374,9 +390,11 @@ abstract contract AaveResolver is Events, Helpers {
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
 		for (uint256 i = 0; i < _length; i++) {
-			address token = tokens[i];
-			if (getCollateralBalance(token) > 0 && !getIsColl(token)) {
-				aave.setUserUseReserveAsCollateral(token, true);
+			bool isAVAX = tokens[i] == avaxAddr;
+			address _token = isAVAX ? wavaxAddr : tokens[i];
+
+			if (getCollateralBalance(_token) > 0 && !getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, true);
 			}
 		}
 
@@ -400,20 +418,23 @@ abstract contract AaveResolver is Events, Helpers {
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
 		for (uint256 i = 0; i < _length; i++) {
-			address token = tokens[i];
-			if (getCollateralBalance(token) > 0 && getIsColl(token)) {
-				aave.setUserUseReserveAsCollateral(token, false);
+			bool isAVAX = tokens[i] == avaxAddr;
+			address _token = isAVAX ? wavaxAddr : tokens[i];
+
+			if (getCollateralBalance(_token) > 0 && getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, false);
 			}
 		}
 
 		_eventName = "LogDisableCollateral(address[])";
 		_eventParam = abi.encode(tokens);
 	}
+
 	/**
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
 	 * @param token The address of the token to swap borrow rate.(For avax: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param rateMode Desired borrow rate mode. (Stable = 1, Variable = 2)
+	 * @param rateMode Current rate mode (Stable = 1, Variable = 2)
 	 */
 	function swapBorrowRateMode(address token, uint256 rateMode)
 		external
@@ -422,10 +443,11 @@ abstract contract AaveResolver is Events, Helpers {
 	{
 		AaveInterface aave = AaveInterface(aaveProvider.getPool());
 
-		uint256 currentRateMode = rateMode == 1 ? 2 : 1;
+		bool isAVAX = token == avaxAddr;
+		address _token = isAVAX ? wavaxAddr : token;
 
-		if (getPaybackBalance(token, currentRateMode) > 0) {
-			aave.swapBorrowRateMode(token, rateMode);
+		if (getPaybackBalance(_token, rateMode) > 0) {
+			aave.swapBorrowRateMode(_token, rateMode);
 		}
 
 		_eventName = "LogSwapRateMode(address,uint256)";
@@ -483,7 +505,14 @@ abstract contract AaveResolver is Events, Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogDelegateBorrow(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(token, _amt, rateMode, delegateTo, getId, setId);
+		_eventParam = abi.encode(
+			token,
+			_amt,
+			rateMode,
+			delegateTo,
+			getId,
+			setId
+		);
 	}
 }
 
