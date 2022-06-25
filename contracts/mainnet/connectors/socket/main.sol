@@ -7,46 +7,10 @@ pragma experimental ABIEncoderV2;
  * @dev Multi-chain Bridge Aggregator.
  */
 
-import { Basic } from "../../common/basic.sol";
-import { TokenInterface } from "../../common/interfaces.sol";
 import "./events.sol";
-import "./interface.sol";
+import "./helpers.sol";
 
-abstract contract SocketConnectorBridge is Basic {
-	address constant registry = 0xc30141B657f4216252dc59Af2e7CdB9D8792e1B0;
-
-	/**
-	 * @dev socket API bridge handler
-	 * @param _txData - contains data returned from socket build-tx API. Struct defined in interfaces.sol
-	 * @param _ethAmt - Eth to bridge for .value()
-	 */
-	function socketBridge(bytes memory _txData, uint256 _ethAmt)
-		internal
-		returns (bool _success)
-	{
-		(_success, ) = registry.call{ value: _ethAmt }(_txData);
-		require(_success, "Socket-swap-failed");
-	}
-}
-
-abstract contract SocketConnectorResolver is SocketConnectorBridge {
-	/**
-	 * @dev Gets Allowance target from registry.
-	 * @param _route route number
-	 */
-	function getAllowanceTarget(uint256 _route)
-		internal
-		view
-		returns (address _allowanceTarget)
-	{
-		ISocketRegistry.RouteData memory data = ISocketRegistry(registry)
-			.routes(_route);
-		require(data.route != address(0), "allowanceTarget-not-valid");
-		return data.route;
-	}
-}
-
-abstract contract SocketConnector is SocketConnectorResolver {
+abstract contract SocketResolver is Helpers {
 	/**
 	 * @dev Bridge Token.
 	 * @notice Bridge Token on Socket.
@@ -69,16 +33,22 @@ abstract contract SocketConnector is SocketConnectorResolver {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _ethAmt;
+		bool isNative = _token == ethAddr;
+		uint256 nativeTokenAmt;
 
-		if (_token == ethAddr) {
-			_ethAmt = _amount;
+		if (isNative) {
+			_amount = _amount == uint256(-1) ? address(this).balance : _amount;
+			nativeTokenAmt = _amount;
 		} else {
-			TokenInterface _tokenContract = TokenInterface(_token);
-			_tokenContract.approve(getAllowanceTarget(_route), _amount);
+			TokenInterface tokenContract = TokenInterface(_token);
+
+			_amount = _amount == uint256(-1)
+				? tokenContract.balanceOf(address(this))
+				: _amount;
+			tokenContract.approve(getAllowanceTarget(_route), _amount);
 		}
 
-		socketBridge(_txData, _ethAmt);
+		require(_socketBridge(_txData, nativeTokenAmt), "Socket-swap-failed");
 
 		uint256 _sourceChain;
 		assembly {
@@ -96,6 +66,6 @@ abstract contract SocketConnector is SocketConnectorResolver {
 	}
 }
 
-contract ConnectV2Socket is SocketConnector {
+contract ConnectV2Socket is SocketResolver {
 	string public constant name = "Socket-v1.0";
 }
