@@ -21,14 +21,14 @@ describe("Socket Connector", function () {
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
   let connector: Contract;
-  let build_tx_data, quote
+  let build_tx_data, quote;
 
-  const fromChainId = "1"
-  const toChainId = "137"
+  const fromChainId = "1";
+  const toChainId = "137";
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1, wallet2, wallet3] = wallets;
-  const API_KEY = '645b2c8c-5825-4930-baf3-d9b997fcd88c';
+  const API_KEY = "645b2c8c-5825-4930-baf3-d9b997fcd88c";
 
   const DAI_ADDR_ETH = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
   const ETHADDR = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -70,7 +70,7 @@ describe("Socket Connector", function () {
   describe("DSA wallet setup", function () {
     it("Should build DSA v2", async function () {
       dsaWallet0 = await buildDSAv2(wallet0.address);
-      console.log("dsaWallet0: ", dsaWallet0.address)
+      console.log("dsaWallet0: ", dsaWallet0.address);
       expect(!!dsaWallet0.address).to.be.true;
     });
 
@@ -92,77 +92,78 @@ describe("Socket Connector", function () {
     fromAmount: any,
     userAddress: any,
     recipient: any,
-    uniqueRoutesPerBridge: any)
-  {
-    const response = await fetch(`https://api.socket.tech/v2/quote?fromChainId=${fromChainId}&fromTokenAddress=${fromTokenAddress}&toChainId=${toChainId}&toTokenAddress=${toTokenAddress}&fromAmount=${fromAmount}&userAddress=${userAddress}&recipient=${recipient}&uniqueRoutesPerBridge=${uniqueRoutesPerBridge}&includeDexes=&excludeDexes=&includeBridges=&excludeBridges=&sort=output&singleTxOnly=true&isContractCall=true`, {
-        method: 'GET',
+    uniqueRoutesPerBridge: any
+  ) {
+    const response = await fetch(
+      `https://api.socket.tech/v2/quote?fromChainId=${fromChainId}&fromTokenAddress=${fromTokenAddress}&toChainId=${toChainId}&toTokenAddress=${toTokenAddress}&fromAmount=${fromAmount}&userAddress=${userAddress}&recipient=${recipient}&uniqueRoutesPerBridge=${uniqueRoutesPerBridge}&includeDexes=&excludeDexes=&includeBridges=&excludeBridges=&sort=output&singleTxOnly=true&isContractCall=true`,
+      {
+        method: "GET",
         headers: {
-            'API-KEY': API_KEY,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-    }});
+          "API-KEY": API_KEY,
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        }
+      }
+    );
     quote = await response.json();
-    return(quote)
+    return quote;
   }
 
   async function getRouteTransactionData(route: any) {
-    const response = await fetch('https://api.socket.tech/v2/build-tx', {
-            method: 'POST',
-            headers: {
-                'API-KEY': API_KEY,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ "route": route })
-            })
+    const response = await fetch("https://api.socket.tech/v2/build-tx", {
+      method: "POST",
+      headers: {
+        "API-KEY": API_KEY,
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ route: route })
+    });
     build_tx_data = await response.json();
-    return(build_tx_data)
+    return build_tx_data;
   }
 
-  async function getBridgeStatus(
-    transactionHash: any, 
-    fromChainId: any,
-    toChainId: any)
-  {
-    const response = await fetch(`https://api.socket.tech/v2/bridge-status?transactionHash=${transactionHash}&fromChainId=${fromChainId}&toChainId=${toChainId}`, {
-        method: 'GET',
+  async function getBridgeStatus(transactionHash: any, fromChainId: any, toChainId: any) {
+    const response = await fetch(
+      `https://api.socket.tech/v2/bridge-status?transactionHash=${transactionHash}&fromChainId=${fromChainId}&toChainId=${toChainId}`,
+      {
+        method: "GET",
         headers: {
-            'API-KEY': API_KEY,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+          "API-KEY": API_KEY,
+          Accept: "application/json",
+          "Content-Type": "application/json"
         }
-    });
+      }
+    );
     const status = await response.json();
     return status;
-}
-
-  let getRouteToPass = (pathArray: Array<number>) => {
-    if(pathArray[0] == 0) {
-      let routeNum : number = pathArray[1]
-      return routeNum
-    } else {
-      let routeNum : number = pathArray[0]
-      return routeNum
-    }
   }
 
+  let getRouteToPass = (pathArray: Array<number>) => {
+    if (pathArray[0] == 0) {
+      let routeNum: number = pathArray[1];
+      return routeNum;
+    } else {
+      let routeNum: number = pathArray[0];
+      return routeNum;
+    }
+  };
+
   describe("Main", function () {
-
     it("should send DAI from ETH to Polygon", async function () {
-
       const quote = await getQuote(
-        fromChainId, 
-        DAI_ADDR_ETH, 
+        fromChainId,
+        DAI_ADDR_ETH,
         toChainId,
         DAI_ADDR_POLYGON,
-        "1000000000000000000",
+        ethers.utils.parseEther("1"),
         dsaWallet0.address,
-        wallet0.address, 
+        wallet0.address,
         "true"
       );
-      const route = quote.result.routes[0]
+      const route = quote.result.routes[0];
       const splitArr = route.userTxs[0].routePath.split("-");
-      const routeToPass : number = getRouteToPass(splitArr);
+      const routeToPass: number = getRouteToPass(splitArr);
       console.log("routeToPass: ", routeToPass);
 
       let apiReturnData = await getRouteTransactionData(route);
@@ -171,29 +172,37 @@ describe("Socket Connector", function () {
         {
           connector: connectorName,
           method: "bridge",
-          args: [DAI_ADDR_ETH, apiReturnData.result.txData, routeToPass, "1000000000000000000", fromChainId, toChainId, wallet0.address]
+          args: [
+            DAI_ADDR_ETH,
+            apiReturnData.result.txData,
+            routeToPass,
+            ethers.utils.parseEther("1"),
+            toChainId,
+            wallet0.address
+          ]
         }
       ];
 
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
       const txHash = receipt.transactionHash;
+
       console.log("Receipt confimation: ", await receipt.confirmations);
-      console.log('Bridging Transaction : ', receipt.transactionHash);
+      console.log("Bridging Transaction : ", receipt.transactionHash);
     });
 
     it("should migrate ETH from Eth to Polygon", async function () {
       const quote = await getQuote(
-        fromChainId, 
-        ETHADDR, 
-        toChainId, 
-        DAI_ADDR_POLYGON, 
-        "1000000000000000000",
-        dsaWallet0.address, 
-        wallet0.address, 
+        fromChainId,
+        ETHADDR,
+        toChainId,
+        DAI_ADDR_POLYGON,
+        ethers.utils.parseEther("1"),
+        dsaWallet0.address,
+        wallet0.address,
         "true"
       );
-      const route = quote.result.routes[0]
+      const route = quote.result.routes[0];
       const splitArr = route.userTxs[0].routePath.split("-");
 
       const routeToPass = getRouteToPass(splitArr);
@@ -201,25 +210,29 @@ describe("Socket Connector", function () {
 
       let apiReturnData = await getRouteTransactionData(route);
 
-      const params: any = [
-        apiReturnData.result.txData,
-        ETHADDR,
-        "1000000000000000000"
-      ];
+      const params: any = [apiReturnData.result.txData, ETHADDR, ethers.utils.parseEther("1")];
 
       const spells = [
         {
           connector: connectorName,
           method: "bridge",
-          args: [ETHADDR, apiReturnData.result.txData, routeToPass, "1000000000000000000", fromChainId, toChainId, wallet0.address]
+          args: [
+            ETHADDR,
+            apiReturnData.result.txData,
+            routeToPass,
+            ethers.utils.parseEther("1"),
+            toChainId,
+            wallet0.address
+          ]
         }
       ];
 
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
       const txHash = receipt.transactionHash;
+
       console.log("Receipt confimation: ", await receipt.confirmations);
-      console.log('Bridging Transaction : ', receipt.transactionHash);
+      console.log("Bridging Transaction : ", receipt.transactionHash);
     });
   });
 });
