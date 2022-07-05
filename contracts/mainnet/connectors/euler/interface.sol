@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 interface IEulerMarkets {
     function enterMarket(uint subAccountId, address newMarket) external;
@@ -25,4 +26,30 @@ interface IEulerDToken {
     function repay(uint subAccountId, uint amount) external;
     function balanceOf(address account) external view returns (uint);
     function transfer(address to, uint amount) external returns (bool);
+}
+
+interface IEulerSwap {
+    struct SwapUniExactInputSingleParams {
+        uint subAccountIdIn;
+        uint subAccountIdOut;
+        address underlyingIn;
+        address underlyingOut;
+        uint amountIn;
+        uint amountOutMinimum;
+        uint deadline;
+        uint24 fee;
+        uint160 sqrtPriceLimitX96;
+    }
+
+    struct Swap1InchParams {
+        uint subAccountIdIn;
+        uint subAccountIdOut;
+        address underlyingIn;
+        address underlyingOut;
+        uint amount;
+        uint amountOutMinimum;
+        bytes payload;
+    }
+
+    function swap1Inch(Swap1InchParams memory) external;
 }

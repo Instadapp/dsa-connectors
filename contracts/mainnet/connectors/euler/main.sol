@@ -49,13 +49,11 @@ abstract contract Euler is Helpers {
 		approve(tokenContract, EULER_MAINNET, _amt);
 
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
-
-		eToken.deposit(subAccount, (_amt * eToken.decimals()));//0 for primary
+		eToken.deposit(subAccount, _amt);//0 for primary
 
         if (enableCollateral) {
             markets.enterMarket(subAccount, _token);
         }
-
 		setUint(setId, _amt);
 
 		_eventName = "LogDeposit(uint256,address,uint256,bool,uint256,uint256)";
@@ -89,7 +87,6 @@ abstract contract Euler is Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
         
-        IEulerMarkets markets = IEulerMarkets(markets);
         IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
 		uint256 initialBal = tokenContract.balanceOf(address(this));
@@ -132,7 +129,7 @@ abstract contract Euler is Helpers {
         address _token = isEth ? wethAddr : token;
 
         IEulerDToken borrowedDToken = IEulerDToken(markets.underlyingToDToken(_token));
-        borrowedDToken.borrow(subAccount, (amt * borrowedDToken.decimals()));
+        borrowedDToken.borrow(subAccount, amt);
 
         convertWethToEth(isEth, TokenInterface(_token), _amt);
 
@@ -202,7 +199,6 @@ abstract contract Euler is Helpers {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
         uint256 _amt = getUint(getId, amt);
-		//should have some deposit first?
         bool isEth = token == ethAddr ? true : false;
         address _token = isEth ? wethAddr : token;
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
@@ -338,4 +334,8 @@ abstract contract Euler is Helpers {
 		_eventName = "LogDTransfer(uint256,uint256,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(subAccount1, subAccount2, token, _amt, getId, setId);
     }
+}
+
+contract ConnectV2Euler is Euler {
+	string public constant name = "Euler-v1.0";
 }
