@@ -374,11 +374,21 @@ abstract contract Euler is Helpers {
 		);
 	}
 
+	/**
+	 * @dev Approve debt.
+	 * @notice Approves receiver to take debt.
+	 * @param subAccountId Subaccount number
+	 * @param debtReceiver Address of receiver
+	 * @param token The address of the token to mint.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to mint.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
 	function approveDebt(
 		uint256 subAccountId,
 		address debtReceiver,
 		address token,
-		uint256 amount,
+		uint256 amt,
 		uint256 getId,
 		uint256 setId
 	)
@@ -386,7 +396,7 @@ abstract contract Euler is Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(getId, amount);
+		uint256 _amt = getUint(getId, amt);
 
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
@@ -401,7 +411,7 @@ abstract contract Euler is Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogApproveDebt(uint256,address,address,uint256)";
-		_eventParam = abi.encode(subAccountId, debtReceiver, token, amount);
+		_eventParam = abi.encode(subAccountId, debtReceiver, token, amt);
 	}
 
 	struct swapHelper {
@@ -423,6 +433,11 @@ abstract contract Euler is Helpers {
 		bytes callData;
 	}
 
+	/**
+	 * @dev Swap.
+	 * @notice Executes swap.
+	 * @param params swapParams struct
+	 */
 	function swap(swapParams memory params)
 		external
 		payable
@@ -484,17 +499,23 @@ abstract contract Euler is Helpers {
 		);
 	}
 
-	function enterMarket(uint256 subAccountId, address[] memory newMarkets)
+	/**
+	 * @dev Enter Market.
+	 * @notice Enter Market.
+	 * @param subAccountId Subaccount number
+	 * @param tokens Array of new token markets to be entered
+	 */
+	function enterMarket(uint256 subAccountId, address[] memory tokens)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _length = newMarkets.length;
+		uint256 _length = tokens.length;
 		require(_length > 0, "0-markets-not-allowed");
 
 		for (uint256 i = 0; i < _length; i++) {
-			bool isEth = newMarkets[i] == ethAddr;
-			address _token = isEth ? wethAddr : newMarkets[i];
+			bool isEth = tokens[i] == ethAddr;
+			address _token = isEth ? wethAddr : tokens[i];
 
 			IEulerEToken eToken = IEulerEToken(
 				markets.underlyingToEToken(_token)
@@ -503,20 +524,26 @@ abstract contract Euler is Helpers {
 		}
 
 		_eventName = "LogEnterMarket(uint256,address[])";
-		_eventParam = abi.encode(subAccountId, newMarkets);
+		_eventParam = abi.encode(subAccountId, tokens);
 	}
 
-	function exitMarket(uint256 subAccountId, address oldMarket)
+	/**
+	 * @dev Exit Market.
+	 * @notice Exit Market.
+	 * @param subAccountId Subaccount number
+	 * @param token token address
+	 */
+	function exitMarket(uint256 subAccountId, address token)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		bool isEth = oldMarket == ethAddr;
-		address _token = isEth ? wethAddr : oldMarket;
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
 		markets.exitMarket(subAccountId, _token);
 
 		_eventName = "LogExitMarket(uint256,address)";
-		_eventParam = abi.encode(subAccountId, oldMarket);
+		_eventParam = abi.encode(subAccountId, token);
 	}
 }
 
