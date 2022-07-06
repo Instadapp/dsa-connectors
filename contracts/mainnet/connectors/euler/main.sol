@@ -369,6 +369,15 @@ abstract contract Euler is Helpers {
 		_eventParam = abi.encode(subAccountId, debtReceiver, token, amount);
 	}
 
+	struct swapHelper {
+		address _sellAddr;
+		address _buyAddr;
+		uint _buyDec;
+		uint _sellDec;
+		uint _sellAmt18;
+		uint _slippageAmt;
+	}
+
 	struct swapParams {
 		uint256 subAccountFrom;
 		uint subAccountTo;
@@ -386,33 +395,34 @@ abstract contract Euler is Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		bool isEthSellAddr = params.sellAddr == ethAddr;
-		address _sellAddr = isEthSellAddr ? wethAddr : params.sellAddr;
+		swapHelper memory helperParams;
 
-		bool isEthBuyAddr = params.sellAddr == ethAddr;
-		address _buyAddr = isEthBuyAddr ? wethAddr : params.buyAddr;
+		helperParams._sellAddr = params.sellAddr == ethAddr ? wethAddr : params.sellAddr;
+		helperParams._buyAddr = params.sellAddr == ethAddr ? wethAddr : params.buyAddr;
 
-		TokenInterface sellToken = TokenInterface(_sellAddr);
-		TokenInterface buyToken = TokenInterface(_buyAddr);
+		TokenInterface sellToken = TokenInterface(helperParams._sellAddr);
+		TokenInterface buyToken = TokenInterface(helperParams._buyAddr);
 
 		approve(sellToken, address(swapExec), params.sellAmt);
 
-    	(uint _buyDec, uint _sellDec) = getTokensDec(buyToken, sellToken);
-        uint _sellAmt18 = convertTo18(_sellDec, params.sellAmt);
-        uint _slippageAmt = convert18ToDec(_buyDec, wmul(params.unitAmt, _sellAmt18));
+    	(helperParams._buyDec, helperParams._sellDec) = getTokensDec(buyToken, sellToken);
+        helperParams._sellAmt18 = convertTo18(helperParams._sellDec, params.sellAmt);
+        helperParams._slippageAmt = convert18ToDec(helperParams._buyDec, wmul(params.unitAmt, helperParams._sellAmt18));
 
 		IEulerSwap.Swap1InchParams memory oneInchParams = IEulerSwap.Swap1InchParams({
             subAccountIdIn: params.subAccountFrom,
 			subAccountIdOut: params.subAccountTo,
-			underlyingIn: _sellAddr,
-            underlyingOut: _buyAddr,
+			underlyingIn: helperParams._sellAddr,
+            underlyingOut: helperParams._buyAddr,
             amount: params.sellAmt,
-			amountOutMinimum: _slippageAmt,
+			amountOutMinimum: helperParams._slippageAmt,
             payload: params.callData
         });
 
-		if(!checkIfEnteredMarket(_buyAddr)) {
-			markets.enterMarket(params.subAccountTo, _buyAddr);
+		swapExec.swap1Inch(oneInchParams);
+
+		if(!checkIfEnteredMarket(helperParams._buyAddr)) {
+			markets.enterMarket(params.subAccountTo, helperParams._buyAddr);
 		}
 
 		_eventName = "LogSwap(uint256,uint256,address,address,uint256,uint256,bytes)";
@@ -432,15 +442,11 @@ abstract contract Euler is Helpers {
 			address _token = isEth ? wethAddr : newMarkets[i];
 
 			IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
-			if (eToken.balanceOf(address(this)) > 0) {
-				markets.enterMarket(subAccountId, _token);
-			}
+			markets.enterMarket(subAccountId, _token);
 		}
 
 		_eventName = "LogEnterMarket(uint256,address[])";
 		_eventParam = abi.encode(subAccountId, newMarkets);
-
-
 	}
 
 	function exitMarket(uint subAccountId, address oldMarket) 
