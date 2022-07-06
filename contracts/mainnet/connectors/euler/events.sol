@@ -69,4 +69,33 @@ contract Events {
         uint256 getId,
         uint256 setId
     );
+
+    event LogApproveDebt(
+        uint256 subAccountId,
+		address debtReceiver,
+		address token,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+    );
+
+    event LogSwap(
+        uint256 subAccountFrom,
+		uint subAccountTo,
+        address buyAddr,
+        address sellAddr,
+        uint sellAmt,
+        uint unitAmt,
+        bytes callData
+    );
+
+    event LogEnterMarket(
+        uint subAccountId,
+        address[] newMarkets
+    );
+
+    event LogExitMarket(
+        uint subAccountId,
+        address oldMarket
+    );
 }

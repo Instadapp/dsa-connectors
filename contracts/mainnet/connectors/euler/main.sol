@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 import "./helpers.sol";
 import { Stores } from "../../common/stores.sol";
 import { TokenInterface } from "../../common/interfaces.sol";
@@ -162,6 +163,7 @@ abstract contract Euler is Helpers {
         uint256 _amt = getUint(getId, amt);
 
         bool isEth = token == ethAddr ? true : false;
+
         address _token = isEth ? wethAddr : token;
 		IEulerDToken borrowedDToken = IEulerDToken(markets.underlyingToDToken(_token));
 
@@ -169,8 +171,8 @@ abstract contract Euler is Helpers {
 
 		_amt = _amt == type(uint).max ? borrowedDToken.balanceOf(address(this)) : _amt;
 
-		IERC20(_token).approve(EULER_MAINNET, _amt);
-        borrowedDToken.repay(subAccount, (amt * borrowedDToken.decimals()));
+		TokenInterface(_token).approve(EULER_MAINNET, _amt);
+        borrowedDToken.repay(subAccount, amt);
 
 		setUint(setId, _amt);
 
@@ -199,13 +201,14 @@ abstract contract Euler is Helpers {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
         uint256 _amt = getUint(getId, amt);
+
         bool isEth = token == ethAddr ? true : false;
         address _token = isEth ? wethAddr : token;
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
         if(isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-        eToken.mint(subAccount, (amt * eToken.decimals()));
+        eToken.mint(subAccount, amt);
 
 		setUint(setId, _amt);
 
@@ -245,7 +248,7 @@ abstract contract Euler is Helpers {
 
         if(isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-        eToken.burn(subAccount, (amt * eToken.decimals()));
+        eToken.burn(subAccount, amt);
 
 		setUint(setId, _amt);
 
@@ -256,16 +259,16 @@ abstract contract Euler is Helpers {
 	/**
 	 * @dev ETransfer ETH/ERC20_Token.
 	 * @notice ETransfer deposits from account to another.
-     * @param subAccount1 Subaccount from which deposit is transferred
-	 * @param subAccount2 Subaccount to which deposit is transferred
+     * @param subAccountFrom subAccount from which deposit is transferred
+	 * @param subAccountTo subAccount to which deposit is transferred
 	 * @param token The address of the token to etransfer.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to etransfer. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
 	function eTransfer(
-        uint256 subAccount1,
-		uint256 subAccount2,
+        uint256 subAccountFrom,
+		uint256 subAccountTo,
 		address token,//eth
 		uint256 amt,//max
 		uint256 getId,//1
@@ -286,27 +289,29 @@ abstract contract Euler is Helpers {
 
         if(isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-        eToken.transfer(msg.sender, (amt * eToken.decimals()));//update
+		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
+
+        eToken.transfer(_subAccountToAddr, amt);
 
 		setUint(setId, _amt);
 
 		_eventName = "LogETransfer(uint256,uint256,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(subAccount1, subAccount2, token, _amt, getId, setId);
+		_eventParam = abi.encode(subAccountFrom, subAccountTo, token, _amt, getId, setId);
     }
 
 	/**
 	 * @dev DTransfer ETH/ERC20_Token.
 	 * @notice DTransfer deposits from account to another.
-     * @param subAccount1 Subaccount from which debt is transferred
-	 * @param subAccount2 Subaccount to which debt is transferred
+     * @param subAccountFrom subAccount from which debt is transferred
+	 * @param subAccountTo subAccount to which debt is transferred
 	 * @param token The address of the token to dtransfer.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to dtransfer. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
 	function dTransfer(
-        uint256 subAccount1,
-		uint256 subAccount2,
+        uint256 subAccountFrom,
+		uint256 subAccountTo,
 		address token,//eth
 		uint256 amt,//max
 		uint256 getId,//1
@@ -321,19 +326,135 @@ abstract contract Euler is Helpers {
         bool isEth = token == ethAddr ? true : false;
         address _token = isEth ? wethAddr : token;
 
-		IEulerEToken dToken = IEulerEToken(markets.underlyingToDToken(_token));
+		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 
 		_amt = _amt == type(uint).max ? dToken.balanceOf(address(this)) : _amt;
 
         if(isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-        dToken.transfer(msg.sender, (amt * dToken.decimals()));//update
+		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
+        dToken.transfer(_subAccountToAddr, amt);
 
 		setUint(setId, _amt);
 
 		_eventName = "LogDTransfer(uint256,uint256,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(subAccount1, subAccount2, token, _amt, getId, setId);
+		_eventParam = abi.encode(subAccountFrom, subAccountTo, token, _amt, getId, setId);
     }
+
+	function approveDebt(
+		uint256 subAccountId,
+		address debtReceiver,
+		address token,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amount);
+
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
+
+		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
+		_amt = _amt == type(uint).max ? dToken.balanceOf(address(this)) : _amt;
+
+		dToken.approveDebt(subAccountId, debtReceiver, _amt);
+
+		setUint(setId, _amt);
+
+		_eventName = "LogApproveDebt(uint256,address,address,uint256)";
+		_eventParam = abi.encode(subAccountId, debtReceiver, token, amount);
+	}
+
+	struct swapParams {
+		uint256 subAccountFrom;
+		uint subAccountTo;
+        address buyAddr;
+        address sellAddr;
+        uint sellAmt;
+        uint unitAmt;
+        bytes callData;
+	}
+
+	function swap(
+		swapParams memory params
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		bool isEthSellAddr = params.sellAddr == ethAddr;
+		address _sellAddr = isEthSellAddr ? wethAddr : params.sellAddr;
+
+		bool isEthBuyAddr = params.sellAddr == ethAddr;
+		address _buyAddr = isEthBuyAddr ? wethAddr : params.buyAddr;
+
+		TokenInterface sellToken = TokenInterface(_sellAddr);
+		TokenInterface buyToken = TokenInterface(_buyAddr);
+
+		approve(sellToken, address(swapExec), params.sellAmt);
+
+    	(uint _buyDec, uint _sellDec) = getTokensDec(buyToken, sellToken);
+        uint _sellAmt18 = convertTo18(_sellDec, params.sellAmt);
+        uint _slippageAmt = convert18ToDec(_buyDec, wmul(params.unitAmt, _sellAmt18));
+
+		IEulerSwap.Swap1InchParams memory oneInchParams = IEulerSwap.Swap1InchParams({
+            subAccountIdIn: params.subAccountFrom,
+			subAccountIdOut: params.subAccountTo,
+			underlyingIn: _sellAddr,
+            underlyingOut: _buyAddr,
+            amount: params.sellAmt,
+			amountOutMinimum: _slippageAmt,
+            payload: params.callData
+        });
+
+		if(!checkIfEnteredMarket(_buyAddr)) {
+			markets.enterMarket(params.subAccountTo, _buyAddr);
+		}
+
+		_eventName = "LogSwap(uint256,uint256,address,address,uint256,uint256,bytes)";
+		_eventParam = abi.encode(params.subAccountFrom, params.subAccountTo, params.buyAddr, params.sellAddr, params.sellAmt, params.unitAmt, params.callData);
+    }
+
+	function enterMarket(uint subAccountId, address[] memory newMarkets) 
+		external 
+		payable 
+		returns (string memory _eventName, bytes memory _eventParam) 
+	{
+		uint256 _length = newMarkets.length;
+		require(_length > 0, "0-markets-not-allowed");
+
+		for (uint256 i = 0; i < _length; i++) {
+			bool isEth = newMarkets[i] == ethAddr;
+			address _token = isEth ? wethAddr : newMarkets[i];
+
+			IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
+			if (eToken.balanceOf(address(this)) > 0) {
+				markets.enterMarket(subAccountId, _token);
+			}
+		}
+
+		_eventName = "LogEnterMarket(uint256,address[])";
+		_eventParam = abi.encode(subAccountId, newMarkets);
+
+
+	}
+
+	function exitMarket(uint subAccountId, address oldMarket) 
+		external 
+		payable 
+		returns (string memory _eventName, bytes memory _eventParam) 
+	{
+		bool isEth = oldMarket == ethAddr;
+		address _token = isEth ? wethAddr : oldMarket;
+		markets.exitMarket(subAccountId, _token);
+
+		_eventName = "LogExitMarket(uint256,address)";
+		_eventParam = abi.encode(subAccountId, oldMarket);
+	}
 }
 
 contract ConnectV2Euler is Euler {
