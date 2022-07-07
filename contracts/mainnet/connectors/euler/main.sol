@@ -195,7 +195,7 @@ abstract contract Euler is Helpers {
 
 	/**
 	 * @dev Mint ETH/ERC20_Token.
-	 * @notice Mint a token from Euler. Maint creates equal amount of deposits and debts.
+	 * @notice Mint a token from Euler. Mint creates an equal amount of deposits and debts. (self-borrow)
 	 * @param subAccount Subaccount number
 	 * @param token The address of the token to mint.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to mint.
