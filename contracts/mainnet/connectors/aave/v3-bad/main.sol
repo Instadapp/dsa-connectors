@@ -15,7 +15,14 @@ import { AaveInterface, DTokenInterface } from "./interface.sol";
 abstract contract AaveResolver is Events, Helpers {
 	// This contract should have only external and payable
 
-
+	interface AaveV4Interface {
+		function supply(
+			address asset,
+			uint256 amount,
+			address onBehalfOf,
+			uint16 referralCode
+		) external;
+	}
 
 	/**
 	 * @dev Deposit ETH/ERC20_Token.

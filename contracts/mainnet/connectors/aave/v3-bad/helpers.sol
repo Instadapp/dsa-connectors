@@ -5,7 +5,7 @@ import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
 import { AavePoolProviderInterface, AaveDataProviderInterface } from "./interface.sol";
 
-abstract contract Helpers is DSMath, Basic {
+abstract contract Helpers is DSMath {
 	event LogWithdraw(
 		address indexed token,
 		uint256 tokenAmt,
