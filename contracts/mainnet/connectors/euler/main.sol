@@ -514,8 +514,7 @@ abstract contract Euler is Helpers {
 		require(_length > 0, "0-markets-not-allowed");
 
 		for (uint256 i = 0; i < _length; i++) {
-			bool isEth = tokens[i] == ethAddr;
-			address _token = isEth ? wethAddr : tokens[i];
+			address _token = tokens[i] == ethAddr ? wethAddr : tokens[i];
 
 			IEulerEToken eToken = IEulerEToken(
 				markets.underlyingToEToken(_token)
