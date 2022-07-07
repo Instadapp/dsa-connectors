@@ -139,7 +139,7 @@ abstract contract Euler is Helpers {
 		IEulerDToken borrowedDToken = IEulerDToken(
 			markets.underlyingToDToken(_token)
 		);
-		borrowedDToken.borrow(subAccount, amt);
+		borrowedDToken.borrow(subAccount, _amt);
 
 		convertWethToEth(isEth, TokenInterface(_token), _amt);
 
