@@ -70,7 +70,7 @@ abstract contract Euler is Helpers {
 
 	/**
 	 * @dev Withdraw ETH/ERC20_Token.
-	 * @notice Withdraw deposited token Euler
+	 * @notice Withdraw deposited token and earned interest from Euler
 	 * @param subAccount Subaccount number
 	 * @param token The address of the token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
