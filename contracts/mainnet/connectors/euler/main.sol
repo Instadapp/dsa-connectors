@@ -325,7 +325,7 @@ abstract contract Euler is Helpers {
 
 	/**
 	 * @dev DTransfer ETH/ERC20_Token.
-	 * @notice DTransfer deposits from account to another.
+	 * @notice DTransfer deposits from one sub-account to another.
 	 * @param subAccountFrom subAccount from which debt is transferred
 	 * @param subAccountTo subAccount to which debt is transferred
 	 * @param token The address of the token to dtransfer.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
