@@ -12,7 +12,7 @@ abstract contract Euler is Helpers {
 	/**
 	 * @dev Deposit ETH/ERC20_Token.
 	 * @notice Deposit a token to Euler for lending / collaterization.
-	 * @param subAccount Subaccount number
+	 * @param subAccount Sub-account Id (0 for primary and 1 - 255 for sub-account)
 	 * @param token The address of the token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
 	 * @param enableCollateral True for entering the market
