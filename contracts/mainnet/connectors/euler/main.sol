@@ -411,7 +411,7 @@ abstract contract Euler is Helpers {
 		setUint(setId, _amt);
 
 		_eventName = "LogApproveDebt(uint256,address,address,uint256)";
-		_eventParam = abi.encode(subAccountId, debtReceiver, token, amt);
+		_eventParam = abi.encode(subAccountId, debtReceiver, token, _amt);
 	}
 
 	struct swapHelper {
