@@ -263,7 +263,7 @@ abstract contract Euler is Helpers {
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-		eToken.burn(subAccount, amt);
+		eToken.burn(subAccount, _amt);
 
 		setUint(setId, _amt);
 
