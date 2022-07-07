@@ -50,7 +50,7 @@ abstract contract Euler is Helpers {
 		approve(tokenContract, EULER_MAINNET, _amt);
 
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
-		eToken.deposit(subAccount, _amt); //0 for primary
+		eToken.deposit(subAccount, _amt);
 
 		if (enableCollateral) {
 			markets.enterMarket(subAccount, _token);
@@ -183,11 +183,7 @@ abstract contract Euler is Helpers {
 			convertEthToWeth(isEth, TokenInterface(_token), _amt);
 		}
 
-		_amt = _amt == type(uint256).max
-			? borrowedDToken.balanceOf(address(this))
-			: _amt;
-
-		TokenInterface(_token).approve(EULER_MAINNET, _amt);
+		approve(TokenInterface(_token), EULER_MAINNET, _amt);
 		borrowedDToken.repay(subAccount, _amt);
 
 		setUint(setId, _amt);
@@ -405,9 +401,6 @@ abstract contract Euler is Helpers {
 		address _token = isEth ? wethAddr : token;
 
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
-		_amt = _amt == type(uint256).max
-			? dToken.balanceOf(address(this))
-			: _amt;
 
 		dToken.approveDebt(subAccountId, debtReceiver, _amt);
 
@@ -415,25 +408,6 @@ abstract contract Euler is Helpers {
 
 		_eventName = "LogApproveDebt(uint256,address,address,uint256)";
 		_eventParam = abi.encode(subAccountId, debtReceiver, token, _amt);
-	}
-
-	struct swapHelper {
-		address _sellAddr;
-		address _buyAddr;
-		uint256 _buyDec;
-		uint256 _sellDec;
-		uint256 _sellAmt18;
-		uint256 _slippageAmt;
-	}
-
-	struct swapParams {
-		uint256 subAccountFrom;
-		uint256 subAccountTo;
-		address buyAddr;
-		address sellAddr;
-		uint256 sellAmt;
-		uint256 unitAmt;
-		bytes callData;
 	}
 
 	/**
@@ -518,10 +492,6 @@ abstract contract Euler is Helpers {
 
 		for (uint256 i = 0; i < _length; i++) {
 			address _token = tokens[i] == ethAddr ? wethAddr : tokens[i];
-
-			IEulerEToken eToken = IEulerEToken(
-				markets.underlyingToEToken(_token)
-			);
 			markets.enterMarket(subAccountId, _token);
 		}
 
