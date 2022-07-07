@@ -178,7 +178,10 @@ abstract contract Euler is Helpers {
 			markets.underlyingToDToken(_token)
 		);
 
-		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
+		if (isEth) {
+			_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
+			convertEthToWeth(isEth, TokenInterface(_token), _amt);
+		}
 
 		_amt = _amt == type(uint256).max
 			? borrowedDToken.balanceOf(address(this))
