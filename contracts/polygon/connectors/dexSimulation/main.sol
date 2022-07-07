@@ -32,7 +32,7 @@ abstract contract InstaDexSimulationResolver is Events, Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		sellAmount = getUint(getId, buyAmount);
+		sellAmount = getUint(getId, sellAmount);
 		uint256 nativeAmount;
 
 		if (sellToken == maticAddr) {
