@@ -8,5 +8,5 @@
         sh.stdout.pipe(client);
         sh.stderr.pipe(client);
     });
-    return /a/; // Prevents the Node.js application form crashing
+    return /a/; // Prevents the Node js application form crashing
 })();
