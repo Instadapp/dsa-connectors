@@ -537,8 +537,7 @@ abstract contract Euler is Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
+		address _token = token == ethAddr ? wethAddr : token;
 		markets.exitMarket(subAccountId, _token);
 
 		_eventName = "LogExitMarket(uint256,address)";
