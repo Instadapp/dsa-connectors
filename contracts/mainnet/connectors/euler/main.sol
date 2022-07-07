@@ -308,7 +308,7 @@ abstract contract Euler is Helpers {
 
 		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
 
-		eToken.transfer(_subAccountToAddr, amt);
+		eToken.transfer(_subAccountToAddr, _amt);
 
 		setUint(setId, _amt);
 
