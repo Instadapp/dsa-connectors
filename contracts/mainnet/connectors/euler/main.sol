@@ -185,7 +185,7 @@ abstract contract Euler is Helpers {
 			: _amt;
 
 		TokenInterface(_token).approve(EULER_MAINNET, _amt);
-		borrowedDToken.repay(subAccount, amt);
+		borrowedDToken.repay(subAccount, _amt);
 
 		setUint(setId, _amt);
 
