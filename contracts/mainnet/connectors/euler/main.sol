@@ -94,13 +94,13 @@ abstract contract Euler is Helpers {
 		address _token = isEth ? wethAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
-
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
-
+		_amt = _amt == uint256(-1) ?  eToken.balanceOf(address(this)) : _amt;
 		uint256 initialBal = tokenContract.balanceOf(address(this));
-		eToken.withdraw(subAccount, _amt);
-		uint256 finalBal = tokenContract.balanceOf(address(this));
 
+		eToken.withdraw(subAccount, _amt);
+
+		uint256 finalBal = tokenContract.balanceOf(address(this));
 		_amt = finalBal - initialBal;
 
 		convertWethToEth(isEth, tokenContract, _amt);
@@ -116,7 +116,7 @@ abstract contract Euler is Helpers {
 	 * @notice Borrow a token from Euler
 	 * @param subAccount Subaccount number
 	 * @param token The address of the token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param amt The amount of the token to borrow. (For max: `uint256(-1)`)
+	 * @param amt The amount of the token to borrow.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
@@ -233,7 +233,7 @@ abstract contract Euler is Helpers {
 	 * @notice Burn a token from Euler. Burn removes equal amount of deposits and debts.
 	 * @param subAccount Subaccount number
 	 * @param token The address of the token to burn.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param amt The amount of the token to burn. (For max: `uint256(-1)`)
+	 * @param amt The amount of the token to burn.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
@@ -299,7 +299,7 @@ abstract contract Euler is Helpers {
 
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
-		_amt = _amt == type(uint256).max
+		_amt = _amt == uint256(-1)
 			? eToken.balanceOf(address(this))
 			: _amt;
 
@@ -351,7 +351,7 @@ abstract contract Euler is Helpers {
 
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 
-		_amt = _amt == type(uint256).max
+		_amt = _amt == uint256(-1)
 			? dToken.balanceOf(address(this))
 			: _amt;
 
