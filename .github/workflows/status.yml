@@ -40,7 +40,9 @@ jobs:
       - name: Run lint checks
         id: lint_check
         run: |
-          npx ts-node ./status-checks/lint.ts 
+          output=$(npx ts-node ./status-checks/lint.ts)
+          cat <<< "$output" > "./pr/status-check-output"
+          echo ${{ github.event.number }} > ./pr/number
       - uses: actions/upload-artifact@v2
         with:
           name: pr

@@ -1,5 +1,7 @@
 import { readFileSync } from "fs";
 import glob from "glob"
+//@ts-ignore
+import markdownTable from 'markdown-table'
 
 interface FileInfo {
     path: string;
@@ -129,13 +131,14 @@ const lint = async () => {
     }
 
 
-
-    console.table(Object.keys(errors).map(filePath => ({
-        path: filePath,
-        errors: errors[filePath]
-    })));
-
     if (Object.keys(errors).length > 0) {
+        console.log(markdownTable)
+        console.log(markdownTable(
+            [
+                ['File', 'Error'],
+                ...Object.keys(errors).map(filePath => ([filePath, errors[filePath].join(', ')]))
+            ]
+        ))
         process.exit(1);
     }
 }
