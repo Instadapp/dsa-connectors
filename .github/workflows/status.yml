@@ -29,12 +29,18 @@ jobs:
       - name: Install and build
         run: |
           npm install
-      - name: Run status checks
-        id: status_check
+      # - name: Run status checks
+      #   id: status_check
+      #   run: |
+      #     mkdir -p pr
+      #     # Run status checks, Remove ANSI colors from the text
+      #     output=$(npx ts-node ./status-checks/index.ts | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+      #     cat <<< "$output" > "./pr/status-check-output"
+      #     echo ${{ github.event.number }} > ./pr/number
+      - name: Run lint checks
+        id: lint_check
         run: |
-          mkdir -p pr
-          # Run status checks, Remove ANSI colors from the text
-          output=$(npx ts-node ./status-checks/index.ts | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+          output=$(npx ts-node ./status-checks/lint.ts)
           cat <<< "$output" > "./pr/status-check-output"
           echo ${{ github.event.number }} > ./pr/number
       - uses: actions/upload-artifact@v2
