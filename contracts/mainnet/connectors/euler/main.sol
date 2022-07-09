@@ -171,16 +171,15 @@ abstract contract Euler is Helpers {
 	{
 		uint256 _amt = getUint(getId, amt);
 
-		bool isEth = token == ethAddr ? true : false;
-
+		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
+
 		IEulerDToken borrowedDToken = IEulerDToken(
 			markets.underlyingToDToken(_token)
 		);
 
+		_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
 		if (isEth) {
-_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
-if (isEth) {
 			convertEthToWeth(isEth, TokenInterface(_token), _amt);
 		}
 
@@ -448,8 +447,7 @@ if (isEth) {
 			wmul(params.unitAmt, helperParams._sellAmt18)
 		);
 
-		IEulerSwap.Swap1InchParams memory oneInchParams = IEulerSwap
-			.Swap1InchParams({
+		Swap1InchParams memory oneInchParams = Swap1InchParams({
 				subAccountIdIn: params.subAccountFrom,
 				subAccountIdOut: params.subAccountTo,
 				underlyingIn: helperParams._sellAddr,

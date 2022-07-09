@@ -64,8 +64,7 @@ interface IEulerDToken {
 	) external returns (bool);
 }
 
-interface IEulerSwap {
-	struct Swap1InchParams {
+struct Swap1InchParams {
 		uint256 subAccountIdIn;
 		uint256 subAccountIdOut;
 		address underlyingIn;
@@ -73,7 +72,8 @@ interface IEulerSwap {
 		uint256 amount;
 		uint256 amountOutMinimum;
 		bytes payload;
-	}
+}
 
+interface IEulerSwap {
 	function swap1Inch(Swap1InchParams memory) external;
 }
