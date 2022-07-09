@@ -179,7 +179,8 @@ abstract contract Euler is Helpers {
 		);
 
 		if (isEth) {
-			_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
+_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
+if (isEth) {
 			convertEthToWeth(isEth, TokenInterface(_token), _amt);
 		}
 
