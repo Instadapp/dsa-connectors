@@ -12,7 +12,7 @@ import "./interfaces.sol";
 
 abstract contract Resolver is Events {
 	InstaAaveAutomation internal immutable automation =
-		InstaAaveAutomation(0x4dDc35489042db14434E19cE205963aa72Ecd722);
+		InstaAaveAutomation(0x7eE533CB0642f18191D2927bdA735c3830B355BB);
 
 	function submitAutomationRequest(
 		uint256 safeHealthFactor,
@@ -50,7 +50,12 @@ abstract contract Resolver is Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		automation.updateAutomation(safeHealthFactor, thresholdHealthFactor);
+		automation.cancelAutomationRequest();
+
+		automation.submitAutomationRequest(
+			safeHealthFactor,
+			thresholdHealthFactor
+		);
 
 		(_eventName, _eventParam) = (
 			"LogUpdateAutomation(uint256,uint256)",
