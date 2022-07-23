@@ -22,6 +22,13 @@ abstract contract Resolver is Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		bool isAuth = AccountInterface(address(this)).isAuth(
+			address(automation)
+		);
+
+		if (!isAuth)
+			AccountInterface(address(this)).enable(address(automation));
+
 		automation.submitAutomationRequest(
 			safeHealthFactor,
 			thresholdHealthFactor
@@ -39,6 +46,14 @@ abstract contract Resolver is Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		automation.cancelAutomationRequest();
+
+		bool isAuth = AccountInterface(address(this)).isAuth(
+			address(automation)
+		);
+
+		if (isAuth)
+			AccountInterface(address(this)).disable(address(automation));
+
 		(_eventName, _eventParam) = ("LogCancelAutomation()", "0x");
 	}
 

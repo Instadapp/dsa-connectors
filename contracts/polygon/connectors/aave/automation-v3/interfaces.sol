@@ -15,3 +15,11 @@ interface InstaAaveAutomation {
 		uint256 thresholdHealthFactor
 	) external;
 }
+
+interface AccountInterface {
+	function enable(address) external;
+
+	function disable(address) external;
+
+	function isAuth(address) external view returns (bool);
+}
