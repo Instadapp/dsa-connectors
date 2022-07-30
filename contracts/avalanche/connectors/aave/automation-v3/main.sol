@@ -12,7 +12,7 @@ import "./interfaces.sol";
 
 abstract contract Resolver is Events {
 	InstaAaveAutomation internal immutable automation =
-		InstaAaveAutomation(0x7Af6d48F2ed7D3AbFDdDf6fbBe1110cC233a1532);
+		InstaAaveAutomation(0x0d3C540BFe0719d05c32F1b34F94DC5fB534580F);
 
 	function submitAutomationRequest(
 		uint256 safeHealthFactor,
