@@ -79,6 +79,6 @@ abstract contract Resolver is Events {
 	}
 }
 
-contract ConnectV2InstaAaveV3Automation is Resolver {
+contract ConnectV2InstaAaveV3AutomationPolygon is Resolver {
 	string public constant name = "Insta-Aave-V3-Automation-v1";
 }
