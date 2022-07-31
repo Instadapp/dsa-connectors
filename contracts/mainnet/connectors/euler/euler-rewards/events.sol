@@ -6,7 +6,6 @@ contract Events {
         address user,
         address token,
         uint256 amt,
-        uint256 getId,
         uint256 setId
     );
 }
