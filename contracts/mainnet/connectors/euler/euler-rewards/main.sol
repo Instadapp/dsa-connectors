@@ -30,7 +30,7 @@ contract EulerIncentives is Helpers, Events {
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         uint _amt = getUint(getId, amt);
 
-        require(proof.length > 0, "invalid-assets");
+        require(proof.length > 0, "proofs-empty");
 
         eulerDistribute.claim(user, token, _amt, proof, address(0));
 
