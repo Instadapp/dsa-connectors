@@ -36,8 +36,8 @@ contract EulerIncentives is Helpers, Events {
 
         setUint(setId, _amt);
 
-        _eventName = "LogClaimed(address,address,uint256,bytes32[],uint256,uint256)";
-        _eventParam = abi.encode(user, token, _amt, proof, getId, setId);
+        _eventName = "LogClaimed(address,address,uint256,uint256,uint256)";
+        _eventParam = abi.encode(user, token, _amt, getId, setId);
     }
 }
 
