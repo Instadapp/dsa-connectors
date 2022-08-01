@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
-import { ConnectV2EulereIncentives, ConnectV2EulereIncentives__factory } from "../../../typechain";
+import { ConnectV2EulerIncentives, ConnectV2EulerIncentives__factory } from "../../../typechain";
 import hre from "hardhat";
 
 describe("Euler Rewards Claim Test", () => {
@@ -14,7 +14,7 @@ describe("Euler Rewards Claim Test", () => {
   });
 
   describe("Euler Functions", () => {
-    let contract: ConnectV2EulereIncentives;
+    let contract: ConnectV2EulerIncentives;
 
     before(async () => {
       await hre.network.provider.request({
@@ -31,7 +31,7 @@ describe("Euler Rewards Claim Test", () => {
         ],
       });
 
-      const deployer = new ConnectV2EulereIncentives__factory(signer);
+      const deployer = new ConnectV2EulerIncentives__factory(signer);
       contract = await deployer.deploy();
       await contract.deployed();
       console.log("Contract deployed at: ", contract.address);
@@ -64,7 +64,6 @@ describe("Euler Rewards Claim Test", () => {
                 '0x310fdf199874bf9f992c02125278b4592bec5cd5ad1ee30fac130fa2b9ffc0ae',
                 '0x6d0a8568a994d5b8a356cf1a933ff8f5c195ea72f0f213f38a08ff3d87b3c4da'
                 ],
-                "0",
                 "0"
             )
         console.log(response);

@@ -37,6 +37,6 @@ contract EulerIncentives is Helpers, Events {
     }
 }
 
-contract ConnectV2EulereIncentives is EulerIncentives {
+contract ConnectV2EulerIncentives is EulerIncentives {
     string public constant name = "Euler-Incentives-v1";
 }
