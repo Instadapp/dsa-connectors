@@ -53,7 +53,7 @@ abstract contract Helpers is DSMath, Basic {
 			wmul(buyData.unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
 		);
 
-		bool isMatic = address(_sellAddr) == maticAddr;
+		bool isMatic = address(buyData.sellAddr) == maticAddr;
 		convertMaticToWmatic(isMatic, _sellAddr, _slippageAmt);
 		approve(_sellAddr, address(swapRouter), _slippageAmt);
 		ExactOutputSingleParams memory params = ExactOutputSingleParams({
@@ -69,8 +69,8 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 _sellAmt = swapRouter.exactOutputSingle(params);
 		require(_slippageAmt >= _sellAmt, "Too much slippage");
 
-		isMatic = address(_buyAddr) == wmaticAddr;
-		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
+		isMatic = address(buyData.buyAddr) == maticAddr;
+		convertMaticToWmatic(isMatic, _buyAddr, _slippageAmt);
 
 		setUint(setId, _sellAmt);
 
@@ -114,7 +114,7 @@ abstract contract Helpers is DSMath, Basic {
 			wmul(sellData.unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt))
 		);
 
-		bool isMatic = address(_sellAddr) == maticAddr;
+		bool isMatic = address(buyData.sellAddr) == maticAddr;
 		convertMaticToWmatic(isMatic, _sellAddr, _sellAmt);
 		approve(_sellAddr, address(swapRouter), _sellAmt);
 		ExactInputSingleParams memory params = ExactInputSingleParams({
@@ -130,7 +130,7 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 _buyAmt = swapRouter.exactInputSingle(params);
 		require(_slippageAmt <= _buyAmt, "Too much slippage");
 
-		isMatic = address(_buyAddr) == wmaticAddr;
+		isMatic = address(sellData.buyAddr) == wmaticAddr;
 		convertWmaticToMatic(isMatic, _buyAddr, _buyAmt);
 
 		setUint(setId, _buyAmt);
