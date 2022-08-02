@@ -70,8 +70,12 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 _sellAmt = swapRouter.exactOutputSingle(params);
 		require(_slippageAmt >= _sellAmt, "Too much slippage");
 
-		isEth = address(buyData.buyAddr) == wethAddr;
-		convertEthToWeth(isEth, _buyAddr, _slippageAmt);
+		if (_slippageAmt > _sellAmt) {
+			convertEthToWeth(isEth, _sellAddr, _slippageAmt - _sellAmt);
+			approve(_sellAddr, address(swapRouter), 0);
+		}
+		isEth = address(buyData.buyAddr) == ethAddr;
+		convertWethToEth(isEth, _buyAddr, _buyAmt);
 
 		setUint(setId, _sellAmt);
 
@@ -131,8 +135,8 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 _buyAmt = swapRouter.exactInputSingle(params);
 		require(_slippageAmt <= _buyAmt, "Too much slippage");
 
-		isEth = address(sellData.buyAddr) == wethAddr;
-		convertEthToWeth(isEth, _buyAddr, _sellAmt);
+		isEth = address(sellData.buyAddr) == ethAddr;
+		convertWethToEth(isEth, _buyAddr, _buyAmt);
 
 		setUint(setId, _buyAmt);
 
