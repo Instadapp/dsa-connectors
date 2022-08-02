@@ -53,7 +53,7 @@ abstract contract Helpers is DSMath, Basic {
 			_sellAddr.decimals(),
 			wmul(buyData.unitAmt, convertTo18(_buyAddr.decimals(), _buyAmt))
 		);
-		bool isEth = address(_sellAddr) == wethAddr;
+		bool isEth = address(_sellAddr) == ethAddr;
 		convertEthToWeth(isEth, _sellAddr, _slippageAmt);
 		approve(_sellAddr, address(swapRouter), _slippageAmt);
 
@@ -115,7 +115,7 @@ abstract contract Helpers is DSMath, Basic {
 			wmul(sellData.unitAmt, convertTo18(_sellAddr.decimals(), _sellAmt))
 		);
 
-		bool isEth = address(_sellAddr) == wethAddr;
+		bool isEth = address(_sellAddr) == ethAddr;
 		convertEthToWeth(isEth, _sellAddr, _sellAmt);
 		approve(_sellAddr, address(swapRouter), _sellAmt);
 		ExactInputSingleParams memory params = ExactInputSingleParams({
