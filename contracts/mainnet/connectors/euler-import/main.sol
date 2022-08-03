@@ -14,8 +14,9 @@ contract EulerImport is EulerHelpers {
     )
 		external
 		payable
+        returns (string memory _eventName, bytes memory _eventParam)
 	{
-		_importEuler(userAccount, sourceId, targetId, inputData, enterMarket);
+		(_eventName, _eventParam) = _importEuler(userAccount, sourceId, targetId, inputData, enterMarket);
 	}
 
     function _importEuler(
@@ -26,6 +27,7 @@ contract EulerImport is EulerHelpers {
         bool[] memory enterMarket
     )
 		internal
+        returns (string memory _eventName, bytes memory _eventParam)
 	{
         require(
 			AccountInterface(address(this)).isAuth(userAccount),
@@ -41,6 +43,8 @@ contract EulerImport is EulerHelpers {
 
         data = getBorrowAmounts(_sourceAccount, inputData, data);
 		data = getSupplyAmounts(_targetAccount, inputData, data);
+        
+        IExec(exec).deferLiquidityCheck(_sourceAccount, bytes(0));
 
         _TransferEtokens(
 			data._supplyTokens.length,
@@ -60,5 +64,17 @@ contract EulerImport is EulerHelpers {
             _sourceAccount,
             _targetAccount
         );
+
+        _eventName = "LogEulerImport(address,uint256,uint256,address[],address[],uint256[],uint256[],bool[])";
+		_eventParam = abi.encode(
+			userAccount,
+            sourceId,
+            targetId,
+            inputData.supplyTokens,
+			inputData.borrowTokens,
+            data.supplyAmts,
+			data.borrowAmts,
+            enterMarket
+		);
     }
 }
