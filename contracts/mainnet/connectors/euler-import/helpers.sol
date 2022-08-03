@@ -7,11 +7,23 @@ import "./interface.sol";
 
 contract EulerHelpers is Basic {
 
+	/**
+	 * @dev Euler's Market Module
+	 */
     IEulerMarkets internal constant markets =
 		IEulerMarkets(0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3);
 
+	/**
+	 * @dev Euler's Execution Module
+	 */
     IEulerExecute internal constant eulerExec = IEulerExecute(0x59828FdF7ee634AaaD3f58B19fDBa3b03E2D9d80);
 
+	/**
+	 * @dev Compute sub account address.
+	 * @notice Compute sub account address from sub-account id
+	 * @param primary primary address
+     * @param subAccountId sub-account id whose address needs to be computed
+	 */
 	function getSubAccountAddress(address primary, uint256 subAccountId)
 		public
 		pure

@@ -5,12 +5,21 @@ import "./helpers.sol";
 
 contract EulerImport is EulerHelpers {
 
+    /**
+	 * @dev Import Euler position.
+	 * @notice Import EOA's Euler subaccount position to DSA's Euler subaccount
+	 * @param userAccount The address of the EOA from which position will be imported
+     * @param sourceId EOA sub-account id from which position be be imported
+     * @param targetId DSA sub-account id
+	 * @param inputData The struct containing all the neccessary input data
+	 * @param enterMarket The boolean array to enable market in the imported position
+	 */
 	function importEuler(
-        address userAccount,//EOA address
+        address userAccount,
         uint256 sourceId, 
         uint256 targetId,
-        bool[] memory enterMarket,
-        ImportInputData memory inputData
+        ImportInputData memory inputData,
+        bool[] memory enterMarket
     )
 		external
 		payable
@@ -20,7 +29,7 @@ contract EulerImport is EulerHelpers {
 	}
 
     function _importEuler(
-        address userAccount,//EOA address
+        address userAccount,
         uint256 sourceId, 
         uint256 targetId,
         ImportInputData memory inputData,
@@ -36,7 +45,7 @@ contract EulerImport is EulerHelpers {
 		require(inputData.supplyTokens.length > 0, "0-length-not-allowed");
         require(enterMarket.length == inputData.supplyTokens.length, "lengths-not-same");
 
-        address _sourceAccount = getSubAccountAddress(userAccount, sourceId); //User's EOA sub-account address
+        address _sourceAccount = getSubAccountAddress(userAccount, sourceId);
         address _targetAccount = getSubAccountAddress(address(this), targetId);
 
 		ImportData memory data;
@@ -77,4 +86,8 @@ contract EulerImport is EulerHelpers {
             enterMarket
 		);
     }
+}
+
+contract ConnectV2EulerImport is EulerImport {
+	string public constant name = "Euler-import-v1.0";
 }
