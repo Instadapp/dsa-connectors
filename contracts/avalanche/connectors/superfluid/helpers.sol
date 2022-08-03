@@ -1,22 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
+import { Basic } from "../../common/basic.sol";
 import { ISuperfluid, IConstantFlowAgreementV1, IInstantDistributionAgreementV1 } from "./interface.sol";
 import { CFAv1Library } from "./libraries/CFAv1Library.sol";
 import { IDAv1Library } from "./libraries/IDAv1Library.sol";
 
-abstract contract Helpers {
+abstract contract Helpers is Basic {
 	using CFAv1Library for CFAv1Library.InitData;
 	using IDAv1Library for IDAv1Library.InitData;
 
-	ISuperfluid host = ISuperfluid(0x60377C7016E4cdB03C87EF474896C11cB560752C);
-	IInstantDistributionAgreementV1 ida =
+	ISuperfluid internal constant host =
+		ISuperfluid(0x60377C7016E4cdB03C87EF474896C11cB560752C);
+	IInstantDistributionAgreementV1 internal constant ida =
 		IInstantDistributionAgreementV1(
 			0x1fA9fFe8Db73F701454B195151Db4Abb18423cf2
 		);
 
 	//initialize InitData struct, and set equal to cfaV1
-	CFAv1Library.InitData public cfaV1 =
+	CFAv1Library.InitData internal cfaV1 =
 		CFAv1Library.InitData(
 			host,
 			//here, we are deriving the address of the CFA using the host contract

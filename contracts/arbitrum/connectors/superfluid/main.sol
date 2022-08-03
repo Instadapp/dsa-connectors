@@ -32,11 +32,18 @@ abstract contract Superfluid is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		uint256 _amount = getUint(getId, amount);
+
 		IERC20(superToken.getUnderlyingToken()).approve(
 			address(superToken),
-			amount
+			_amount
 		);
-		superToken.upgrade(amount);
+		superToken.upgrade(_amount);
+
+		setUint(setId, _amount);
+
+		_eventName = "LogWrap(address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(address(superToken), _amount, getId, setId);
 	}
 
 	/**
@@ -57,7 +64,14 @@ abstract contract Superfluid is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		uint256 _amount = getUint(getId, amount);
+
 		superToken.downgrade(amount);
+
+		setUint(setId, _amount);
+
+		_eventName = "LogUnwrap(address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(address(superToken), _amount, getId, setId);
 	}
 
 	/**
@@ -93,6 +107,16 @@ abstract contract Superfluid is Helpers, Events {
 			flowRate,
 			userData
 		);
+
+		_eventName = "LogCreateFlow(address,address,int96,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			receiver,
+			address(superToken),
+			flowRate,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -124,6 +148,16 @@ abstract contract Superfluid is Helpers, Events {
 			flowRate,
 			userData
 		);
+
+		_eventName = "LogUpdateFlow(address,address,int96,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			receiver,
+			address(superToken),
+			flowRate,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -149,6 +183,16 @@ abstract contract Superfluid is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		CFAv1Library.deleteFlow(cfaV1, sender, receiver, superToken, userData);
+
+		_eventName = "LogDeleteFlow(address,address,address,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			sender,
+			receiver,
+			address(superToken),
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -178,6 +222,14 @@ abstract contract Superfluid is Helpers, Events {
 			flowOperator,
 			superToken
 		);
+
+		_eventName = "LogAuthorizeFlowOperatorWithFullControl(address,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			flowOperator,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -202,6 +254,14 @@ abstract contract Superfluid is Helpers, Events {
 			cfaV1,
 			flowOperator,
 			superToken
+		);
+
+		_eventName = "LogRevokeFlowOperatorWithFullControl(address,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			flowOperator,
+			getId,
+			setId
 		);
 	}
 
@@ -233,6 +293,16 @@ abstract contract Superfluid is Helpers, Events {
 			superToken,
 			permissions,
 			flowRateAllowance
+		);
+
+		_eventName = "LogUpdateFlowOperatorPermissions(address,address,uint8,int96,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			flowOperator,
+			permissions,
+			flowRateAllowance,
+			getId,
+			setId
 		);
 	}
 
@@ -268,6 +338,17 @@ abstract contract Superfluid is Helpers, Events {
 			flowRate,
 			userData
 		);
+
+		_eventName = "LogCreateFlowByOperator(address,address,address,int96,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			sender,
+			receiver,
+			flowRate,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -302,6 +383,17 @@ abstract contract Superfluid is Helpers, Events {
 			flowRate,
 			userData
 		);
+
+		_eventName = "LogUpdateFlowByOperator(address,address,address,int96,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			sender,
+			receiver,
+			flowRate,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -333,6 +425,16 @@ abstract contract Superfluid is Helpers, Events {
 			superToken,
 			userData
 		);
+
+		_eventName = "LogDeleteFlowByOperator(address,address,address,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			sender,
+			receiver,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -360,6 +462,15 @@ abstract contract Superfluid is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		IDAv1Library.createIndex(_idav1Lib, superToken, indexId, userData);
+
+		_eventName = "LogCreateIndex(address,uint32,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			indexId,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -391,6 +502,16 @@ abstract contract Superfluid is Helpers, Events {
 			indexValue,
 			userData
 		);
+
+		_eventName = "LogUpdateIndexValue(address,uint32,uint128,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			id,
+			indexValue,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -416,6 +537,16 @@ abstract contract Superfluid is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		IDAv1Library.distribute(_idav1Lib, superToken, id, amount, userData);
+
+		_eventName = "LogDistribute(address,uint32,uint256,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			id,
+			amount,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -447,6 +578,16 @@ abstract contract Superfluid is Helpers, Events {
 			indexId,
 			userData
 		);
+
+		_eventName = "LogApproveSubscription(address,address,uint32,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			publisher,
+			indexId,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -477,6 +618,16 @@ abstract contract Superfluid is Helpers, Events {
 			publisher,
 			indexId,
 			userData
+		);
+
+		_eventName = "LogRevokeSubscription(address,address,uint32,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			publisher,
+			indexId,
+			userData,
+			getId,
+			setId
 		);
 	}
 
@@ -512,6 +663,17 @@ abstract contract Superfluid is Helpers, Events {
 			units,
 			userData
 		);
+
+		_eventName = "LogUpdateSubscriptionUnits(address,uint32,address,uint128,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			indexId,
+			subscriber,
+			units,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -546,6 +708,17 @@ abstract contract Superfluid is Helpers, Events {
 			subscriber,
 			userData
 		);
+
+		_eventName = "LogDeleteSubscription(address,address,uint32,address,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			publisher,
+			indexId,
+			subscriber,
+			userData,
+			getId,
+			setId
+		);
 	}
 
 	/**
@@ -579,6 +752,17 @@ abstract contract Superfluid is Helpers, Events {
 			indexId,
 			subscriber,
 			userData
+		);
+
+		_eventName = "LogClaim(address,address,uint32,address,bytes,uint256,uint256)";
+		_eventParam = abi.encode(
+			address(superToken),
+			publisher,
+			indexId,
+			subscriber,
+			userData,
+			getId,
+			setId
 		);
 	}
 }
