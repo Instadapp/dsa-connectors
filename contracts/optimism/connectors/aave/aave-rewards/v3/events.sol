@@ -9,5 +9,5 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogAllClaimed(address[] assets, address[] rewards, uint256[] amt);
+	event LogAllClaimed(address[] assets, address[] rewards, uint256[] amts);
 }
