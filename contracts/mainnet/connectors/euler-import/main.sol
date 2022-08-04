@@ -53,7 +53,29 @@ contract EulerImport is EulerHelpers {
         data = getBorrowAmounts(_sourceAccount, inputData, data);
 		data = getSupplyAmounts(_targetAccount, inputData, data);
         
-        IEulerExecute(eulerExec).deferLiquidityCheck(_sourceAccount, "0x0");
+        eulerExec.deferLiquidityCheck(_sourceAccount, abi.encode(data, enterMarket, _sourceAccount, _targetAccount, targetId));
+
+        _eventName = "LogEulerImport(address,uint256,uint256,address[],address[],uint256[],uint256[],bool[])";
+		_eventParam = abi.encode(
+			userAccount,
+            sourceId,
+            targetId,
+            inputData.supplyTokens,
+			inputData.borrowTokens,
+            data.supplyAmts,
+			data.borrowAmts,
+            enterMarket
+		);
+    }
+
+    function onDeferredLiquidityCheck(bytes memory encodedData) external {
+        (
+            ImportData memory data,
+            bool[] memory enterMarket, 
+            address _sourceAccount,
+            address _targetAccount,
+            uint targetId
+        ) = abi.decode(encodedData, (ImportData, bool[], address, address, uint));
 
         _TransferEtokens(
 			data._supplyTokens.length,
@@ -74,18 +96,6 @@ contract EulerImport is EulerHelpers {
             _sourceAccount,
             _targetAccount
         );
-
-        _eventName = "LogEulerImport(address,uint256,uint256,address[],address[],uint256[],uint256[],bool[])";
-		_eventParam = abi.encode(
-			userAccount,
-            sourceId,
-            targetId,
-            inputData.supplyTokens,
-			inputData.borrowTokens,
-            data.supplyAmts,
-			data.borrowAmts,
-            enterMarket
-		);
     }
 }
 

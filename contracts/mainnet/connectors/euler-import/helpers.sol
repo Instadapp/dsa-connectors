@@ -83,13 +83,14 @@ contract EulerHelpers is Basic {
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
-		if (inputData.borrowTokens.length > 0) {
-			data._borrowTokens = new address[](inputData.borrowTokens.length);
-			data.borrowAmts = new uint256[](
-				inputData.borrowTokens.length
-			);
-			for (uint256 i = 0; i < inputData.borrowTokens.length; i++) {
-				for (uint256 j = i; j < inputData.borrowTokens.length; j++) {
+		uint _borrowTokensLength = inputData.borrowTokens.length;
+
+		if (_borrowTokensLength > 0) {
+			data._borrowTokens = new address[](_borrowTokensLength);
+			data.dTokens = new EulerTokenInterface[](_borrowTokensLength);
+			data.borrowAmts = new uint256[](_borrowTokensLength);
+			for (uint256 i = 0; i < _borrowTokensLength; i++) {
+				for (uint256 j = i; j < _borrowTokensLength; j++) {
 					if (j != i) {
 						require(
 							inputData.borrowTokens[i] !=
@@ -99,7 +100,8 @@ contract EulerHelpers is Basic {
 					}
 				}
 			}
-			for (uint256 i = 0; i < inputData.borrowTokens.length; i++) {
+
+			for (uint256 i = 0; i < _borrowTokensLength; i++) {
 				address _token = inputData.borrowTokens[i] == ethAddr
 					? wethAddr
 					: inputData.borrowTokens[i];
@@ -166,7 +168,4 @@ contract EulerHelpers is Basic {
 			}
 		}
 	}
-
-
-
 }
