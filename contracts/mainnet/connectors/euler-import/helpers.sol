@@ -121,7 +121,7 @@ contract EulerHelpers is Basic {
 		bool[] memory enterMarket,
 		address userAccountFrom,
         address userAccountTo,
-        uint targetId
+        uint256 targetId
 	) internal {
 		for (uint256 i = 0; i < _length; i++) {
 			if (amts[i] > 0) {

@@ -53,7 +53,7 @@ contract EulerImport is EulerHelpers {
         data = getBorrowAmounts(_sourceAccount, inputData, data);
 		data = getSupplyAmounts(_targetAccount, inputData, data);
         
-        IExec(exec).deferLiquidityCheck(_sourceAccount, bytes(0));
+        IEulerExecute(eulerExec).deferLiquidityCheck(_sourceAccount, "0x0");
 
         _TransferEtokens(
 			data._supplyTokens.length,
@@ -62,7 +62,8 @@ contract EulerImport is EulerHelpers {
 			data._supplyTokens,
 			enterMarket,
 			_sourceAccount,
-            _targetAccount
+            _targetAccount,
+            targetId
 		);
 
         _TransferDtokens(
