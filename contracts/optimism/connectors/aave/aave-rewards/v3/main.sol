@@ -59,17 +59,17 @@ abstract contract IncentivesResolver is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		require(assets.length > 0, "invalid-assets");
-		uint256[] memory _amt = new uint256[](assets.length);
+		uint256[] memory _amts = new uint256[](assets.length);
 		address[] memory _rewards = new address[](assets.length);
 
-		(_rewards, _amt) = incentives.claimAllRewards(assets, address(this));
+		(_rewards, _amts) = incentives.claimAllRewards(assets, address(this));
 
 		TokenInterface weth = TokenInterface(wethAddr);
 		uint256 wethAmount = weth.balanceOf(address(this));
 		convertWethToEth(wethAmount > 0, weth, wethAmount);
 
 		_eventName = "LogAllClaimed(address[],address[],uint256[])";
-		_eventParam = abi.encode(assets, _rewards, _amt);
+		_eventParam = abi.encode(assets, _rewards, _amts);
 	}
 }
 
