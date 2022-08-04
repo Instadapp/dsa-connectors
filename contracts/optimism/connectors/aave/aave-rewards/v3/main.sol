@@ -68,8 +68,8 @@ abstract contract IncentivesResolver is Helpers, Events {
 		uint256 wethAmount = weth.balanceOf(address(this));
 		convertWethToEth(wethAmount > 0, weth, wethAmount);
 
-		_eventName = "LogAllClaimed(address[],uint256[])";
-		_eventParam = abi.encode(assets, _amt);
+		_eventName = "LogAllClaimed(address[],address[],uint256[])";
+		_eventParam = abi.encode(assets, _rewards, _amt);
 	}
 }
 
