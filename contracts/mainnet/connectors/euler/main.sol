@@ -305,9 +305,10 @@ abstract contract Euler is Helpers {
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
+		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
 		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
 
-		eToken.transfer(_subAccountToAddr, _amt);
+		eToken.transferFrom(_subAccountFromAddr, _subAccountToAddr, _amt);
 
 		setUint(setId, _amt);
 
@@ -357,8 +358,9 @@ abstract contract Euler is Helpers {
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
+		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
 		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
-		dToken.transfer(_subAccountToAddr, amt);
+		dToken.transferFrom(_subAccountFromAddr, _subAccountToAddr, _amt);
 
 		setUint(setId, _amt);
 
