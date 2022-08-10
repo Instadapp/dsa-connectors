@@ -376,7 +376,7 @@ abstract contract Euler is Helpers {
 	}
 
 	/**
-	 * @dev Approve debt.
+	 * @dev Approve Spender's debt.
 	 * @notice Approve sender to send debt.
 	 * @param subAccountId Subaccount id of receiver
 	 * @param debtSender Address of sender
@@ -384,7 +384,7 @@ abstract contract Euler is Helpers {
 	 * @param amt The amount of the token.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
-	function approveDebt(
+	function approveSpenderDebt(
 		uint256 subAccountId,
 		address debtSender,
 		address token,
@@ -395,7 +395,6 @@ abstract contract Euler is Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		require(instaList.accountID(debtSender) != 0, "not-a-DSA");
 
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
