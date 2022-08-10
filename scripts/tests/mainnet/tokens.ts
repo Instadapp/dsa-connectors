@@ -34,6 +34,13 @@ export const tokens = {
     name: "Wrapped Ether",
     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     decimals: 18
+  },
+  ens: {
+    type: "token",
+    symbol: "ENS",
+    name: "Etherem Name Services",
+    address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+    decimals: 18
   }
 };
 
