@@ -395,6 +395,7 @@ abstract contract Euler is Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		require(instaList.accountID(debtSender) != 0, "not-a-DSA");
 
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
