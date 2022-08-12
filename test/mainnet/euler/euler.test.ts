@@ -412,7 +412,7 @@ describe("Euler", function () {
       const spell = [
         {
           connector: connectorName,
-          method: "approveDebt",
+          method: "approveSpenderDebt",
           args: ["0", "0x85c2ac24a8BD9Ff6E2Ef6cf76C198E36550f41D7", tokens.dai.address, "10000000", "0"],
         },
       ];
@@ -493,6 +493,38 @@ describe("Euler", function () {
           connector: connectorName,
           method: "burn",
           args: ["3", tokens.weth.address, "10000000", "0", "0"],
+        },
+      ];
+
+      const txn = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spell), wallet1.getAddress());
+
+      await txn.wait();
+    })
+
+    it("Should deposit in sub account 4", async function () {
+
+      const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: ["4", tokens.weth.address, "1000000000000000000", "true", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+    })
+    it("Should withdraw from sub account 4", async function () {
+      const spell = [
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: ["4", tokens.weth.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935", "0", "0"],
         },
       ];
 

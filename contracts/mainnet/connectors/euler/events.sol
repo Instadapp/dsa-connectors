@@ -52,8 +52,8 @@ contract Events {
 	);
 
 	event LogETransfer(
-		uint256 subAccount1,
-		uint256 subAccount2,
+		uint256 subAccountFrom,
+		uint256 subAccountTo,
 		address token,
 		uint256 amount,
 		uint256 getId,
@@ -61,31 +61,20 @@ contract Events {
 	);
 
 	event LogDTransfer(
-		uint256 subAccount1,
-		uint256 subAccount2,
-		address token,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogApproveDebt(
-		uint256 subAccountId,
-		address debtReceiver,
-		address token,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogSwap(
 		uint256 subAccountFrom,
 		uint256 subAccountTo,
-		address buyAddr,
-		address sellAddr,
-		uint256 sellAmt,
-		uint256 unitAmt,
-		bytes callData
+		address token,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogApproveSpenderDebt(
+		uint256 subAccountId,
+		address debtSender,
+		address token,
+		uint256 amount,
+		uint256 setId
 	);
 
 	event LogEnterMarket(uint256 subAccountId, address[] newMarkets);

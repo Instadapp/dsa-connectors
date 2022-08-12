@@ -95,7 +95,9 @@ abstract contract Euler is Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
-		_amt = _amt == uint256(-1) ?  eToken.balanceOfUnderlying(address(this)) : _amt;
+
+		address _subAccount = getSubAccount(address(this), subAccount);
+		_amt = _amt == uint256(-1) ?  eToken.balanceOfUnderlying(_subAccount) : _amt;
 		uint256 initialBal = tokenContract.balanceOf(address(this));
 
 		eToken.withdraw(subAccount, _amt);
@@ -178,7 +180,8 @@ abstract contract Euler is Helpers {
 			markets.underlyingToDToken(_token)
 		);
 
-		_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
+		address _subAccount = getSubAccount(address(this), subAccount);
+		_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(_subAccount) : _amt;
 		if (isEth) {
 			convertEthToWeth(isEth, TokenInterface(_token), _amt);
 		}
@@ -299,14 +302,14 @@ abstract contract Euler is Helpers {
 
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
+		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
+		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
+
 		_amt = _amt == uint256(-1)
-			? eToken.balanceOf(address(this))
+			? eToken.balanceOf(_subAccountFromAddr)
 			: _amt;
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
-
-		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
-		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
 
 		eToken.transferFrom(_subAccountFromAddr, _subAccountToAddr, _amt);
 
@@ -352,14 +355,15 @@ abstract contract Euler is Helpers {
 
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 
+		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
+		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
+
 		_amt = _amt == uint256(-1)
-			? dToken.balanceOf(address(this))
+			? dToken.balanceOf(_subAccountFromAddr)
 			: _amt;
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
-		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
 		dToken.transferFrom(_subAccountFromAddr, _subAccountToAddr, _amt);
 
 		setUint(setId, _amt);
@@ -405,8 +409,8 @@ abstract contract Euler is Helpers {
 
 		setUint(setId, amt);
 
-		_eventName = "LogApproveDebt(uint256,address,address,uint256)";
-		_eventParam = abi.encode(subAccountId, debtSender, token, amt);
+		_eventName = "LogApproveSpenderDebt(uint256,address,address,uint256,uint256)";
+		_eventParam = abi.encode(subAccountId, debtSender, token, amt, setId);
 	}
 
 	/**
