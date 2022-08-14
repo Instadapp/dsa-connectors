@@ -36,6 +36,8 @@ interface IEulerEToken {
 
 	function balanceOf(address account) external view returns (uint256);
 
+	function balanceOfUnderlying(address account) external view returns (uint);
+
 	function transferFrom(address from, address to, uint amount) external returns (bool);
 
 	function approve(address spender, uint256 amount) external returns (bool);
@@ -62,18 +64,4 @@ interface IEulerDToken {
 		address spender,
 		uint256 amount
 	) external returns (bool);
-}
-
-struct Swap1InchParams {
-		uint256 subAccountIdIn;
-		uint256 subAccountIdOut;
-		address underlyingIn;
-		address underlyingOut;
-		uint256 amount;
-		uint256 amountOutMinimum;
-		bytes payload;
-}
-
-interface IEulerSwap {
-	function swap1Inch(Swap1InchParams memory) external;
 }
