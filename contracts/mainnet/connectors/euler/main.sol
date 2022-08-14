@@ -98,11 +98,11 @@ abstract contract Euler is Helpers {
 
 		address _subAccount = getSubAccount(address(this), subAccount);
 		_amt = _amt == uint256(-1) ?  eToken.balanceOfUnderlying(_subAccount) : _amt;
-		uint256 initialBal = tokenContract.balanceOf(_subAccount);
+		uint256 initialBal = tokenContract.balanceOf(address(this));
 
 		eToken.withdraw(subAccount, _amt);
 
-		uint256 finalBal = tokenContract.balanceOf(_subAccount);
+		uint256 finalBal = tokenContract.balanceOf(address(this));
 		_amt = finalBal - initialBal;
 
 		convertWethToEth(isEth, tokenContract, _amt);
