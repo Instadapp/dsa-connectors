@@ -11,40 +11,10 @@ contract Helpers is Basic, Events {
 	IEulerMarkets internal constant markets =
 		IEulerMarkets(0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3);
 
-	struct swapHelper {
-		address _sellAddr;
-		address _buyAddr;
-		uint256 _buyDec;
-		uint256 _sellDec;
-		uint256 _sellAmt18;
-		uint256 _slippageAmt;
-	}
-
-	struct swapParams {
-		uint256 subAccountFrom;
-		uint256 subAccountTo;
-		address buyAddr;
-		address sellAddr;
-		uint256 sellAmt;
-		uint256 unitAmt;
-		bytes callData;
-	}
-
-	/**
-	 * @dev Get Enetered markets for a user
-	 */
-	function getEnteredMarkets()
-		internal
-		view
-		returns (address[] memory enteredMarkets)
-	{
-		enteredMarkets = markets.getEnteredMarkets(address(this));
-	}
-
 	/**
 	 * @dev Get sub account address
 	 * @param primary address of user
-	 * @param subAccountId subAccount ID
+	 * @param subAccountId sub-account id
 	 */
 	function getSubAccount(address primary, uint256 subAccountId)
 		public
@@ -56,11 +26,25 @@ contract Helpers is Basic, Events {
 	}
 
 	/**
+	 * @dev Get Enetered markets for a user
+	 * @param subAccountId sub-account id
+	 */
+	function getEnteredMarkets(uint256 subAccountId)
+		internal
+		view
+		returns (address[] memory enteredMarkets)
+	{
+		address _subAccountAddress = getSubAccount(address(this), subAccountId);
+		enteredMarkets = markets.getEnteredMarkets(_subAccountAddress);
+	}
+
+	/**
 	 * @dev Check if the market is entered
+	 * @param subAccountId sub-account id
 	 * @param token token address
 	 */
-	function checkIfEnteredMarket(address token) public view returns (bool) {
-		address[] memory enteredMarkets = getEnteredMarkets();
+	function checkIfEnteredMarket(uint256 subAccountId, address token) public view returns (bool) {
+		address[] memory enteredMarkets = getEnteredMarkets(subAccountId);
 		uint256 length = enteredMarkets.length;
 
 		for (uint256 i = 0; i < length; i++) {

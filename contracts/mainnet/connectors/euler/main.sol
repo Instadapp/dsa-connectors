@@ -98,11 +98,11 @@ abstract contract Euler is Helpers {
 
 		address _subAccount = getSubAccount(address(this), subAccount);
 		_amt = _amt == uint256(-1) ?  eToken.balanceOfUnderlying(_subAccount) : _amt;
-		uint256 initialBal = tokenContract.balanceOf(address(this));
+		uint256 initialBal = tokenContract.balanceOf(_subAccount);
 
 		eToken.withdraw(subAccount, _amt);
 
-		uint256 finalBal = tokenContract.balanceOf(address(this));
+		uint256 finalBal = tokenContract.balanceOf(_subAccount);
 		_amt = finalBal - initialBal;
 
 		convertWethToEth(isEth, tokenContract, _amt);
@@ -259,9 +259,15 @@ abstract contract Euler is Helpers {
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
-		_amt = _amt == type(uint256).max
-			? dToken.balanceOf(address(this))
-			: _amt;
+		address _subAccount = getSubAccount(address(this), subAccount);
+
+		if(_amt == uint256(-1)) {
+
+			uint256 _eTokenBalance = eToken.balanceOfUnderlying(_subAccount);
+			uint256 _dTokenBalance = dToken.balanceOf(_subAccount);
+
+			_amt = _eTokenBalance <= _dTokenBalance ? _eTokenBalance : _dTokenBalance;
+		}
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 

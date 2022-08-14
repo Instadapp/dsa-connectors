@@ -172,7 +172,7 @@ describe("Euler", function () {
           {
             connector: connectorName,
             method: "deposit",
-            args: ["0", tokens.usdc.address, "10000000", "true", "0", "0"],
+            args: ["0", tokens.usdc.address, "10000000", "true", "0", "0"], // 10 USDC
           },
         ];
 
@@ -188,7 +188,7 @@ describe("Euler", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: ["1", tokens.usdc.address, "10000000", "true", "0", "0"],
+          args: ["1", tokens.usdc.address, "10000000", "true", "0", "0"], // 10 USDC
         },
       ];
 
@@ -206,7 +206,7 @@ describe("Euler", function () {
           {
             connector: connectorName,
             method: "borrow",
-            args: ["0", tokens.dai.address, "1000000000000000000", "0", "0"],
+            args: ["0", tokens.dai.address, "1000000000000000000", "0", "0"], // 1 DAI
           },
         ];
 
@@ -224,7 +224,7 @@ describe("Euler", function () {
         {
           connector: connectorName,
           method: "repay",
-          args: ["0", tokens.dai.address, "500000000000000000", "0", "0"],
+          args: ["0", tokens.dai.address, "500000000000000000", "0", "0"], // 0.5 DAI
         },
       ];
 
@@ -243,7 +243,7 @@ describe("Euler", function () {
         {
           connector: connectorName,
           method: "withdraw",
-          args: ["0", tokens.usdc.address, "2000000", "0", "0"],
+          args: ["0", tokens.usdc.address, "2000000", "0", "0"], // 2 USDC
         },
       ];
 
@@ -462,7 +462,7 @@ describe("Euler", function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: ["3", tokens.weth.address, "1000000000000000000", "true", "0", "0"],
+          args: ["3", tokens.dai.address, "1000000000000000000", "true", "0", "0"],
         },
       ];
 
@@ -492,7 +492,7 @@ describe("Euler", function () {
         {
           connector: connectorName,
           method: "burn",
-          args: ["3", tokens.weth.address, "10000000", "0", "0"],
+          args: ["3", tokens.weth.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935", "0", "0"],
         },
       ];
 
