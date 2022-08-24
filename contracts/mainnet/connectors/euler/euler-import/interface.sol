@@ -49,7 +49,7 @@ interface IEulerExecute {
 		bytes result;
 	}
 
-	function batchDispatch(EulerBatchItem[] calldata items, address[] calldata deferLiquidityChecks) external returns (EulerBatchItemResponse[] memory);
+	function batchDispatch(EulerBatchItem[] calldata items, address[] calldata deferLiquidityChecks) external;
 
 	function deferLiquidityCheck(address account, bytes memory data) external;
 }

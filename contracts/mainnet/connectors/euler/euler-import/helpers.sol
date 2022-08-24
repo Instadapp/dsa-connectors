@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
-import { TokenInterface, AccountInterface } from "../../common/interfaces.sol";
-import { Basic } from "../../common/basic.sol";
+import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
+import { Basic } from "../../../common/basic.sol";
 import "./interface.sol";
 
 contract EulerHelpers is Basic {
@@ -36,6 +36,7 @@ contract EulerHelpers is Basic {
     struct ImportInputData {
 		address[] supplyTokens;
 		address[] borrowTokens;
+		bool[] enterMarket;
 	}
 
     struct ImportData {
@@ -48,7 +49,7 @@ contract EulerHelpers is Basic {
 	}
 
     function getSupplyAmounts(
-		address userAccount,
+		address userAccount,//user's EOA sub-account address
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
@@ -72,7 +73,7 @@ contract EulerHelpers is Basic {
 				: inputData.supplyTokens[i];
 			data._supplyTokens[i] = _token;
 			data.eTokens[i] = EulerTokenInterface(markets.underlyingToEToken(_token));
-			data.supplyAmts[i] = data.eTokens[i].balanceOf(userAccount);
+			data.supplyAmts[i] = data.eTokens[i].balanceOf(userAccount);//All 18 dec
 		}
 
 		return data;
@@ -112,60 +113,5 @@ contract EulerHelpers is Basic {
 			}
 		}
 		return data;
-	}
-
-//transfer and enter market
-    function _TransferEtokens(
-		uint256 _length,
-		EulerTokenInterface[] memory etokenContracts,
-		uint256[] memory amts,
-		address[] memory tokens,
-		bool[] memory enterMarket,
-		address userAccountFrom,
-        address userAccountTo,
-        uint256 targetId
-	) internal {
-		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0) {
-				uint256 _amt = amts[i];
-				require(
-					etokenContracts[i].transferFrom(
-						userAccountFrom,
-						userAccountTo,
-						_amt
-					),
-					"allowance?"//change
-				);
-
-				if (enterMarket[i]) {
-                    markets.enterMarket(targetId, tokens[i]);
-				} else {
-                    markets.exitMarket(targetId, tokens[i]);
-                }
-			}
-		}
-	}
-
-    function _TransferDtokens(
-		uint256 _length,
-		EulerTokenInterface[] memory dtokenContracts,
-		uint256[] memory amts,
-		address[] memory tokens,
-		address eoaIdFrom,
-        address dsaIdTo
-	) internal {
-		for (uint256 i = 0; i < _length; i++) {
-			if (amts[i] > 0) {
-				uint256 _amt = amts[i];
-				require(
-					dtokenContracts[i].transferFrom(
-						eoaIdFrom,
-						dsaIdTo,
-						_amt
-					),
-					"debt-transfer-failed?"
-				);
-			}
-		}
 	}
 }
