@@ -95,7 +95,9 @@ abstract contract Euler is Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
-		_amt = _amt == uint256(-1) ?  eToken.balanceOf(address(this)) : _amt;
+
+		address _subAccount = getSubAccount(address(this), subAccount);
+		_amt = _amt == uint256(-1) ?  eToken.balanceOfUnderlying(_subAccount) : _amt;
 		uint256 initialBal = tokenContract.balanceOf(address(this));
 
 		eToken.withdraw(subAccount, _amt);
@@ -178,7 +180,8 @@ abstract contract Euler is Helpers {
 			markets.underlyingToDToken(_token)
 		);
 
-		_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(address(this)) : _amt;
+		address _subAccount = getSubAccount(address(this), subAccount);
+		_amt = _amt == uint256(-1) ? borrowedDToken.balanceOf(_subAccount) : _amt;
 		if (isEth) {
 			convertEthToWeth(isEth, TokenInterface(_token), _amt);
 		}
@@ -256,9 +259,15 @@ abstract contract Euler is Helpers {
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
-		_amt = _amt == type(uint256).max
-			? dToken.balanceOf(address(this))
-			: _amt;
+		address _subAccount = getSubAccount(address(this), subAccount);
+
+		if(_amt == uint256(-1)) {
+
+			uint256 _eTokenBalance = eToken.balanceOfUnderlying(_subAccount);
+			uint256 _dTokenBalance = dToken.balanceOf(_subAccount);
+
+			_amt = _eTokenBalance <= _dTokenBalance ? _eTokenBalance : _dTokenBalance;
+		}
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
@@ -299,15 +308,16 @@ abstract contract Euler is Helpers {
 
 		IEulerEToken eToken = IEulerEToken(markets.underlyingToEToken(_token));
 
+		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
+		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
+
 		_amt = _amt == uint256(-1)
-			? eToken.balanceOf(address(this))
+			? eToken.balanceOf(_subAccountFromAddr)
 			: _amt;
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
-
-		eToken.transfer(_subAccountToAddr, _amt);
+		eToken.transferFrom(_subAccountFromAddr, _subAccountToAddr, _amt);
 
 		setUint(setId, _amt);
 
@@ -351,14 +361,16 @@ abstract contract Euler is Helpers {
 
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 
+		address _subAccountFromAddr = getSubAccount(address(this), subAccountFrom);
+		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
+
 		_amt = _amt == uint256(-1)
-			? dToken.balanceOf(address(this))
+			? dToken.balanceOf(_subAccountFromAddr)
 			: _amt;
 
 		if (isEth) convertEthToWeth(isEth, TokenInterface(_token), _amt);
 
-		address _subAccountToAddr = getSubAccount(address(this), subAccountTo);
-		dToken.transfer(_subAccountToAddr, amt);
+		dToken.transferFrom(_subAccountFromAddr, _subAccountToAddr, _amt);
 
 		setUint(setId, _amt);
 
@@ -374,105 +386,37 @@ abstract contract Euler is Helpers {
 	}
 
 	/**
-	 * @dev Approve debt.
-	 * @notice Approves receiver to take debt.
-	 * @param subAccountId Subaccount number
-	 * @param debtReceiver Address of receiver
-	 * @param token The address of the token to mint.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param amt The amount of the token to mint.
-	 * @param getId ID to retrieve amt.
+	 * @dev Approve Spender's debt.
+	 * @notice Approve sender to send debt.
+	 * @param subAccountId Subaccount id of receiver
+	 * @param debtSender Address of sender
+	 * @param token The address of the token.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
-	function approveDebt(
+	function approveSpenderDebt(
 		uint256 subAccountId,
-		address debtReceiver,
+		address debtSender,
 		address token,
 		uint256 amt,
-		uint256 getId,
 		uint256 setId
 	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(getId, amt);
 
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
 
 		IEulerDToken dToken = IEulerDToken(markets.underlyingToDToken(_token));
 
-		dToken.approveDebt(subAccountId, debtReceiver, _amt);
+		dToken.approveDebt(subAccountId, debtSender, amt);
 
-		setUint(setId, _amt);
+		setUint(setId, amt);
 
-		_eventName = "LogApproveDebt(uint256,address,address,uint256)";
-		_eventParam = abi.encode(subAccountId, debtReceiver, token, _amt);
-	}
-
-	/**
-	 * @dev Swap.
-	 * @notice Executes swap.
-	 * @param params swapParams struct
-	 */
-	function swap(swapParams memory params)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		swapHelper memory helperParams;
-
-		helperParams._sellAddr = params.sellAddr == ethAddr
-			? wethAddr
-			: params.sellAddr;
-		helperParams._buyAddr = params.sellAddr == ethAddr
-			? wethAddr
-			: params.buyAddr;
-
-		TokenInterface sellToken = TokenInterface(helperParams._sellAddr);
-		TokenInterface buyToken = TokenInterface(helperParams._buyAddr);
-
-		approve(sellToken, address(swapExec), params.sellAmt);
-
-		(helperParams._buyDec, helperParams._sellDec) = getTokensDec(
-			buyToken,
-			sellToken
-		);
-		helperParams._sellAmt18 = convertTo18(
-			helperParams._sellDec,
-			params.sellAmt
-		);
-		helperParams._slippageAmt = convert18ToDec(
-			helperParams._buyDec,
-			wmul(params.unitAmt, helperParams._sellAmt18)
-		);
-
-		Swap1InchParams memory oneInchParams = Swap1InchParams({
-				subAccountIdIn: params.subAccountFrom,
-				subAccountIdOut: params.subAccountTo,
-				underlyingIn: helperParams._sellAddr,
-				underlyingOut: helperParams._buyAddr,
-				amount: params.sellAmt,
-				amountOutMinimum: helperParams._slippageAmt,
-				payload: params.callData
-			});
-
-		swapExec.swap1Inch(oneInchParams);
-
-		if (!checkIfEnteredMarket(helperParams._buyAddr)) {
-			markets.enterMarket(params.subAccountTo, helperParams._buyAddr);
-		}
-
-		_eventName = "LogSwap(uint256,uint256,address,address,uint256,uint256,bytes)";
-		_eventParam = abi.encode(
-			params.subAccountFrom,
-			params.subAccountTo,
-			params.buyAddr,
-			params.sellAddr,
-			params.sellAmt,
-			params.unitAmt,
-			params.callData
-		);
+		_eventName = "LogApproveSpenderDebt(uint256,address,address,uint256,uint256)";
+		_eventParam = abi.encode(subAccountId, debtSender, token, amt, setId);
 	}
 
 	/**

@@ -12,6 +12,24 @@ import { tokens } from "../../../scripts/tests/mainnet/tokens";
 const { ethers } = hre;
 import type { Signer, Contract } from "ethers";
 
+const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+const ACC_USDC = '0xe78388b4ce79068e89bf8aa7f218ef6b9ab0e9d0'
+const Usdc = parseUnits('5000', 6)
+
+const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'
+const ACC_DAI = '0xcd6Eb888e76450eF584E8B51bB73c76ffBa21FF2'
+const Dai = parseUnits('5000', 18)
+
+const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+const ACC_WETH = '0x05547D4e1A2191B91510Ea7fA8555a2788C70030'
+const Weth = parseUnits('50', 18)
+
+const token_usdc = new ethers.Contract(
+  USDC,
+  IERC20__factory.abi,
+  ethers.provider,
+)
+
 describe("Euler", function () {
   const connectorName = "EULER-TEST-A";
   let connector: any;
@@ -20,18 +38,6 @@ describe("Euler", function () {
   let dsaWallet0: any;
   let instaConnectorsV2: Contract;
   let masterSigner: Signer;
-
-  const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-  const ACC_USDC = '0xe78388b4ce79068e89bf8aa7f218ef6b9ab0e9d0'
-  const Usdc = parseUnits('5000', 6)
-
-  const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'
-  const ACC_DAI = '0xcd6Eb888e76450eF584E8B51bB73c76ffBa21FF2'
-  const Dai = parseUnits('5000', 18)
-
-  const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-  const ACC_WETH = '0x05547D4e1A2191B91510Ea7fA8555a2788C70030'
-  const Weth = parseUnits('50', 18)
 
   before(async () => {
     await hre.network.provider.request({
@@ -84,11 +90,6 @@ describe("Euler", function () {
     });
 
     it("Deposit USDC into DSA wallet", async function () {
-      const token_usdc = new ethers.Contract(
-          USDC,
-          IERC20__factory.abi,
-          ethers.provider,
-      )
 
       await hre.network.provider.request({
           method: 'hardhat_impersonateAccount',
@@ -171,7 +172,7 @@ describe("Euler", function () {
           {
             connector: connectorName,
             method: "deposit",
-            args: ["0", tokens.usdc.address, "10000000", "true", "0", "0"],
+            args: ["0", tokens.usdc.address, "10000000", "true", "0", "0"], // 10 USDC
           },
         ];
 
@@ -181,12 +182,31 @@ describe("Euler", function () {
 
         await tx.wait();
     });
-    it("Should borrow DAI into DSA wallet", async function () {
+
+    it("Should deposit in sub-account 1", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: ["1", tokens.usdc.address, "10000000", "true", "0", "0"], // 10 USDC
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
+        parseUnits('1', 18)
+      );
+  })
+    it("Should borrow DAI into DSA wallet sub-account 0", async function () {
         const spells = [
           {
             connector: connectorName,
             method: "borrow",
-            args: ["0", tokens.dai.address, "1000000000000000000", "0", "0"],
+            args: ["0", tokens.dai.address, "1000000000000000000", "0", "0"], // 1 DAI
           },
         ];
 
@@ -199,12 +219,12 @@ describe("Euler", function () {
           parseUnits('1', 18)
         );
     })
-    it("Should repay DAI", async function () {
+    it("Should repay DAI sub-account 0", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "repay",
-          args: ["0", tokens.dai.address, "1000000000000000", "0", "0"],
+          args: ["0", tokens.dai.address, "500000000000000000", "0", "0"], // 0.5 DAI
         },
       ];
 
@@ -218,12 +238,12 @@ describe("Euler", function () {
       );
     })
 
-    it("Should withdraw USDC into DSA wallet", async function () {
+    it("Should withdraw USDC into DSA wallet from sub-account 0", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "withdraw",
-          args: ["0", tokens.usdc.address, "2000000", "0", "0"],
+          args: ["0", tokens.usdc.address, "2000000", "0", "0"], // 2 USDC
         },
       ];
 
@@ -232,14 +252,51 @@ describe("Euler", function () {
           .cast(...encodeSpells(spells), wallet1.getAddress());
 
       await tx.wait();
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('2', 6)
+      );
     })
 
-    it("Should eTransfer to subAccount 2", async function () {
+    it("Should borrow ENS into DSA wallet sub-account 1", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "borrow",
+          args: ["1", tokens.ens.address, "100000000000000", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
+        parseUnits('1', 18)
+      );
+  })
+  it("Should withdraw USDC from sub-account 1", async function () {
+    const spells = [
+      {
+        connector: connectorName,
+        method: "withdraw",
+        args: ["1", tokens.usdc.address, "20000", "0", "0"],
+      },
+    ];
+
+    const tx = await dsaWallet0
+        .connect(wallet0)
+        .cast(...encodeSpells(spells), wallet1.getAddress());
+
+    await tx.wait();
+  })
+
+    it("Should eTransfer from subAccount 0 to sub account 2", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "eTransfer",
-          args: ["0", "1", tokens.usdc.address, "1000000", "0", "0"],
+          args: ["0", "2", tokens.usdc.address, "2000000", "0", "0"],
         },
       ];
 
@@ -250,26 +307,97 @@ describe("Euler", function () {
       await tx.wait();
     })
 
-    it("Should dTransfer to subAccount 2", async function () {
-      const spell = [
+    it("Should eTransfer from subAccount 1 to sub account 2", async function () {
+      const spells = [
         {
           connector: connectorName,
-          method: "deposit",
-          args: ["1", tokens.usdc.address, "10000000", "true", "0", "0"],
+          method: "eTransfer",
+          args: ["1", "2", tokens.usdc.address, "10000", "0", "0"],
         },
       ];
 
-      const txn = await dsaWallet0
+      const tx = await dsaWallet0
           .connect(wallet0)
-          .cast(...encodeSpells(spell), wallet1.getAddress());
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-      await txn.wait();
+      await tx.wait();
+    })
+
+    it("Should eTransfer from subAccount 2 to sub account 0", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "eTransfer",
+          args: ["2", "0", tokens.usdc.address, "10000", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+    })
+
+    it("Should deposit in sub-account 2", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: ["2", tokens.usdc.address, "10000000", "true", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
+        parseUnits('1', 18)
+      );
+  })
+
+    it("Should dTransfer from subAccount 0 to sub account 2", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "dTransfer",
+          args: ["0", "2", tokens.dai.address, "50000000000000", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+    })
+
+    it("Should dTransfer from subAccount 1 to sub account 2", async function () {
 
       const spells = [
         {
           connector: connectorName,
           method: "dTransfer",
-          args: ["0", "1", tokens.dai.address, "100000000000000000", "0", "0"],
+          args: ["1", "2", tokens.ens.address, "100000", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+    })
+
+    it("Should dTransfer from sub account 2 to subAccount 0", async function () {
+
+      const spells = [
+        {
+          connector: connectorName,
+          method: "dTransfer",
+          args: ["2", "0", tokens.dai.address, "5000000000000", "0", "0"],
         },
       ];
 
@@ -284,8 +412,8 @@ describe("Euler", function () {
       const spell = [
         {
           connector: connectorName,
-          method: "approveDebt",
-          args: ["0", "0x9F60699cE23f1Ab86Ec3e095b477Ff79d4f409AD", tokens.dai.address, "10000000", "0", "0"],
+          method: "approveSpenderDebt",
+          args: ["0", "0x85c2ac24a8BD9Ff6E2Ef6cf76C198E36550f41D7", tokens.dai.address, "10000000", "0"],
         },
       ];
 
@@ -328,13 +456,13 @@ describe("Euler", function () {
       await txn.wait();
     });
 
-    it("Should mint", async function () {
+    it("Should mint in sub-account 3", async function () {
 
       const spells = [
         {
           connector: connectorName,
           method: "deposit",
-          args: ["2", tokens.weth.address, "1000000000000000000", "true", "0", "0"],
+          args: ["3", tokens.dai.address, "1000000000000000000", "true", "0", "0"],
         },
       ];
 
@@ -348,7 +476,7 @@ describe("Euler", function () {
         {
           connector: connectorName,
           method: "mint",
-          args: ["2", tokens.weth.address, "100000000", "0", "0"],
+          args: ["3", tokens.weth.address, "100000000", "0", "0"],
         },
       ];
 
@@ -359,12 +487,44 @@ describe("Euler", function () {
       await txn.wait();
     })
 
-    it("Should burn", async function () {
+    it("Should burn in sub account 3", async function () {
       const spell = [
         {
           connector: connectorName,
           method: "burn",
-          args: ["2", tokens.weth.address, "10000000", "0", "0"],
+          args: ["3", tokens.weth.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935", "0", "0"],
+        },
+      ];
+
+      const txn = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spell), wallet1.getAddress());
+
+      await txn.wait();
+    })
+
+    it("Should deposit in sub account 4", async function () {
+
+      const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: ["4", tokens.weth.address, "1000000000000000000", "true", "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+    })
+    it("Should withdraw from sub account 4", async function () {
+      const spell = [
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: ["4", tokens.weth.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935", "0", "0"],
         },
       ];
 
