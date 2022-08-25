@@ -9,7 +9,9 @@ contract Events {
         uint sourceId,
         uint targetId,
         address[] supplyTokens,
+        uint256[] supplyAmounts,
         address[] borrowTokens,
+        uint256[] borrowAmounts,
         bool[] enterMarket
     );
 }

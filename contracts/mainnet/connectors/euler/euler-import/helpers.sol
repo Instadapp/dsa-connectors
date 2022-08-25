@@ -34,44 +34,52 @@ contract EulerHelpers is Basic {
 	}
 
     struct ImportInputData {
-		address[] supplyTokens;
-		address[] borrowTokens;
-		bool[] enterMarket;
+		address[] _supplyTokens;
+		address[] _borrowTokens;
+		bool[] _enterMarket;
 	}
 
     struct ImportData {
-		address[] _supplyTokens;
-		address[] _borrowTokens;
+		address[] supplyTokens;
+		address[] borrowTokens;
 		EulerTokenInterface[] eTokens;
         EulerTokenInterface[] dTokens;
 		uint256[] supplyAmts;
 		uint256[] borrowAmts;
 	}
 
+	struct ImportHelper {
+		uint256 supplylength;
+		uint256 borrowlength;
+		uint256 totalExecutions;
+		address sourceAccount;
+		address targetAccount;
+	}
+
     function getSupplyAmounts(
-		address userAccount,//user's EOA sub-account address
+		address userAccount,// user's EOA sub-account address
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
-		data.supplyAmts = new uint256[](inputData.supplyTokens.length);
-		data._supplyTokens = new address[](inputData.supplyTokens.length);
-		data.eTokens = new EulerTokenInterface[](inputData.supplyTokens.length);
+		data.supplyAmts = new uint256[](inputData._supplyTokens.length);
+		data.supplyTokens = new address[](inputData._supplyTokens.length);
+		data.eTokens = new EulerTokenInterface[](inputData._supplyTokens.length);
 
-		for (uint256 i = 0; i < inputData.supplyTokens.length; i++) {
-			for (uint256 j = i; j < inputData.supplyTokens.length; j++) {
+		for (uint256 i = 0; i < inputData._supplyTokens.length; i++) {
+			for (uint256 j = i; j < inputData._supplyTokens.length; j++) {
 				if (j != i) {
 					require(
-						inputData.supplyTokens[i] != inputData.supplyTokens[j],
+						inputData._supplyTokens[i] != inputData._supplyTokens[j],
 						"token-repeated"
 					);
 				}
 			}
 		}
-		for (uint256 i = 0; i < inputData.supplyTokens.length; i++) {
-			address _token = inputData.supplyTokens[i] == ethAddr
+		for (uint256 i = 0; i < inputData._supplyTokens.length; i++) {
+			address _token = inputData._supplyTokens[i] == ethAddr
 				? wethAddr
-				: inputData.supplyTokens[i];
-			data._supplyTokens[i] = _token;
+				: inputData._supplyTokens[i];
+			data.supplyTokens[i] = _token;
 			data.eTokens[i] = EulerTokenInterface(markets.underlyingToEToken(_token));
 			data.supplyAmts[i] = data.eTokens[i].balanceOf(userAccount);//All 18 dec
 		}
@@ -80,22 +88,22 @@ contract EulerHelpers is Basic {
 	}
 
     function getBorrowAmounts(
-		address userAccount,//user's EOA sub-account address
+		address userAccount,// user's EOA sub-account address
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
-		uint _borrowTokensLength = inputData.borrowTokens.length;
+		uint _borrowTokensLength = inputData._borrowTokens.length;
 
 		if (_borrowTokensLength > 0) {
-			data._borrowTokens = new address[](_borrowTokensLength);
+			data.borrowTokens = new address[](_borrowTokensLength);
 			data.dTokens = new EulerTokenInterface[](_borrowTokensLength);
 			data.borrowAmts = new uint256[](_borrowTokensLength);
 			for (uint256 i = 0; i < _borrowTokensLength; i++) {
 				for (uint256 j = i; j < _borrowTokensLength; j++) {
 					if (j != i) {
 						require(
-							inputData.borrowTokens[i] !=
-								inputData.borrowTokens[j],
+							inputData._borrowTokens[i] !=
+								inputData._borrowTokens[j],
 							"token-repeated"
 						);
 					}
@@ -103,11 +111,11 @@ contract EulerHelpers is Basic {
 			}
 
 			for (uint256 i = 0; i < _borrowTokensLength; i++) {
-				address _token = inputData.borrowTokens[i] == ethAddr
+				address _token = inputData._borrowTokens[i] == ethAddr
 					? wethAddr
-					: inputData.borrowTokens[i];
+					: inputData._borrowTokens[i];
 
-				data._borrowTokens[i] = _token;
+				data.borrowTokens[i] = _token;
                 data.dTokens[i] = EulerTokenInterface(markets.underlyingToDToken(_token));
                 data.borrowAmts[i] = data.dTokens[i].balanceOf(userAccount);
 			}
