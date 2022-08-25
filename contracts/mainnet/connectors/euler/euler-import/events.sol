@@ -11,5 +11,5 @@ contract Events {
         address[] supplyTokens,
         address[] borrowTokens,
         bool[] enterMarket
-    )
+    );
 }
