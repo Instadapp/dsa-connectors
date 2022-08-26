@@ -67,21 +67,14 @@ contract EulerHelpers is Basic {
 			inputData._supplyTokens.length
 		);
 		uint256 length_ = inputData._supplyTokens.length;
+
 		for (uint256 i = 0; i < length_; i++) {
-			for (uint256 j = i + 1; j < length_; j++) {
-				require(
-					inputData._supplyTokens[i] != inputData._supplyTokens[j],
-					"token-repeated"
-				);
-			}
-		}
-		for (uint256 i = 0; i < length_; i++) {
-			address _token = inputData._supplyTokens[i] == ethAddr
+			address token_ = inputData._supplyTokens[i] == ethAddr
 				? wethAddr
 				: inputData._supplyTokens[i];
-			data.supplyTokens[i] = _token;
+			data.supplyTokens[i] = token_;
 			data.eTokens[i] = EulerTokenInterface(
-				markets.underlyingToEToken(_token)
+				markets.underlyingToEToken(token_)
 			);
 			data.supplyAmts[i] = data.eTokens[i].balanceOf(userAccount); //All 18 dec
 		}
@@ -97,20 +90,11 @@ contract EulerHelpers is Basic {
 		uint256 borrowTokensLength_ = inputData._borrowTokens.length;
 
 		if (borrowTokensLength_ > 0) {
-			data.borrowTokens = new address[](_borrowTokensLength);
-			data.dTokens = new EulerTokenInterface[](_borrowTokensLength);
-			data.borrowAmts = new uint256[](_borrowTokensLength);
-			for (uint256 i = 0; i < _borrowTokensLength; i++) {
-				for (uint256 j = i + 1; j < _borrowTokensLength; j++) {
-					require(
-						inputData._borrowTokens[i] !=
-							inputData._borrowTokens[j],
-						"token-repeated"
-					);
-				}
-			}
+			data.borrowTokens = new address[](borrowTokensLength_);
+			data.dTokens = new EulerTokenInterface[](borrowTokensLength_);
+			data.borrowAmts = new uint256[](borrowTokensLength_);
 
-			for (uint256 i = 0; i < _borrowTokensLength; i++) {
+			for (uint256 i = 0; i < borrowTokensLength_; i++) {
 				address _token = inputData._borrowTokens[i] == ethAddr
 					? wethAddr
 					: inputData._borrowTokens[i];
