@@ -93,7 +93,7 @@ contract EulerImport is EulerHelpers {
 		uint16 k = 0;
 
 		for (uint16 i = 0; i < helper.supplylength; i++) {
-			items[k] = IEulerExecute.EulerBatchItem({
+			items[k++] = IEulerExecute.EulerBatchItem({
 				allowError: false,
 				proxyAddr: address(data.eTokens[i]),
 				data: abi.encodeWithSignature(
@@ -103,7 +103,6 @@ contract EulerImport is EulerHelpers {
 					data.supplyAmts[i]
 				)
 			});
-			k++;
 
 			if (inputData._enterMarket[i]) {
 				items[k] = IEulerExecute.EulerBatchItem({
