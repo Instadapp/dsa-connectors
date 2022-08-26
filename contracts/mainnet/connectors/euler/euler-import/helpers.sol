@@ -6,23 +6,23 @@ import { Basic } from "../../../common/basic.sol";
 import "./interface.sol";
 
 contract EulerHelpers is Basic {
-
 	/**
 	 * @dev Euler's Market Module
 	 */
-    IEulerMarkets internal constant markets =
+	IEulerMarkets internal constant markets =
 		IEulerMarkets(0x3520d5a913427E6F0D6A83E07ccD4A4da316e4d3);
 
 	/**
 	 * @dev Euler's Execution Module
 	 */
-    IEulerExecute internal constant eulerExec = IEulerExecute(0x59828FdF7ee634AaaD3f58B19fDBa3b03E2D9d80);
+	IEulerExecute internal constant eulerExec =
+		IEulerExecute(0x59828FdF7ee634AaaD3f58B19fDBa3b03E2D9d80);
 
 	/**
 	 * @dev Compute sub account address.
 	 * @notice Compute sub account address from sub-account id
 	 * @param primary primary address
-     * @param subAccountId sub-account id whose address needs to be computed
+	 * @param subAccountId sub-account id whose address needs to be computed
 	 */
 	function getSubAccountAddress(address primary, uint256 subAccountId)
 		public
@@ -33,17 +33,17 @@ contract EulerHelpers is Basic {
 		return address(uint160(primary) ^ uint160(subAccountId));
 	}
 
-    struct ImportInputData {
+	struct ImportInputData {
 		address[] _supplyTokens;
 		address[] _borrowTokens;
 		bool[] _enterMarket;
 	}
 
-    struct ImportData {
+	struct ImportData {
 		address[] supplyTokens;
 		address[] borrowTokens;
 		EulerTokenInterface[] eTokens;
-        EulerTokenInterface[] dTokens;
+		EulerTokenInterface[] dTokens;
 		uint256[] supplyAmts;
 		uint256[] borrowAmts;
 	}
@@ -56,21 +56,23 @@ contract EulerHelpers is Basic {
 		address targetAccount;
 	}
 
-    function getSupplyAmounts(
-		address userAccount,// user's EOA sub-account address
+	function getSupplyAmounts(
+		address userAccount, // user's EOA sub-account address
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
 		data.supplyAmts = new uint256[](inputData._supplyTokens.length);
 		data.supplyTokens = new address[](inputData._supplyTokens.length);
-		data.eTokens = new EulerTokenInterface[](inputData._supplyTokens.length);
-                uint256 length_ = inputData._supplyTokens.length;
+		data.eTokens = new EulerTokenInterface[](
+			inputData._supplyTokens.length
+		);
+		uint256 length_ = inputData._supplyTokens.length;
 		for (uint256 i = 0; i < length_; i++) {
 			for (uint256 j = i + 1; j < length_; j++) {
-					require(
-						inputData._supplyTokens[i] != inputData._supplyTokens[j],
-						"token-repeated"
-					);
+				require(
+					inputData._supplyTokens[i] != inputData._supplyTokens[j],
+					"token-repeated"
+				);
 			}
 		}
 		for (uint256 i = 0; i < length_; i++) {
@@ -78,19 +80,21 @@ contract EulerHelpers is Basic {
 				? wethAddr
 				: inputData._supplyTokens[i];
 			data.supplyTokens[i] = _token;
-			data.eTokens[i] = EulerTokenInterface(markets.underlyingToEToken(_token));
-			data.supplyAmts[i] = data.eTokens[i].balanceOf(userAccount);//All 18 dec
+			data.eTokens[i] = EulerTokenInterface(
+				markets.underlyingToEToken(_token)
+			);
+			data.supplyAmts[i] = data.eTokens[i].balanceOf(userAccount); //All 18 dec
 		}
 
 		return data;
 	}
 
-    function getBorrowAmounts(
-		address userAccount,// user's EOA sub-account address
+	function getBorrowAmounts(
+		address userAccount, // user's EOA sub-account address
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
-		uint _borrowTokensLength = inputData._borrowTokens.length;
+		uint256 _borrowTokensLength = inputData._borrowTokens.length;
 
 		if (_borrowTokensLength > 0) {
 			data.borrowTokens = new address[](_borrowTokensLength);
@@ -98,11 +102,11 @@ contract EulerHelpers is Basic {
 			data.borrowAmts = new uint256[](_borrowTokensLength);
 			for (uint256 i = 0; i < _borrowTokensLength; i++) {
 				for (uint256 j = i + 1; j < _borrowTokensLength; j++) {
-						require(
-							inputData._borrowTokens[i] !=
-								inputData._borrowTokens[j],
-							"token-repeated"
-						);
+					require(
+						inputData._borrowTokens[i] !=
+							inputData._borrowTokens[j],
+						"token-repeated"
+					);
 				}
 			}
 
@@ -112,8 +116,10 @@ contract EulerHelpers is Basic {
 					: inputData._borrowTokens[i];
 
 				data.borrowTokens[i] = _token;
-                data.dTokens[i] = EulerTokenInterface(markets.underlyingToDToken(_token));
-                data.borrowAmts[i] = data.dTokens[i].balanceOf(userAccount);
+				data.dTokens[i] = EulerTokenInterface(
+					markets.underlyingToDToken(_token)
+				);
+				data.borrowAmts[i] = data.dTokens[i].balanceOf(userAccount);
 			}
 		}
 		return data;

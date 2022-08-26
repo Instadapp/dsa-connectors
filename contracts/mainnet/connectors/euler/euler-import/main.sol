@@ -24,6 +24,8 @@ contract EulerImport is EulerHelpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		require(sourceId < 256 && targetId < 256, "Id should be less than 256");
+
 		(_eventName, _eventParam) = _importEuler(
 			userAccount,
 			sourceId,
@@ -45,28 +47,24 @@ contract EulerImport is EulerHelpers {
 		uint256 sourceId,
 		uint256 targetId,
 		ImportInputData memory inputData
-	) 
-        internal 
-        returns (string memory _eventName, bytes memory _eventParam) 
-    {
+	) internal returns (string memory _eventName, bytes memory _eventParam) {
+		require(inputData._supplyTokens.length > 0, "0-length-not-allowed");
+		require(
+			AccountInterface(address(this)).isAuth(userAccount),
+			"user-account-not-auth"
+		);
+		require(
+			inputData._enterMarket.length == inputData._supplyTokens.length,
+			"lengths-not-same"
+		);
 
-        require(inputData._supplyTokens.length > 0, "0-length-not-allowed");
-		require( 
-            AccountInterface(address(this)).isAuth(userAccount), 
-            "user-account-not-auth"
-        );
-        require( 
-            inputData._enterMarket.length == inputData._supplyTokens.length, 
-            "lengths-not-same"
-        );
-
-        ImportData memory data;
-        ImportHelper memory helper;
+		ImportData memory data;
+		ImportHelper memory helper;
 
 		helper.sourceAccount = getSubAccountAddress(userAccount, sourceId);
 		helper.targetAccount = getSubAccountAddress(address(this), targetId);
 
-        // BorrowAmts will be in underlying token decimals
+		// BorrowAmts will be in underlying token decimals
 		data = getBorrowAmounts(helper.sourceAccount, inputData, data);
 
 		// SupplyAmts will be in 18 decimals
@@ -78,11 +76,14 @@ contract EulerImport is EulerHelpers {
 
 		for (uint16 i = 0; i < inputData._enterMarket.length; i++) {
 			if (inputData._enterMarket[i]) {
-				++enterMarkets;
+				++enterMarketsLength;
 			}
 		}
 
-		helper.totalExecutions = helper.supplylength + enterMarkets + helper.borrowlength;
+		helper.totalExecutions =
+			helper.supplylength +
+			enterMarketsLength +
+			helper.borrowlength;
 
 		IEulerExecute.EulerBatchItem[]
 			memory items = new IEulerExecute.EulerBatchItem[](

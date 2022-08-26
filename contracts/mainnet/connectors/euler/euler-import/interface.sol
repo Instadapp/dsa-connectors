@@ -3,7 +3,6 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 interface EulerTokenInterface {
-
 	function balanceOf(address _user) external view returns (uint256);
 
 	function transferFrom(
@@ -37,19 +36,21 @@ interface IEulerMarkets {
 }
 
 interface IEulerExecute {
-
 	struct EulerBatchItem {
 		bool allowError;
 		address proxyAddr;
 		bytes data;
 	}
-	
+
 	struct EulerBatchItemResponse {
 		bool success;
 		bytes result;
 	}
 
-	function batchDispatch(EulerBatchItem[] calldata items, address[] calldata deferLiquidityChecks) external;
+	function batchDispatch(
+		EulerBatchItem[] calldata items,
+		address[] calldata deferLiquidityChecks
+	) external;
 
 	function deferLiquidityCheck(address account, bytes memory data) external;
 }
