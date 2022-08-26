@@ -105,7 +105,7 @@ contract EulerImport is EulerHelpers {
 			});
 
 			if (inputData._enterMarket[i]) {
-				items[k] = IEulerExecute.EulerBatchItem({
+				items[k++] = IEulerExecute.EulerBatchItem({
 					allowError: false,
 					proxyAddr: address(markets),
 					data: abi.encodeWithSignature(
@@ -114,7 +114,6 @@ contract EulerImport is EulerHelpers {
 						data.supplyTokens[i]
 					)
 				});
-				k++;
 			}
 		}
 
