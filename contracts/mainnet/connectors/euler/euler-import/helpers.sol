@@ -97,14 +97,12 @@ contract EulerHelpers is Basic {
 			data.dTokens = new EulerTokenInterface[](_borrowTokensLength);
 			data.borrowAmts = new uint256[](_borrowTokensLength);
 			for (uint256 i = 0; i < _borrowTokensLength; i++) {
-				for (uint256 j = i; j < _borrowTokensLength; j++) {
-					if (j != i) {
+				for (uint256 j = i + 1; j < _borrowTokensLength; j++) {
 						require(
 							inputData._borrowTokens[i] !=
 								inputData._borrowTokens[j],
 							"token-repeated"
 						);
-					}
 				}
 			}
 
