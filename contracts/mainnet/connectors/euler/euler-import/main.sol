@@ -151,5 +151,5 @@ contract EulerImport is EulerHelpers {
 }
 
 contract ConnectV2EulerImport is EulerImport {
-	string public constant name = "Euler-import-v1.0";
+	string public constant name = "Euler-Import-v1.0";
 }
