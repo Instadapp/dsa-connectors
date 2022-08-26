@@ -118,7 +118,7 @@ contract EulerImport is EulerHelpers {
 		}
 
 		for (uint16 j = 0; j < helper.borrowlength; j++) {
-			items[k] = IEulerExecute.EulerBatchItem({
+			items[k++] = IEulerExecute.EulerBatchItem({
 				allowError: false,
 				proxyAddr: address(data.dTokens[j]),
 				data: abi.encodeWithSignature(
@@ -128,7 +128,6 @@ contract EulerImport is EulerHelpers {
 					data.borrowAmts[j]
 				)
 			});
-			k++;
 		}
 
 		address[] memory deferLiquidityChecks = new address[](2);
