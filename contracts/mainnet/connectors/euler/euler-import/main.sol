@@ -138,7 +138,7 @@ contract EulerImport is EulerHelpers {
 
 		eulerExec.batchDispatch(items, deferLiquidityChecks);
 
-		_eventName = "LogEulerImport(address,uint,uint,address[],address[],bool[])";
+		_eventName = "LogEulerImport(address,uint256,uint256,address[],uint256[],address[],uint256[],bool[])";
 		_eventParam = abi.encode(
 			userAccount,
 			sourceId,
