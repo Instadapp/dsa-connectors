@@ -144,9 +144,9 @@ contract EulerImport is EulerHelpers {
 			sourceId,
 			targetId,
 			inputData._supplyTokens,
-            data.supplyAmts,
+			data.supplyAmts,
 			inputData._borrowTokens,
-            data.borrowAmts,
+			data.borrowAmts,
 			inputData._enterMarket
 		);
 	}
