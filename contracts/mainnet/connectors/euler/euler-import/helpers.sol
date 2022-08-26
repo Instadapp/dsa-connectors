@@ -94,9 +94,9 @@ contract EulerHelpers is Basic {
 		ImportInputData memory inputData,
 		ImportData memory data
 	) internal view returns (ImportData memory) {
-		uint256 _borrowTokensLength = inputData._borrowTokens.length;
+		uint256 borrowTokensLength_ = inputData._borrowTokens.length;
 
-		if (_borrowTokensLength > 0) {
+		if (borrowTokensLength_ > 0) {
 			data.borrowTokens = new address[](_borrowTokensLength);
 			data.dTokens = new EulerTokenInterface[](_borrowTokensLength);
 			data.borrowAmts = new uint256[](_borrowTokensLength);
