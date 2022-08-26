@@ -74,7 +74,7 @@ contract EulerImport is EulerHelpers {
 
 		helper.supplylength = data.supplyTokens.length;
 		helper.borrowlength = data.borrowTokens.length;
-		uint16 enterMarkets = 0;
+		uint16 enterMarketsLength = 0;
 
 		for (uint16 i = 0; i < inputData._enterMarket.length; i++) {
 			if (inputData._enterMarket[i]) {
