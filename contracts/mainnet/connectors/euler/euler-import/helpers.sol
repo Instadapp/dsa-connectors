@@ -64,18 +64,16 @@ contract EulerHelpers is Basic {
 		data.supplyAmts = new uint256[](inputData._supplyTokens.length);
 		data.supplyTokens = new address[](inputData._supplyTokens.length);
 		data.eTokens = new EulerTokenInterface[](inputData._supplyTokens.length);
-
-		for (uint256 i = 0; i < inputData._supplyTokens.length; i++) {
-			for (uint256 j = i; j < inputData._supplyTokens.length; j++) {
-				if (j != i) {
+                uint256 length_ = inputData._supplyTokens.length;
+		for (uint256 i = 0; i < length_; i++) {
+			for (uint256 j = i + 1; j < length_; j++) {
 					require(
 						inputData._supplyTokens[i] != inputData._supplyTokens[j],
 						"token-repeated"
 					);
-				}
 			}
 		}
-		for (uint256 i = 0; i < inputData._supplyTokens.length; i++) {
+		for (uint256 i = 0; i < length_; i++) {
 			address _token = inputData._supplyTokens[i] == ethAddr
 				? wethAddr
 				: inputData._supplyTokens[i];
