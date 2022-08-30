@@ -17,26 +17,69 @@ abstract contract Helpers is DSMath, Basic {
 	function _supply(
 		address market,
 		address token,
+		address from,
+		address to,
 		uint256 amt
 	) internal payable returns (bool success) {
-		bytes memory data = abi.encodeWithSignature(
-			"supply(address, uint256)",
-			token,
-			amt
-		);
+		bytes memory data;
+
+		if (from == address(0) && to == address(0)) {
+			data = abi.encodeWithSignature(
+				"supply(address, uint256)",
+				token,
+				amt
+			);
+		} else if (from == address(0)) {
+			data = abi.encodeWithSignature(
+				"supplyTo(address, address, uint256)",
+				to,
+				token,
+				amt
+			);
+		} else if (from != address(0) && to != address(0)) {
+			data = abi.encodeWithSignature(
+				"supplyFrom(address, address, address, uint256)",
+				from,
+				to,
+				token,
+				amt
+			);
+		}
+
 		(success, ) = market.delegateCall(data);
 	}
 
 	function _withdraw(
 		address market,
 		address token,
+		address from,
+		address to,
 		uint256 amt
 	) internal payable returns (bool success) {
-		bytes memory data = abi.encodeWithSignature(
-			"withdraw(address, uint256)",
-			token,
-			amt
-		);
+		bytes memory data;
+
+		if (from == address(0) && to == address(0)) {
+			data = abi.encodeWithSignature(
+				"withdraw(address, uint256)",
+				token,
+				amt
+			);
+		} else if (from == address(0)) {
+			data = abi.encodeWithSignature(
+				"withdrawTo(address, address, uint256)",
+				to,
+				token,
+				amt
+			);
+		} else if (from != address(0) && to != address(0)) {
+			data = abi.encodeWithSignature(
+				"withdrawFrom(address, address, address, uint256)",
+				from,
+				to,
+				token,
+				amt
+			);
+		}
 		(success, ) = market.delegateCall(data);
 	}
 
