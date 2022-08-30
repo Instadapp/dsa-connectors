@@ -236,40 +236,20 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(getId, amt);
-
-		require(
-			market != address(0) && token != address(0),
-			"invalid market/token address"
+		(uint256 _amt, uint256 _setId) = _borrowOrWithdraw(
+			BorrowWithdrawParams({
+				market: market,
+				token: token,
+				from: address(0),
+				to: to,
+				amt: amt,
+				getId: getId,
+				setId: setId
+			})
 		);
-
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
-
-		TokenInterface tokenContract = TokenInterface(_token);
-
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token
-		);
-		bool success = _withdraw(market, token, address(0), to, _amt);
-		require(success, "withdraw-failed");
-
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token
-		);
-
-		_amt = sub(finalBal, initialBal);
-
-		convertWethToEth(isEth, tokenContract, _amt);
-
-		setUint(setId, _amt);
 
 		_eventName = "LogWithdrawOnBehalf(address,address,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(market, token, to, _amt, getId, setId);
+		_eventParam = abi.encode(market, token, to, _amt, getId, _setId);
 	}
 
 	/**
@@ -296,40 +276,20 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(getId, amt);
-
-		require(
-			market != address(0) && token != address(0),
-			"invalid market/token address"
+		(uint256 _amt, uint256 _setId) = _borrowOrWithdraw(
+			BorrowWithdrawParams({
+				market: market,
+				token: token,
+				from: from,
+				to: to,
+				amt: amt,
+				getId: getId,
+				setId: setId
+			})
 		);
-
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
-
-		TokenInterface tokenContract = TokenInterface(_token);
-
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token
-		);
-		bool success = _withdraw(market, token, from, to, _amt);
-		require(success, "withdraw-failed");
-
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token
-		);
-
-		_amt = sub(finalBal, initialBal);
-
-		convertWethToEth(isEth, tokenContract, _amt);
-
-		setUint(setId, _amt);
 
 		_eventName = "LogWithdrawFrom(address,address,address,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(market, token, from, to, _amt, getId, setId);
+		_eventParam = abi.encode(market, token, from, to, _amt, getId, _setId);
 	}
 
 	/**
@@ -404,38 +364,19 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(getId, amt);
-
-		require(market != address(0), "invalid market address");
-
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address _token = isEth ? wethAddr : token;
-
-		TokenInterface tokenContract = TokenInterface(_token);
-
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token
+		(uint256 _amt, uint256 _setId) = _borrowOrWithdraw(
+			BorrowWithdrawParams({
+				market: market,
+				token: getBaseToken(market),
+				from: address(0),
+				to: to,
+				amt: amt,
+				getId: getId,
+				setId: setId
+			})
 		);
-		bool success = _withdraw(market, token, address(0), to, _amt);
-		require(success, "borrow-failed");
-
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token
-		);
-
-		_amt = sub(finalBal, initialBal);
-
-		convertWethToEth(isEth, tokenContract, _amt);
-
-		setUint(setId, _amt);
-
 		_eventName = "LogBorrowOnBehalf(address,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(market, to, _amt, getId, setId);
+		_eventParam = abi.encode(market, to, _amt, getId, _setId);
 	}
 
 	/**
@@ -460,36 +401,19 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(getId, amt);
-
-		require(market != address(0), "invalid market address");
-		bool isEth = (getBaseToken(market) == ethAddr);
-		address _token = isEth ? wethAddr : getBaseToken(market);
-
-		TokenInterface tokenContract = TokenInterface(_token);
-
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			getBaseToken(market)
+		(uint256 _amt, uint256 _setId) = _borrowOrWithdraw(
+			BorrowWithdrawParams({
+				market: market,
+				token: getBaseToken(market),
+				from: from,
+				to: to,
+				amt: amt,
+				getId: getId,
+				setId: setId
+			})
 		);
-		bool success = _withdraw(market, _token, from, to, _amt);
-		require(success, "borrow-failed");
-
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			getBaseToken(market)
-		);
-
-		_amt = sub(finalBal, initialBal);
-
-		convertWethToEth(isEth, tokenContract, _amt);
-
-		setUint(setId, _amt);
-
 		_eventName = "LogBorrowFrom(address,address,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(market, from, to, _amt, getId, setId);
+		_eventParam = abi.encode(market, from, to, _amt, getId, _setId);
 	}
 
 	/**
@@ -605,7 +529,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 	 * @notice Buy collateral asset to increase protocol base reserves until targetReserves is reached.
 	 * @param market The address of the market from where to withdraw.
 	 * @param asset The collateral asset to purachase.
-	 * @param to The address on to transfer the purchased assets.
+	 * @param dest The address on to transfer the purchased assets.
 	 * @param minCollateralAmt Minimum amount of collateral expected to be received.
 	 * @param baseAmt Amount of base asset to be sold for collateral.
 	 * @param getId ID to retrieve amt.
