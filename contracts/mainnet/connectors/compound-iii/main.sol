@@ -600,6 +600,17 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		_eventParam = abi.encode(market, token, from, to, _amt, setId);
 	}
 
+	/**
+	 * @dev Buy collateral asset absorbed, from the market.
+	 * @notice Buy collateral asset to increase protocol base reserves until targetReserves is reached.
+	 * @param market The address of the market from where to withdraw.
+	 * @param asset The collateral asset to purachase.
+	 * @param to The address on to transfer the purchased assets.
+	 * @param minCollateralAmt Minimum amount of collateral expected to be received.
+	 * @param baseAmt Amount of base asset to be sold for collateral.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens withdrawn.
+	 */
 	function buyCollateral(
 		address market,
 		address asset,
@@ -645,6 +656,15 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		);
 	}
 
+	/**
+	 * @dev Authorize manager to perform operations on ERC20 asset for the account.
+	 * @notice Authorize manager to perform operations on ERC20 asset for the account or withdraw Comet's Comet balance.
+	 * @param market The address of the market from where to withdraw.
+	 * @param asset The ERC20 asset to authorize the manager for, use this as Comet's address to withdraw Comet's comet balance.
+	 * @param amount Amount of ERC20 asset to provide allowance for.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens withdrawn.
+	 */
 	function approveManager(
 		address market,
 		address manager,
@@ -663,6 +683,14 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		_eventParam = abi.encode(market, manager, asset, _amt, getId, setId);
 	}
 
+	/**
+	 * @dev Claim rewards and interests accrued in supplied/borrowed base asset.
+	 * @notice Claim rewards and interests accrued.
+	 * @param market The address of the market from where to withdraw.
+	 * @param account The account of which the rewards are to be claimed.
+	 * @param accrue Should accrue the rewards and interest before claiming.
+	 * @param setId ID stores the amount of tokens withdrawn.
+	 */
 	function claimRewards(
 		address market,
 		address account,
@@ -688,6 +716,15 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		);
 	}
 
+	/**
+	 * @dev Claim rewards and interests accrued in supplied/borrowed base asset.
+	 * @notice Claim rewards and interests accrued and transfer to dest address.
+	 * @param market The address of the market from where to withdraw.
+	 * @param account The account of which the rewards are to be claimed.
+	 * @param dest The account where to transfer the claimed rewards.
+	 * @param accrue Should accrue the rewards and interest before claiming.
+	 * @param setId ID stores the amount of tokens withdrawn.
+	 */
 	function claimRewardsTo(
 		address market,
 		address account,
@@ -715,6 +752,15 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		);
 	}
 
+	/**
+	 * @dev Transfer base asset to dest address from this account.
+	 * @notice Transfer base asset to dest address from caller's account.
+	 * @param market The address of the market where to supply.
+	 * @param dest The account where to transfer the base assets.
+	 * @param amount The amount of the base token to transfer. (For max: `uint256(-1)`)
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
 	function transferBase(
 		address market,
 		address dest,
@@ -747,6 +793,16 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		_eventParam = abi.encode(market, dest, _amt, getId, setId);
 	}
 
+	/**
+	 * @dev Transfer base asset to dest address from src account.
+	 * @notice Transfer base asset to dest address from src account.
+	 * @param market The address of the market where to supply.
+	 * @param src The account to transfer the base assets from.
+	 * @param dest The account to transfer the base assets to.
+	 * @param amount The amount of the base token to transfer. (For max: `uint256(-1)`)
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
 	function transferBaseFrom(
 		address market,
 		address src,
@@ -780,6 +836,16 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		_eventParam = abi.encode(market, src, dest, _amt, getId, setId);
 	}
 
+	/**
+	 * @dev Transfer collateral asset to dest address from this account.
+	 * @notice Transfer collateral asset to dest address from caller's account.
+	 * @param market The address of the market where to supply.
+	 * @param token The collateral asset to transfer to dest address.
+	 * @param dest The account where to transfer the base assets.
+	 * @param amount The amount of the collateral token to transfer. (For max: `uint256(-1)`)
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
 	function transferAsset(
 		address market,
 		address token,
@@ -815,6 +881,17 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		_eventParam = abi.encode(market, _token, dest, _amt, getId, setId);
 	}
 
+	/**
+	 * @dev Transfer collateral asset to dest address from src account.
+	 * @notice Transfer collateral asset to dest address from src's account.
+	 * @param market The address of the market where to supply.
+	 * @param token The collateral asset to transfer to dest address.
+	 * @param src The account from where to transfer the collaterals.
+	 * @param dest The account where to transfer the collateral assets.
+	 * @param amount The amount of the collateral token to transfer. (For max: `uint256(-1)`)
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens deposited.
+	 */
 	function transferAssetFrom(
 		address market,
 		address token,
