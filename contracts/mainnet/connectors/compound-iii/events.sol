@@ -105,10 +105,10 @@ contract Events {
 		bool accrued
 	);
 
-    event LogRewardsClaimedTo(
+	event LogRewardsClaimedTo(
 		address indexed market,
 		address indexed account,
-        address to,
+		address to,
 		uint256 indexed totalClaimedInWei,
 		uint256 getId,
 		bool accrued
@@ -137,6 +137,43 @@ contract Events {
 		address indexed market,
 		address indexed account,
 		address indexed asset,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogTransferBase(
+		address indexed market,
+		address indexed dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogTransferBaseFrom(
+		address indexed market,
+		address indexed from,
+		address indexed dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogTransferAsset(
+		address indexed market,
+		address token,
+		address indexed from,
+		address indexed dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogTransferAssetFrom(
+		address indexed market,
+		address token,
+		address indexed from,
+		address indexed dest,
 		uint256 amount,
 		uint256 getId,
 		uint256 setId

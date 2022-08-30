@@ -463,7 +463,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		uint256 _amt = getUint(getId, amt);
 
 		require(market != address(0), "invalid market address");
-        bool isEth = (getBaseToken(market) == ethAddr);
+		bool isEth = (getBaseToken(market) == ethAddr);
 		address _token = isEth ? wethAddr : getBaseToken(market);
 
 		TokenInterface tokenContract = TokenInterface(_token);
@@ -513,7 +513,13 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(address(this));
 
-		bool success = _supply(market, _token, address(0), address(0), uint256(-1));
+		bool success = _supply(
+			market,
+			_token,
+			address(0),
+			address(0),
+			uint256(-1)
+		);
 		require(success, "payback-failed");
 
 		setUint(setId, _amt);
@@ -707,6 +713,140 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			setId,
 			accrue
 		);
+	}
+
+	function transferBase(
+		address market,
+		address dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amount);
+		require(market != address(0), "invalid market address");
+
+		address token = getBaseToken(market);
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
+		TokenInterface tokenContract = TokenInterface(_token);
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, _amt);
+		}
+
+		bool success = _transfer(market, _token, address(0), dest, _amt);
+		require(success, "transfer-base-failed");
+
+		setUint(setId, _amt);
+
+		_eventName = "LogTransferBase(address,address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(market, dest, _amt, getId, setId);
+	}
+
+	function transferBaseFrom(
+		address market,
+		address src,
+		address dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amount);
+		require(market != address(0), "invalid market address");
+
+		address token = getBaseToken(market);
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
+		TokenInterface tokenContract = TokenInterface(_token);
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, _amt);
+		}
+
+		bool success = _transfer(market, _token, src, dest, _amt);
+		require(success, "transfer-base-from-failed");
+
+		setUint(setId, _amt);
+
+		_eventName = "LogTransferBaseFrom(address,address,address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(market, src, dest, _amt, getId, setId);
+	}
+
+	function transferAsset(
+		address market,
+		address token,
+		address dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amount);
+		require(
+			market != address(0) && token != address(0),
+			"invalid market address"
+		);
+
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
+		TokenInterface tokenContract = TokenInterface(_token);
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, _amt);
+		}
+
+		bool success = _transfer(market, _token, address(0), dest, _amt);
+		require(success, "transfer-asset-failed");
+
+		setUint(setId, _amt);
+
+		_eventName = "LogTransferAsset(address,address,address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(market, _token, dest, _amt, getId, setId);
+	}
+
+	function transferAssetFrom(
+		address market,
+		address token,
+		address src,
+		address dest,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(getId, amount);
+		require(market != address(0), "invalid market address");
+
+		address token = getBaseToken(market);
+		bool isEth = token == ethAddr;
+		address _token = isEth ? wethAddr : token;
+		TokenInterface tokenContract = TokenInterface(_token);
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, _amt);
+		}
+
+		bool success = _transfer(market, _token, src, dest, _amt);
+		require(success, "transfer-asset-from-failed");
+
+		setUint(setId, _amt);
+
+		_eventName = "LogTransferAssetFrom(address,address,address,address,uint256,uint256,uint256)";
+		_eventParam = abi.encode(market, _token, src, dest, _amt, getId, setId);
 	}
 }
 

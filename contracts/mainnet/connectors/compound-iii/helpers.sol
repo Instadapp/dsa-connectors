@@ -7,8 +7,8 @@ import { Basic } from "../../common/basic.sol";
 import { CometInterface, CometRewards } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
-
-    CometRewards internal constant cometRewards = CometRewards(0x1B0e765F6224C21223AeA2af16c1C46E38885a40);
+	CometRewards internal constant cometRewards =
+		CometRewards(0x1B0e765F6224C21223AeA2af16c1C46E38885a40);
 
 	function getBaseToken(address market)
 		internal
@@ -84,6 +84,35 @@ abstract contract Helpers is DSMath, Basic {
 				amt
 			);
 		}
+		(success, ) = market.delegatecall(data);
+	}
+
+	function _transfer(
+		address market,
+		address token,
+		address from,
+		address to,
+		uint256 amt
+	) public payable returns (bool success) {
+		bytes memory data;
+
+		if (from == address(0)) {
+			data = abi.encodeWithSignature(
+				"transferAsset(address, address, uint256)",
+				dest,
+				token,
+				amt
+			);
+		} else {
+			data = abi.encodeWithSignature(
+				"transferAssetFrom(address, address, address, uint256)",
+				from,
+				dest,
+				token,
+				amt
+			);
+		}
+
 		(success, ) = market.delegatecall(data);
 	}
 
