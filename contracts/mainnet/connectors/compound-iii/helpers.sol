@@ -1,11 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
+pragma abicoder v2;
 
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
-import { CometInterface } from "./interface.sol";
+import { CometInterface, CometRewards } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
+
+    CometRewards internal constant cometRewards = CometRewards(0x1B0e765F6224C21223AeA2af16c1C46E38885a40);
+
 	function getBaseToken(address market)
 		internal
 		view
@@ -20,7 +24,7 @@ abstract contract Helpers is DSMath, Basic {
 		address from,
 		address to,
 		uint256 amt
-	) internal payable returns (bool success) {
+	) public payable returns (bool success) {
 		bytes memory data;
 
 		if (from == address(0) && to == address(0)) {
@@ -46,7 +50,7 @@ abstract contract Helpers is DSMath, Basic {
 			);
 		}
 
-		(success, ) = market.delegateCall(data);
+		(success, ) = market.delegatecall(data);
 	}
 
 	function _withdraw(
@@ -55,7 +59,7 @@ abstract contract Helpers is DSMath, Basic {
 		address from,
 		address to,
 		uint256 amt
-	) internal payable returns (bool success) {
+	) internal returns (bool success) {
 		bytes memory data;
 
 		if (from == address(0) && to == address(0)) {
@@ -80,14 +84,14 @@ abstract contract Helpers is DSMath, Basic {
 				amt
 			);
 		}
-		(success, ) = market.delegateCall(data);
+		(success, ) = market.delegatecall(data);
 	}
 
 	function getAccountSupplyBalanceOfAsset(
 		address account,
 		address market,
 		address asset
-	) internal view returns (uint256 balance) {
+	) internal returns (uint256 balance) {
 		if (asset == getBaseToken(market)) {
 			//balance in base
 			balance = CometInterface(market).balanceOf(account);

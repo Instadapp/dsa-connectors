@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
+pragma abicoder v2;
 
 struct UserCollateral {
 	uint128 balance;
@@ -81,9 +82,8 @@ interface CometInterface {
 	) external virtual;
 
 	function quoteCollateral(address asset, uint256 baseAmount)
-		public
+		external
 		view
-		virtual
 		returns (uint256);
 
 	function userCollateral(address, address)
@@ -93,4 +93,26 @@ interface CometInterface {
 	function baseToken() external view returns (address);
 
 	function balanceOf(address account) external view returns (uint256);
+
+	function borrowBalanceOf(address account) external view returns (uint256);
+}
+
+interface CometRewards {
+	function claim(
+		address comet,
+		address src,
+		bool shouldAccrue
+	) external;
+
+	function claimTo(
+		address comet,
+		address src,
+		address to,
+		bool shouldAccrue
+	) external;
+
+	function rewardsClaimed(address cometProxy, address account)
+		external
+		view
+		returns (uint256);
 }

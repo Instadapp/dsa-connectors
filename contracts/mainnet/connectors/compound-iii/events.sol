@@ -80,18 +80,12 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogPayback(
-		address indexed market,
-		uint256 tokenAmt,
-		uint256 getId,
-		uint256 setId
-	);
+	event LogPayback(address indexed market, uint256 tokenAmt, uint256 setId);
 
 	event LogPaybackOnBehalfOf(
 		address indexed market,
 		address to,
 		uint256 tokenAmt,
-		uint256 getId,
 		uint256 setId
 	);
 
@@ -100,17 +94,24 @@ contract Events {
 		address from,
 		address to,
 		uint256 tokenAmt,
-		uint256 getId,
 		uint256 setId
 	);
 
 	event LogRewardsClaimed(
-		address indexed token,
-		address cToken,
-		uint256 tokenAmt,
-		uint256 cTokenAmt,
+		address indexed market,
+		address indexed account,
+		uint256 indexed totalClaimedInWei,
 		uint256 getId,
-		uint256 setId
+		bool accrued
+	);
+
+    event LogRewardsClaimedTo(
+		address indexed market,
+		address indexed account,
+        address to,
+		uint256 indexed totalClaimedInWei,
+		uint256 getId,
+		bool accrued
 	);
 
 	event LogLiquidate(
@@ -118,6 +119,25 @@ contract Events {
 		address indexed tokenToPay,
 		address indexed tokenInReturn,
 		uint256 tokenAmt,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogBuyCollateral(
+		address indexed market,
+		address indexed asset,
+		uint256 indexed baseAmount,
+		uint256 minCollateralAmt,
+		uint256 collateralAmount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogApproveManager(
+		address indexed market,
+		address indexed account,
+		address indexed asset,
+		uint256 amount,
 		uint256 getId,
 		uint256 setId
 	);
