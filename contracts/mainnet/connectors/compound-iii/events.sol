@@ -133,15 +133,6 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogApproveManager(
-		address indexed market,
-		address indexed account,
-		address indexed asset,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	);
-
 	event LogTransferBase(
 		address indexed market,
 		address indexed dest,

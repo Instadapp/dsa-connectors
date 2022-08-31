@@ -12,6 +12,7 @@ import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
+import "hardhat/console.sol";
 
 abstract contract CompoundIIIResolver is Events, Helpers {
 	/**
@@ -314,6 +315,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		address token = getBaseToken(market);
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
+		console.log(_amt);
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
@@ -565,33 +567,6 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			getId,
 			setId
 		);
-	}
-
-	/**
-	 * @dev Authorize manager to perform operations on ERC20 asset for the account.
-	 * @notice Authorize manager to perform operations on ERC20 asset for the account or withdraw Comet's Comet balance.
-	 * @param market The address of the market from where to withdraw.
-	 * @param asset The ERC20 asset to authorize the manager for, use this as Comet's address to withdraw Comet's comet balance.
-	 * @param amount Amount of ERC20 asset to provide allowance for.
-	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of tokens withdrawn.
-	 */
-	function approveManager(
-		address market,
-		address manager,
-		address asset,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	) public returns (string memory _eventName, bytes memory _eventParam) {
-		uint256 _amt = getUint(getId, amount);
-
-		CometInterface(market).approveThis(manager, asset, amount);
-
-		setUint(setId, _amt);
-
-		_eventName = "LogApproveManager(address,address,address,uint256,uint256,uint256)";
-		_eventParam = abi.encode(market, manager, asset, _amt, getId, setId);
 	}
 
 	/**
