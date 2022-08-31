@@ -29,73 +29,22 @@ abstract contract Helpers is DSMath, Basic {
 		baseToken = CometInterface(market).baseToken();
 	}
 
-	function _supply(
-		address market,
-		address token,
-		address from,
-		address to,
-		uint256 amt
-	) public payable returns (bool success) {
-		bytes memory data;
-
-		if (from == address(0) && to == address(0)) {
-			data = abi.encodeWithSignature(
-				"supply(address, uint256)",
-				token,
-				amt
-			);
-		} else if (from == address(0)) {
-			data = abi.encodeWithSignature(
-				"supplyTo(address, address, uint256)",
-				to,
-				token,
-				amt
-			);
-		} else if (from != address(0) && to != address(0)) {
-			data = abi.encodeWithSignature(
-				"supplyFrom(address, address, address, uint256)",
-				from,
-				to,
-				token,
-				amt
-			);
-		}
-
-		(success, ) = market.delegatecall(data);
-	}
-
 	function _withdraw(
 		address market,
 		address token,
 		address from,
 		address to,
 		uint256 amt
-	) internal returns (bool success) {
+	) internal {
 		bytes memory data;
 
 		if (from == address(0) && to == address(0)) {
-			data = abi.encodeWithSignature(
-				"withdraw(address, uint256)",
-				token,
-				amt
-			);
+			CometInterface(market).withdraw(token, amt);
 		} else if (from == address(0)) {
-			data = abi.encodeWithSignature(
-				"withdrawTo(address, address, uint256)",
-				to,
-				token,
-				amt
-			);
+			CometInterface(market).withdrawTo(to, token, amt);
 		} else if (from != address(0) && to != address(0)) {
-			data = abi.encodeWithSignature(
-				"withdrawFrom(address, address, address, uint256)",
-				from,
-				to,
-				token,
-				amt
-			);
+			CometInterface(market).withdrawFrom(from, to, token, amt);
 		}
-		(success, ) = market.delegatecall(data);
 	}
 
 	function _transfer(
@@ -104,27 +53,14 @@ abstract contract Helpers is DSMath, Basic {
 		address from,
 		address to,
 		uint256 amt
-	) public payable returns (bool success) {
+	) public payable {
 		bytes memory data;
 
 		if (from == address(0)) {
-			data = abi.encodeWithSignature(
-				"transferAsset(address, address, uint256)",
-				to,
-				token,
-				amt
-			);
+			CometInterface(market).transferAsset(to, token, amt);
 		} else {
-			data = abi.encodeWithSignature(
-				"transferAssetFrom(address, address, address, uint256)",
-				from,
-				to,
-				token,
-				amt
-			);
+			CometInterface(market).transferAssetFrom(from, to, token, amt);
 		}
-
-		(success, ) = market.delegatecall(data);
 	}
 
 	function _borrowOrWithdraw(BorrowWithdrawParams memory params)
@@ -147,14 +83,7 @@ abstract contract Helpers is DSMath, Basic {
 			params.market,
 			_token
 		);
-		bool success = _withdraw(
-			params.market,
-			_token,
-			params.from,
-			params.to,
-			_amt
-		);
-		require(success, "borrow-or-withdraw-failed");
+		_withdraw(params.market, _token, params.from, params.to, _amt);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
 			address(this),

@@ -95,6 +95,19 @@ interface CometInterface {
 	function balanceOf(address account) external view returns (uint256);
 
 	function borrowBalanceOf(address account) external view returns (uint256);
+
+	function allow(address manager, bool isAllowed_) external;
+
+	function allowBySig(
+		address owner,
+		address manager,
+		bool isAllowed_,
+		uint256 nonce,
+		uint256 expiry,
+		uint8 v,
+		bytes32 r,
+		bytes32 s
+	) external;
 }
 
 interface CometRewards {

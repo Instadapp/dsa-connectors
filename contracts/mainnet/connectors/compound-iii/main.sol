@@ -12,6 +12,7 @@ import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
+import "hardhat/console.sol";
 
 abstract contract CompoundIIIResolver is Events, Helpers {
 	/**
@@ -51,8 +52,11 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 
 		approve(tokenContract, market, _amt);
 
-		bool success = _supply(market, _token, address(0), address(0), _amt);
-		require(success, "supply-failed");
+		CometInterface(market).supply(_token, _amt);
+		console.log(
+			CometInterface(market).userCollateral(address(this), _token).balance
+		);
+		console.log(address(this));
 
 		setUint(setId, _amt);
 
@@ -99,8 +103,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 
 		approve(tokenContract, market, _amt);
 
-		bool success = _supply(market, _token, address(0), to, _amt);
-		require(success, "supply-failed");
+		CometInterface(market).supplyTo(to, _token, _amt);
 
 		setUint(setId, _amt);
 
@@ -149,8 +152,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 
 		approve(tokenContract, market, _amt);
 
-		bool success = _supply(market, _token, from, to, _amt);
-		require(success, "supply-failed");
+		CometInterface(market).supplyFrom(from, to, _token, _amt);
 
 		setUint(setId, _amt);
 
@@ -195,8 +197,8 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			market,
 			token
 		);
-		bool success = _withdraw(market, token, address(0), address(0), _amt);
-		require(success, "withdraw-failed");
+
+		CometInterface(market).withdraw(_token, _amt);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
 			address(this),
@@ -325,8 +327,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			market,
 			token
 		);
-		bool success = _withdraw(market, token, address(0), address(0), _amt);
-		require(success, "borrow-failed");
+		CometInterface(market).withdraw(_token, _amt);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
 			address(this),
@@ -422,7 +423,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 	 * @param market The address of the market from where to withdraw.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function payBack(address market, uint256 setId)
+	function payback(address market, uint256 setId)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
@@ -437,14 +438,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(address(this));
 
-		bool success = _supply(
-			market,
-			_token,
-			address(0),
-			address(0),
-			uint256(-1)
-		);
-		require(success, "payback-failed");
+		CometInterface(market).supply(_token, uint256(-1));
 
 		setUint(setId, _amt);
 
@@ -459,7 +453,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 	 * @param to The address on behalf of which the borrow is to be repaid.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function payBackOnBehalf(
+	function paybackOnBehalf(
 		address market,
 		address to,
 		uint256 setId
@@ -478,8 +472,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(to);
 
-		bool success = _supply(market, _token, address(0), to, uint256(-1));
-		require(success, "paybackOnBehalf-failed");
+		CometInterface(market).supplyTo(to, _token, uint256(-1));
 
 		setUint(setId, _amt);
 
@@ -495,7 +488,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 	 * @param to The address on behalf of which the borrow is to be repaid.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function payFrom(
+	function paybackFrom(
 		address market,
 		address from,
 		address to,
@@ -515,8 +508,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(to);
 
-		bool success = _supply(market, _token, from, to, uint256(-1));
-		require(success, "paybackFrom-failed");
+		CometInterface(market).supplyFrom(from, to, _token, uint256(-1));
 
 		setUint(setId, _amt);
 
@@ -708,8 +700,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
-		bool success = _transfer(market, _token, address(0), dest, _amt);
-		require(success, "transfer-base-failed");
+		_transfer(market, _token, address(0), dest, _amt);
 
 		setUint(setId, _amt);
 
@@ -751,8 +742,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
-		bool success = _transfer(market, _token, src, dest, _amt);
-		require(success, "transfer-base-from-failed");
+		_transfer(market, _token, src, dest, _amt);
 
 		setUint(setId, _amt);
 
@@ -796,8 +786,7 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
-		bool success = _transfer(market, _token, address(0), dest, _amt);
-		require(success, "transfer-asset-failed");
+		_transfer(market, _token, address(0), dest, _amt);
 
 		setUint(setId, _amt);
 
@@ -841,13 +830,77 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
-		bool success = _transfer(market, _token, src, dest, _amt);
-		require(success, "transfer-asset-from-failed");
+		_transfer(market, _token, src, dest, _amt);
 
 		setUint(setId, _amt);
 
 		_eventName = "LogTransferAssetFrom(address,address,address,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(market, _token, src, dest, _amt, getId, setId);
+	}
+
+	/**
+	 * @dev Allow/Disallow managers to handle position.
+	 * @notice Authorize/Remove managers to perform write operations for the position.
+	 * @param market The address of the market where to supply.
+	 * @param manager The address to be authorized.
+	 * @param isAllowed Whether to allow or disallow the manager.
+	 */
+	function allow(
+		address market,
+		address manager,
+		bool isAllowed
+	) external returns (string memory _eventName, bytes memory _eventParam) {
+		CometInterface(market).allow(manager, isAllowed);
+		_eventName = "LogAllow(address,address,bool)";
+		_eventParam = abi.encode(market, manager, isAllowed);
+	}
+
+	/**
+	 * @dev Allow/Disallow managers to handle owner's position.
+	 * @notice Authorize/Remove managers to perform write operations for owner's position.
+	 * @param market The address of the market where to supply.
+	 * @param owner The authorizind owner account.
+	 * @param manager The address to be authorized.
+	 * @param isAllowed Whether to allow or disallow the manager.
+	 * @param nonce Signer's nonce.
+	 * @param expiry The duration for which to permit the manager.
+	 * @param v Recovery byte of the signature.
+	 * @param r Half of the ECDSA signature pair.
+	 * @param s Half of the ECDSA signature pair.
+	 */
+	function allowWithPermit(
+		address market,
+		address owner,
+		address manager,
+		bool isAllowed,
+		uint256 nonce,
+		uint256 expiry,
+		uint8 v,
+		bytes32 r,
+		bytes32 s
+	) external returns (string memory _eventName, bytes memory _eventParam) {
+		CometInterface(market).allowBySig(
+			owner,
+			manager,
+			isAllowed,
+			nonce,
+			expiry,
+			v,
+			r,
+			s
+		);
+		_eventName = "LogAllowWithPermit(address,address,address,uint256,uint256,uint256,uint256,uint256,bool)";
+		_eventParam = abi.encode(
+			market,
+			owner,
+			manager,
+			isAllowed,
+			nonce,
+			expiry,
+			v,
+			r,
+			s
+		);
 	}
 }
 

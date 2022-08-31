@@ -178,4 +178,22 @@ contract Events {
 		uint256 getId,
 		uint256 setId
 	);
+
+	event LogAllow(
+		address indexed market,
+		address indexed manager,
+		bool allow
+	);
+
+	event LogAllowWithPermit(
+		address indexed market,
+		address indexed owner,
+		address indexed manager,
+		uint256 expiry,
+		uint256 nonce,
+		uint256 v,
+		uint256 r,
+		uint256 s,
+		bool allow
+	);
 }
