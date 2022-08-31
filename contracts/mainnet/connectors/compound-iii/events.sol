@@ -4,7 +4,7 @@ pragma solidity ^0.7.0;
 contract Events {
 	event LogDeposit(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		uint256 tokenAmt,
 		uint256 getId,
 		uint256 setId
@@ -12,7 +12,7 @@ contract Events {
 
 	event LogDepositOnBehalfOf(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		address to,
 		uint256 tokenAmt,
 		uint256 getId,
@@ -21,7 +21,7 @@ contract Events {
 
 	event LogDepositFrom(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		address from,
 		address to,
 		uint256 tokenAmt,
@@ -31,7 +31,7 @@ contract Events {
 
 	event LogWithdraw(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		uint256 tokenAmt,
 		uint256 getId,
 		uint256 setId
@@ -39,7 +39,7 @@ contract Events {
 
 	event LogWithdrawOnBehalfOf(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		address to,
 		uint256 tokenAmt,
 		uint256 getId,
@@ -48,7 +48,7 @@ contract Events {
 
 	event LogWithdrawFrom(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		address from,
 		address to,
 		uint256 tokenAmt,
@@ -125,7 +125,7 @@ contract Events {
 
 	event LogBuyCollateral(
 		address indexed market,
-		address indexed asset,
+		address indexed token,
 		uint256 indexed baseAmount,
 		uint256 minCollateralAmt,
 		uint256 collateralAmount,
