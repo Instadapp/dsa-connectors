@@ -36,7 +36,6 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-		bytes memory data;
 
 		if (from == address(0) && to == address(0)) {
 			CometInterface(market).withdraw(token, amt);
@@ -53,7 +52,7 @@ abstract contract Helpers is DSMath, Basic {
 		address from,
 		address to,
 		uint256 amt
-	) public payable {
+	) internal {
 		bytes memory data;
 
 		if (from == address(0)) {

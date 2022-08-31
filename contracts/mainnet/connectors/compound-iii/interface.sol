@@ -7,6 +7,11 @@ struct UserCollateral {
 	uint128 _reserved;
 }
 
+struct RewardOwed {
+	address token;
+	uint256 owed;
+}
+
 interface CometInterface {
 	function supply(address asset, uint256 amount) external virtual;
 
@@ -123,6 +128,10 @@ interface CometRewards {
 		address to,
 		bool shouldAccrue
 	) external;
+
+	function getRewardOwed(address comet, address account)
+		external
+		returns (RewardOwed memory);
 
 	function rewardsClaimed(address cometProxy, address account)
 		external

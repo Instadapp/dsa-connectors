@@ -455,7 +455,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
-			? CometInterface(market).borrowBalanceOf(address(this))
+			? TokenInterface(market).balanceOf(address(this))
 			: amt_;
 
 		if (isEth) {
@@ -500,7 +500,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
-			? CometInterface(market).borrowBalanceOf(to)
+			? TokenInterface(market).balanceOf(to)
 			: amt_;
 
 		if (isEth) {
@@ -548,7 +548,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
-			? CometInterface(market).borrowBalanceOf(to)
+			? TokenInterface(market).balanceOf(to)
 			: amt_;
 
 		if (isEth) {
@@ -634,23 +634,13 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		bool accrue,
 		uint256 setId
 	) public returns (string memory eventName_, bytes memory eventParam_) {
+		uint256 rewardsOwed = cometRewards.getRewardOwed(market, account).owed;
 		cometRewards.claim(market, account, accrue);
 
-		//in reward token decimals
-		uint256 totalRewardsClaimed = cometRewards.rewardsClaimed(
-			market,
-			account
-		);
-		setUint(setId, totalRewardsClaimed);
+		setUint(setId, rewardsOwed);
 
 		eventName_ = "LogRewardsClaimed(address,address,uint256,uint256,bool)";
-		eventParam_ = abi.encode(
-			market,
-			account,
-			totalRewardsClaimed,
-			setId,
-			accrue
-		);
+		eventParam_ = abi.encode(market, account, rewardsOwed, setId, accrue);
 	}
 
 	/**
@@ -669,21 +659,18 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		bool accrue,
 		uint256 setId
 	) public returns (string memory eventName_, bytes memory eventParam_) {
+		//in reward token decimals
+		uint256 rewardsOwed = cometRewards.getRewardOwed(market, account).owed;
 		cometRewards.claimTo(market, account, dest, accrue);
 
-		//in reward token decimals
-		uint256 totalRewardsClaimed = cometRewards.rewardsClaimed(
-			market,
-			account
-		);
-		setUint(setId, totalRewardsClaimed);
+		setUint(setId, rewardsOwed);
 
 		eventName_ = "LogRewardsClaimedTo(address,address,address,uint256,uint256,bool)";
 		eventParam_ = abi.encode(
 			market,
 			account,
 			dest,
-			totalRewardsClaimed,
+			rewardsOwed,
 			setId,
 			accrue
 		);
@@ -880,7 +867,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param manager The address to be authorized.
 	 * @param isAllowed Whether to allow or disallow the manager.
 	 */
-	function allow(
+	function toggleAccountManager(
 		address market,
 		address manager,
 		bool isAllowed
@@ -903,7 +890,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param r Half of the ECDSA signature pair.
 	 * @param s Half of the ECDSA signature pair.
 	 */
-	function allowWithPermit(
+	function toggleAccountManagerWithPermit(
 		address market,
 		address owner,
 		address manager,
