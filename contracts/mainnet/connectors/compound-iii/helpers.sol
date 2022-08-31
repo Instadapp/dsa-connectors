@@ -83,6 +83,9 @@ abstract contract Helpers is DSMath, Basic {
 			params.market,
 			_token
 		);
+
+		_amt = _amt == uint256(-1) ? initialBal : _amt;
+
 		_withdraw(params.market, _token, params.from, params.to, _amt);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(

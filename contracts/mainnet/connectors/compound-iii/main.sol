@@ -12,7 +12,6 @@ import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
-import "hardhat/console.sol";
 
 abstract contract CompoundIIIResolver is Events, Helpers {
 	/**
@@ -47,10 +46,14 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(_token);
 
 		if (isEth) {
+			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
 			convertEthToWeth(isEth, tokenContract, _amt);
+		} else {
+			_amt = _amt == uint256(-1)
+				? tokenContract.balanceOf(address(this))
+				: _amt;
+			approve(tokenContract, market, _amt);
 		}
-
-		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supply(_token, _amt);
 
@@ -94,10 +97,14 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(_token);
 
 		if (isEth) {
+			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
 			convertEthToWeth(isEth, tokenContract, _amt);
+		} else {
+			_amt = _amt == uint256(-1)
+				? tokenContract.balanceOf(address(this))
+				: _amt;
+			approve(tokenContract, market, _amt);
 		}
-
-		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supplyTo(to, _token, _amt);
 
@@ -143,10 +150,14 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(_token);
 
 		if (isEth) {
+			_amt = _amt == uint256(-1) ? address(this).balance : _amt;
 			convertEthToWeth(isEth, tokenContract, _amt);
+		} else {
+			_amt = _amt == uint256(-1)
+				? tokenContract.balanceOf(address(this))
+				: _amt;
+			approve(tokenContract, market, _amt);
 		}
-
-		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supplyFrom(from, to, _token, _amt);
 
@@ -193,6 +204,8 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			market,
 			token
 		);
+
+		_amt = _amt == uint256(-1) ? initialBal : _amt;
 
 		CometInterface(market).withdraw(_token, _amt);
 
@@ -315,7 +328,6 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		address token = getBaseToken(market);
 		bool isEth = token == ethAddr;
 		address _token = isEth ? wethAddr : token;
-		console.log(_amt);
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
@@ -324,6 +336,9 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			market,
 			_token
 		);
+
+		_amt = _amt == uint256(-1) ? initialBal : _amt;
+
 		CometInterface(market).withdraw(_token, _amt);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
@@ -432,8 +447,8 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		address _token = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(address(this));
+		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supply(_token, uint256(-1));
 
@@ -466,8 +481,8 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		address _token = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(to);
+		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supplyTo(to, _token, uint256(-1));
 
@@ -502,8 +517,8 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		address _token = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		approve(tokenContract, market, uint256(-1));
 		uint256 _amt = CometInterface(market).borrowBalanceOf(to);
+		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supplyFrom(from, to, _token, uint256(-1));
 
@@ -670,6 +685,9 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
+		_amt = _amt == uint256(-1)
+			? CometInterface(market).balanceOf(address(this))
+			: _amt;
 		_transfer(market, _token, address(0), dest, _amt);
 
 		setUint(setId, _amt);
@@ -712,6 +730,9 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
+		_amt = _amt == uint256(-1)
+			? CometInterface(market).balanceOf(src)
+			: _amt;
 		_transfer(market, _token, src, dest, _amt);
 
 		setUint(setId, _amt);
@@ -756,6 +777,9 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
+		_amt = _amt == uint256(-1)
+			? CometInterface(market).userCollateral(address(this), _token).balance
+			: _amt;
 		_transfer(market, _token, address(0), dest, _amt);
 
 		setUint(setId, _amt);
@@ -800,6 +824,9 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, _amt);
 		}
 
+		_amt = _amt == uint256(-1)
+			? CometInterface(market).userCollateral(src, _token).balance
+			: _amt;
 		_transfer(market, _token, src, dest, _amt);
 
 		setUint(setId, _amt);
