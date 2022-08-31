@@ -320,14 +320,14 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		uint256 initialBal = getAccountSupplyBalanceOfAsset(
 			address(this),
 			market,
-			token
+			_token
 		);
 		CometInterface(market).withdraw(_token, _amt);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
 			address(this),
 			market,
-			token
+			_token
 		);
 
 		_amt = sub(finalBal, initialBal);
