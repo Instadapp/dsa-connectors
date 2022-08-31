@@ -149,15 +149,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		if (isEth) {
-			amt_ = amt_ == uint256(-1) ? address(this).balance : amt_;
-			convertEthToWeth(isEth, tokenContract, amt_);
-		} else {
-			amt_ = amt_ == uint256(-1)
-				? tokenContract.balanceOf(address(this))
-				: amt_;
-		}
-		approve(tokenContract, market, amt_);
+		amt_ = setAmt(market, token_, from, amt_, isEth);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 		setUint(setId, amt_);
@@ -547,15 +539,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		amt_ = amt_ == uint256(-1)
-			? TokenInterface(market).balanceOf(to)
-			: amt_;
-
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
-		}
-
-		approve(tokenContract, market, amt_);
+		amt_ = setAmt(market, token_, from, amt_, isEth);
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 
 		setUint(setId, amt_);
@@ -621,151 +605,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Claim rewards and interests accrued in supplied/borrowed base asset.
-	 * @notice Claim rewards and interests accrued.
-	 * @param market The address of the market.
-	 * @param account The account of which the rewards are to be claimed.
-	 * @param accrue Should accrue the rewards and interest before claiming.
-	 * @param setId ID stores the amount of rewards claimed.
-	 */
-	function claimRewards(
-		address market,
-		address account,
-		bool accrue,
-		uint256 setId
-	) public returns (string memory eventName_, bytes memory eventParam_) {
-		uint256 rewardsOwed = cometRewards.getRewardOwed(market, account).owed;
-		cometRewards.claim(market, account, accrue);
-
-		setUint(setId, rewardsOwed);
-
-		eventName_ = "LogRewardsClaimed(address,address,uint256,uint256,bool)";
-		eventParam_ = abi.encode(market, account, rewardsOwed, setId, accrue);
-	}
-
-	/**
-	 * @dev Claim rewards and interests accrued in supplied/borrowed base asset.
-	 * @notice Claim rewards and interests accrued and transfer to dest address.
-	 * @param market The address of the market.
-	 * @param account The account of which the rewards are to be claimed.
-	 * @param dest The account where to transfer the claimed rewards.
-	 * @param accrue Should accrue the rewards and interest before claiming.
-	 * @param setId ID stores the amount of rewards claimed.
-	 */
-	function claimRewardsTo(
-		address market,
-		address account,
-		address dest,
-		bool accrue,
-		uint256 setId
-	) public returns (string memory eventName_, bytes memory eventParam_) {
-		//in reward token decimals
-		uint256 rewardsOwed = cometRewards.getRewardOwed(market, account).owed;
-		cometRewards.claimTo(market, account, dest, accrue);
-
-		setUint(setId, rewardsOwed);
-
-		eventName_ = "LogRewardsClaimedTo(address,address,address,uint256,uint256,bool)";
-		eventParam_ = abi.encode(
-			market,
-			account,
-			dest,
-			rewardsOwed,
-			setId,
-			accrue
-		);
-	}
-
-	/**
-	 * @dev Transfer base asset to dest address from this account.
-	 * @notice Transfer base asset to dest address from caller's account.
-	 * @param market The address of the market.
-	 * @param dest The account where to transfer the base assets.
-	 * @param amount The amount of the base token to transfer. (For max: `uint256(-1)`)
-	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of tokens transferred.
-	 */
-	function transferBase(
-		address market,
-		address dest,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	)
-		external
-		payable
-		returns (string memory eventName_, bytes memory eventParam_)
-	{
-		uint256 amt_ = getUint(getId, amount);
-		require(market != address(0), "invalid market address");
-
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
-		TokenInterface tokenContract = TokenInterface(token_);
-
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
-		}
-
-		amt_ = amt_ == uint256(-1)
-			? CometInterface(market).balanceOf(address(this))
-			: amt_;
-		_transfer(market, token_, address(0), dest, amt_);
-
-		setUint(setId, amt_);
-
-		eventName_ = "LogTransferBase(address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, dest, amt_, getId, setId);
-	}
-
-	/**
-	 * @dev Transfer base asset to dest address from src account.
-	 * @notice Transfer base asset to dest address from src account.
-	 * @param market The address of the market.
-	 * @param src The account to transfer the base assets from.
-	 * @param dest The account to transfer the base assets to.
-	 * @param amount The amount of the base token to transfer. (For max: `uint256(-1)`)
-	 * @param getId ID to retrieve amt.
-	 * @param setId ID stores the amount of tokens transferred.
-	 */
-	function transferBaseFromUsingManager(
-		address market,
-		address src,
-		address dest,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	)
-		external
-		payable
-		returns (string memory eventName_, bytes memory eventParam_)
-	{
-		uint256 amt_ = getUint(getId, amount);
-		require(market != address(0), "invalid market address");
-
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
-		TokenInterface tokenContract = TokenInterface(token_);
-
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
-		}
-
-		amt_ = amt_ == uint256(-1)
-			? CometInterface(market).balanceOf(src)
-			: amt_;
-		_transfer(market, token_, src, dest, amt_);
-
-		setUint(setId, amt_);
-
-		eventName_ = "LogTransferBaseFrom(address,address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, src, dest, amt_, getId, setId);
-	}
-
-	/**
-	 * @dev Transfer collateral asset to dest address from this account.
+	 * @dev Transfer collateral or base asset to dest address from this account.
 	 * @notice Transfer collateral asset to dest address from caller's account.
 	 * @param market The address of the market.
 	 * @param token The collateral asset to transfer to dest address.
@@ -801,10 +641,15 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		}
 
 		amt_ = amt_ == uint256(-1)
-			? CometInterface(market)
-				.userCollateral(address(this), token_)
-				.balance
+			? (
+				(token_ == getBaseToken(market))
+					? TokenInterface(market).balanceOf(address(this))
+					: CometInterface(market)
+						.userCollateral(address(this), token_)
+						.balance
+			)
 			: amt_;
+
 		_transfer(market, token_, address(0), dest, amt_);
 
 		setUint(setId, amt_);
@@ -814,7 +659,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Transfer collateral asset to dest address from src account.
+	 * @dev Transfer collateral or base asset to dest address from src account.
 	 * @notice Transfer collateral asset to dest address from src's account.
 	 * @param market The address of the market.
 	 * @param token The collateral asset to transfer to dest address.
@@ -840,18 +685,12 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amount);
 		require(market != address(0), "invalid market address");
 
-		address token = getBaseToken(market);
 		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
-		}
+		amt_ = setAmt(market, token_, src, amt_, isEth);
 
-		amt_ = amt_ == uint256(-1)
-			? CometInterface(market).userCollateral(src, token_).balance
-			: amt_;
 		_transfer(market, token_, src, dest, amt_);
 
 		setUint(setId, amt_);

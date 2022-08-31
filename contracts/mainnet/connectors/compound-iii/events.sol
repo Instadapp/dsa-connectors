@@ -97,23 +97,6 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogRewardsClaimed(
-		address indexed market,
-		address indexed account,
-		uint256 indexed totalClaimedInWei,
-		uint256 getId,
-		bool accrued
-	);
-
-	event LogRewardsClaimedTo(
-		address indexed market,
-		address indexed account,
-		address to,
-		uint256 indexed totalClaimedInWei,
-		uint256 getId,
-		bool accrued
-	);
-
 	event LogLiquidate(
 		address indexed borrower,
 		address indexed tokenToPay,
@@ -129,23 +112,6 @@ contract Events {
 		uint256 indexed baseAmount,
 		uint256 minCollateralAmt,
 		uint256 collateralAmount,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogTransferBase(
-		address indexed market,
-		address indexed dest,
-		uint256 amount,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogTransferBaseFrom(
-		address indexed market,
-		address indexed from,
-		address indexed dest,
-		uint256 amount,
 		uint256 getId,
 		uint256 setId
 	);

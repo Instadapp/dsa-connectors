@@ -5,12 +5,9 @@ pragma abicoder v2;
 import { TokenInterface } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
-import { CometInterface, CometRewards } from "./interface.sol";
+import { CometInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
-	CometRewards internal constant cometRewards =
-		CometRewards(0x1B0e765F6224C21223AeA2af16c1C46E38885a40);
-
 	struct BorrowWithdrawParams {
 		address market;
 		address token;
@@ -115,5 +112,37 @@ abstract contract Helpers is DSMath, Basic {
 				CometInterface(market).userCollateral(account, asset).balance
 			);
 		}
+	}
+
+	function setAmt(
+		address market,
+		address token,
+		address src,
+		uint256 amt,
+		bool isEth
+	) internal returns (uint256) {
+		if (isEth) {
+			if (amt == uint256(-1)) {
+				uint256 allowance_ = CometInterface(market).allowance(
+					src,
+					market
+				);
+				amt = src.balance < allowance_ ? src.balance : allowance_;
+			}
+			convertEthToWeth(isEth, TokenInterface(token), amt);
+		} else {
+			if (amt == uint256(-1)) {
+				uint256 allowance_ = CometInterface(market).allowance(
+					src,
+					market
+				);
+				uint256 bal_ = (token == getBaseToken(market))
+					? TokenInterface(market).balanceOf(src)
+					: CometInterface(market).userCollateral(src, token).balance;
+
+				amt = bal_ < allowance_ ? bal_ : allowance_;
+			}
+		}
+		return amt;
 	}
 }

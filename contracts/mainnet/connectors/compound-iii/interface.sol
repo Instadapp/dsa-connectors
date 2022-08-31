@@ -103,6 +103,11 @@ interface CometInterface {
 
 	function allow(address manager, bool isAllowed_) external;
 
+	function allowance(address owner, address spender)
+		external
+		view
+		returns (uint256);
+
 	function allowBySig(
 		address owner,
 		address manager,
@@ -113,28 +118,4 @@ interface CometInterface {
 		bytes32 r,
 		bytes32 s
 	) external;
-}
-
-interface CometRewards {
-	function claim(
-		address comet,
-		address src,
-		bool shouldAccrue
-	) external;
-
-	function claimTo(
-		address comet,
-		address src,
-		address to,
-		bool shouldAccrue
-	) external;
-
-	function getRewardOwed(address comet, address account)
-		external
-		returns (RewardOwed memory);
-
-	function rewardsClaimed(address cometProxy, address account)
-		external
-		view
-		returns (uint256);
 }
