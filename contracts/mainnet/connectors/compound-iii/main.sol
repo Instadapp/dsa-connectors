@@ -12,7 +12,6 @@ import { Stores } from "../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
-import "hardhat/console.sol";
 
 abstract contract CompoundIIIResolver is Events, Helpers {
 	/**
@@ -53,10 +52,6 @@ abstract contract CompoundIIIResolver is Events, Helpers {
 		approve(tokenContract, market, _amt);
 
 		CometInterface(market).supply(_token, _amt);
-		console.log(
-			CometInterface(market).userCollateral(address(this), _token).balance
-		);
-		console.log(address(this));
 
 		setUint(setId, _amt);
 
