@@ -36,7 +36,6 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-
 		if (from == address(0) && to == address(0)) {
 			CometInterface(market).withdraw(token, amt);
 		} else if (from == address(0)) {
@@ -92,7 +91,7 @@ abstract contract Helpers is DSMath, Basic {
 			params.market,
 			_token
 		);
-		_amt = sub(finalBal, initialBal);
+		_amt = sub(initialBal, finalBal);
 
 		convertWethToEth(isEth, tokenContract, _amt);
 

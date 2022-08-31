@@ -125,7 +125,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
 	 */
-	function depositFrom(
+	function depositFromUsingManager(
 		address market,
 		address token,
 		address from,
@@ -214,7 +214,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			token
 		);
 
-		amt_ = sub(finalBal, initialBal);
+		amt_ = sub(initialBal, finalBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);
 
@@ -273,7 +273,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function withdrawFrom(
+	function withdrawFromUsingManager(
 		address market,
 		address token,
 		address from,
@@ -346,7 +346,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			token_
 		);
 
-		amt_ = sub(finalBal, initialBal);
+		amt_ = sub(initialBal, finalBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);
 
@@ -401,7 +401,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */
-	function borrowFrom(
+	function borrowFromUsingManager(
 		address market,
 		address from,
 		address to,
@@ -527,7 +527,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens repaid.
 	 */
-	function paybackFrom(
+	function paybackFromUsingManager(
 		address market,
 		address from,
 		address to,
@@ -729,7 +729,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens transferred.
 	 */
-	function transferBaseFrom(
+	function transferBaseFromUsingManager(
 		address market,
 		address src,
 		address dest,
@@ -824,7 +824,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens transferred.
 	 */
-	function transferAssetFrom(
+	function transferAssetFromUsingManager(
 		address market,
 		address token,
 		address src,
