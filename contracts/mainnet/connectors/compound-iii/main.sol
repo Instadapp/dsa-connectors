@@ -52,8 +52,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			amt_ = amt_ == uint256(-1)
 				? tokenContract.balanceOf(address(this))
 				: amt_;
-			approve(tokenContract, market, amt_);
 		}
+		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supply(token_, amt_);
 
@@ -103,8 +103,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			amt_ = amt_ == uint256(-1)
 				? tokenContract.balanceOf(address(this))
 				: amt_;
-			approve(tokenContract, market, amt_);
 		}
+		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supplyTo(to, token_, amt_);
 
@@ -156,8 +156,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			amt_ = amt_ == uint256(-1)
 				? tokenContract.balanceOf(address(this))
 				: amt_;
-			approve(tokenContract, market, amt_);
 		}
+		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 		setUint(setId, amt_);
@@ -429,16 +429,24 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Repays entire borrow of the base asset.
-	 * @notice Repays an entire borrow of the base asset.
+	 * @dev Repays the borrowed base asset.
+	 * @notice Repays the borrow of the base asset.
 	 * @param market The address of the market.
+	 * @param amt The amount to be repaid.
+	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens repaid.
 	 */
-	function payback(address market, uint256 setId)
+	function payback(
+		address market,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	)
 		external
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
+		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
 		address token = getBaseToken(market);
@@ -446,15 +454,21 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		uint256 amt_ = CometInterface(market).borrowBalanceOf(address(this));
+		amt_ = amt_ == uint256(-1)
+			? CometInterface(market).borrowBalanceOf(address(this))
+			: amt_;
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, amt_);
+		}
 		approve(tokenContract, market, amt_);
 
-		CometInterface(market).supply(token_, uint256(-1));
+		CometInterface(market).supply(token_, amt_);
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPayback(address,address,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, amt_, setId);
+		eventName_ = "LogPayback(address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, token, amt_, getId, setId);
 	}
 
 	/**
@@ -462,17 +476,22 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @notice Repays an entire borrow of the base asset on behalf of 'to'.
 	 * @param market The address of the market.
 	 * @param to The address on behalf of which the borrow is to be repaid.
+	 * @param amt The amount to be repaid.
+	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens repaid.
 	 */
 	function paybackOnBehalf(
 		address market,
 		address to,
+		uint256 amt,
+		uint256 getId,
 		uint256 setId
 	)
 		external
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
+		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
 		address token = getBaseToken(market);
@@ -480,15 +499,22 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		uint256 amt_ = CometInterface(market).borrowBalanceOf(to);
+		amt_ = amt_ == uint256(-1)
+			? CometInterface(market).borrowBalanceOf(to)
+			: amt_;
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, amt_);
+		}
+
 		approve(tokenContract, market, amt_);
 
-		CometInterface(market).supplyTo(to, token_, uint256(-1));
+		CometInterface(market).supplyTo(to, token_, amt_);
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPaybackOnBehalf(address,address,address,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, to, amt_, setId);
+		eventName_ = "LogPaybackOnBehalf(address,address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, token, to, amt_, getId, setId);
 	}
 
 	/**
@@ -497,18 +523,23 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param market The address of the market.
 	 * @param from The address from which the borrow has to be repaid on behalf of 'to'.
 	 * @param to The address on behalf of which the borrow is to be repaid.
+	 * @param amt The amount to be repaid.
+	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens repaid.
 	 */
 	function paybackFrom(
 		address market,
 		address from,
 		address to,
+		uint256 amt,
+		uint256 getId,
 		uint256 setId
 	)
 		external
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
+		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
 		address token = getBaseToken(market);
@@ -516,15 +547,21 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		uint256 amt_ = CometInterface(market).borrowBalanceOf(to);
-		approve(tokenContract, market, amt_);
+		amt_ = amt_ == uint256(-1)
+			? CometInterface(market).borrowBalanceOf(to)
+			: amt_;
 
-		CometInterface(market).supplyFrom(from, to, token_, uint256(-1));
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, amt_);
+		}
+
+		approve(tokenContract, market, amt_);
+		CometInterface(market).supplyFrom(from, to, token_, amt_);
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPaybackFrom(address,address,address,address,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, from, to, amt_, setId);
+		eventName_ = "LogPaybackFrom(address,address,address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, token, from, to, amt_, getId, setId);
 	}
 
 	/**
