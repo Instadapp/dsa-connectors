@@ -49,8 +49,6 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-		bytes memory data;
-
 		if (from == address(0)) {
 			CometInterface(market).transferAsset(to, token, amt);
 		} else {
@@ -62,39 +60,39 @@ abstract contract Helpers is DSMath, Basic {
 		internal
 		returns (uint256 amt, uint256 setId)
 	{
-		uint256 _amt = getUint(params.getId, params.amt);
+		uint256 amt_ = getUint(params.getId, params.amt);
 
 		require(
 			params.market != address(0) && params.token != address(0),
 			"invalid market/token address"
 		);
 		bool isEth = params.token == ethAddr;
-		address _token = isEth ? wethAddr : params.token;
+		address token_ = isEth ? wethAddr : params.token;
 
-		TokenInterface tokenContract = TokenInterface(_token);
+		TokenInterface tokenContract = TokenInterface(token_);
 
 		uint256 initialBal = getAccountSupplyBalanceOfAsset(
 			address(this),
 			params.market,
-			_token
+			token_
 		);
 
-		_amt = _amt == uint256(-1) ? initialBal : _amt;
+		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 
-		_withdraw(params.market, _token, params.from, params.to, _amt);
+		_withdraw(params.market, token_, params.from, params.to, amt_);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
 			address(this),
 			params.market,
-			_token
+			token_
 		);
-		_amt = sub(initialBal, finalBal);
+		amt_ = sub(initialBal, finalBal);
 
-		convertWethToEth(isEth, tokenContract, _amt);
+		convertWethToEth(isEth, tokenContract, amt_);
 
-		setUint(params.setId, _amt);
+		setUint(params.setId, amt_);
 
-		amt = _amt;
+		amt = amt_;
 		setId = params.setId;
 	}
 

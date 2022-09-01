@@ -154,7 +154,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 		setUint(setId, amt_);
 
-		eventName_ = "LogDepositFrom(address,address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogDepositFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token, from, to, amt_, getId, setId);
 	}
 
@@ -290,7 +290,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			})
 		);
 
-		eventName_ = "LogWithdrawFrom(address,address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogWithdrawFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token, from, to, amt_, getId, setId_);
 	}
 
@@ -416,7 +416,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				setId: setId
 			})
 		);
-		eventName_ = "LogBorrowFrom(address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogBorrowFromUsingManager(address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, from, to, amt_, getId, setId_);
 	}
 
@@ -511,7 +511,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 	/**
 	 * @dev Repays entire borrow of the base asset form 'from' on behalf of 'to'.
-	 * @notice Repays an entire borrow of the base asset on behalf of 'to'.
+	 * @notice Repays an entire borrow of the base asset on behalf of 'to'. Approve the comet markey 
 	 * @param market The address of the market.
 	 * @param from The address from which the borrow has to be repaid on behalf of 'to'.
 	 * @param to The address on behalf of which the borrow is to be repaid.
@@ -544,7 +544,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPaybackFrom(address,address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogPaybackFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token, from, to, amt_, getId, setId);
 	}
 
@@ -553,7 +553,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @notice Buy collateral asset to increase protocol base reserves until targetReserves is reached.
 	 * @param market The address of the market from where to withdraw.
 	 * @param asset The collateral asset to purachase.
-	 * @param dest The address on to transfer the purchased assets.
+	 * @param dest The address to transfer the purchased assets.
 	 * @param minCollateralAmt Minimum amount of collateral expected to be received.
 	 * @param baseAmt Amount of base asset to be sold for collateral.
 	 * @param getId ID to retrieve amt.
@@ -596,7 +596,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		eventParam_ = abi.encode(
 			market,
 			asset,
-			baseAmt,
+			amt_,
 			minCollateralAmt,
 			collAmt,
 			getId,
@@ -695,7 +695,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogTransferAssetFrom(address,address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogTransferAssetFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token_, src, dest, amt_, getId, setId);
 	}
 
