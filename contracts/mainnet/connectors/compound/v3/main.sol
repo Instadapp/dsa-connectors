@@ -11,6 +11,7 @@ import { TokenInterface } from "../../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
+import "hardhat/console.sol";
 
 abstract contract CompoundV3Resolver is Events, Helpers {
 	/**
@@ -212,7 +213,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 initialBal = getAccountSupplyBalanceOfAsset(
 			address(this),
 			market,
-			token
+			token_
 		);
 
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
@@ -229,10 +230,14 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
 			address(this),
 			market,
-			token
+			token_
 		);
 
 		amt_ = sub(initialBal, finalBal);
+
+		console.log(amt_);
+		console.log(initialBal);
+		console.log(finalBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);
 
