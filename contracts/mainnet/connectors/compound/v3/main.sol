@@ -481,9 +481,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		}
 
 		convertEthToWeth(isEth, tokenContract, amt_);
-
 		approve(tokenContract, market, amt_);
-
 		CometInterface(market).supply(token_, amt_);
 
 		setUint(setId, amt_);

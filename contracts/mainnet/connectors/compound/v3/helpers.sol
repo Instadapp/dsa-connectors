@@ -189,7 +189,8 @@ abstract contract Helpers is DSMath, Basic {
 				}
 				amt = bal_ < allowance_ ? bal_ : allowance_;
 			}
-			convertEthToWeth(isEth, TokenInterface(token), amt);
+			if (src == address(this))
+				convertEthToWeth(isEth, TokenInterface(token), amt);
 		} else {
 			if (amt == uint256(-1)) {
 				uint256 allowance_ = TokenInterface(token).allowance(
