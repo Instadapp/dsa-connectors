@@ -25,7 +25,8 @@ describe("Compound III", function () {
 
   const ABI = [
     "function balanceOf(address account) public view returns (uint256)",
-    "function approve(address spender, uint256 amount) external returns(bool)"
+    "function approve(address spender, uint256 amount) external returns(bool)",
+    "function transfer(address recipient, uint256 amount) external returns (bool)"
   ];
   const wethContract = new ethers.Contract(tokens.weth.address, ABI);
   const baseContract = new ethers.Contract(base, ABI);
@@ -303,7 +304,7 @@ describe("Compound III", function () {
     });
 
     it("should payback base token from Compound", async function () {
-      const amount = ethers.utils.parseUnits("100", 6);
+      const amount = ethers.utils.parseUnits("102", 6);
       //approve market to access dsaWallet0
       await baseContract.connect(dsa0Signer).approve(market, amount);
 
@@ -317,7 +318,9 @@ describe("Compound III", function () {
 
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(await comet.connect(signer).borrowBalanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseUnits("0", 6));
+      expect(await comet.connect(signer).borrowBalanceOf(dsaWallet0.address)).to.be.equal(
+        ethers.utils.parseUnits("0", 6)
+      );
     });
 
     it("Should borrow on behalf of from Compound", async function () {
@@ -335,8 +338,9 @@ describe("Compound III", function () {
       expect(new BigNumber(await comet.connect(signer).borrowBalanceOf(dsaWallet0.address)).toFixed()).to.be.equal(
         ethers.utils.parseUnits("100", 6)
       );
-      //dsawallet0 --> collateral 6eth, balance 5eth, 100usdc
-      //dsaWallet1 --> balance 9eth coll: 0eth
+      console.log(await baseContract.connect(wallet0).balanceOf(dsaWallet0.address));
+      //dsawallet0 --> collateral 6eth, balance 5eth, borrowed 100usdc
+      //dsaWallet1 --> balance 9eth coll: 0eth, 100usdc
     });
 
     it("Should payback on behalf of from Compound", async function () {
