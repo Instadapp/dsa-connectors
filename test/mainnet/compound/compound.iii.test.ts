@@ -16,6 +16,7 @@ import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
 import { ConnectV2CompoundV3__factory } from "../../../typechain";
 import { MaxUint256 } from "@uniswap/sdk-core";
+import { USDC_OPTIMISTIC_KOVAN } from "@uniswap/smart-order-router";
 
 describe("Compound III", function () {
   const connectorName = "COMPOUND-V3-TEST-A";
@@ -367,13 +368,12 @@ describe("Compound III", function () {
 
     it("should withdraw some ETH collateral", async function () {
       let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
-      console.log(initialBal);
-      const amount = ethers.utils.parseEther("2");
+      const amount_ = ethers.utils.parseEther("2");
       const spells = [
         {
           connector: connectorName,
           method: "withdraw",
-          args: [market, tokens.eth.address, amount, 0, 0]
+          args: [market, tokens.eth.address, amount_, 0, 0]
         }
       ];
 
@@ -382,7 +382,7 @@ describe("Compound III", function () {
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.weth.address)).balance).to.be.gte(
         ethers.utils.parseEther("4")
       );
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(initialBal.add(2).toString());
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(initialBal.add(amount_).toString());
     });
 
     it("manager should be able to withdraw collateral from the position", async function () {
@@ -407,7 +407,7 @@ describe("Compound III", function () {
 
       //dsawallet0 --> collateral 0eth, balance 7eth
       //dsaWallet1 --> balance 7eth coll: 0eth
-      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("7"));
+      expect(await wethContract.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("4"));
     });
 
     it("Should withdraw on behalf of from Compound", async function () {
@@ -422,13 +422,14 @@ describe("Compound III", function () {
       //dsaWallet1 --> balance 2eth coll: 5eth
 
       const tx1 = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
+      let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
 
       const amount = ethers.utils.parseEther("2");
       const spells = [
         {
           connector: connectorName,
           method: "withdrawOnBehalf",
-          args: [market, dsaWallet0.address, dsaWallet0.address, amount, 0, 0]
+          args: [market, tokens.eth.address, dsaWallet0.address, amount, 0, 0]
         }
       ];
       //dsawallet0 --> collateral 0eth, balance 9eth
@@ -436,23 +437,23 @@ describe("Compound III", function () {
 
       const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("9"));
+      expect(await wethContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(amount);
 
-      expect(
-        new BigNumber(
-          await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.eth.address).balance
-        ).toFixed()
-      ).to.be.equal(ethers.utils.parseEther("3"));
+      expect((await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.weth.address)).balance).to.be.gte(
+        ethers.utils.parseEther("3")
+      );
     });
 
     it("should buy collateral", async function () {
       //deposit 10 usdc(base token) to dsa
       await baseContract.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseUnits("10", 6));
+      console.log(await baseContract.connect(signer).balanceOf(dsaWallet0.address));
 
       //dsawallet0 --> collateral 0eth, balance 9eth 10usdc
       //dsaWallet1 --> balance 2eth coll: 3eth
       const amount = ethers.utils.parseEther("1");
       const bal = await baseContract.connect(signer).balanceOf(dsaWallet0.address);
+      await baseContract.connect(wallet0).approve(market, bal);
       const spells = [
         {
           connector: connectorName,
@@ -502,7 +503,7 @@ describe("Compound III", function () {
         {
           connector: connectorName,
           method: "depositFromUsingManager",
-          args: [market, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
+          args: [market, tokens.link.address, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
         }
       ];
 

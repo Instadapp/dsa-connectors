@@ -76,7 +76,6 @@ abstract contract Helpers is DSMath, Basic {
 		);
 		amt_ = sub(finalBal, initialBal);
 
-		convertWethToEth(isEth, tokenContract, amt_);
 		if (params.from == address(0) || params.to == address(this))
 			convertWethToEth(isEth, tokenContract, amt_);
 

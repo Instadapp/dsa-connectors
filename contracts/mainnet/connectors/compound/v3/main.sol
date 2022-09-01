@@ -96,6 +96,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			market != address(0) && token != address(0),
 			"invalid market/token address"
 		);
+		require(to != address(0), "invalid to address");
 
 		bool isEth = token == ethAddr || token == wethAddr;
 		address token_ = isEth ? wethAddr : token;
@@ -156,6 +157,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			market != address(0) && token != address(0),
 			"invalid market/token address"
 		);
+		require(to != address(0), "invalid to address");
 
 		bool isEth = token == ethAddr || token == wethAddr;
 		address token_ = isEth ? wethAddr : token;
@@ -614,7 +616,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		convertEthToWeth(isEth, tokenContract, amt_);
-
 		approve(tokenContract, market, amt_);
 
 		CometInterface(market).buyCollateral(
