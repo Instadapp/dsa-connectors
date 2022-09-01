@@ -71,7 +71,7 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogBorrowFrom(
+	event LogBorrowFromUsingManager(
 		address indexed market,
 		address from,
 		address to,
