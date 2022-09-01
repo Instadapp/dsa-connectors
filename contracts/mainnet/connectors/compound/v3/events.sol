@@ -138,6 +138,6 @@ contract Events {
 		uint256 nonce,
 		uint8 v,
 		bytes32 r,
-		bytes32 s,
+		bytes32 s
 	);
 }
