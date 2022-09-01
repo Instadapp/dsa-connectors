@@ -133,19 +133,11 @@ contract Events {
 		address indexed market,
 		address indexed owner,
 		address indexed manager,
+		bool allow,
 		uint256 expiry,
 		uint256 nonce,
-		uint256 v,
-		uint256 r,
-		uint256 s,
-		bool allow
-	);
-
-	event LogApproveMarket(
-		address indexed market,
-		address indexed token,
-		uint256 indexed amount,
-		uint256 getId,
-		uint256 setId
+		uint8 v,
+		bytes32 r,
+		bytes32 s,
 	);
 }

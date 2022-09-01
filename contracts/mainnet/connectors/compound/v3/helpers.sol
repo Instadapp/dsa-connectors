@@ -26,6 +26,12 @@ abstract contract Helpers is DSMath, Basic {
 		baseToken = CometInterface(market).baseToken();
 	}
 
+	/**
+	 *@dev helper function for three withdraw or borrow cases:
+	 *withdraw - for `withdraw` withdraws the collateral or base from DSA's position to account.
+	 *withdrawFrom - for `withdrawFromUsingManager` withdraws from src to dest using DSA as manager
+	 *withdrawTo - for `withdrawTo` withdraws from DSA to dest address.
+	 */
 	function _withdrawHelper(
 		address market,
 		address token,
@@ -81,7 +87,9 @@ abstract contract Helpers is DSMath, Basic {
 
 		_withdrawHelper(params.market, token_, params.from, params.to, amt_);
 
-		uint256 finalBal = CometInterface(params.market).borrowBalanceOf(params.from);
+		uint256 finalBal = CometInterface(params.market).borrowBalanceOf(
+			params.from
+		);
 		amt_ = sub(finalBal, initialBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);

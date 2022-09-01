@@ -786,7 +786,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			r,
 			s
 		);
-		eventName_ = "LogAllowWithPermit(address,address,address,uint256,uint256,uint256,uint256,uint256,bool)";
+		eventName_ = "LogAllowWithPermit(address,address,address,bool,uint256,uint256,uint8,bytes32,bytes32)";
 		eventParam_ = abi.encode(
 			market,
 			owner,
@@ -798,40 +798,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			r,
 			s
 		);
-	}
-
-	function approveMarket(
-		address market,
-		address token,
-		uint256 amt,
-		uint256 getId,
-		uint256 setId
-	)
-		external
-		payable
-		returns (string memory eventName_, bytes memory eventParam_)
-	{
-		uint256 amt_ = getUint(getId, amt);
-		require(
-			market != address(0) && token != address(0),
-			"invalid market/token address"
-		);
-		require(amt > 0, "amount-cannot-be-zero");
-
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
-		TokenInterface tokenContract = TokenInterface(token_);
-
-		amt_ = amt_ == uint256(-1)
-			? TokenInterface(market).balanceOf(address(this))
-			: amt_;
-
-		approve(tokenContract, market, amt_);
-
-		setUint(setId, amt_);
-
-		eventName_ = "LogApproveMarket(address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token_, amt_, getId, setId);
 	}
 }
 
