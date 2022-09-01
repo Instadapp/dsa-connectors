@@ -616,7 +616,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		convertEthToWeth(isEth, tokenContract, amt_);
-		approve(tokenContract, market, amt_);
+		approve(TokenInterface(getBaseToken(market)), market, amt_);
 
 		CometInterface(market).buyCollateral(
 			asset,
