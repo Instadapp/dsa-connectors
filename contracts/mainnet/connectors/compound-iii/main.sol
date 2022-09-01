@@ -477,7 +477,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		require(market != address(0), "invalid market address");
 
 		address token_ = getBaseToken(market);
-		bool isEth = token == wethAddr;
+		bool isEth = token_ == wethAddr;
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
@@ -500,7 +500,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		setUint(setId, amt_);
 
 		eventName_ = "LogPayback(address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, amt_, getId, setId);
+		eventParam_ = abi.encode(market, token_, amt_, getId, setId);
 	}
 
 	/**
@@ -527,7 +527,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		require(market != address(0), "invalid market address");
 
 		address token_ = getBaseToken(market);
-		bool isEth = token == wethAddr;
+		bool isEth = token_ == wethAddr;
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
@@ -547,7 +547,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		setUint(setId, amt_);
 
 		eventName_ = "LogPaybackOnBehalf(address,address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, to, amt_, getId, setId);
+		eventParam_ = abi.encode(market, token_, to, amt_, getId, setId);
 	}
 
 	/**
@@ -576,7 +576,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		require(market != address(0), "invalid market address");
 
 		address token_ = getBaseToken(market);
-		bool isEth = token == wethAddr;
+		bool isEth = token_ == wethAddr;
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = setAmt(market, token_, from, amt_, isEth, true);
@@ -594,7 +594,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		setUint(setId, amt_);
 
 		eventName_ = "LogPaybackFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, from, to, amt_, getId, setId);
+		eventParam_ = abi.encode(market, token_, from, to, amt_, getId, setId);
 	}
 
 	/**
@@ -644,7 +644,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		eventName_ = "LogBuyCollateral(address,address,uint256,uint256,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(
 			market,
-			asset,
+			token_,
 			amt_,
 			minCollateralAmt,
 			collAmt,
@@ -842,7 +842,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		setUint(setId, amt_);
 
 		eventName_ = "LogApproveMarket(address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token, amt_, getId, setId);
+		eventParam_ = abi.encode(market, token_, amt_, getId, setId);
 	}
 }
 
