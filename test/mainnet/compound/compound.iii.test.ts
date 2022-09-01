@@ -367,7 +367,7 @@ describe("Compound III", function () {
 
     it("should withdraw some ETH collateral", async function () {
       let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
-      console.log(initialBal)
+      console.log(initialBal);
       const amount = ethers.utils.parseEther("2");
       const spells = [
         {
@@ -382,12 +382,14 @@ describe("Compound III", function () {
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.weth.address)).balance).to.be.gte(
         ethers.utils.parseEther("4")
       );
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseEther(initialBal.add(2).toString())
-      );
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(initialBal.add(2).toString());
     });
 
     it("manager should be able to withdraw collateral from the position", async function () {
+      await wallet1.sendTransaction({
+        to: tokens.weth.address,
+        value: ethers.utils.parseEther("10")
+      });
       const amount = ethers.constants.MaxUint256;
       const spells = [
         {

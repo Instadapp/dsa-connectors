@@ -39,26 +39,10 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-		if (from == address(0) && to == address(0)) {
-			CometInterface(market).withdraw(token, amt);
-		} else if (from == address(0)) {
+		if (from == address(0)) {
 			CometInterface(market).withdrawTo(to, token, amt);
 		} else if (from != address(0) && to != address(0)) {
 			CometInterface(market).withdrawFrom(from, to, token, amt);
-		}
-	}
-
-	function _transfer(
-		address market,
-		address token,
-		address from,
-		address to,
-		uint256 amt
-	) internal {
-		if (from == address(0)) {
-			CometInterface(market).transferAsset(to, token, amt);
-		} else {
-			CometInterface(market).transferAssetFrom(from, to, token, amt);
 		}
 	}
 
@@ -93,6 +77,8 @@ abstract contract Helpers is DSMath, Basic {
 		amt_ = sub(finalBal, initialBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);
+		if (params.from == address(0) || params.to == address(this))
+			convertWethToEth(isEth, tokenContract, amt_);
 
 		setUint(params.setId, amt_);
 
@@ -111,7 +97,7 @@ abstract contract Helpers is DSMath, Basic {
 			"invalid market/token address"
 		);
 
-		bool isEth = params.token == ethAddr || params.token == wethAddr;
+		bool isEth = params.token == ethAddr;
 		address token_ = isEth ? wethAddr : params.token;
 
 		TokenInterface tokenContract = TokenInterface(token_);
@@ -142,12 +128,27 @@ abstract contract Helpers is DSMath, Basic {
 		);
 		amt_ = sub(initialBal, finalBal);
 
-		convertWethToEth(isEth, tokenContract, amt_);
+		if (params.from == address(0) || params.to == address(this))
+			convertWethToEth(isEth, tokenContract, amt_);
 
 		setUint(params.setId, amt_);
 
 		amt = amt_;
 		setId = params.setId;
+	}
+
+	function _transfer(
+		address market,
+		address token,
+		address from,
+		address to,
+		uint256 amt
+	) internal {
+		if (from == address(0)) {
+			CometInterface(market).transferAsset(to, token, amt);
+		} else {
+			CometInterface(market).transferAssetFrom(from, to, token, amt);
+		}
 	}
 
 	function getAccountSupplyBalanceOfAsset(

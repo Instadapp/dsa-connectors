@@ -11,7 +11,6 @@ import { TokenInterface } from "../../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
-import "hardhat/console.sol";
 
 abstract contract CompoundV3Resolver is Events, Helpers {
 	/**
@@ -234,10 +233,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 
 		amt_ = sub(initialBal, finalBal);
-
-		console.log(amt_);
-		console.log(initialBal);
-		console.log(finalBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);
 
@@ -580,7 +575,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
 		}
 
-		convertEthToWeth(isEth, tokenContract, amt_);
 		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
