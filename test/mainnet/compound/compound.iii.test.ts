@@ -23,7 +23,10 @@ describe("Compound III", function () {
   const base = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
   const account = "0x72a53cdbbcc1b9efa39c834a540550e23463aacb";
 
-  const ABI = ["function balanceOf(address account) public view returns (uint256)"];
+  const ABI = [
+    "function balanceOf(address account) public view returns (uint256)",
+    "function approve(address spender, uint256 amount) external returns(bool)"
+  ];
   const wethContract = new ethers.Contract(tokens.weth.address, ABI);
   const baseContract = new ethers.Contract(base, ABI);
   const linkContract = new ethers.Contract(tokens.link.address, ABI);
@@ -312,21 +315,12 @@ describe("Compound III", function () {
         }
       ];
 
-      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(await comet.connect(signer).balanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseUnits("0", 6));
+      expect(await comet.connect(signer).borrowBalanceOf(dsaWallet0.address)).to.be.equal(ethers.utils.parseUnits("0", 6));
     });
 
     it("Should borrow on behalf of from Compound", async function () {
-      const spells1 = [
-        {
-          connector: connectorName,
-          method: "deposit",
-          args: [market, tokens.eth.address, ethers.utils.parseEther("6"), 0, 0]
-        }
-      ];
-
-      const tx1 = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
       const amount = ethers.utils.parseUnits("100", 6);
       const spells = [
         {
@@ -342,7 +336,7 @@ describe("Compound III", function () {
         ethers.utils.parseUnits("100", 6)
       );
       //dsawallet0 --> collateral 6eth, balance 5eth, 100usdc
-      //dsaWallet1 --> balance 3eth coll: 0eth
+      //dsaWallet1 --> balance 9eth coll: 0eth
     });
 
     it("Should payback on behalf of from Compound", async function () {

@@ -66,7 +66,7 @@ abstract contract Helpers is DSMath, Basic {
 			params.market != address(0) && params.token != address(0),
 			"invalid market/token address"
 		);
-		bool isEth = params.token == ethAddr;
+		bool isEth = params.token == ethAddr || params.token == wethAddr;
 		address token_ = isEth ? wethAddr : params.token;
 
 		TokenInterface tokenContract = TokenInterface(token_);
@@ -85,7 +85,9 @@ abstract contract Helpers is DSMath, Basic {
 				params.from = params.from == address(0)
 					? address(this)
 					: params.from;
-				uint256 balance = CometInterface(params.market).balanceOf(params.from);
+				uint256 balance = TokenInterface(params.market).balanceOf(
+					params.from
+				);
 				if (balance > 0) {
 					require(
 						amt_ <= balance,
@@ -97,7 +99,9 @@ abstract contract Helpers is DSMath, Basic {
 			params.from = params.from == address(0)
 				? address(this)
 				: params.from;
-			uint256 balance = CometInterface(params.market).balanceOf(params.from);
+			uint256 balance = TokenInterface(params.market).balanceOf(
+				params.from
+			);
 
 			require(balance == 0, "borrow-disabled-when-supplied-base");
 		}
@@ -126,7 +130,7 @@ abstract contract Helpers is DSMath, Basic {
 	) internal returns (uint256 balance) {
 		if (asset == getBaseToken(market)) {
 			//balance in base
-			balance = CometInterface(market).balanceOf(account);
+			balance = TokenInterface(market).balanceOf(account);
 		} else {
 			//balance in asset denomination
 			balance = uint256(
@@ -140,26 +144,44 @@ abstract contract Helpers is DSMath, Basic {
 		address token,
 		address src,
 		uint256 amt,
-		bool isEth
+		bool isEth,
+		bool isRepay
 	) internal returns (uint256) {
 		if (isEth) {
 			if (amt == uint256(-1)) {
-				uint256 allowance_ = CometInterface(market).allowance(
+				uint256 allowance_ = TokenInterface(token).allowance(
 					src,
 					market
 				);
-				amt = src.balance < allowance_ ? src.balance : allowance_;
+				uint256 bal_;
+				if (isRepay) {
+					bal_ = CometInterface(market).borrowBalanceOf(src);
+				} else {
+					bal_ = src.balance;
+				}
+				amt = bal_ < allowance_ ? bal_ : allowance_;
 			}
 			convertEthToWeth(isEth, TokenInterface(token), amt);
 		} else {
 			if (amt == uint256(-1)) {
-				uint256 allowance_ = CometInterface(market).allowance(
+				uint256 allowance_ = TokenInterface(token).allowance(
 					src,
 					market
 				);
-				uint256 bal_ = (token == getBaseToken(market))
-					? TokenInterface(market).balanceOf(src)
-					: CometInterface(market).userCollateral(src, token).balance;
+				uint256 bal_;
+				if (isRepay) {
+					bal_ = (token == getBaseToken(market))
+						? CometInterface(market).borrowBalanceOf(src)
+						: CometInterface(market)
+							.userCollateral(src, token)
+							.balance;
+				} else {
+					bal_ = (token == getBaseToken(market))
+						? TokenInterface(market).balanceOf(src)
+						: CometInterface(market)
+							.userCollateral(src, token)
+							.balance;
+				}
 
 				amt = bal_ < allowance_ ? bal_ : allowance_;
 			}

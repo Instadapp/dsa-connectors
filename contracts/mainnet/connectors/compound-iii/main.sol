@@ -169,7 +169,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			);
 		}
 
-		amt_ = setAmt(market, token_, from, amt_, isEth);
+		amt_ = setAmt(market, token_, from, amt_, isEth, false);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 		setUint(setId, amt_);
@@ -345,9 +345,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		require(market != address(0), "invalid market address");
 
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
+		address token_ = getBaseToken(market);
+		bool isEth = token_ == wethAddr;
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
@@ -477,9 +476,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
+		address token_ = getBaseToken(market);
+		bool isEth = token == wethAddr;
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
@@ -493,9 +491,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
 		}
 
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
-		}
 		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supply(token_, amt_);
@@ -529,9 +524,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
+		address token_ = getBaseToken(market);
+		bool isEth = token == wethAddr;
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
@@ -542,11 +536,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		if (borrowBal > 0) {
 			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
 		}
-
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
-		}
-
 		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supplyTo(to, token_, amt_);
@@ -582,20 +571,15 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
-		address token = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
+		address token_ = getBaseToken(market);
+		bool isEth = token == wethAddr;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		amt_ = setAmt(market, token_, from, amt_, isEth);
+		amt_ = setAmt(market, token_, from, amt_, isEth, true);
 
 		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
 		if (borrowBal > 0) {
 			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
-		}
-
-		if (isEth) {
-			convertEthToWeth(isEth, tokenContract, amt_);
 		}
 
 		approve(tokenContract, market, amt_);
@@ -751,7 +735,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		amt_ = setAmt(market, token_, src, amt_, isEth);
+		amt_ = setAmt(market, token_, src, amt_, isEth, false);
 
 		_transfer(market, token_, src, dest, amt_);
 
