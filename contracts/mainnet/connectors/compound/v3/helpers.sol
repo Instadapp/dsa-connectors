@@ -2,9 +2,9 @@
 pragma solidity ^0.7.0;
 pragma abicoder v2;
 
-import { TokenInterface } from "../../common/interfaces.sol";
-import { DSMath } from "../../common/math.sol";
-import { Basic } from "../../common/basic.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
+import { DSMath } from "../../../common/math.sol";
+import { Basic } from "../../../common/basic.sol";
 import { CometInterface } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
@@ -26,7 +26,7 @@ abstract contract Helpers is DSMath, Basic {
 		baseToken = CometInterface(market).baseToken();
 	}
 
-	function _withdraw(
+	function _withdrawHelper(
 		address market,
 		address token,
 		address from,
@@ -56,60 +56,79 @@ abstract contract Helpers is DSMath, Basic {
 		}
 	}
 
-	function _borrowOrWithdraw(
-		BorrowWithdrawParams memory params,
-		bool isWithdraw
-	) internal returns (uint256 amt, uint256 setId) {
+	function _borrow(BorrowWithdrawParams memory params)
+		internal
+		returns (uint256 amt, uint256 setId)
+	{
 		uint256 amt_ = getUint(params.getId, params.amt);
 
 		require(
 			params.market != address(0) && params.token != address(0),
 			"invalid market/token address"
 		);
-		bool isEth = params.token == ethAddr || params.token == wethAddr;
+		bool isEth = params.token == wethAddr;
 		address token_ = isEth ? wethAddr : params.token;
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
+		params.from = params.from == address(0) ? address(this) : params.from;
+		uint256 initialBal = CometInterface(params.market).borrowBalanceOf(
+			params.from
+		);
+
+		uint256 balance = TokenInterface(params.market).balanceOf(params.from);
+		require(balance == 0, "borrow-disabled-when-supplied-base");
+
+		_withdrawHelper(params.market, token_, params.from, params.to, amt_);
+
+		uint256 finalBal = CometInterface(params.market).borrowBalanceOf(params.from);
+		amt_ = sub(finalBal, initialBal);
+
+		convertWethToEth(isEth, tokenContract, amt_);
+
+		setUint(params.setId, amt_);
+
+		amt = amt_;
+		setId = params.setId;
+	}
+
+	function _withdraw(BorrowWithdrawParams memory params)
+		internal
+		returns (uint256 amt, uint256 setId)
+	{
+		uint256 amt_ = getUint(params.getId, params.amt);
+
+		require(
+			params.market != address(0) && params.token != address(0),
+			"invalid market/token address"
+		);
+
+		bool isEth = params.token == ethAddr || params.token == wethAddr;
+		address token_ = isEth ? wethAddr : params.token;
+
+		TokenInterface tokenContract = TokenInterface(token_);
+		params.from = params.from == address(0) ? address(this) : params.from;
+
 		uint256 initialBal = getAccountSupplyBalanceOfAsset(
-			address(this),
+			params.from,
 			params.market,
 			token_
 		);
-
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 
-		if (isWithdraw) {
-			if (token_ == getBaseToken(params.market)) {
-				//from address is address(this) for withdrawOnBehalf
-				params.from = params.from == address(0)
-					? address(this)
-					: params.from;
-				uint256 balance = TokenInterface(params.market).balanceOf(
-					params.from
-				);
-				if (balance > 0) {
-					require(
-						amt_ <= balance,
-						"withdraw-amt-greater-than-supplies"
-					);
-				}
-			}
-		} else {
-			params.from = params.from == address(0)
-				? address(this)
-				: params.from;
+		if (token_ == getBaseToken(params.market)) {
 			uint256 balance = TokenInterface(params.market).balanceOf(
 				params.from
 			);
-
-			require(balance == 0, "borrow-disabled-when-supplied-base");
+			if (balance > 0) {
+				require(amt_ <= balance, "withdraw-amt-greater-than-supplies");
+			}
 		}
 
-		_withdraw(params.market, token_, params.from, params.to, amt_);
+		_withdrawHelper(params.market, token_, params.from, params.to, amt_);
 
 		uint256 finalBal = getAccountSupplyBalanceOfAsset(
-			address(this),
+			params.from,
 			params.market,
 			token_
 		);

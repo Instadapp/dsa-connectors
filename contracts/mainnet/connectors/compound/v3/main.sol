@@ -7,11 +7,11 @@ pragma experimental ABIEncoderV2;
  * @dev Lending & Borrowing.
  */
 
-import { TokenInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
+import "hardhat/console.sol";
 
 abstract contract CompoundV3Resolver is Events, Helpers {
 	/**
@@ -253,7 +253,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function withdrawOnbehalf(
+	function withdrawOnBehalf(
 		address market,
 		address token,
 		address to,
@@ -265,7 +265,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
-		(uint256 amt_, uint256 setId_) = _borrowOrWithdraw(
+		(uint256 amt_, uint256 setId_) = _withdraw(
 			BorrowWithdrawParams({
 				market: market,
 				token: token,
@@ -274,8 +274,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			}),
-			true
+			})
 		);
 
 		eventName_ = "LogWithdrawOnBehalf(address,address,address,uint256,uint256,uint256)";
@@ -306,7 +305,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
-		(uint256 amt_, uint256 setId_) = _borrowOrWithdraw(
+		(uint256 amt_, uint256 setId_) = _withdraw(
 			BorrowWithdrawParams({
 				market: market,
 				token: token,
@@ -315,8 +314,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			}),
-			true
+			})
 		);
 
 		eventName_ = "LogWithdrawFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
@@ -327,7 +325,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Borrow base asset.
 	 * @notice Borrow base token from Compound.
 	 * @param market The address of the market.
-	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+	 * @param amt The amount of base token to borrow.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */
@@ -350,28 +348,22 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token_
-		);
-
-		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
-
 		if (token_ == getBaseToken(market)) {
 			uint256 balance = CometInterface(market).balanceOf(address(this));
 			require(balance == 0, "borrow-disabled-when-supplied-base");
 		}
 
-		CometInterface(market).withdraw(token_, amt_);
-
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
-			address(this),
-			market,
-			token_
+		uint256 initialBal = CometInterface(market).borrowBalanceOf(
+			address(this)
 		);
 
-		amt_ = sub(initialBal, finalBal);
+		CometInterface(market).withdraw(token_, amt_);
+
+		uint256 finalBal = CometInterface(market).borrowBalanceOf(
+			address(this)
+		);
+
+		amt_ = sub(finalBal, initialBal);
 
 		convertWethToEth(isEth, tokenContract, amt_);
 
@@ -401,7 +393,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
-		(uint256 amt_, uint256 setId_) = _borrowOrWithdraw(
+		(uint256 amt_, uint256 setId_) = _borrow(
 			BorrowWithdrawParams({
 				market: market,
 				token: getBaseToken(market),
@@ -410,8 +402,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			}),
-			false
+			})
 		);
 		eventName_ = "LogBorrowOnBehalf(address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, to, amt_, getId, setId_);
@@ -439,7 +430,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
-		(uint256 amt_, uint256 setId_) = _borrowOrWithdraw(
+		(uint256 amt_, uint256 setId_) = _borrow(
 			BorrowWithdrawParams({
 				market: market,
 				token: getBaseToken(market),
@@ -448,8 +439,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			}),
-			false
+			})
 		);
 		eventName_ = "LogBorrowFromUsingManager(address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, from, to, amt_, getId, setId_);
@@ -481,7 +471,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
-			? TokenInterface(market).balanceOf(address(this))
+			? CometInterface(market).borrowBalanceOf(address(this))
 			: amt_;
 
 		uint256 borrowBal = CometInterface(market).borrowBalanceOf(
@@ -531,7 +521,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
-			? TokenInterface(market).balanceOf(to)
+			? CometInterface(market).borrowBalanceOf(to)
 			: amt_;
 
 		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
@@ -580,6 +570,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = setAmt(market, token_, from, amt_, isEth, true);
+		console.log(amt_);
 
 		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
 		if (borrowBal > 0) {

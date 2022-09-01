@@ -7,8 +7,8 @@ pragma experimental ABIEncoderV2;
  * @dev Rewards.
  */
 
-import { TokenInterface } from "../../common/interfaces.sol";
-import { Stores } from "../../common/stores.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
+import { Stores } from "../../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
