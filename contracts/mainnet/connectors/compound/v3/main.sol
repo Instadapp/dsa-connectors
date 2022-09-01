@@ -11,7 +11,6 @@ import { TokenInterface } from "../../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
-import "hardhat/console.sol";
 
 abstract contract CompoundV3Resolver is Events, Helpers {
 	/**
@@ -570,7 +569,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = setAmt(market, token_, from, amt_, isEth, true);
-		console.log(amt_);
 
 		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
 		if (borrowBal > 0) {
