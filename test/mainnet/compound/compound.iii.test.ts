@@ -304,6 +304,9 @@ describe("Compound III", function () {
     });
 
     it("should payback base token from Compound", async function () {
+      //deposit 10 usdc(base token) to dsa
+      await baseContract.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseUnits("5", 6));
+
       const amount = ethers.utils.parseUnits("102", 6);
       //approve market to access dsaWallet0
       await baseContract.connect(dsa0Signer).approve(market, amount);
@@ -359,7 +362,7 @@ describe("Compound III", function () {
       );
 
       //dsawallet0 --> collateral 6eth, balance 5eth
-      //dsaWallet1 --> balance 3eth coll: 0eth
+      //dsaWallet1 --> balance 9eth coll: 0eth
     });
 
     it("should withdraw some ETH collateral", async function () {
@@ -419,7 +422,7 @@ describe("Compound III", function () {
         {
           connector: connectorName,
           method: "withdrawOnBehalf",
-          args: [market, dsaWallet0.address, amount, 0, 0]
+          args: [market, dsaWallet0.address, dsaWallet0.address, amount, 0, 0]
         }
       ];
       //dsawallet0 --> collateral 0eth, balance 9eth
