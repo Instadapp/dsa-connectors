@@ -45,6 +45,12 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
+		if (token_ == getBaseToken(market)) {
+			require(
+				CometInterface(market).borrowBalanceOf(address(this)) == 0,
+				"debt-not-repaid"
+			);
+		}
 		if (isEth) {
 			amt_ = amt_ == uint256(-1) ? address(this).balance : amt_;
 			convertEthToWeth(isEth, tokenContract, amt_);
@@ -95,6 +101,13 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
+
+		if (token_ == getBaseToken(market)) {
+			require(
+				CometInterface(market).borrowBalanceOf(to) == 0,
+				"debt-not-repaid"
+			);
+		}
 
 		if (isEth) {
 			amt_ = amt_ == uint256(-1) ? address(this).balance : amt_;
@@ -149,6 +162,13 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
+		if (token_ == getBaseToken(market)) {
+			require(
+				CometInterface(market).borrowBalanceOf(to) == 0,
+				"debt-not-repaid"
+			);
+		}
+
 		amt_ = setAmt(market, token_, from, amt_, isEth);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
@@ -197,6 +217,13 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
+
+		if (token_ == getBaseToken(market)) {
+			uint256 balance = CometInterface(market).balanceOf(address(this));
+			if (balance > 0) {
+				require(amt_ <= balance, "withdraw-amt-greater-than-supplies");
+			}
+		}
 
 		CometInterface(market).withdraw(token_, amt_);
 
@@ -247,7 +274,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			})
+			}),
+			true
 		);
 
 		eventName_ = "LogWithdrawOnBehalf(address,address,address,uint256,uint256,uint256)";
@@ -287,7 +315,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			})
+			}),
+			true
 		);
 
 		eventName_ = "LogWithdrawFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
@@ -329,6 +358,11 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
+
+		if (token_ == getBaseToken(market)) {
+			uint256 balance = CometInterface(market).balanceOf(address(this));
+			require(balance == 0, "borrow-disabled-when-supplied-base");
+		}
 
 		CometInterface(market).withdraw(token_, amt_);
 
@@ -377,7 +411,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			})
+			}),
+			false
 		);
 		eventName_ = "LogBorrowOnBehalf(address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, to, amt_, getId, setId_);
@@ -414,7 +449,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				amt: amt,
 				getId: getId,
 				setId: setId
-			})
+			}),
+			false
 		);
 		eventName_ = "LogBorrowFromUsingManager(address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, from, to, amt_, getId, setId_);
@@ -449,6 +485,13 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		amt_ = amt_ == uint256(-1)
 			? TokenInterface(market).balanceOf(address(this))
 			: amt_;
+
+		uint256 borrowBal = CometInterface(market).borrowBalanceOf(
+			address(this)
+		);
+		if (borrowBal > 0) {
+			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
+		}
 
 		if (isEth) {
 			convertEthToWeth(isEth, tokenContract, amt_);
@@ -495,6 +538,11 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			? TokenInterface(market).balanceOf(to)
 			: amt_;
 
+		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
+		if (borrowBal > 0) {
+			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
+		}
+
 		if (isEth) {
 			convertEthToWeth(isEth, tokenContract, amt_);
 		}
@@ -511,7 +559,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 	/**
 	 * @dev Repays entire borrow of the base asset form 'from' on behalf of 'to'.
-	 * @notice Repays an entire borrow of the base asset on behalf of 'to'. Approve the comet markey 
+	 * @notice Repays an entire borrow of the base asset on behalf of 'to'. Approve the comet markey
 	 * @param market The address of the market.
 	 * @param from The address from which the borrow has to be repaid on behalf of 'to'.
 	 * @param to The address on behalf of which the borrow is to be repaid.
@@ -540,6 +588,18 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = setAmt(market, token_, from, amt_, isEth);
+
+		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
+		if (borrowBal > 0) {
+			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
+		}
+
+		if (isEth) {
+			convertEthToWeth(isEth, tokenContract, amt_);
+		}
+
+		approve(tokenContract, market, amt_);
+
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 
 		setUint(setId, amt_);
@@ -582,6 +642,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			convertEthToWeth(isEth, tokenContract, amt_);
 		}
 
+		approve(tokenContract, market, amt_);
+
 		CometInterface(market).buyCollateral(
 			asset,
 			minCollateralAmt,
@@ -605,8 +667,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Transfer collateral or base asset to dest address from this account.
-	 * @notice Transfer collateral asset to dest address from caller's account.
+	 * @dev Transfer base/collateral or base asset to dest address from this account.
+	 * @notice Transfer base/collateral asset to dest address from caller's account.
 	 * @param market The address of the market.
 	 * @param token The collateral asset to transfer to dest address.
 	 * @param dest The account where to transfer the base assets.
@@ -762,6 +824,40 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			r,
 			s
 		);
+	}
+
+	function approveMarket(
+		address market,
+		address token,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory eventName_, bytes memory eventParam_)
+	{
+		uint256 amt_ = getUint(getId, amt);
+		require(
+			market != address(0) && token != address(0),
+			"invalid market/token address"
+		);
+		require(amt > 0, "amount-cannot-be-zero");
+
+		bool isEth = token == ethAddr;
+		address token_ = isEth ? wethAddr : token;
+		TokenInterface tokenContract = TokenInterface(token_);
+
+		amt_ = amt_ == uint256(-1)
+			? TokenInterface(market).balanceOf(address(this))
+			: amt_;
+
+		approve(tokenContract, market, amt_);
+
+		setUint(setId, amt_);
+
+		eventName_ = "LogApproveMarket(address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, token, amt_, getId, setId);
 	}
 }
 

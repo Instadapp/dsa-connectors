@@ -56,10 +56,10 @@ abstract contract Helpers is DSMath, Basic {
 		}
 	}
 
-	function _borrowOrWithdraw(BorrowWithdrawParams memory params)
-		internal
-		returns (uint256 amt, uint256 setId)
-	{
+	function _borrowOrWithdraw(
+		BorrowWithdrawParams memory params,
+		bool isWithdraw
+	) internal returns (uint256 amt, uint256 setId) {
 		uint256 amt_ = getUint(params.getId, params.amt);
 
 		require(
@@ -78,6 +78,29 @@ abstract contract Helpers is DSMath, Basic {
 		);
 
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
+
+		if (isWithdraw) {
+			if (token_ == getBaseToken(params.market)) {
+				//from address is address(this) for withdrawOnBehalf
+				params.from = params.from == address(0)
+					? address(this)
+					: params.from;
+				uint256 balance = CometInterface(params.market).balanceOf(params.from);
+				if (balance > 0) {
+					require(
+						amt_ <= balance,
+						"withdraw-amt-greater-than-supplies"
+					);
+				}
+			}
+		} else {
+			params.from = params.from == address(0)
+				? address(this)
+				: params.from;
+			uint256 balance = CometInterface(params.market).balanceOf(params.from);
+
+			require(balance == 0, "borrow-disabled-when-supplied-base");
+		}
 
 		_withdraw(params.market, token_, params.from, params.to, amt_);
 

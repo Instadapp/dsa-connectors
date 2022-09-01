@@ -140,4 +140,12 @@ contract Events {
 		uint256 s,
 		bool allow
 	);
+
+	event LogApproveMarket(
+		address indexed market,
+		address indexed token,
+		uint256 indexed amount,
+		uint256 getId,
+		uint256 setId
+	);
 }
