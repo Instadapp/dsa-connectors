@@ -253,9 +253,7 @@ abstract contract Helpers is DSMath, Basic {
 			)
 		);
 
-		uint256 initialCollBal_ = CometInterface(params.market)
-			.userCollateral(address(this), params.buyAsset)
-			.balance;
+		uint256 initialCollBal_ = TokenInterface(params.buyAsset).balanceOf(address(this));
 
 		approve(TokenInterface(params.sellToken), params.market, sellAmt_);
 		CometInterface(params.market).buyCollateral(
@@ -264,9 +262,8 @@ abstract contract Helpers is DSMath, Basic {
 			sellAmt_,
 			address(this)
 		);
-		uint256 finalCollBal_ = CometInterface(params.market)
-			.userCollateral(address(this), params.buyAsset)
-			.balance;
+		
+		uint256 finalCollBal_ = TokenInterface(params.buyAsset).balanceOf(address(this));
 
 		uint256 buyAmt_ = sub(finalCollBal_, initialCollBal_);
 		require(slippageAmt_ <= buyAmt_, "too-much-slippage");
