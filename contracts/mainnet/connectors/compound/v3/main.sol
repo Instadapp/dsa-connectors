@@ -223,17 +223,21 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			token_
 		);
 
-		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 		if (token_ == getBaseToken(market)) {
-			//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
-
-			require(amt_ <= initialBal, "withdraw-amt-greater-than-supplies");
+			if (amt_ == uint256(-1)) {
+				amt_ = initialBal;
+			} else {
+				//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
+				require(amt_ <= initialBal, "withdraw-amt-greater-than-supplies");
+			}
 
 			//if borrow balance > 0, there are no supplies so no withdraw, borrow instead.
 			require(
 				CometInterface(market).borrowBalanceOf(address(this)) == 0,
 				"withdraw-disabled-for-zero-supplies"
 			);
+		} else {
+			amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 		}
 
 		CometInterface(market).withdraw(token_, amt_);
