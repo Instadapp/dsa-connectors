@@ -278,7 +278,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			})
 		);
 
-		eventName_ = "LogWithdrawOnBehalf(address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogWithdrawTo(address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token, to, amt_, getId, setId_);
 	}
 
@@ -739,6 +739,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	{
 		uint256 amt_ = getUint(getId, amount);
 		require(market != address(0), "invalid market address");
+		require(dest != address(0), "invalid destination address");
 
 		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;

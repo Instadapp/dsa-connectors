@@ -37,7 +37,7 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogWithdrawOnBehalfOf(
+	event LogWithdrawTo(
 		address indexed market,
 		address indexed token,
 		address to,

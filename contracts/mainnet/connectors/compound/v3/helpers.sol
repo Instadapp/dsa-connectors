@@ -198,7 +198,8 @@ abstract contract Helpers is DSMath, Basic {
 							.userCollateral(src, token)
 							.balance;
 				}
-				amt = bal_ < allowance_ ? bal_ : allowance_;
+				if (action == ACTION.transfer) amt = bal_;
+				else amt = bal_ < allowance_ ? bal_ : allowance_;
 			}
 			if (src == address(this))
 				convertEthToWeth(isEth, TokenInterface(token), amt);
@@ -220,8 +221,8 @@ abstract contract Helpers is DSMath, Basic {
 							.userCollateral(src, token)
 							.balance;
 				}
-
-				amt = bal_ < allowance_ ? bal_ : allowance_;
+				if (action == ACTION.transfer) amt = bal_;
+				else amt = bal_ < allowance_ ? bal_ : allowance_;
 			}
 		}
 		return amt;
