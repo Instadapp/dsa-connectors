@@ -353,7 +353,6 @@ describe("Compound III", function () {
       expect(new BigNumber(await comet.connect(signer).borrowBalanceOf(dsaWallet0.address)).toFixed()).to.be.equal(
         ethers.utils.parseUnits("100", 6)
       );
-      console.log(await baseContract.connect(wallet0).balanceOf(dsaWallet0.address));
     });
 
     it("Should payback on behalf of from Compound", async function () {
@@ -505,7 +504,6 @@ describe("Compound III", function () {
       const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
       let initialBal = await baseContract.connect(signer).balanceOf(dsaWallet1.address);
-      console.log(initialBal.toString());
       let spells1 = [
         {
           connector: connectorName,
@@ -529,7 +527,6 @@ describe("Compound III", function () {
         }
       ];
       let initialBal = await baseContract.connect(signer).balanceOf(dsaWallet0.address);
-      console.log(initialBal.toString());
 
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
