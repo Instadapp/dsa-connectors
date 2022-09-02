@@ -254,7 +254,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function withdrawOnBehalf(
+	function withdrawTo(
 		address market,
 		address token,
 		address to,
