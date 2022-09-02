@@ -228,7 +228,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			if (amt_ == uint256(-1)) {
 				amt_ = initialBal;
 			} else {
-				require(amt_ <= initialBal, "withdraw-amt-greater-than-supplies");
+				require(
+					amt_ <= initialBal,
+					"withdraw-amt-greater-than-supplies"
+				);
 			}
 
 			//if borrow balance > 0, there are no supplies so no withdraw, borrow instead.
@@ -405,7 +408,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		if (token_ == getBaseToken(market)) {
-			require(CometInterface(market).balanceOf(address(this)) == 0, "borrow-disabled-when-supplied-base");
+			require(
+				CometInterface(market).balanceOf(address(this)) == 0,
+				"borrow-disabled-when-supplied-base"
+			);
 		}
 
 		uint256 initialBal = CometInterface(market).borrowBalanceOf(
@@ -585,16 +591,24 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		uint256 borrowedBalance_ = CometInterface(market).borrowBalanceOf(address(this));
+		uint256 borrowedBalance_ = CometInterface(market).borrowBalanceOf(
+			address(this)
+		);
 
 		if (amt_ == uint256(-1)) {
 			amt_ = initialBal;
 		} else {
-			require(amt_ <= borrowedBalance_, "withdraw-amt-greater-than-supplies");
+			require(
+				amt_ <= borrowedBalance_,
+				"withdraw-amt-greater-than-supplies"
+			);
 		}
 
 		//if supply balance > 0, there are no borrowing so no repay, withdraw instead.
-		require(CometInterface(market).balanceOf(address(this)) == 0, "cannot-repay-when-supplied");
+		require(
+			CometInterface(market).balanceOf(address(this)) == 0,
+			"cannot-repay-when-supplied"
+		);
 
 		convertEthToWeth(isEth, tokenContract, amt_);
 		approve(tokenContract, market, amt_);
@@ -608,8 +622,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Repays entire borrow of the base asset on behalf of 'to'.
-	 * @notice Repays an entire borrow of the base asset on behalf of 'to'.
+	 * @dev Repays borrow of the base asset on behalf of 'to'.
+	 * @notice Repays borrow of the base asset on behalf of 'to'.
 	 * @param market The address of the market.
 	 * @param token The address of the token to be repaid. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param to The address on behalf of which the borrow is to be repaid.
@@ -646,11 +660,17 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		if (amt_ == uint256(-1)) {
 			amt_ = initialBal;
 		} else {
-			require(amt_ <= borrowedBalance_, "withdraw-amt-greater-than-supplies");
+			require(
+				amt_ <= borrowedBalance_,
+				"withdraw-amt-greater-than-supplies"
+			);
 		}
 
 		//if supply balance > 0, there are no borrowing so no repay, withdraw instead.
-		require(CometInterface(market).balanceOf(to) == 0, "cannot-repay-when-supplied");
+		require(
+			CometInterface(market).balanceOf(to) == 0,
+			"cannot-repay-when-supplied"
+		);
 
 		convertEthToWeth(isEth, tokenContract, amt_);
 		approve(tokenContract, market, amt_);
@@ -664,8 +684,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
-	 * @dev Repays entire borrow of the base asset form 'from' on behalf of 'to'.
-	 * @notice Repays an entire borrow of the base asset on behalf of 'to'. Approve the comet markey
+	 * @dev Repays borrow of the base asset form 'from' on behalf of 'to'.
+	 * @notice Repays borrow of the base asset on behalf of 'to'. 'From' address must approve the comet market.
 	 * @param market The address of the market.
 	 * @param token The address of the token to be repaid. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param from The address from which the borrow has to be repaid on behalf of 'to'.
