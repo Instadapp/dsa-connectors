@@ -18,6 +18,12 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 setId;
 	}
 
+	enum ACTION {
+		repay,
+		deposit,
+		transfer
+	}
+
 	function getBaseToken(address market)
 		internal
 		view
@@ -172,7 +178,7 @@ abstract contract Helpers is DSMath, Basic {
 		address src,
 		uint256 amt,
 		bool isEth,
-		bool isRepay
+		ACTION action
 	) internal returns (uint256) {
 		if (isEth) {
 			if (amt == uint256(-1)) {
@@ -181,10 +187,16 @@ abstract contract Helpers is DSMath, Basic {
 					market
 				);
 				uint256 bal_;
-				if (isRepay) {
+				if (action == ACTION.repay) {
 					bal_ = CometInterface(market).borrowBalanceOf(src);
-				} else {
+				} else if (action == ACTION.deposit) {
 					bal_ = src.balance;
+				} else if (action == ACTION.transfer) {
+					bal_ = (token == getBaseToken(market))
+						? TokenInterface(market).balanceOf(src)
+						: CometInterface(market)
+							.userCollateral(src, token)
+							.balance;
 				}
 				amt = bal_ < allowance_ ? bal_ : allowance_;
 			}
@@ -197,13 +209,11 @@ abstract contract Helpers is DSMath, Basic {
 					market
 				);
 				uint256 bal_;
-				if (isRepay) {
-					bal_ = (token == getBaseToken(market))
-						? CometInterface(market).borrowBalanceOf(src)
-						: CometInterface(market)
-							.userCollateral(src, token)
-							.balance;
-				} else {
+				if (action == ACTION.repay) {
+					bal_ = CometInterface(market).borrowBalanceOf(src);
+				} else if (action == ACTION.deposit) {
+					bal_ = TokenInterface(token).balanceOf(src);
+				} else if (action == ACTION.transfer) {
 					bal_ = (token == getBaseToken(market))
 						? TokenInterface(market).balanceOf(src)
 						: CometInterface(market)
