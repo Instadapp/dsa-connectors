@@ -18,10 +18,10 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 setId;
 	}
 
-	enum ACTION {
-		repay,
-		deposit,
-		transfer
+	enum Action {
+		REPAY,
+		DEPOSIT,
+		TRANSFER
 	}
 
 	function getBaseToken(address market)
@@ -113,7 +113,7 @@ abstract contract Helpers is DSMath, Basic {
 		TokenInterface tokenContract = TokenInterface(token_);
 		params.from = params.from == address(0) ? address(this) : params.from;
 
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
+		uint256 initialBal = _getAccountSupplyBalanceOfAsset(
 			params.from,
 			params.market,
 			token_
@@ -131,7 +131,7 @@ abstract contract Helpers is DSMath, Basic {
 
 		_withdrawHelper(params.market, token_, params.from, params.to, amt_);
 
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
+		uint256 finalBal = _getAccountSupplyBalanceOfAsset(
 			params.from,
 			params.market,
 			token_
@@ -161,7 +161,7 @@ abstract contract Helpers is DSMath, Basic {
 		}
 	}
 
-	function getAccountSupplyBalanceOfAsset(
+	function _getAccountSupplyBalanceOfAsset(
 		address account,
 		address market,
 		address asset
@@ -177,29 +177,29 @@ abstract contract Helpers is DSMath, Basic {
 		}
 	}
 
-	function setAmt(
+	function _setAmt(
 		address market,
 		address token,
 		address src,
 		uint256 amt,
 		bool isEth,
-		ACTION action
+		Action action
 	) internal returns (uint256) {
 		if (amt == uint256(-1)) {
 			uint256 allowance_ = TokenInterface(token).allowance(src, market);
 			uint256 bal_;
 
-			if (action == ACTION.repay) {
+			if (action == Action.REPAY) {
 				bal_ = CometInterface(market).borrowBalanceOf(src);
-			} else if (action == ACTION.deposit) {
+			} else if (action == Action.DEPOSIT) {
 				if (isEth) bal_ = src.balance;
 				else bal_ = TokenInterface(token).balanceOf(src);
-			} else if (action == ACTION.transfer) {
+			} else if (action == Action.TRANSFER) {
 				bal_ = (token == getBaseToken(market))
 					? TokenInterface(market).balanceOf(src)
 					: CometInterface(market).userCollateral(src, token).balance;
 			}
-			if (action == ACTION.transfer) amt = bal_;
+			if (action == Action.TRANSFER) amt = bal_;
 			else amt = bal_ < allowance_ ? bal_ : allowance_;
 		}
 		if (src == address(this))

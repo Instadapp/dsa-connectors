@@ -168,7 +168,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			);
 		}
 
-		amt_ = setAmt(market, token_, from, amt_, isEth, ACTION.deposit);
+		amt_ = _setAmt(market, token_, from, amt_, isEth, Action.DEPOSIT);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 		setUint(setId, amt_);
@@ -209,7 +209,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		uint256 initialBal = getAccountSupplyBalanceOfAsset(
+		uint256 initialBal = _getAccountSupplyBalanceOfAsset(
 			address(this),
 			market,
 			token_
@@ -226,7 +226,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		CometInterface(market).withdraw(token_, amt_);
 
-		uint256 finalBal = getAccountSupplyBalanceOfAsset(
+		uint256 finalBal = _getAccountSupplyBalanceOfAsset(
 			address(this),
 			market,
 			token_
@@ -602,7 +602,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		amt_ = setAmt(market, token_, from, amt_, isEth, ACTION.repay);
+		amt_ = _setAmt(market, token_, from, amt_, isEth, Action.REPAY);
 
 		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
 		if (borrowBal > 0) {
@@ -764,7 +764,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		amt_ = setAmt(market, token_, src, amt_, isEth, ACTION.transfer);
+		amt_ = _setAmt(market, token_, src, amt_, isEth, Action.TRANSFER);
 
 		_transfer(market, token_, src, dest, amt_);
 
