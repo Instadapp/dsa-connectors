@@ -178,7 +178,7 @@ abstract contract Helpers is DSMath, Basic {
 	) internal returns (uint256 balance) {
 		if (asset == getBaseToken(market)) {
 			//balance in base
-			balance = TokenInterface(market).balanceOf(account);
+			balance = CometInterface(market).balanceOf(account);
 		} else {
 			//balance in asset denomination
 			balance = uint256(
