@@ -207,13 +207,14 @@ abstract contract Helpers is DSMath, Basic {
 			params.market != address(0) && params.buyAsset != address(0),
 			"invalid market/token address"
 		);
+
+		bool isEth = params.sellToken == ethAddr;
+		params.sellToken = isEth ? wethAddr : params.sellToken;
+
 		require(
 			params.sellToken == getBaseToken(params.market),
 			"invalid-sell-token"
 		);
-
-		bool isEth = params.sellToken == ethAddr;
-		params.sellToken = isEth ? wethAddr : params.sellToken;
 
 		if (sellAmt_ == uint256(-1)) {
 			sellAmt_ = isEth
@@ -236,7 +237,9 @@ abstract contract Helpers is DSMath, Basic {
 			)
 		);
 
-		uint256 initialCollBal_ = TokenInterface(params.buyAsset).balanceOf(address(this));
+		uint256 initialCollBal_ = TokenInterface(params.buyAsset).balanceOf(
+			address(this)
+		);
 
 		approve(TokenInterface(params.sellToken), params.market, sellAmt_);
 		CometInterface(params.market).buyCollateral(
@@ -246,7 +249,9 @@ abstract contract Helpers is DSMath, Basic {
 			address(this)
 		);
 
-		uint256 finalCollBal_ = TokenInterface(params.buyAsset).balanceOf(address(this));
+		uint256 finalCollBal_ = TokenInterface(params.buyAsset).balanceOf(
+			address(this)
+		);
 
 		uint256 buyAmt_ = sub(finalCollBal_, initialCollBal_);
 		require(slippageAmt_ <= buyAmt_, "too-much-slippage");
