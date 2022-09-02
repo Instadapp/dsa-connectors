@@ -557,26 +557,6 @@ describe("Compound III", function () {
       expect(await wethContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(initialBal.sub(amount));
     });
 
-    it("should deposit eth using manager same as 'from'", async function () {
-      const amount = ethers.utils.parseEther("1");
-      await wethContract.connect(dsa0Signer).approve(market, amount);
-      let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
-
-      const spells = [
-        {
-          connector: connectorName,
-          method: "depositFromUsingManager",
-          args: [market, tokens.eth.address, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
-        }
-      ];
-
-      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
-      const receipt = await tx.wait();
-      expect((await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.weth.address)).balance).to.be.gte(
-        ethers.utils.parseEther("2")
-      );
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(initialBal.sub(amount));
-    });
     it("should allow manager for dsaWallet0's collateral", async function () {
       const spells = [
         {

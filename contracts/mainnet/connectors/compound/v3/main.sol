@@ -157,7 +157,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			market != address(0) && token != address(0) && to != address(0),
 			"invalid market/token/to address"
 		);
-		require(from != address(this), "from-cannot-be-address(this)-use-paybackOnBehalf");
+		require(from != address(this), "from-cannot-be-address(this)-use-depositOnBehalf");
 
 		address token_ = token == ethAddr ? wethAddr : token;
 
@@ -173,7 +173,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			token_,
 			from,
 			amt_,
-			isEth,
+			token == ethAddr,
 			Action.DEPOSIT
 		);
 
@@ -717,7 +717,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				token_,
 				from,
 				amt_,
-				isEth,
+				token == ethAddr,
 				Action.REPAY
 			);
 		} else {
@@ -809,9 +809,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		address token_ = token == ethAddr ? wethAddr : token;
 
-		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(address(this)) : amt_;
+		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(address(this), market, token) : amt_;
 
-		CometInterface(market).transferAssetFrom(address(this), dest, token_, amt);
+		CometInterface(market).transferAssetFrom(address(this), dest, token_, amt_);
 
 		setUint(setId, amt_);
 
@@ -851,7 +851,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		address token_ = token == ethAddr ? wethAddr : token;
 
-		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(src) : amt_;
+		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(src, market, token) : amt_;
 
 		CometInterface(market).transferAssetFrom(src, dest, token_, amt_);
 
