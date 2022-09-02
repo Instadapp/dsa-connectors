@@ -97,12 +97,13 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogPayback(address indexed market, uint256 tokenAmt, uint256 setId);
+	event LogPayback(address indexed market, uint256 tokenAmt, uint256 getId, uint256 setId);
 
 	event LogPaybackOnBehalf(
 		address indexed market,
 		address to,
 		uint256 tokenAmt,
+		uint256 getId,
 		uint256 setId
 	);
 
@@ -111,6 +112,7 @@ contract Events {
 		address from,
 		address to,
 		uint256 tokenAmt,
+		uint256 getId,
 		uint256 setId
 	);
 
@@ -127,14 +129,13 @@ contract Events {
 	event LogTransferAsset(
 		address indexed market,
 		address token,
-		address indexed from,
 		address indexed dest,
 		uint256 amount,
 		uint256 getId,
 		uint256 setId
 	);
 
-	event LogTransferAssetFromUsingManager(
+	event LogTransferAssetOnBehalf(
 		address indexed market,
 		address token,
 		address indexed from,

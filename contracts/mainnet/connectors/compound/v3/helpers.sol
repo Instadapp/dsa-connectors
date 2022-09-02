@@ -82,7 +82,7 @@ abstract contract Helpers is DSMath, Basic {
 		);
 
 		require(
-			TokenInterface(params.market).balanceOf(params.from) == 0,
+			CometInterface(params.market).balanceOf(params.from) == 0,
 			"borrow-disabled-when-supplied-base"
 		);
 
@@ -127,22 +127,16 @@ abstract contract Helpers is DSMath, Basic {
 			token_
 		);
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
-
 		if (token_ == getBaseToken(params.market)) {
-			uint256 balance = CometInterface(params.market).balanceOf(
-				params.from
-			);
 			//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
-			if (balance > 0) {
-				require(amt_ <= balance, "withdraw-amt-greater-than-supplies");
-			}
+			require(amt_ <= initialBal, "withdraw-amt-greater-than-supplies");
+
 			//if borrow balance > 0, there are no supplies so no withdraw, borrow instead.
 			require(
 				CometInterface(params.market).borrowBalanceOf(params.from) == 0,
 				"withdraw-disabled-for-zero-supplies"
 			);
 		}
-
 		_withdrawHelper(params.market, token_, params.from, params.to, amt_);
 
 		uint256 finalBal = _getAccountSupplyBalanceOfAsset(
@@ -261,6 +255,10 @@ abstract contract Helpers is DSMath, Basic {
 				)
 			)
 		);
+
+		uint256 initialCollBal_ = CometInterface(params.market)
+			.userCollateral(address(this), params.buyAsset)
+			.balance;
 		approve(TokenInterface(params.sellToken), params.market, sellAmt_);
 		CometInterface(params.market).buyCollateral(
 			params.buyAsset,
@@ -268,11 +266,11 @@ abstract contract Helpers is DSMath, Basic {
 			sellAmt_,
 			address(this)
 		);
+		uint256 finalCollBal_ = CometInterface(params.market)
+			.userCollateral(address(this), params.buyAsset)
+			.balance;
 
-		uint256 buyAmt_ = CometInterface(params.market).quoteCollateral(
-			params.buyAsset,
-			sellAmt_
-		);
+		uint256 buyAmt_ = sub(finalCollBal_, initialCollBal_);
 		require(slippageAmt_ <= buyAmt_, "too-much-slippage");
 
 		convertWethToEth(isEth, TokenInterface(params.buyAsset), buyAmt_);
