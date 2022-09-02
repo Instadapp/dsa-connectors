@@ -136,7 +136,7 @@ abstract contract Helpers is DSMath, Basic {
 
 			//if borrow balance > 0, there are no supplies so no withdraw, borrow instead.
 			require(
-				CometInterface(market).borrowBalanceOf(params.from) == 0,
+				CometInterface(params.market).borrowBalanceOf(params.from) == 0,
 				"withdraw-disabled-for-zero-supplies"
 			);
 		} else {
