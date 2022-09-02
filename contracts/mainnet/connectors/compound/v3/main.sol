@@ -370,7 +370,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			})
 		);
 
-		eventName_ = "LogWithdrawOnBehalf(address,address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogWithdrawOnBehalfAndTransfer(address,address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token, from, to, amt_, getId, setId_);
 	}
 
