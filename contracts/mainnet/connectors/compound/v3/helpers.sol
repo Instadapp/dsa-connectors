@@ -56,7 +56,7 @@ abstract contract Helpers is DSMath, Basic {
 			params.market != address(0) && params.token != address(0),
 			"invalid market/token address"
 		);
-		bool isEth = params.token == wethAddr;
+		bool isEth = params.token == ethAddr;
 		address token_ = isEth ? wethAddr : params.token;
 
 		TokenInterface tokenContract = TokenInterface(token_);

@@ -40,7 +40,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			"invalid market/token address"
 		);
 
-		bool isEth = token == ethAddr || token == wethAddr;
+		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
@@ -98,7 +98,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 		require(to != address(0), "invalid to address");
 
-		bool isEth = token == ethAddr || token == wethAddr;
+		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
@@ -159,7 +159,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 		require(to != address(0), "invalid to address");
 
-		bool isEth = token == ethAddr || token == wethAddr;
+		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
 		TokenInterface tokenContract = TokenInterface(token_);
 
@@ -332,6 +332,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 */
 	function borrow(
 		address market,
+		address token,
 		uint256 amt,
 		uint256 getId,
 		uint256 setId
@@ -344,8 +345,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		require(market != address(0), "invalid market address");
 
+		bool isEth = token == ethAddr;
 		address token_ = getBaseToken(market);
-		bool isEth = token_ == wethAddr;
+		require(token == token_ || token == ethAddr, "invalid-token");
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
@@ -385,6 +387,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 */
 	function borrowOnBehalf(
 		address market,
+		address token,
 		address to,
 		uint256 amt,
 		uint256 getId,
@@ -394,10 +397,14 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
+		require(
+			token == ethAddr || token == getBaseToken(market),
+			"invalid-token"
+		);
 		(uint256 amt_, uint256 setId_) = _borrow(
 			BorrowWithdrawParams({
 				market: market,
-				token: getBaseToken(market),
+				token: token,
 				from: address(0),
 				to: to,
 				amt: amt,
@@ -423,6 +430,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		address market,
 		address from,
 		address to,
+		address token,
 		uint256 amt,
 		uint256 getId,
 		uint256 setId
@@ -431,10 +439,14 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
+		require(
+			token == ethAddr || token == getBaseToken(market),
+			"invalid-token"
+		);
 		(uint256 amt_, uint256 setId_) = _borrow(
 			BorrowWithdrawParams({
 				market: market,
-				token: getBaseToken(market),
+				token: token,
 				from: from,
 				to: to,
 				amt: amt,
@@ -456,6 +468,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 */
 	function payback(
 		address market,
+		address token,
 		uint256 amt,
 		uint256 getId,
 		uint256 setId
@@ -467,8 +480,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amt);
 		require(market != address(0), "invalid market address");
 
+		bool isEth = token == ethAddr;
 		address token_ = getBaseToken(market);
-		bool isEth = token_ == wethAddr;
+		require(token == token_ || token == ethAddr, "invalid-token");
+
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
@@ -503,6 +518,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 */
 	function paybackOnBehalf(
 		address market,
+		address token,
 		address to,
 		uint256 amt,
 		uint256 getId,
@@ -516,7 +532,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		require(market != address(0), "invalid market address");
 
 		address token_ = getBaseToken(market);
-		bool isEth = token_ == wethAddr;
+		bool isEth = token == ethAddr;
+		require(token == token_ || token == ethAddr, "invalid-token");
+
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = amt_ == uint256(-1)
@@ -551,6 +569,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 */
 	function paybackFromUsingManager(
 		address market,
+		address token,
 		address from,
 		address to,
 		uint256 amt,
@@ -565,7 +584,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		require(market != address(0), "invalid market address");
 
 		address token_ = getBaseToken(market);
-		bool isEth = token_ == wethAddr;
+		bool isEth = token == ethAddr;
+		require(token == token_ || token == ethAddr, "invalid-token");
+
 		TokenInterface tokenContract = TokenInterface(token_);
 
 		amt_ = setAmt(market, token_, from, amt_, isEth, true);
