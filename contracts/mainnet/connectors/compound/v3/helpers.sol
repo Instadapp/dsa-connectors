@@ -33,8 +33,7 @@ abstract contract Helpers is DSMath, Basic {
 	}
 
 	/**
-	 *@dev helper function for three withdraw or borrow cases:
-	 *withdraw - for `withdraw` withdraws the collateral or base from DSA's position to account.
+	 *@dev helper function for following withdraw or borrow cases:
 	 *withdrawFrom - for `withdrawFromUsingManager` withdraws from src to dest using DSA as manager
 	 *withdrawTo - for `withdrawTo` withdraws from DSA to dest address.
 	 */
@@ -45,9 +44,9 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-		if (from == address(0)) {
+		if (from == address(this)) {
 			CometInterface(market).withdrawTo(to, token, amt);
-		} else if (from != address(0) && to != address(0)) {
+		} else {
 			CometInterface(market).withdrawFrom(from, to, token, amt);
 		}
 	}
@@ -72,8 +71,10 @@ abstract contract Helpers is DSMath, Basic {
 			params.from
 		);
 
-		uint256 balance = TokenInterface(params.market).balanceOf(params.from);
-		require(balance == 0, "borrow-disabled-when-supplied-base");
+		require(
+			TokenInterface(params.market).balanceOf(params.from) == 0,
+			"borrow-disabled-when-supplied-base"
+		);
 
 		_withdrawHelper(params.market, token_, params.from, params.to, amt_);
 
@@ -82,7 +83,7 @@ abstract contract Helpers is DSMath, Basic {
 		);
 		amt_ = sub(finalBal, initialBal);
 
-		if (params.from == address(0) || params.to == address(this))
+		if (params.to == address(this))
 			convertWethToEth(isEth, tokenContract, amt_);
 
 		setUint(params.setId, amt_);
@@ -133,7 +134,7 @@ abstract contract Helpers is DSMath, Basic {
 		);
 		amt_ = sub(initialBal, finalBal);
 
-		if (params.from == address(0) || params.to == address(this))
+		if (params.to == address(this))
 			convertWethToEth(isEth, tokenContract, amt_);
 
 		setUint(params.setId, amt_);

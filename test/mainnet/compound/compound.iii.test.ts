@@ -142,6 +142,7 @@ describe("Compound III", function () {
   let dsaWallet0: any;
   let dsaWallet1: any;
   let dsaWallet2: any;
+  let dsaWallet3: any;
   let wallet: any;
   let dsa0Signer: any;
   let masterSigner: Signer;
@@ -208,6 +209,8 @@ describe("Compound III", function () {
       expect(!!dsaWallet1.address).to.be.true;
       dsaWallet2 = await buildDSAv2(wallet0.address);
       expect(!!dsaWallet2.address).to.be.true;
+      dsaWallet3 = await buildDSAv2(wallet0.address);
+      expect(!!dsaWallet3.address).to.be.true;
       wallet = await ethers.getSigner(dsaWallet0.address);
       expect(!!dsaWallet1.address).to.be.true;
     });
@@ -226,6 +229,11 @@ describe("Compound III", function () {
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
       await wallet0.sendTransaction({
         to: dsaWallet1.address,
+        value: ethers.utils.parseEther("10")
+      });
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+      await wallet0.sendTransaction({
+        to: dsaWallet3.address,
         value: ethers.utils.parseEther("10")
       });
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
@@ -496,7 +504,7 @@ describe("Compound III", function () {
       ];
       const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      let initialBal= (await baseContract.connect(signer).balanceOf(dsaWallet1.address));
+      let initialBal = await baseContract.connect(signer).balanceOf(dsaWallet1.address);
       console.log(initialBal.toString());
       let spells1 = [
         {
@@ -520,7 +528,7 @@ describe("Compound III", function () {
           args: [market, base, dsaWallet0.address, dsaWallet1.address, ethers.constants.MaxUint256, 0, 0]
         }
       ];
-      let initialBal= (await baseContract.connect(signer).balanceOf(dsaWallet0.address));
+      let initialBal = await baseContract.connect(signer).balanceOf(dsaWallet0.address);
       console.log(initialBal.toString());
 
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
@@ -572,37 +580,47 @@ describe("Compound III", function () {
       );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(initialBal.sub(amount));
     });
+    it("should allow manager for dsaWallet0's collateral", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "toggleAccountManager",
+          args: [market, dsaWallet2.address, true]
+        }
+      ];
 
+      const tx = await dsaWallet3.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      const receipt = await tx.wait();
+    });
     it("should borrow using manager", async function () {
+      let initialBal = await baseContract.connect(wallet0).balanceOf(dsaWallet0.address);
       await wallet0.sendTransaction({
-        to: dsaWallet0.address,
-        value: ethers.utils.parseEther("5")
+        to: dsaWallet3.address,
+        value: ethers.utils.parseEther("15")
       });
       const spells1 = [
         {
           connector: connectorName,
           method: "deposit",
-          args: [market, tokens.eth.address, ethers.utils.parseEther("3"), 0, 0]
+          args: [market, tokens.eth.address, ethers.utils.parseEther("15"), 0, 0]
         }
       ];
-      const tx1 = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
-      const amount = ethers.utils.parseUnits("10", 6);
+      const tx1 = await dsaWallet3.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
+      const amount = ethers.utils.parseUnits("500", 6);
       const spells = [
         {
           connector: connectorName,
           method: "borrowOnBehalf",
-          args: [market, base, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
+          args: [market, base, dsaWallet3.address, dsaWallet0.address, amount, 0, 0]
         }
       ];
 
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(new BigNumber(await comet.connect(signer).borrowBalanceOf(dsaWallet0.address)).toFixed()).to.be.equal(
-        ethers.utils.parseUnits("10", 6)
+      expect(new BigNumber(await comet.connect(signer).borrowBalanceOf(dsaWallet3.address)).toFixed()).to.be.equal(
+        ethers.utils.parseUnits("500", 6)
       );
-      expect(await baseContract.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.equal(
-        ethers.utils.parseUnits("10", 6)
-      );
+      expect(await baseContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.equal(initialBal.add(amount));
     });
 
     it("should transferAsset collateral using manager", async function () {
