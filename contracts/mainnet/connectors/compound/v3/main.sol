@@ -159,7 +159,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 		require(from != address(this), "from-cannot-be-address(this)-use-paybackOnBehalf");
 
-		address token_ = token == ethAddr ? wethAddr : token;
+		bool isEth = token == ethAddr;
+		address token_ = isEth? wethAddr : token;
 
 		if (token_ == getBaseToken(market)) {
 			require(
@@ -709,7 +710,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		require(from != address(this), "from-cannot-be-address(this)-use-paybackOnBehalf");
 
 		address token_ = getBaseToken(market);
-		require(token == token_ || token == ethAddr, "invalid-token");
+		bool isEth = token == ethAddr;
+		require(token == token_ || isEth, "invalid-token");
 
 		if (amt_ == uint256(-1)) {
 			amt_ = _calculateFromAmount(
