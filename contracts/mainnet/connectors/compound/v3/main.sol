@@ -594,7 +594,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 
 		if (amt_ == uint256(-1)) {
-			amt_ = initialBal;
+			amt_ = borrowedBalance_;
 		} else {
 			require(
 				amt_ <= borrowedBalance_,
