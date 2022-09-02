@@ -335,7 +335,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "borrowOnBehalf",
+          method: "borrowTo",
           args: [market, base, dsaWallet1.address, amount, 0, 0]
         }
       ];
@@ -590,7 +590,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "borrowFromUsingManager",
+          method: "borrowOnBehalf",
           args: [market, base, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
         }
       ];

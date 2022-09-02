@@ -326,6 +326,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Borrow base asset.
 	 * @notice Borrow base token from Compound.
 	 * @param market The address of the market.
+	 * @param token The address of the token to be borrowed. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of base token to borrow.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
@@ -380,12 +381,13 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Borrow base asset and transfer to 'to' account.
 	 * @notice Borrow base token from Compound on behalf of an address.
 	 * @param market The address of the market.
+	 * @param token The address of the token to be borrowed. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param to The address to which the borrowed asset is transferred.
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */
-	function borrowOnBehalf(
+	function borrowTo(
 		address market,
 		address token,
 		address to,
@@ -420,13 +422,14 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Borrow base asset from 'from' and transfer to 'to'.
 	 * @notice Borrow base token or deposited token from Compound.
 	 * @param market The address of the market.
+	 * @param token The address of the token to be borrowed. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
 	 * @param from The address from where asset is to be withdrawed.
 	 * @param to The address to which the borrowed assets are to be transferred.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */
-	function borrowFromUsingManager(
+	function borrowOnBehalf(
 		address market,
 		address token,
 		address from,
@@ -462,6 +465,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Repays the borrowed base asset.
 	 * @notice Repays the borrow of the base asset.
 	 * @param market The address of the market.
+	 * @param token The address of the token to be repaid. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount to be repaid.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens repaid.
@@ -511,6 +515,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Repays entire borrow of the base asset on behalf of 'to'.
 	 * @notice Repays an entire borrow of the base asset on behalf of 'to'.
 	 * @param market The address of the market.
+	 * @param token The address of the token to be repaid. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param to The address on behalf of which the borrow is to be repaid.
 	 * @param amt The amount to be repaid.
 	 * @param getId ID to retrieve amt.
@@ -561,6 +566,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Repays entire borrow of the base asset form 'from' on behalf of 'to'.
 	 * @notice Repays an entire borrow of the base asset on behalf of 'to'. Approve the comet markey
 	 * @param market The address of the market.
+	 * @param token The address of the token to be repaid. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param from The address from which the borrow has to be repaid on behalf of 'to'.
 	 * @param to The address on behalf of which the borrow is to be repaid.
 	 * @param amt The amount to be repaid.
