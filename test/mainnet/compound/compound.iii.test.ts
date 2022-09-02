@@ -399,7 +399,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "withdrawFromUsingManager",
+          method: "withdrawOnBehalf",
           args: [market, tokens.eth.address, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
         }
       ];

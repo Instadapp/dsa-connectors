@@ -177,7 +177,7 @@ abstract contract Helpers is DSMath, Basic {
 		}
 	}
 
-	function _setAmt(
+	function _calculateFromAmount(
 		address market,
 		address token,
 		address src,
