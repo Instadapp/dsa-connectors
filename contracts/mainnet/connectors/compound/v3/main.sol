@@ -714,17 +714,19 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @dev Buy collateral asset absorbed, from the market.
 	 * @notice Buy collateral asset to increase protocol base reserves until targetReserves is reached.
 	 * @param market The address of the market from where to withdraw.
-	 * @param asset The collateral asset to purachase.
-	 * @param minCollateralAmt Minimum amount of collateral expected to be received.
-	 * @param baseAmt Amount of base asset to be sold for collateral.
+	 * @param sellToken base token. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param buyAsset The collateral asset to purachase. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param unitAmt Minimum amount of collateral expected to be received.
+	 * @param baseSellAmt Amount of base asset to be sold for collateral.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of base tokens sold.
 	 */
 	function buyCollateral(
 		address market,
-		address asset,
-		uint256 minCollateralAmt,
-		uint256 baseAmt,
+		address sellToken,
+		address buyAsset,
+		uint256 unitAmt,
+		uint256 baseSellAmt,
 		uint256 getId,
 		uint256 setId
 	)
@@ -732,36 +734,14 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		payable
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
-		uint256 amt_ = getUint(getId, baseAmt);
-		require(
-			market != address(0) && asset != address(0),
-			"invalid market/token address"
-		);
-
-		bool isEth = asset == ethAddr;
-		address token_ = isEth ? wethAddr : asset;
-		TokenInterface tokenContract = TokenInterface(token_);
-
-		convertEthToWeth(isEth, tokenContract, amt_);
-		approve(TokenInterface(getBaseToken(market)), market, amt_);
-
-		CometInterface(market).buyCollateral(
-			asset,
-			minCollateralAmt,
-			amt_,
-			address(this)
-		);
-
-		uint256 collAmt = CometInterface(market).quoteCollateral(asset, amt_);
-		setUint(setId, amt_);
-
-		eventName_ = "LogBuyCollateral(address,address,uint256,uint256,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(
-			market,
-			token_,
-			amt_,
-			minCollateralAmt,
-			collAmt,
+		(eventName_, eventParam_) = _buyCollateral(
+			BuyCollateralData({
+				market: market,
+				sellToken: sellToken,
+				buyAsset: buyAsset,
+				unitAmt: unitAmt,
+				baseSellAmt: baseSellAmt
+			}),
 			getId,
 			setId
 		);

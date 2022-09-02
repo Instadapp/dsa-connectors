@@ -18,6 +18,14 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 setId;
 	}
 
+	struct BuyCollateralData {
+		address market;
+		address sellToken;
+		address buyAsset;
+		uint256 unitAmt;
+		uint256 baseSellAmt;
+	}
+
 	enum Action {
 		REPAY,
 		DEPOSIT,
@@ -121,7 +129,9 @@ abstract contract Helpers is DSMath, Basic {
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 
 		if (token_ == getBaseToken(params.market)) {
-			uint256 balance = CometInterface(params.market).balanceOf(params.from);
+			uint256 balance = CometInterface(params.market).balanceOf(
+				params.from
+			);
 			//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
 			if (balance > 0) {
 				require(amt_ <= balance, "withdraw-amt-greater-than-supplies");
@@ -210,5 +220,73 @@ abstract contract Helpers is DSMath, Basic {
 			convertEthToWeth(isEth, TokenInterface(token), amt);
 
 		return amt;
+	}
+
+	function _buyCollateral(
+		BuyCollateralData memory params,
+		uint256 getId,
+		uint256 setId
+	) internal returns (string memory eventName_, bytes memory eventParam_) {
+		uint256 sellAmt_ = getUint(getId, params.baseSellAmt);
+		require(
+			params.market != address(0) && params.buyAsset != address(0),
+			"invalid market/token address"
+		);
+		require(
+			params.sellToken == getBaseToken(params.market),
+			"invalid-sell-token"
+		);
+
+		bool isEth = params.sellToken == ethAddr;
+		params.sellToken = isEth ? wethAddr : params.sellToken;
+
+		if (sellAmt_ == uint256(-1)) {
+			sellAmt_ = isEth
+				? address(this).balance
+				: TokenInterface(params.sellToken).balanceOf(address(this));
+		}
+
+		isEth = params.buyAsset == ethAddr;
+		params.buyAsset = isEth ? wethAddr : params.buyAsset;
+
+		convertEthToWeth(isEth, TokenInterface(params.sellToken), sellAmt_);
+
+		uint256 slippageAmt_ = convert18ToDec(
+			TokenInterface(params.buyAsset).decimals(),
+			wmul(
+				params.unitAmt,
+				convertTo18(
+					TokenInterface(params.sellToken).decimals(),
+					sellAmt_
+				)
+			)
+		);
+		approve(TokenInterface(params.sellToken), params.market, sellAmt_);
+		CometInterface(params.market).buyCollateral(
+			params.buyAsset,
+			slippageAmt_,
+			sellAmt_,
+			address(this)
+		);
+
+		uint256 buyAmt_ = CometInterface(params.market).quoteCollateral(
+			params.buyAsset,
+			sellAmt_
+		);
+		require(slippageAmt_ <= buyAmt_, "too-much-slippage");
+
+		convertWethToEth(isEth, TokenInterface(params.buyAsset), buyAmt_);
+		setUint(setId, sellAmt_);
+
+		eventName_ = "LogBuyCollateral(address,address,uint256,uint256,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(
+			params.market,
+			params.buyAsset,
+			sellAmt_,
+			params.unitAmt,
+			buyAmt_,
+			getId,
+			setId
+		);
 	}
 }

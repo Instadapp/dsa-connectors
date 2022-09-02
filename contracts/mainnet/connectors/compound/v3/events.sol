@@ -116,10 +116,10 @@ contract Events {
 
 	event LogBuyCollateral(
 		address indexed market,
-		address indexed token,
-		uint256 indexed baseAmount,
-		uint256 minCollateralAmt,
-		uint256 collateralAmount,
+		address indexed buyToken,
+		uint256 indexed baseSellAmt,
+		uint256 unitAmt,
+		uint256 buyAmount,
 		uint256 getId,
 		uint256 setId
 	);
