@@ -522,7 +522,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "transferAssetFromUsingManager",
+          method: "transferAssetOnBehalf",
           args: [market, base, dsaWallet0.address, dsaWallet1.address, ethers.constants.MaxUint256, 0, 0]
         }
       ];
@@ -626,7 +626,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "transferAssetFromUsingManager",
+          method: "transferAssetOnBehalf",
           args: [market, tokens.eth.address, dsaWallet0.address, dsaWallet1.address, ethers.utils.parseEther("1"), 0, 0]
         }
       ];

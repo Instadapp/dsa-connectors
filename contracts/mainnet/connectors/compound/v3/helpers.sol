@@ -121,12 +121,16 @@ abstract contract Helpers is DSMath, Basic {
 		amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 
 		if (token_ == getBaseToken(params.market)) {
-			uint256 balance = TokenInterface(params.market).balanceOf(
-				params.from
-			);
+			uint256 balance = CometInterface(params.market).balanceOf(params.from);
+			//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
 			if (balance > 0) {
 				require(amt_ <= balance, "withdraw-amt-greater-than-supplies");
 			}
+			//if borrow balance > 0, there are no supplies so no withdraw, borrow instead.
+			require(
+				CometInterface(params.market).borrowBalanceOf(params.from) == 0,
+				"withdraw-disabled-for-zero-supplies"
+			);
 		}
 
 		_withdrawHelper(params.market, token_, params.from, params.to, amt_);

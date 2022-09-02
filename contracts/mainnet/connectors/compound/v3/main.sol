@@ -715,7 +715,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @notice Buy collateral asset to increase protocol base reserves until targetReserves is reached.
 	 * @param market The address of the market from where to withdraw.
 	 * @param asset The collateral asset to purachase.
-	 * @param dest The address to transfer the purchased assets.
 	 * @param minCollateralAmt Minimum amount of collateral expected to be received.
 	 * @param baseAmt Amount of base asset to be sold for collateral.
 	 * @param getId ID to retrieve amt.
@@ -724,7 +723,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	function buyCollateral(
 		address market,
 		address asset,
-		address dest,
 		uint256 minCollateralAmt,
 		uint256 baseAmt,
 		uint256 getId,
@@ -736,8 +734,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	{
 		uint256 amt_ = getUint(getId, baseAmt);
 		require(
-			market != address(0) && asset != address(0) && dest != address(0),
-			"invalid market/token/to address"
+			market != address(0) && asset != address(0),
+			"invalid market/token address"
 		);
 
 		bool isEth = asset == ethAddr;
@@ -751,7 +749,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			asset,
 			minCollateralAmt,
 			amt_,
-			dest
+			address(this)
 		);
 
 		uint256 collAmt = CometInterface(market).quoteCollateral(asset, amt_);
@@ -832,7 +830,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens transferred.
 	 */
-	function transferAssetFromUsingManager(
+	function transferAssetOnBehalf(
 		address market,
 		address token,
 		address src,
@@ -868,7 +866,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogTransferAssetFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogTransferAssetOnBehalf(address,address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, token_, src, dest, amt_, getId, setId);
 	}
 
