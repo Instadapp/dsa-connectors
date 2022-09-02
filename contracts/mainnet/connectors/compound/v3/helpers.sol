@@ -123,7 +123,7 @@ abstract contract Helpers is DSMath, Basic {
 			token_
 		);
 
-		if (token_ == getBaseToken(market)) {
+		if (token_ == getBaseToken(params.market)) {
 			//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
 			if (amt_ == uint256(-1)) {
 				amt_ = initialBal;
@@ -262,7 +262,7 @@ abstract contract Helpers is DSMath, Basic {
 			sellAmt_,
 			address(this)
 		);
-		
+
 		uint256 finalCollBal_ = TokenInterface(params.buyAsset).balanceOf(address(this));
 
 		uint256 buyAmt_ = sub(finalCollBal_, initialCollBal_);
