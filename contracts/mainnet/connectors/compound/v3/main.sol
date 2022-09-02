@@ -717,14 +717,21 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		amt_ = _calculateFromAmount(
-			market,
-			token_,
-			from,
-			amt_,
-			isEth,
-			Action.REPAY
-		);
+		if (amt_ == uint256(-1)) {
+			amt_ = _calculateFromAmount(
+				market,
+				token_,
+				from,
+				amt_,
+				isEth,
+				Action.REPAY
+			);
+		} else {
+			require(
+				amt_ <= borrowedBalance_,
+				"withdraw-amt-greater-than-supplies"
+			);
+		}
 
 		uint256 supplyBalance_ = CometInterface(market).balanceOf(to);
 		require(supplyBalance_ == 0, "cannot-repay-when-supplied");
