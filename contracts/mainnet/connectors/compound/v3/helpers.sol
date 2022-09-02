@@ -181,51 +181,26 @@ abstract contract Helpers is DSMath, Basic {
 		bool isEth,
 		ACTION action
 	) internal returns (uint256) {
-		if (isEth) {
-			if (amt == uint256(-1)) {
-				uint256 allowance_ = TokenInterface(token).allowance(
-					src,
-					market
-				);
-				uint256 bal_;
-				if (action == ACTION.repay) {
-					bal_ = CometInterface(market).borrowBalanceOf(src);
-				} else if (action == ACTION.deposit) {
-					bal_ = src.balance;
-				} else if (action == ACTION.transfer) {
-					bal_ = (token == getBaseToken(market))
-						? TokenInterface(market).balanceOf(src)
-						: CometInterface(market)
-							.userCollateral(src, token)
-							.balance;
-				}
-				if (action == ACTION.transfer) amt = bal_;
-				else amt = bal_ < allowance_ ? bal_ : allowance_;
+		if (amt == uint256(-1)) {
+			uint256 allowance_ = TokenInterface(token).allowance(src, market);
+			uint256 bal_;
+
+			if (action == ACTION.repay) {
+				bal_ = CometInterface(market).borrowBalanceOf(src);
+			} else if (action == ACTION.deposit) {
+				if (isEth) bal_ = src.balance;
+				else bal_ = TokenInterface(token).balanceOf(src);
+			} else if (action == ACTION.transfer) {
+				bal_ = (token == getBaseToken(market))
+					? TokenInterface(market).balanceOf(src)
+					: CometInterface(market).userCollateral(src, token).balance;
 			}
-			if (src == address(this))
-				convertEthToWeth(isEth, TokenInterface(token), amt);
-		} else {
-			if (amt == uint256(-1)) {
-				uint256 allowance_ = TokenInterface(token).allowance(
-					src,
-					market
-				);
-				uint256 bal_;
-				if (action == ACTION.repay) {
-					bal_ = CometInterface(market).borrowBalanceOf(src);
-				} else if (action == ACTION.deposit) {
-					bal_ = TokenInterface(token).balanceOf(src);
-				} else if (action == ACTION.transfer) {
-					bal_ = (token == getBaseToken(market))
-						? TokenInterface(market).balanceOf(src)
-						: CometInterface(market)
-							.userCollateral(src, token)
-							.balance;
-				}
-				if (action == ACTION.transfer) amt = bal_;
-				else amt = bal_ < allowance_ ? bal_ : allowance_;
-			}
+			if (action == ACTION.transfer) amt = bal_;
+			else amt = bal_ < allowance_ ? bal_ : allowance_;
 		}
+		if (src == address(this))
+			convertEthToWeth(isEth, TokenInterface(token), amt);
+
 		return amt;
 	}
 }
