@@ -39,21 +39,6 @@ abstract contract Helpers is DSMath, Basic {
 		baseToken = CometInterface(market).baseToken();
 	}
 
-	/**
-	 *@dev helper function for following withdraw or borrow cases:
-	 *withdrawFrom - for `withdrawFromUsingManager` withdraws from src to dest using DSA as manager
-	 *withdrawTo - for `withdrawTo` withdraws from DSA to dest address.
-	 */
-	function _withdrawHelper(
-		address market,
-		address token,
-		address from,
-		address to,
-		uint256 amt
-	) internal {
-		CometInterface(market).withdrawFrom(from, to, token, amt);
-	}
-
 	function _borrow(BorrowWithdrawParams memory params)
 		internal
 		returns (uint256 amt, uint256 setId)
@@ -82,7 +67,12 @@ abstract contract Helpers is DSMath, Basic {
 			params.from
 		);
 
-		CometInterface(params.market).withdrawFrom(params.from, params.to, token_, amt_);
+		CometInterface(params.market).withdrawFrom(
+			params.from,
+			params.to,
+			token_,
+			amt_
+		);
 
 		uint256 finalBal = CometInterface(params.market).borrowBalanceOf(
 			params.from
@@ -143,7 +133,12 @@ abstract contract Helpers is DSMath, Basic {
 			amt_ = amt_ == uint256(-1) ? initialBal : amt_;
 		}
 
-		CometInterface(params.market).withdrawFrom(params.from, params.to, token_, amt_);
+		CometInterface(params.market).withdrawFrom(
+			params.from,
+			params.to,
+			token_,
+			amt_
+		);
 
 		uint256 finalBal = _getAccountSupplyBalanceOfAsset(
 			params.from,
@@ -159,16 +154,6 @@ abstract contract Helpers is DSMath, Basic {
 
 		amt = amt_;
 		setId = params.setId;
-	}
-
-	function _transfer(
-		address market,
-		address token,
-		address from,
-		address to,
-		uint256 amt
-	) internal {
-		CometInterface(market).transferAssetFrom(from, to, token, amt);
 	}
 
 	function _getAccountSupplyBalanceOfAsset(
@@ -204,8 +189,8 @@ abstract contract Helpers is DSMath, Basic {
 			} else if (action == Action.DEPOSIT) {
 				if (isEth) bal_ = src.balance;
 				else bal_ = TokenInterface(token).balanceOf(src);
-			} 
-			
+			}
+
 			amt = bal_ < allowance_ ? bal_ : allowance_;
 		}
 
