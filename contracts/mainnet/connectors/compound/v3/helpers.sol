@@ -28,8 +28,7 @@ abstract contract Helpers is DSMath, Basic {
 
 	enum Action {
 		REPAY,
-		DEPOSIT,
-		TRANSFER
+		DEPOSIT
 	}
 
 	function getBaseToken(address market)
@@ -52,11 +51,7 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-		if (from == address(this)) {
-			CometInterface(market).withdrawTo(to, token, amt);
-		} else {
-			CometInterface(market).withdrawFrom(from, to, token, amt);
-		}
+		CometInterface(market).withdrawFrom(from, to, token, amt);
 	}
 
 	function _borrow(BorrowWithdrawParams memory params)
@@ -173,11 +168,7 @@ abstract contract Helpers is DSMath, Basic {
 		address to,
 		uint256 amt
 	) internal {
-		if (from == address(0)) {
-			CometInterface(market).transferAsset(to, token, amt);
-		} else {
-			CometInterface(market).transferAssetFrom(from, to, token, amt);
-		}
+		CometInterface(market).transferAssetFrom(from, to, token, amt);
 	}
 
 	function _getAccountSupplyBalanceOfAsset(
@@ -213,13 +204,9 @@ abstract contract Helpers is DSMath, Basic {
 			} else if (action == Action.DEPOSIT) {
 				if (isEth) bal_ = src.balance;
 				else bal_ = TokenInterface(token).balanceOf(src);
-			} else if (action == Action.TRANSFER) {
-				bal_ = (token == getBaseToken(market))
-					? TokenInterface(market).balanceOf(src)
-					: CometInterface(market).userCollateral(src, token).balance;
-			}
-			if (action == Action.TRANSFER) amt = bal_;
-			else amt = bal_ < allowance_ ? bal_ : allowance_;
+			} 
+			
+			amt = bal_ < allowance_ ? bal_ : allowance_;
 		}
 		if (src == address(this))
 			convertEthToWeth(isEth, TokenInterface(token), amt);

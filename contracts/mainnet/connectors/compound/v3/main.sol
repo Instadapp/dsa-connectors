@@ -287,7 +287,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			BorrowWithdrawParams({
 				market: market,
 				token: token,
-				from: address(0),
+				from: address(this),
 				to: to,
 				amt: amt,
 				getId: getId,
@@ -407,12 +407,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(token_);
 
-		if (token_ == getBaseToken(market)) {
-			require(
-				CometInterface(market).balanceOf(address(this)) == 0,
-				"borrow-disabled-when-supplied-base"
-			);
-		}
+		require(
+			CometInterface(market).balanceOf(address(this)) == 0,
+			"borrow-disabled-when-supplied-base"
+		);
 
 		uint256 initialBal = CometInterface(market).borrowBalanceOf(
 			address(this)
@@ -464,7 +462,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			BorrowWithdrawParams({
 				market: market,
 				token: token,
-				from: address(0),
+				from: address(this),
 				to: to,
 				amt: amt,
 				getId: getId,
@@ -804,23 +802,11 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			"invalid market/token/to address"
 		);
 
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
-		TokenInterface tokenContract = TokenInterface(token_);
+		address token_ = token == ethAddr ? wethAddr : token;
 
-		convertEthToWeth(isEth, tokenContract, amt_);
+		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(address(this)) : amt_;
 
-		amt_ = amt_ == uint256(-1)
-			? (
-				(token_ == getBaseToken(market))
-					? TokenInterface(market).balanceOf(address(this))
-					: CometInterface(market)
-						.userCollateral(address(this), token_)
-						.balance
-			)
-			: amt_;
-
-		_transfer(market, token_, address(0), dest, amt_);
+		CometInterface(market).transferAssetFrom(address(this), dest, token_, amt);
 
 		setUint(setId, amt_);
 
@@ -858,20 +844,11 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			"invalid market/token/to address"
 		);
 
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
-		TokenInterface tokenContract = TokenInterface(token_);
+		address token_ = token == ethAddr ? wethAddr : token;
 
-		amt_ = _calculateFromAmount(
-			market,
-			token_,
-			src,
-			amt_,
-			isEth,
-			Action.TRANSFER
-		);
+		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(src) : amt_;
 
-		_transfer(market, token_, src, dest, amt_);
+		CometInterface(market).transferAssetFrom(src, dest, token_, amt_);
 
 		setUint(setId, amt_);
 
