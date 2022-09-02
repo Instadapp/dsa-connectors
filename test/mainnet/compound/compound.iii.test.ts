@@ -261,7 +261,7 @@ describe("Compound III", function () {
     });
 
     //deposit asset on behalf of
-    it("Should supply on behalf of dsaWallet0 ETH collateral in Compound V3", async function () {
+    it("Should supply  ETH collateral on behalf of dsaWallet0 in Compound V3", async function () {
       const amount = ethers.utils.parseEther("1"); // 1 ETH
       const spells = [
         {
@@ -304,7 +304,7 @@ describe("Compound III", function () {
       );
     });
 
-    it("should allow manager for dsaWallet0's collateral", async function () {
+    it("should allow manager for dsaWallet0's collateral and base", async function () {
       const spells = [
         {
           connector: connectorName,
@@ -317,7 +317,7 @@ describe("Compound III", function () {
       const receipt = await tx.wait();
     });
 
-    it("should payback base token from Compound", async function () {
+    it("should payback base token on Compound using manager", async function () {
       await baseContract.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseUnits("5", 6));
 
       const amount = ethers.utils.parseUnits("102", 6);
@@ -338,7 +338,7 @@ describe("Compound III", function () {
       );
     });
 
-    it("Should borrow on behalf of from Compound", async function () {
+    it("Should borrow to another dsa from Compound", async function () {
       const amount = ethers.utils.parseUnits("100", 6);
       const spells = [
         {
@@ -412,7 +412,7 @@ describe("Compound III", function () {
       expect(await wethContract.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("4"));
     });
 
-    it("Should withdraw on behalf of from Compound", async function () {
+    it("Should withdraw collateral to another DSA", async function () {
       const spells1 = [
         {
           connector: connectorName,
@@ -442,7 +442,7 @@ describe("Compound III", function () {
       );
     });
 
-    it("Should withdraw asset and transfer", async function () {
+    it("Should withdraw collateral to another DSA", async function () {
       const spells1 = [
         {
           connector: connectorName,
@@ -534,7 +534,7 @@ describe("Compound III", function () {
       expect(await comet.connect(signer).balanceOf(dsaWallet1.address)).to.be.gte(initialBal);
     });
 
-    it("should deposit weth from using manager", async function () {
+    it("should deposit weth using manager", async function () {
       await wethContract.connect(wethSigner).transfer(dsaWallet0.address, ethers.utils.parseEther("10"));
       let initialBal = await wethContract.connect(wallet0).balanceOf(dsaWallet0.address);
 
@@ -557,7 +557,7 @@ describe("Compound III", function () {
       expect(await wethContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(initialBal.sub(amount));
     });
 
-    it("should deposit eth from using manager same as 'from'", async function () {
+    it("should deposit eth using manager same as 'from'", async function () {
       const amount = ethers.utils.parseEther("1");
       await wethContract.connect(dsa0Signer).approve(market, amount);
       let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
@@ -589,7 +589,7 @@ describe("Compound III", function () {
       const tx = await dsaWallet3.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
     });
-    it("should borrow using manager", async function () {
+    it("should borrow on behalf using manager", async function () {
       let initialBal = await baseContract.connect(wallet0).balanceOf(dsaWallet0.address);
       await wallet0.sendTransaction({
         to: dsaWallet3.address,
