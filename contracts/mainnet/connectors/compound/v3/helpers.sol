@@ -194,7 +194,7 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 amt,
 		bool isEth,
 		Action action
-	) internal returns (uint256) {
+	) internal view returns (uint256) {
 		if (amt == uint256(-1)) {
 			uint256 allowance_ = TokenInterface(token).allowance(src, market);
 			uint256 bal_;
