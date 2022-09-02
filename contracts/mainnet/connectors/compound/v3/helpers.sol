@@ -58,8 +58,10 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 amt_ = getUint(params.getId, params.amt);
 
 		require(
-			params.market != address(0) && params.token != address(0),
-			"invalid market/token address"
+			params.market != address(0) &&
+				params.token != address(0) &&
+				params.to != address(0),
+			"invalid market/token/to address"
 		);
 		bool isEth = params.token == ethAddr;
 		address token_ = isEth ? wethAddr : params.token;
@@ -99,8 +101,10 @@ abstract contract Helpers is DSMath, Basic {
 		uint256 amt_ = getUint(params.getId, params.amt);
 
 		require(
-			params.market != address(0) && params.token != address(0),
-			"invalid market/token address"
+			params.market != address(0) &&
+				params.token != address(0) &&
+				params.to != address(0),
+			"invalid market/token/to address"
 		);
 
 		bool isEth = params.token == ethAddr;

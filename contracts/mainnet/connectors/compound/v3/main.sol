@@ -93,10 +93,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amt);
 
 		require(
-			market != address(0) && token != address(0),
-			"invalid market/token address"
+			market != address(0) && token != address(0) && to != address(0),
+			"invalid market/token/to address"
 		);
-		require(to != address(0), "invalid to address");
 
 		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
@@ -154,10 +153,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 amt_ = getUint(getId, amt);
 
 		require(
-			market != address(0) && token != address(0),
-			"invalid market/token address"
+			market != address(0) && token != address(0) && to != address(0),
+			"invalid market/token/to address"
 		);
-		require(to != address(0), "invalid to address");
 
 		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
@@ -482,7 +480,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
 		uint256 amt_ = getUint(getId, amt);
-		require(market != address(0), "invalid market address");
+		require(
+			market != address(0) && token != address(0),
+			"invalid market/token address"
+		);
 
 		bool isEth = token == ethAddr;
 		address token_ = getBaseToken(market);
@@ -534,7 +535,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
 		uint256 amt_ = getUint(getId, amt);
-		require(market != address(0), "invalid market address");
+		require(
+			market != address(0) && token != address(0) && to != address(0),
+			"invalid market/token/to address"
+		);
 
 		address token_ = getBaseToken(market);
 		bool isEth = token == ethAddr;
@@ -587,7 +591,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
 		uint256 amt_ = getUint(getId, amt);
-		require(market != address(0), "invalid market address");
+		require(
+			market != address(0) && token != address(0) && to != address(0),
+			"invalid market/token/to address"
+		);
 
 		address token_ = getBaseToken(market);
 		bool isEth = token == ethAddr;
@@ -637,6 +644,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
 		uint256 amt_ = getUint(getId, baseAmt);
+		require(
+			market != address(0) && asset != address(0) && dest != address(0),
+			"invalid market/token/to address"
+		);
 
 		bool isEth = asset == ethAddr;
 		address token_ = isEth ? wethAddr : asset;
@@ -691,8 +702,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	{
 		uint256 amt_ = getUint(getId, amount);
 		require(
-			market != address(0) && token != address(0),
-			"invalid market address"
+			market != address(0) && token != address(0) && dest != address(0),
+			"invalid market/token/to address"
 		);
 
 		bool isEth = token == ethAddr;
@@ -744,8 +755,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
 		uint256 amt_ = getUint(getId, amount);
-		require(market != address(0), "invalid market address");
-		require(dest != address(0), "invalid destination address");
+		require(
+			market != address(0) && token != address(0) && dest != address(0),
+			"invalid market/token/to address"
+		);
 
 		bool isEth = token == ethAddr;
 		address token_ = isEth ? wethAddr : token;
