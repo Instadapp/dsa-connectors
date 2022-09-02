@@ -208,8 +208,6 @@ abstract contract Helpers is DSMath, Basic {
 			
 			amt = bal_ < allowance_ ? bal_ : allowance_;
 		}
-		if (src == address(this))
-			convertEthToWeth(isEth, TokenInterface(token), amt);
 
 		return amt;
 	}
