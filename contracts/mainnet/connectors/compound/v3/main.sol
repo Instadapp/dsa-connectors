@@ -502,12 +502,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			? CometInterface(market).borrowBalanceOf(address(this))
 			: amt_;
 
-		uint256 borrowBal = CometInterface(market).borrowBalanceOf(
+		uint256 supplyBalance_ = CometInterface(market).balanceOf(
 			address(this)
 		);
-		if (borrowBal > 0) {
-			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
-		}
+		require(supplyBalance_ == 0, "cannot-repay-when-supplied");
 
 		convertEthToWeth(isEth, tokenContract, amt_);
 		approve(tokenContract, market, amt_);
@@ -557,10 +555,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			? CometInterface(market).borrowBalanceOf(to)
 			: amt_;
 
-		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
-		if (borrowBal > 0) {
-			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
-		}
+		uint256 supplyBalance_ = CometInterface(market).balanceOf(to);
+		require(supplyBalance_ == 0, "cannot-repay-when-supplied");
 
 		convertEthToWeth(isEth, tokenContract, amt_);
 		approve(tokenContract, market, amt_);
@@ -618,12 +614,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			Action.REPAY
 		);
 
-		uint256 borrowBal = CometInterface(market).borrowBalanceOf(to);
-		if (borrowBal > 0) {
-			require(amt_ <= borrowBal, "repay-amt-greater-than-debt");
-		}
-
-		approve(tokenContract, market, amt_);
+		uint256 supplyBalance_ = CometInterface(market).balanceOf(to);
+		require(supplyBalance_ == 0, "cannot-repay-when-supplied");
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 
