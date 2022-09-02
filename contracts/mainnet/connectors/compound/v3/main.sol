@@ -174,7 +174,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			token_,
 			from,
 			amt_,
-			token == ethAddr,
+			isEth,
 			Action.DEPOSIT
 		);
 
@@ -719,7 +719,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				token_,
 				from,
 				amt_,
-				token == ethAddr,
+				isEth,
 				Action.REPAY
 			);
 		} else {
