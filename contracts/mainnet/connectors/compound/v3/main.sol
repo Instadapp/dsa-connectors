@@ -224,14 +224,11 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		);
 
 		if (token_ == getBaseToken(market)) {
-			//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
 			if (amt_ == uint256(-1)) {
 				amt_ = initialBal;
 			} else {
-				require(
-					amt_ <= initialBal,
-					"withdraw-amt-greater-than-supplies"
-				);
+				//if there are supplies, ensure withdrawn amount is not greater than supplied i.e can't borrow using withdraw.
+				require(amt_ <= initialBal, "withdraw-amt-greater-than-supplies");
 			}
 
 			//if borrow balance > 0, there are no supplies so no withdraw, borrow instead.
@@ -598,11 +595,11 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		} else {
 			require(
 				amt_ <= borrowedBalance_,
-				"withdraw-amt-greater-than-supplies"
+				"payback-amt-greater-than-borrows"
 			);
 		}
 
-		//if supply balance > 0, there are no borrowing so no repay, withdraw instead.
+		//if supply balance > 0, there are no borrowing so no repay, supply instead.
 		require(
 			CometInterface(market).balanceOf(address(this)) == 0,
 			"cannot-repay-when-supplied"
@@ -615,8 +612,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPayback(address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token_, amt_, getId, setId);
+		eventName_ = "LogPayback(address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, amt_, getId, setId);
 	}
 
 	/**
@@ -656,15 +653,15 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 		uint256 borrowedBalance_ = CometInterface(market).borrowBalanceOf(to);
 
 		if (amt_ == uint256(-1)) {
-			amt_ = initialBal;
+			amt_ = borrowedBalance_;
 		} else {
 			require(
 				amt_ <= borrowedBalance_,
-				"withdraw-amt-greater-than-supplies"
+				"payback-amt-greater-than-borrows"
 			);
 		}
 
-		//if supply balance > 0, there are no borrowing so no repay, withdraw instead.
+		//if supply balance > 0, there are no borrowing so no repay, supply instead.
 		require(
 			CometInterface(market).balanceOf(to) == 0,
 			"cannot-repay-when-supplied"
@@ -677,8 +674,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPaybackOnBehalf(address,address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token_, to, amt_, getId, setId);
+		eventName_ = "LogPaybackOnBehalf(address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, to, amt_, getId, setId);
 	}
 
 	/**
@@ -733,15 +730,29 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			);
 		}
 
-		uint256 supplyBalance_ = CometInterface(market).balanceOf(to);
-		require(supplyBalance_ == 0, "cannot-repay-when-supplied");
+		uint256 borrowedBalance_ = CometInterface(market).borrowBalanceOf(to);
+
+		if (amt_ == uint256(-1)) {
+			amt_ = borrowedBalance_;
+		} else {
+			require(
+				amt_ <= borrowedBalance_,
+				"payback-amt-greater-than-borrows"
+			);
+		}
+
+		//if supply balance > 0, there are no borrowing so no repay, withdraw instead.
+		require(
+			CometInterface(market).balanceOf(to) == 0,
+			"cannot-repay-when-supplied"
+		);
 
 		CometInterface(market).supplyFrom(from, to, token_, amt_);
 
 		setUint(setId, amt_);
 
-		eventName_ = "LogPaybackFromUsingManager(address,address,address,address,uint256,uint256,uint256)";
-		eventParam_ = abi.encode(market, token_, from, to, amt_, getId, setId);
+		eventName_ = "LogPaybackFromUsingManager(address,address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, from, to, amt_, getId, setId);
 	}
 
 	/**
@@ -920,8 +931,8 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			owner,
 			manager,
 			isAllowed,
-			nonce,
 			expiry,
+			nonce,
 			v,
 			r,
 			s
