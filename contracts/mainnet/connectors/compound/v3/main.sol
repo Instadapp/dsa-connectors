@@ -157,10 +157,9 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			market != address(0) && token != address(0) && to != address(0),
 			"invalid market/token/to address"
 		);
+		require(from != address(this), "from-cannot-be-address(this)-use-paybackOnBehalf");
 
-		bool isEth = token == ethAddr;
-		address token_ = isEth ? wethAddr : token;
-		TokenInterface tokenContract = TokenInterface(token_);
+		address token_ = token == ethAddr ? wethAddr : token;
 
 		if (token_ == getBaseToken(market)) {
 			require(
@@ -707,12 +706,10 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 			market != address(0) && token != address(0) && to != address(0),
 			"invalid market/token/to address"
 		);
+		require(from != address(this), "from-cannot-be-address(this)-use-paybackOnBehalf");
 
 		address token_ = getBaseToken(market);
-		bool isEth = token == ethAddr;
-		require(token == token_ || isEth, "invalid-token");
-
-		TokenInterface tokenContract = TokenInterface(token_);
+		require(token == token_ || token == ethAddr, "invalid-token");
 
 		if (amt_ == uint256(-1)) {
 			amt_ = _calculateFromAmount(
@@ -724,17 +721,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				Action.REPAY
 			);
 		} else {
-			require(
-				amt_ <= borrowedBalance_,
-				"withdraw-amt-greater-than-supplies"
-			);
-		}
-
-		uint256 borrowedBalance_ = CometInterface(market).borrowBalanceOf(to);
-
-		if (amt_ == uint256(-1)) {
-			amt_ = borrowedBalance_;
-		} else {
+			uint256 borrowedBalance_ = CometInterface(market).borrowBalanceOf(to);
 			require(
 				amt_ <= borrowedBalance_,
 				"payback-amt-greater-than-borrows"
