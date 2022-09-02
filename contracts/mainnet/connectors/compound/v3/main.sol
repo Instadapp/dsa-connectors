@@ -294,6 +294,44 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 
 	/**
+	 * @dev Withdraw base/collateral asset from an account and transfer to DSA.
+	 * @notice Withdraw base token or deposited token from Compound from an address and transfer to DSA.
+	 * @param market The address of the market.
+	 * @param token The address of the token to be withdrawn. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param from The address from where asset is to be withdrawed.
+	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens withdrawn.
+	 */
+	function withdrawOnBehalf(
+		address market,
+		address token,
+		address from,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	)
+		public
+		payable
+		returns (string memory eventName_, bytes memory eventParam_)
+	{
+		(uint256 amt_, uint256 setId_) = _withdraw(
+			BorrowWithdrawParams({
+				market: market,
+				token: token,
+				from: from,
+				to: address(this),
+				amt: amt,
+				getId: getId,
+				setId: setId
+			})
+		);
+
+		eventName_ = "LogWithdrawOnBehalf(address,address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, token, from, amt_, getId, setId_);
+	}
+
+	/**
 	 * @dev Withdraw base/collateral asset from an account and transfer to 'to'.
 	 * @notice Withdraw base token or deposited token from Compound from an address and transfer to 'to'.
 	 * @param market The address of the market.
@@ -304,7 +342,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
-	function withdrawOnBehalf(
+	function withdrawOnBehalfAndTransfer(
 		address market,
 		address token,
 		address from,
@@ -436,11 +474,52 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	 * @param token The address of the token to be borrowed. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
 	 * @param from The address from where asset is to be withdrawed.
-	 * @param to The address to which the borrowed assets are to be transferred.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens borrowed.
 	 */
 	function borrowOnBehalf(
+		address market,
+		address token,
+		address from,
+		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	)
+		external
+		payable
+		returns (string memory eventName_, bytes memory eventParam_)
+	{
+		require(
+			token == ethAddr || token == getBaseToken(market),
+			"invalid-token"
+		);
+		(uint256 amt_, uint256 setId_) = _borrow(
+			BorrowWithdrawParams({
+				market: market,
+				token: token,
+				from: from,
+				to: address(this),
+				amt: amt,
+				getId: getId,
+				setId: setId
+			})
+		);
+		eventName_ = "LogBorrowOnBehalf(address,address,uint256,uint256,uint256)";
+		eventParam_ = abi.encode(market, from, amt_, getId, setId_);
+	}
+
+	/**
+	 * @dev Borrow base asset from 'from' and transfer to 'to'.
+	 * @notice Borrow base token or deposited token from Compound.
+	 * @param market The address of the market.
+	 * @param token The address of the token to be borrowed. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+	 * @param from The address from where asset is to be withdrawed.
+	 * @param to The address to which the borrowed assets are to be transferred.
+	 * @param getId ID to retrieve amt.
+	 * @param setId ID stores the amount of tokens borrowed.
+	 */
+	function borrowOnBehalfAndTransfer(
 		address market,
 		address token,
 		address from,
@@ -468,7 +547,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 				setId: setId
 			})
 		);
-		eventName_ = "LogBorrowOnBehalf(address,address,address,uint256,uint256,uint256)";
+		eventName_ = "LogBorrowOnBehalfAndTransfer(address,address,address,uint256,uint256,uint256)";
 		eventParam_ = abi.encode(market, from, to, amt_, getId, setId_);
 	}
 

@@ -50,6 +50,15 @@ contract Events {
 		address indexed market,
 		address indexed token,
 		address from,
+		uint256 tokenAmt,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogWithdrawOnBehalfAndTransfer(
+		address indexed market,
+		address indexed token,
+		address from,
 		address to,
 		uint256 tokenAmt,
 		uint256 getId,
@@ -72,6 +81,14 @@ contract Events {
 	);
 
 	event LogBorrowOnBehalf(
+		address indexed market,
+		address from,
+		uint256 tokenAmt,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogBorrowOnBehalfAndTransfer(
 		address indexed market,
 		address from,
 		address to,
@@ -127,7 +144,11 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogToggleAccountManager(address indexed market, address indexed manager, bool allow);
+	event LogToggleAccountManager(
+		address indexed market,
+		address indexed manager,
+		bool allow
+	);
 
 	event LogToggleAccountManagerWithPermit(
 		address indexed market,

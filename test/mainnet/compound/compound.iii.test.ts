@@ -390,7 +390,7 @@ describe("Compound III", function () {
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(initialBal.add(amount_).toString());
     });
 
-    it("manager should be able to withdraw collateral from the position", async function () {
+    it("manager should be able to withdraw collateral from the position and transfer", async function () {
       await wallet1.sendTransaction({
         to: tokens.weth.address,
         value: ethers.utils.parseEther("10")
@@ -399,7 +399,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "withdrawOnBehalf",
+          method: "withdrawOnBehalfAndTransfer",
           args: [market, tokens.eth.address, dsaWallet0.address, dsaWallet1.address, amount, 0, 0]
         }
       ];
@@ -607,7 +607,7 @@ describe("Compound III", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "borrowOnBehalf",
+          method: "borrowOnBehalfAndTransfer",
           args: [market, base, dsaWallet3.address, dsaWallet0.address, amount, 0, 0]
         }
       ];
