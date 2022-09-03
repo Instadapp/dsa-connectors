@@ -256,7 +256,7 @@ describe("Import Compound v3 Position", function () {
         )
       );
 
-      let nonce = (await comet.connect(walletSigner).userNonce(wallet.address)).toNumber();
+      let nonce = new BigNumber(await comet.connect(walletSigner).userNonce(wallet.address)).toFixed(0);
       //Approving max amount
       const amount = ethers.constants.MaxUint256;
       const expiry = Date.now() + 20 * 60;
@@ -270,7 +270,7 @@ describe("Import Compound v3 Position", function () {
             DOMAIN_SEPARATOR,
             keccak256(
               defaultAbiCoder.encode(
-                ["bytes32", "address", "address", "uint256", "uint256", "uint256"],
+                ["bytes32", "address", "address", "bool", "uint256", "uint256"],
                 [PERMIT_TYPEHASH, wallet.address, dsaWallet0.address, true, nonce, expiry]
               )
             )
@@ -278,11 +278,11 @@ describe("Import Compound v3 Position", function () {
         )
       );
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
-
-      let buffer = ethers.utils.parseUnits("100", 6).toNumber();
+      let buffer = ethers.utils.parseUnits("100", 3).toNumber();
       let amount0 = new BigNumber(await comet.connect(wallet0).borrowBalanceOf(wallet.address)).plus(buffer);
       let amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       let amountWithFee = amount0.plus(amountB);
+      console.log(r);
       const spells1 = [
         {
           connector: "COMPOUND-V3-X",
