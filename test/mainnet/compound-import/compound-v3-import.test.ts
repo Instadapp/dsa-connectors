@@ -128,7 +128,23 @@ const cometABI = [
     outputs: [],
     stateMutability: "nonpayable",
     type: "function"
-  }
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "owner", type: "address" },
+      { internalType: "address", name: "manager", type: "address" },
+      { internalType: "bool", name: "isAllowed_", type: "bool" },
+      { internalType: "uint256", name: "nonce", type: "uint256" },
+      { internalType: "uint256", name: "expiry", type: "uint256" },
+      { internalType: "uint8", name: "v", type: "uint8" },
+      { internalType: "bytes32", name: "r", type: "bytes32" },
+      { internalType: "bytes32", name: "s", type: "bytes32" }
+    ],
+    name: "allowBySig",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
 ];
 
 const comet = new ethers.Contract(market, cometABI);
@@ -283,11 +299,13 @@ describe("Import Compound v3 Position", function () {
       let amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       let amountWithFee = amount0.plus(amountB);
       console.log(r);
+      // let interface_ = new ethers.Contract("0x285617313887d43256F852cAE0Ee4de4b68D45B0", cometABI);
+      await comet.connect(signer).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
       const spells1 = [
         {
           connector: "COMPOUND-V3-X",
           method: "toggleAccountManagerWithPermit",
-          args: [wallet.address, dsaWallet0.address, true, nonce, expiry, v, r, s]
+          args: ["0x285617313887d43256F852cAE0Ee4de4b68D45B0", wallet.address, dsaWallet0.address, true, nonce, expiry, v, ethers.utils.hexlify(r), ethers.utils.hexlify(s)]
         }
       ];
 
