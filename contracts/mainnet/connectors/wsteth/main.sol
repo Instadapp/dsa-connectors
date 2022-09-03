@@ -57,6 +57,6 @@ abstract contract WSTETHContract is Helpers, Basic {
     }
 }
 
-contract ConnectV2WETH is WSTETHContract {
+contract ConnectV2WSTETH is WSTETHContract {
     string constant public name = "WSTETH-v1.0";
 }
