@@ -41,6 +41,27 @@ export const tokens = {
     name: "Etherem Name Services",
     address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
     decimals: 18
+  },
+  comp: {
+    type: "token",
+    symbol: "COMP",
+    name: "Compound",
+    address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+    decimals: 18
+  },
+  link: {
+    type: "token",
+    symbol: "LINK",
+    name: "ChainLink Token",
+    address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    decimals: 18
+  },
+  uni: {
+    type: "token",
+    symbol: "UNI",
+    name: "Uniswap",
+    address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+    decimals: 18
   }
 };
 
@@ -48,7 +69,10 @@ export const tokenMapping: Record<string, any> = {
   usdc: {
     impersonateSigner: "0xfcb19e6a322b27c06842a71e8c725399f049ae3a",
     address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-    abi: ["function mint(address _to, uint256 _amount) external returns (bool);"],
+    abi: [
+      "function mint(address _to, uint256 _amount) external returns (bool)",
+      "function balanceOf(address user) external returns (uint256)"
+    ],
     process: async function (owner: Signer | Provider, to: any, amt: any) {
       const contract = new ethers.Contract(this.address, this.abi, owner);
 
