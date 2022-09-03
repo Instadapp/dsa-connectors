@@ -279,7 +279,7 @@ describe("Import Compound v3 Position", function () {
         )
       );
 
-      let nonce = new BigNumber(await comet.connect(walletSigner).userNonce(wallet.address)).toFixed(0);
+      let nonce = new BigNumber(await comet.connect(walletSigner).userNonce(wallet.address)).plus(1).toFixed(0);
       //Approving max amount
       const amount = ethers.constants.MaxUint256;
       const expiry = Date.now() + 20 * 60;
@@ -307,7 +307,7 @@ describe("Import Compound v3 Position", function () {
       let amountWithFee = amount0.plus(amountB);
       console.log(r);
       // let interface_ = new ethers.Contract("0x285617313887d43256F852cAE0Ee4de4b68D45B0", cometABI);
-      await comet.connect(walletSigner).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
+      // await comet.connect(walletSigner).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
       const spells1 = [
         {
           connector: "COMPOUND-V3-X",
