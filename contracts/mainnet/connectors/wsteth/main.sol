@@ -54,7 +54,7 @@ abstract contract WSTETHContract is Helpers, Basic {
         uint256 stethAmt_ = wstethContract.unwrap(_amt);
         setUint(setId, stethAmt_);
 
-        _eventName = "LogWithdraw(uint256,uint256,uint256)";
+        _eventName = "LogWithdraw(uint256,uint256,uint256,uint256)";
         _eventParam = abi.encode(_amt, stethAmt_, getId, setId);
     }
 }
