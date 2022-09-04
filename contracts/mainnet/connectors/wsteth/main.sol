@@ -28,8 +28,8 @@ abstract contract WSTETHContract is Helpers, Basic {
 
         approve(stethContract, address(wstethContract), _amt);
 
-        wstethContract.wrap(_amt);
-        setUint(setId, _amt);
+        uint256 wstethAmt_ = wstethContract.wrap(_amt);
+        setUint(setId, wstethAmt_);
 
         _eventName = "LogDeposit(uint256,uint256,uint256)";
         _eventParam = abi.encode(_amt, getId, setId);
