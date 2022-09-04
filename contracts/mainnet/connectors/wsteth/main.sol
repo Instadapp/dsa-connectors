@@ -39,8 +39,8 @@ abstract contract WSTETHContract is Helpers, Basic {
      * @dev Withdraw STETH from WSTETH from Smart  Account
      * @notice Unwrap STETH from WSTETH
      * @param wstethAmt The amount of WSTETH to withdraw. (For max: `uint256(-1)`)
-     * @param getId ID to retrieve amt.
-     * @param setId ID stores the amount of ETH withdrawn.
+     * @param getId ID to retrieve WSTETH amount.
+     * @param setId ID stores the amount of STETH.
      */
     function withdraw(
         uint256 wstethAmt,
