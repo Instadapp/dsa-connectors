@@ -189,7 +189,7 @@ describe("Import Compound v3 Position", function () {
           forking: {
             //@ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 15467174
+            blockNumber: 15469858
           }
         }
       ]
@@ -281,7 +281,7 @@ describe("Import Compound v3 Position", function () {
       );
       const name = keccak256(ethers.utils.toUtf8Bytes("Compound USDC"));
       const version = keccak256(ethers.utils.toUtf8Bytes("0"));
-      const chainId = 1;
+      const chainId = new BigNumber(1).toFixed(0);
       const DOMAIN_SEPARATOR = keccak256(
         defaultAbiCoder.encode(
           ["bytes32", "bytes32", "bytes32", "uint256", "address"],
@@ -292,7 +292,7 @@ describe("Import Compound v3 Position", function () {
       let nonce = new BigNumber(await comet.connect(walletSigner).userNonce(wallet.address)).toFixed(0);
       //Approving max amount
       const amount = ethers.constants.MaxUint256;
-      const expiry = Date.now() + 20 * 60;
+      const expiry = Date.now() + 100 * 60;
       const structHash = keccak256(
         defaultAbiCoder.encode(
           ["bytes32", "address", "address", "bool", "uint256", "uint256"],
@@ -322,9 +322,10 @@ describe("Import Compound v3 Position", function () {
       console.log(`s: ${ethers.utils.hexlify(s)}`);
       console.log(`Digest: ${digest}`);
       console.log(`structHash: ${structHash}`);
-      console.log(`block timestamp: ${(await provider.getBlock(15467174)).timestamp}`);
+      console.log(`block timestamp: ${(await provider.getBlock(15469858)).timestamp}`);
 
-      // let interface_ = new ethers.Contract("0x285617313887d43256F852cAE0Ee4de4b68D45B0", cometABI);
+      // let interface_ = new ethers.Contract("0x285617313887d43256F852cAE0Ee4de4b68D45B0", extABI);
+      console.log(await ethers.provider.getBalance(walletSigner.address));
       // await comet.connect(walletSigner).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
       await comet.connect(walletSigner).allow(dsaWallet0.address, true);
       // const spells1 = [
@@ -344,7 +345,9 @@ describe("Import Compound v3 Position", function () {
       //     ]
       //   }
       // ];
-
+      // let [targets, calldata] = encodeSpells(spells1);
+      // console.log(targets);
+      // console.log(calldata);
       // let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells1), wallet0.address);
       // const receipt = await tx.wait();
       console.log("DSA Permitted as manager");
@@ -390,6 +393,11 @@ describe("Import Compound v3 Position", function () {
       expect(await comet.connect(wallet0).borrowBalanceOf(dsaWallet0.address)).to.be.gte(
         ethers.utils.parseUnits("100", 6)
       );
+
+      expect((await comet.connect(wallet0).userCollateral(wallet.address, tokens.weth.address)).balance).to.be.lte(
+        ethers.utils.parseEther("0")
+      );
+      expect(await comet.connect(wallet0).borrowBalanceOf(wallet.address)).to.be.lte(ethers.utils.parseUnits("0", 6));
     });
   });
 });
