@@ -14,8 +14,8 @@ abstract contract WSTETHContract is Helpers, Basic {
      * @dev Deposit STETH into WSTETH.
      * @notice Wrap STETH into WSTETH
      * @param stethAmt The amount of STETH to deposit. (For max: `uint256(-1)`)
-     * @param getId ID to retrieve amt.
-     * @param setId ID stores the amount of STETH deposited.
+     * @param getId ID to retrieve STETH amount.
+     * @param setId ID stores the amount of WSTETH deposited.
      */
     function deposit(
         uint256 stethAmt,
