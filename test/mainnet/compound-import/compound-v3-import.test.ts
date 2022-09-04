@@ -179,7 +179,7 @@ describe("Import Compound v3 Position", function () {
           forking: {
             //@ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 15444500
+            blockNumber: 15467174
           }
         }
       ]
@@ -279,25 +279,20 @@ describe("Import Compound v3 Position", function () {
         )
       );
 
-      let nonce = new BigNumber(await comet.connect(walletSigner).userNonce(wallet.address)).plus(1).toFixed(0);
+      let nonce = new BigNumber(await comet.connect(walletSigner).userNonce(wallet.address)).toFixed(0);
       //Approving max amount
       const amount = ethers.constants.MaxUint256;
       const expiry = Date.now() + 20 * 60;
-
+      const structHash = keccak256(
+        defaultAbiCoder.encode(
+          ["bytes32", "address", "address", "bool", "uint256", "uint256"],
+          [PERMIT_TYPEHASH, wallet.address, dsaWallet0.address, true, nonce, expiry]
+        )
+      );
       const digest = keccak256(
         ethers.utils.solidityPack(
           ["bytes1", "bytes1", "bytes32", "bytes32"],
-          [
-            "0x19",
-            "0x01",
-            DOMAIN_SEPARATOR,
-            keccak256(
-              defaultAbiCoder.encode(
-                ["bytes32", "address", "address", "bool", "uint256", "uint256"],
-                [PERMIT_TYPEHASH, wallet.address, dsaWallet0.address, true, nonce, expiry]
-              )
-            )
-          ]
+          ["0x19", "0x01", DOMAIN_SEPARATOR, structHash]
         )
       );
       const { v, r, s } = ecsign(Buffer.from(digest.slice(2), "hex"), Buffer.from(wallet.privateKey.slice(2), "hex"));
@@ -305,7 +300,20 @@ describe("Import Compound v3 Position", function () {
       let amount0 = new BigNumber(await comet.connect(wallet0).borrowBalanceOf(wallet.address)).plus(buffer);
       let amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       let amountWithFee = amount0.plus(amountB);
-      console.log(r);
+      console.log(`Owner: ${wallet.address}`);
+      console.log(`Manager: ${dsaWallet0.address}`);
+      console.log(`domain speparator: ${DOMAIN_SEPARATOR}`);
+      console.log(`domain typehash: ${DOMAIN_TYPEHASH}`);
+      console.log(`permit typehash: ${PERMIT_TYPEHASH}`);
+      console.log(`nonce: ${nonce}`);
+      console.log(`expiry: ${expiry}`);
+      console.log(`v: ${v}`);
+      console.log(`r: ${ethers.utils.hexlify(r)}`);
+      console.log(`s: ${ethers.utils.hexlify(s)}`);
+      console.log(`Digest: ${digest}`);
+      console.log(`structHash: ${structHash}`);
+      console.log(`block timestamp: ${(await provider.getBlock(15467174)).timestamp}`);
+
       // let interface_ = new ethers.Contract("0x285617313887d43256F852cAE0Ee4de4b68D45B0", cometABI);
       // await comet.connect(walletSigner).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
       const spells1 = [
