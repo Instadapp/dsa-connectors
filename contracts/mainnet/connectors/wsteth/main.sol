@@ -51,8 +51,8 @@ abstract contract WSTETHContract is Helpers, Basic {
         uint256 _amt = getUint(getId, wstethAmt);
         _amt = _amt == uint(-1) ? wstethContract.balanceOf(address(this)) : _amt;
 
-        wstethContract.unwrap(_amt);
-        setUint(setId, _amt);
+        uint256 stethAmt_ = wstethContract.unwrap(_amt);
+        setUint(setId, stethAmt_);
 
         _eventName = "LogWithdraw(uint256,uint256,uint256)";
         _eventParam = abi.encode(_amt, getId, setId);
