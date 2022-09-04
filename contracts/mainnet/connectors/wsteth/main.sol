@@ -32,7 +32,7 @@ abstract contract WSTETHContract is Helpers, Basic {
         setUint(setId, _wstethAmt);
 
         _eventName = "LogDeposit(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_amt, wstethAmt_, getId, setId);
+        _eventParam = abi.encode(_amt, _wstethAmt, getId, setId);
     }
 
     /**
@@ -55,7 +55,7 @@ abstract contract WSTETHContract is Helpers, Basic {
         setUint(setId, _stethAmt);
 
         _eventName = "LogWithdraw(uint256,uint256,uint256,uint256)";
-        _eventParam = abi.encode(_amt, stethAmt_, getId, setId);
+        _eventParam = abi.encode(_amt, _stethAmt, getId, setId);
     }
 }
 
