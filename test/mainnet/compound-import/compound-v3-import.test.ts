@@ -16,6 +16,7 @@ import encodeFlashcastData from "../../../scripts/tests/encodeFlashcastData";
 import { ConnectV2CompoundV3__factory, IERC20__factory } from "../../../typechain";
 import { tokens } from "../../../scripts/tests/mainnet/tokens";
 const { provider } = waffle;
+import { getChainId } from "hardhat";
 
 const ABI = [
   "function balanceOf(address account) public view returns (uint256)",
@@ -301,7 +302,7 @@ describe("Import Compound v3 Position", function () {
       const name = keccak256(ethers.utils.toUtf8Bytes("Compound USDC"));
       const version = keccak256(ethers.utils.toUtf8Bytes("0"));
       //hardhat network chainID
-      const chainId = new BigNumber(31337).toFixed(0);
+      const chainId = new BigNumber(await getChainId()).toFixed(0);
       const DOMAIN_SEPARATOR = keccak256(
         defaultAbiCoder.encode(
           ["bytes32", "bytes32", "bytes32", "uint256", "address"],
@@ -330,19 +331,20 @@ describe("Import Compound v3 Position", function () {
       let amount0 = new BigNumber(await comet.connect(wallet0).borrowBalanceOf(wallet.address)).plus(buffer);
       let amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
       let amountWithFee = amount0.plus(amountB);
-      console.log(`Owner: ${wallet.address}`);
-      console.log(`Manager: ${dsaWallet0.address}`);
-      console.log(`domain speparator: ${DOMAIN_SEPARATOR}`);
-      console.log(`domain typehash: ${DOMAIN_TYPEHASH}`);
-      console.log(`permit typehash: ${PERMIT_TYPEHASH}`);
-      console.log(`nonce: ${nonce}`);
-      console.log(`expiry: ${expiry}`);
-      console.log(`v: ${v}`);
-      console.log(`r: ${ethers.utils.hexlify(r)}`);
-      console.log(`s: ${ethers.utils.hexlify(s)}`);
-      console.log(`Digest: ${digest}`);
-      console.log(`structHash: ${structHash}`);
-      console.log(`block timestamp: ${(await provider.getBlock(15469858)).timestamp}`);
+
+      console.log(`\n\tOwner: ${wallet.address}`);
+      console.log(`\tManager: ${dsaWallet0.address}`);
+      console.log(`\tdomain speparator: ${DOMAIN_SEPARATOR}`);
+      console.log(`\tdomain typehash: ${DOMAIN_TYPEHASH}`);
+      console.log(`\tpermit typehash: ${PERMIT_TYPEHASH}`);
+      console.log(`\tnonce: ${nonce}`);
+      console.log(`\texpiry: ${expiry}`);
+      console.log(`\tv: ${v}`);
+      console.log(`\tr: ${ethers.utils.hexlify(r)}`);
+      console.log(`\ts: ${ethers.utils.hexlify(s)}`);
+      console.log(`\tDigest: ${digest}`);
+      console.log(`\tstructHash: ${structHash}`);
+      console.log(`\tblock timestamp: ${(await provider.getBlock(15469858)).timestamp}`);
 
       console.log(await ethers.provider.getBalance(walletSigner.address));
       const spells1 = [
