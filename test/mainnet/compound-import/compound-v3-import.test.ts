@@ -31,17 +31,6 @@ const account = "0x72a53cdbbcc1b9efa39c834a540550e23463aacb";
 const mnemonic = "test test test test test test test test test test test junk";
 const connectorName = "COMPOUND-V3-X";
 
-const chainIds = {
-  ganache: 1337,
-  hardhat: 31337,
-  mainnet: 1,
-  avalanche: 43114,
-  polygon: 137,
-  arbitrum: 42161,
-  optimism: 10,
-  fantom: 250
-};
-
 const cometABI = [
   {
     inputs: [{ internalType: "address", name: "account", type: "address" }],
