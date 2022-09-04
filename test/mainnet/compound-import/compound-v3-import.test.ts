@@ -151,6 +151,16 @@ const cometABI = [
     outputs: [{ internalType: "string", name: "", type: "string" }],
     stateMutability: "view",
     type: "function"
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "manager", type: "address" },
+      { internalType: "bool", name: "isAllowed_", type: "bool" }
+    ],
+    name: "allow",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
   }
 ];
 
@@ -316,26 +326,27 @@ describe("Import Compound v3 Position", function () {
 
       // let interface_ = new ethers.Contract("0x285617313887d43256F852cAE0Ee4de4b68D45B0", cometABI);
       // await comet.connect(walletSigner).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
-      const spells1 = [
-        {
-          connector: "COMPOUND-V3-X",
-          method: "toggleAccountManagerWithPermit",
-          args: [
-            market,
-            wallet.address,
-            dsaWallet0.address,
-            true,
-            nonce,
-            expiry,
-            v,
-            ethers.utils.hexlify(r),
-            ethers.utils.hexlify(s)
-          ]
-        }
-      ];
+      await comet.connect(walletSigner).allow(dsaWallet0.address, true);
+      // const spells1 = [
+      //   {
+      //     connector: "COMPOUND-V3-X",
+      //     method: "toggleAccountManagerWithPermit",
+      //     args: [
+      //       market,
+      //       wallet.address,
+      //       dsaWallet0.address,
+      //       true,
+      //       nonce,
+      //       expiry,
+      //       v,
+      //       ethers.utils.hexlify(r),
+      //       ethers.utils.hexlify(s)
+      //     ]
+      //   }
+      // ];
 
-      let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells1), wallet0.address);
-      const receipt = await tx.wait();
+      // let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells1), wallet0.address);
+      // const receipt = await tx.wait();
       console.log("DSA Permitted as manager");
 
       const flashSpells = [
@@ -346,8 +357,8 @@ describe("Import Compound v3 Position", function () {
         },
         {
           connector: "COMPOUND-V3-X",
-          method: "transferAssetFromUsingManager",
-          args: [market, tokens.eth.address, wallet.address, dsaWallet0.address, ethers.constants.MaxUint256, 0, 0]
+          method: "transferAssetOnBehalf",
+          args: [market, tokens.weth.address, wallet.address, dsaWallet0.address, ethers.constants.MaxUint256, 0, 0]
         },
         {
           connector: "COMPOUND-V3-X",
@@ -368,7 +379,7 @@ describe("Import Compound v3 Position", function () {
         }
       ];
 
-      tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
+      let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       await tx.wait();
     });
 
