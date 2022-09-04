@@ -30,6 +30,17 @@ const account = "0x72a53cdbbcc1b9efa39c834a540550e23463aacb";
 const mnemonic = "test test test test test test test test test test test junk";
 const connectorName = "COMPOUND-V3-X";
 
+const chainIds = {
+  ganache: 1337,
+  hardhat: 31337,
+  mainnet: 1,
+  avalanche: 43114,
+  polygon: 137,
+  arbitrum: 42161,
+  optimism: 10,
+  fantom: 250
+};
+
 const cometABI = [
   {
     inputs: [{ internalType: "address", name: "account", type: "address" }],
@@ -269,96 +280,16 @@ describe("Import Compound v3 Position", function () {
     });
   });
 
-  describe("Compound position migration - Using `allow` by EOA", async () => {
-    it("Should migrate Compound position", async () => {
-      
-      let buffer = ethers.utils.parseUnits("100", 3).toNumber();
-      let amount0 = new BigNumber(await comet.connect(wallet0).borrowBalanceOf(wallet.address)).plus(buffer);
-      let amountB = new BigNumber(amount0.toString()).multipliedBy(5).dividedBy(1e4);
-      let amountWithFee = amount0.plus(amountB);
-      
-      await comet.connect(walletSigner).allow(dsaWallet0.address, true);
-      console.log("DSA Permitted as manager");
-
-      const flashSpells = [
-        {
-          connector: "COMPOUND-V3-X",
-          method: "paybackOnBehalf",
-          args: [market, tokens.usdc.address, wallet.address, ethers.constants.MaxUint256, 0, 0]
-        },
-        {
-          connector: "COMPOUND-V3-X",
-          method: "transferAssetOnBehalf",
-          args: [market, tokens.weth.address, wallet.address, dsaWallet0.address, ethers.constants.MaxUint256, 0, 0]
-        },
-        {
-          connector: "COMPOUND-V3-X",
-          method: "borrow",
-          args: [market, tokens.usdc.address, amountWithFee.toFixed(0), 0, 0]
-        },
-        {
-          connector: "INSTAPOOL-C",
-          method: "flashPayback",
-          args: [tokens.usdc.address, amountWithFee.toFixed(0), 0, 0]
-        }
-      ];
-      const spells = [
-        {
-          connector: "INSTAPOOL-C",
-          method: "flashBorrowAndCast",
-          args: [tokens.usdc.address, amount0.toFixed(), 5, encodeFlashcastData(flashSpells), "0x"]
-        }
-      ];
-
-      let tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells), wallet0.address);
-      await tx.wait();
-    });
-
-    it("Should check DSA COMPOUND position", async () => {
-      expect((await comet.connect(wallet0).userCollateral(dsaWallet0.address, tokens.weth.address)).balance).to.be.gte(
-        ethers.utils.parseEther("100")
-      );
-      expect(await comet.connect(wallet0).borrowBalanceOf(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseUnits("100", 6)
-      );
-
-      expect((await comet.connect(wallet0).userCollateral(wallet.address, tokens.weth.address)).balance).to.be.lte(
-        ethers.utils.parseEther("0")
-      );
-      expect(await comet.connect(wallet0).borrowBalanceOf(wallet.address)).to.be.lte(ethers.utils.parseUnits("0", 6));
-    });
-  });
-
   describe("Compound position migration - Using `toggleManagerUsingPermit` spell by Manager DSA", async () => {
-
-    describe("check user Compound position", async () => {
-      it("Should create Compound v3 position of WETH(collateral) and USDC(debt)", async () => {
-        await wethContract.connect(signer).transfer(wallet.address, parseEther("100"));
-        // approve WETH to market
-
-        await wethContract.connect(walletSigner).approve(market, parseEther("100"));
-
-        //deposit WETH in Compound
-        await comet.connect(walletSigner).supply(tokens.weth.address, parseEther("100"));
-        console.log("Supplied WETH on compound");
-
-        //borrow Base from compound
-        await comet.connect(walletSigner).withdraw(tokens.usdc.address, parseUnits("100", 6));
-        console.log("Borrowed USDC from compound");
-      });
-
-      it("Should check position of user", async () => {
-        expect((await comet.connect(signer).userCollateral(wallet.address, tokens.weth.address)).balance).to.be.gte(
-          new BigNumber(100).multipliedBy(1e18).toString()
-        );
-
-        expect(await comet.connect(signer).borrowBalanceOf(wallet.address)).to.be.gte(
-          new BigNumber(100).multipliedBy(1e6).toString()
-        );
-      });
-    });
+    let initialbal: any;
+    let initialborrow: any;
 
     it("Should migrate Compound position", async () => {
+      initialbal = new BigNumber(
+        (await comet.connect(wallet0).userCollateral(dsaWallet0.address, tokens.weth.address)).balance
+      );
+      initialborrow = new BigNumber(await comet.connect(wallet0).borrowBalanceOf(dsaWallet0.address));
+
       const DOMAIN_TYPEHASH = keccak256(
         ethers.utils.toUtf8Bytes("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
       );
@@ -369,7 +300,8 @@ describe("Import Compound v3 Position", function () {
       );
       const name = keccak256(ethers.utils.toUtf8Bytes("Compound USDC"));
       const version = keccak256(ethers.utils.toUtf8Bytes("0"));
-      const chainId = new BigNumber(1).toFixed(0);
+      //hardhat network chainID
+      const chainId = new BigNumber(31337).toFixed(0);
       const DOMAIN_SEPARATOR = keccak256(
         defaultAbiCoder.encode(
           ["bytes32", "bytes32", "bytes32", "uint256", "address"],
@@ -413,7 +345,6 @@ describe("Import Compound v3 Position", function () {
       console.log(`block timestamp: ${(await provider.getBlock(15469858)).timestamp}`);
 
       console.log(await ethers.provider.getBalance(walletSigner.address));
-      // await comet.connect(walletSigner).allowBySig(wallet.address, dsaWallet0.address, true, nonce, expiry,v, ethers.utils.hexlify(r), ethers.utils.hexlify(s));
       const spells1 = [
         {
           connector: "COMPOUND-V3-X",
@@ -434,7 +365,6 @@ describe("Import Compound v3 Position", function () {
       let [targets, calldata] = encodeSpells(spells1);
       console.log(targets);
       console.log(calldata);
-      
       let tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells1), wallet0.address);
       const receipt = await tx.wait();
       console.log("DSA Permitted as manager");
@@ -475,10 +405,10 @@ describe("Import Compound v3 Position", function () {
 
     it("Should check DSA COMPOUND position", async () => {
       expect((await comet.connect(wallet0).userCollateral(dsaWallet0.address, tokens.weth.address)).balance).to.be.gte(
-        ethers.utils.parseEther("200")
+        initialbal.plus(100 * 1e18).toFixed(0)
       );
       expect(await comet.connect(wallet0).borrowBalanceOf(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseUnits("200", 6)
+        initialborrow.plus(100 * 1e6).toFixed(0)
       );
 
       expect((await comet.connect(wallet0).userCollateral(wallet.address, tokens.weth.address)).balance).to.be.lte(
