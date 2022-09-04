@@ -28,9 +28,10 @@ abstract contract WSTETHContract is Helpers, Basic {
 
         approve(stethContract, address(wstethContract), _amt);
 
-        setId = wstethContract.wrap(_amt);
+        wstethContract.wrap(_amt);
+        setUint(setId, _amt);
 
-        _eventName = "LogDepositSTETH(uint256,uint256,uint256)";
+        _eventName = "LogDeposit(uint256,uint256,uint256)";
         _eventParam = abi.encode(_amt, getId, setId);
     }
 
@@ -50,9 +51,10 @@ abstract contract WSTETHContract is Helpers, Basic {
         uint256 _amt = getUint(getId, wstethAmt);
         _amt = _amt == uint(-1) ? wstethContract.balanceOf(address(this)) : _amt;
 
-        setId = wstethContract.unwrap(_amt);
+        wstethContract.unwrap(_amt);
+        setUint(setId, _amt);
 
-        _eventName = "LogWithdrawWSTETH(uint256,uint256,uint256)";
+        _eventName = "LogWithdraw(uint256,uint256,uint256)";
         _eventParam = abi.encode(_amt, getId, setId);
     }
 }
