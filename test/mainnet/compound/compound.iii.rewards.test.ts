@@ -325,7 +325,7 @@ describe("Compound III Rewards", function () {
         signer: masterSigner,
         connectors: instaConnectorsV2
       });
-      const amount = ethers.utils.parseUnits("400", 6); 
+      const amount = ethers.utils.parseUnits("400", 6);
       const spells = [
         {
           connector: "COMPOUND-V3-TEST-A",
@@ -355,7 +355,7 @@ describe("Compound III Rewards", function () {
         {
           connector: connector_,
           method: "claimRewards",
-          args: [market, dsaWallet0.address, true, 0]
+          args: [market, 0]
         }
       ];
 
@@ -395,8 +395,8 @@ describe("Compound III Rewards", function () {
       const spells = [
         {
           connector: connector_,
-          method: "claimRewardsTo",
-          args: [market, dsaWallet0.address, dsaWallet1.address, true, 0]
+          method: "claimRewardsOnBehalfOf",
+          args: [market, dsaWallet0.address, dsaWallet1.address, 0]
         }
       ];
 
@@ -429,8 +429,8 @@ describe("Compound III Rewards", function () {
       const spells = [
         {
           connector: connector_,
-          method: "claimRewardsTo",
-          args: [market, dsaWallet0.address, dsaWallet1.address, true, 0]
+          method: "claimRewardsOnBehalfOf",
+          args: [market, dsaWallet0.address, dsaWallet1.address, 0]
         }
       ];
 
