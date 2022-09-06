@@ -380,7 +380,7 @@ describe("Import Compound v3 Position", function () {
         }
       ];
 
-      tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells), wallet0.address);
+      let tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells), wallet0.address);
       await tx.wait();
     });
 
