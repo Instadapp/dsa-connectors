@@ -325,8 +325,7 @@ describe("Compound III Rewards", function () {
         signer: masterSigner,
         connectors: instaConnectorsV2
       });
-      const amount = ethers.utils.parseUnits("400", 6); // 1 ETH
-      console.log(new BigNumber(await baseContract.connect(signer).balanceOf(dsaWallet0.address)).toFixed(0));
+      const amount = ethers.utils.parseUnits("400", 6); 
       const spells = [
         {
           connector: "COMPOUND-V3-TEST-A",
@@ -351,7 +350,7 @@ describe("Compound III Rewards", function () {
       let rewardInterface = new ethers.Contract(reward, ABI);
       let owed_ = await cometReward.connect(signer).callStatic.getRewardOwed(market, dsaWallet0.address);
       let amt: number = owed_.owed;
-      console.log(amt);
+      console.log(new BigNumber(amt).toFixed(0));
       const spells = [
         {
           connector: connector_,
