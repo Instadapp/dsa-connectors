@@ -37,18 +37,18 @@ abstract contract CompoundV3RewardsResolver is Events, Helpers {
 	 * @notice Claim rewards and interests accrued and transfer to dest address.
 	 * @param market The address of the market.
 	 * @param owner The account of which the rewards are to be claimed.
-	 * @param manager The account where to transfer the claimed rewards.
+	 * @param to The account where to transfer the claimed rewards.
 	 * @param setId ID stores the amount of rewards claimed.
 	 */
 	function claimRewardsOnBehalfOf(
 		address market,
 		address owner,
-		address manager,
+		address to,
 		uint256 setId
 	) public returns (string memory eventName_, bytes memory eventParam_) {
 		//in reward token decimals
 		uint256 rewardsOwed = cometRewards.getRewardOwed(market, owner).owed;
-		cometRewards.claimTo(market, owner, manager, true);
+		cometRewards.claimTo(market, owner, to, true);
 
 		setUint(setId, rewardsOwed);
 
@@ -56,7 +56,7 @@ abstract contract CompoundV3RewardsResolver is Events, Helpers {
 		eventParam_ = abi.encode(
 			market,
 			owner,
-			manager,
+			to,
 			rewardsOwed,
 			setId
 		);

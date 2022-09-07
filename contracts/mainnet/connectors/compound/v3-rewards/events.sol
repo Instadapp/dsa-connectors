@@ -13,7 +13,7 @@ contract Events {
 	event LogRewardsClaimedOnBehalf(
 		address indexed market,
 		address indexed owner,
-		address manager,
+		address to,
 		uint256 indexed rewardsClaimed,
 		uint256 setId
 	);
