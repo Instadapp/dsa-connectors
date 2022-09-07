@@ -6,7 +6,7 @@ contract Events {
 	event LogRewardsClaimed(
 		address indexed market,
 		address indexed account,
-		uint256 indexed totalClaimedInWei,
+		uint256 indexed rewardsClaimed,
 		uint256 setId
 	);
 
@@ -14,7 +14,7 @@ contract Events {
 		address indexed market,
 		address indexed owner,
 		address manager,
-		uint256 indexed totalClaimedInWei,
+		uint256 indexed rewardsClaimed,
 		uint256 setId
 	);
 }
