@@ -811,7 +811,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		address token_ = token == ethAddr ? wethAddr : token;
 
-		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(address(this), market, token) : amt_;
+		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(address(this), market, token_) : amt_;
 
 		CometInterface(market).transferAssetFrom(address(this), dest, token_, amt_);
 
@@ -853,7 +853,7 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 
 		address token_ = token == ethAddr ? wethAddr : token;
 
-		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(src, market, token) : amt_;
+		amt_ = amt_ == uint256(-1) ? _getAccountSupplyBalanceOfAsset(src, market, token_) : amt_;
 
 		CometInterface(market).transferAssetFrom(src, dest, token_, amt_);
 
