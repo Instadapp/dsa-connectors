@@ -335,31 +335,6 @@ describe("Import Compound v3 Position", function () {
       console.log(`\tstructHash: ${structHash}`);
       console.log(`\tblock timestamp: ${(await provider.getBlock(15469858)).timestamp}`);
 
-      console.log(await ethers.provider.getBalance(walletSigner.address));
-      const spells1 = [
-        {
-          connector: "COMPOUND-V3-X",
-          method: "toggleAccountManagerWithPermit",
-          args: [
-            market,
-            wallet.address,
-            dsaWallet0.address,
-            true,
-            nonce,
-            expiry,
-            v,
-            ethers.utils.hexlify(r),
-            ethers.utils.hexlify(s)
-          ]
-        }
-      ];
-      let [targets, calldata] = encodeSpells(spells1);
-      console.log(targets);
-      console.log(calldata);
-      let tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells1), wallet0.address);
-      const receipt = await tx.wait();
-      console.log("DSA Permitted as manager");
-
       const flashSpells = [
         {
           connector: "COMPOUND-V3-X",
@@ -384,13 +359,28 @@ describe("Import Compound v3 Position", function () {
       ];
       const spells = [
         {
+          connector: "COMPOUND-V3-X",
+          method: "toggleAccountManagerWithPermit",
+          args: [
+            market,
+            wallet.address,
+            dsaWallet0.address,
+            true,
+            nonce,
+            expiry,
+            v,
+            ethers.utils.hexlify(r),
+            ethers.utils.hexlify(s)
+          ]
+        },
+        {
           connector: "INSTAPOOL-C",
           method: "flashBorrowAndCast",
           args: [tokens.usdc.address, amount0.toFixed(), 5, encodeFlashcastData(flashSpells), "0x"]
         }
       ];
 
-      tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells), wallet0.address);
+      let tx = await dsaWallet0.connect(walletSigner).cast(...encodeSpells(spells), wallet0.address);
       await tx.wait();
     });
 
