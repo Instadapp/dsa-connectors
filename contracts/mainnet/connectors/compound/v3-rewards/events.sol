@@ -6,17 +6,15 @@ contract Events {
 	event LogRewardsClaimed(
 		address indexed market,
 		address indexed account,
-		uint256 indexed totalClaimedInWei,
-		uint256 getId,
-		bool accrued
+		uint256 indexed rewardsClaimed,
+		uint256 setId
 	);
 
-	event LogRewardsClaimedTo(
+	event LogRewardsClaimedOnBehalf(
 		address indexed market,
-		address indexed account,
+		address indexed owner,
 		address to,
-		uint256 indexed totalClaimedInWei,
-		uint256 getId,
-		bool accrued
+		uint256 indexed rewardsClaimed,
+		uint256 setId
 	);
 }
