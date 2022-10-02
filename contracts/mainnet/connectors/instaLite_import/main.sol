@@ -46,6 +46,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 			: stEthAmt_;
 
 		astethToken.approve(address(iEth), stEthAmt_);
+		uint256 initialBal = iEth.balanceOf(address(this));
 
 		iEth.importPosition(
 			flashTkn_,
@@ -56,7 +57,10 @@ abstract contract InstaLiteConnector is Events, Basic {
 			wethAmt_
 		);
 
-		setUint(setId, iEth.balanceOf(address(this)));
+		uint256 finalBalance = iEth.balanceOf(address(this));
+		uint256 iEthAmt_ = finalBalance - initialBal;
+
+		setUint(setId, iEthAmt_);
 
 		eventName_ = "LogImport(address,uint256,uint256,uint256,uint256,uint256[],uint256)";
 		eventParam_ = abi.encode(
@@ -65,6 +69,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 			route_,
 			stEthAmt_,
 			wethAmt_,
+			iEthAmt_,
 			getIds,
 			setId
 		);
