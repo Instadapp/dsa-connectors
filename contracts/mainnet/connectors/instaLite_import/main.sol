@@ -62,7 +62,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 
 		setUint(setId, iEthAmt_);
 
-		eventName_ = "LogImport(address,uint256,uint256,uint256,uint256,uint256[],uint256)";
+		eventName_ = "LogImport(address,uint256,uint256,uint256,uint256,uint256,uint256[],uint256)";
 		eventParam_ = abi.encode(
 			flashTkn_,
 			flashAmt_,
