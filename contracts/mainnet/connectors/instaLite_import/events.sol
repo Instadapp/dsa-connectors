@@ -9,6 +9,6 @@ contract Events {
 		uint256 stEthAmt,
 		uint256 wethAmt,
 		uint256[] getIds,
-		uint256[] setIds
+		uint256 setId
 	);
 }

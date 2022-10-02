@@ -28,7 +28,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 	 * @param stEthAmt_ Amount of astEthToken to be imported.
 	 * @param wethAmt_ Amount of weth borrows to be imported.
 	 * @param getIds IDs to retrieve amt.
-	 * @param setIds array of IDs to store the amount of tokens deposited.
+	 * @param setId ID to store balanceOf of iEth.
 	 */
 	function importPosition(
 		address flashTkn_,
@@ -37,7 +37,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 		uint256 stEthAmt_,
 		uint256 wethAmt_,
 		uint256[] memory getIds,
-		uint256[] memory setIds
+		uint256 setId
 	) external returns (string memory eventName_, bytes memory eventParam_) {
 		uint256 stEthAmt_ = getUint(getIds[0], stEthAmt_);
 		uint256 wethAmt_ = getUint(getIds[1], wethAmt_);
@@ -56,10 +56,9 @@ abstract contract InstaLiteConnector is Events, Basic {
 			wethAmt_
 		);
 
-		setUint(setIds[0], stEthAmt_);
-		setUint(setIds[1], wethAmt_);
+		setUint(setId, iEth.balanceOf(address(this)));
 
-		eventName_ = "LogImport(address,uint256,uint256,uint256,uint256,uint256[],uint256[])";
+		eventName_ = "LogImport(address,uint256,uint256,uint256,uint256,uint256[],uint256)";
 		eventParam_ = abi.encode(
 			flashTkn_,
 			flashAmt_,
@@ -67,7 +66,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 			stEthAmt_,
 			wethAmt_,
 			getIds,
-			setIds
+			setId
 		);
 	}
 }

@@ -2,6 +2,8 @@
 pragma solidity ^0.7.0;
 
 interface IInstaLite {
+	function balanceOf(address account) external view virtual returns (uint256);
+
 	function importPosition(
 		address flashTkn_,
 		uint256 flashAmt_,
