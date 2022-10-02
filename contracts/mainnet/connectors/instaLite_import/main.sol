@@ -19,6 +19,9 @@ abstract contract InstaLiteConnector is Events, Basic {
 	IInstaLite internal constant iEth =
 		IInstaLite(0xc383a3833A87009fD9597F8184979AF5eDFad019);
 
+	address internal constant iEthDSA =
+		0x94269A09c5Fcbd5e88F9DF13741997bc11735a9c;
+
 	/**
 	 * @dev Supply ETH/ERC20
 	 * @notice Supply a token into Instalite.
@@ -45,7 +48,7 @@ abstract contract InstaLiteConnector is Events, Basic {
 			? astethToken.balanceOf(msg.sender)
 			: stEthAmt_;
 
-		astethToken.approve(address(iEth), stEthAmt_);
+		astethToken.approve(iEthDSA, stEthAmt_);
 		uint256 initialBal = iEth.balanceOf(address(this));
 
 		iEth.importPosition(
