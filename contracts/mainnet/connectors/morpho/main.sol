@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 import './helpers.sol';
 import './events.sol';
-import './hardhat/console.sol';
+import 'hardhat/console.sol';
 
 abstract contract Morpho is Helpers, Events {
     
@@ -12,19 +12,18 @@ abstract contract Morpho is Helpers, Events {
         address _tokenAddress,
         address _poolTokenAddress, // if address weth (send eth)
         uint256 _amount, // if max, check balance
-        uint256 _maxGasForMatching,
+        uint256 _maxGasForMatching, // optional
         uint256 _getId,
 		uint256 _setId
     ) external payable returns(string memory _eventName, bytes memory _eventParam) {
 
-        require(_pool == Underlying.AAVEV2 || _pool == Underlying.COMPOUNDV2, 'protocol not supported');
+        require(_pool == Underlying.AAVEV2 || _pool == Underlying.COMPOUNDV2, 'underlying-protocol-not-supported');
 
         uint256 _amt = getUint(_getId, _amount);
 
-        bool _isETH ? _tokenAddress == ethAddr;
-        address _token = _isETH ? wethAddr : _tokenAddress
+        bool _isETH = _tokenAddress == ethAddr;
 
-        TokenInterface _tokenContract = TokenInterface(_token);
+        TokenInterface _tokenContract = _isETH ? TokenInterface(wethAddr) : TokenInterface(_tokenAddress);
 
         if(_amt == uint256(-1)) {
             _amt = _isETH ? address(this).balance : _tokenContract.balanceOf(address(this));
@@ -32,13 +31,13 @@ abstract contract Morpho is Helpers, Events {
 
         if(_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
 
-        _pool == Underlying.AAVEV2 
-        ?
+        if(_pool == Underlying.AAVEV2) {
             approve(_tokenContract, morphoAave, _amt);
             morphoAave.supply(_poolTokenAddress, address(this), _amt, _maxGasForMatching);
-        :
+        } else {
             approve(_tokenContract, morphoCompound, _amt);
             morphoCompound.supply(_poolTokenAddress, address(this), _amt, _maxGasForMatching);
+        }
 
         setUint(_setId, _amt);
 
@@ -59,17 +58,16 @@ abstract contract Morpho is Helpers, Events {
         address _tokenAddress,
         address _poolTokenAddress, //todo: dTokenaAddress? // if address weth (send eth)
         uint256 _amount,
-        uint256 _maxGasForMatching
+        uint256 _maxGasForMatching,
         uint256 _getId,
         uint256 _setId
     ) external payable returns(string memory _eventName, bytes memory _eventParam) {
 
-        require(_pool == Underlying.AAVEV2 || _pool == Underlying.COMPOUNDV2, 'protocol not supported');
+        require(_pool == Underlying.AAVEV2 || _pool == Underlying.COMPOUNDV2, 'protocol-not-supported');
 
         uint256 _amt = getUint(_getId, _amount);
 
-        bool _isETH ? _tokenAddress == ethAddr;
-        address _token = _isETH ? wethAddr : _tokenAddress;
+        bool _isETH = _tokenAddress == ethAddr;
 
         if(_pool == Underlying.AAVEV2) {
             morphoAave.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
@@ -77,7 +75,7 @@ abstract contract Morpho is Helpers, Events {
             morphoCompound.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
         }
 
-        if(_isETH) convertWethToEth(_isETH, tokenInterface(_token), _amt);
+        if(_isETH) convertWethToEth(_isETH, tokenInterface(wethAddr), _amt);
 
         setUint(_setId, _amt);
 
@@ -104,7 +102,7 @@ abstract contract Morpho is Helpers, Events {
         require(_pool == Underlying.AAVEV2 || _pool == Underlying.COMPOUNDV2, 'protocol not supported');
 
         uint256 _amt = getUint(_getId, _amount);
-        bool _isETH ? _tokenAddress == ethAddr;
+        bool _isETH = _tokenAddress == ethAddr;
         address _token = _isETH ? wethAddr : _tokenAddress;
 
         if (_amt == uint256(-1)) _amt = _poolTokenAddress.balanceOf(address(this));
@@ -135,12 +133,12 @@ abstract contract Morpho is Helpers, Events {
 
         require(_pool == Underlying.AAVEV2 || _pool == Underlying.COMPOUNDV2, 'protocol not supported');
 
-        bool _isETH ? _tokenAddress == ethAddr;
+        bool _isETH = _tokenAddress == ethAddr;
         uint256 _amt = getUint(_getId, _amount);
         address _token = _isETH ? wethAddr : _tokenAddress;
 
         if(_amt == uint256(-1)) {
-            _amt = _isETH ? _amt = address(this).balance : TokenInterface(_token).balanceOf(address(this))
+            _amt = _isETH ? _amt = address(this).balance : TokenInterface(_token).balanceOf(address(this));
         }
 
         if (_isETH) convertEthToWeth(_isETH, TokenInterface(_token), _amt);
