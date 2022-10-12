@@ -12,6 +12,8 @@ export const tokens = {
     symbol: "ETH",
     name: "Ethereum",
     address: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    aTokenAddress: "0x030bA81f1c18d280636F32af80b9AAd02Cf0854e",
+    cTokenAddress: "0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5",
     decimals: 18
   },
   dai: {
@@ -19,6 +21,8 @@ export const tokens = {
     symbol: "DAI",
     name: "DAI Stable",
     address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    aTokenAddress: "0x028171bCA77440897B824Ca71D1c56caC55b68A3",
+    cTokenAddress: "0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643",
     decimals: 18
   },
   usdc: {
@@ -26,6 +30,8 @@ export const tokens = {
     symbol: "USDC",
     name: "USD Coin",
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    aTokenAddress: "0xBcca60bB61934080951369a648Fb03DF4F96263C",
+    cTokenAddress: "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
     decimals: 6
   },
   weth: {
@@ -33,6 +39,8 @@ export const tokens = {
     symbol: "WETH",
     name: "Wrapped Ether",
     address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    aTokenAddress: "0x030bA81f1c18d280636F32af80b9AAd02Cf0854e",
+    cTokenAddress: "0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5",
     decimals: 18
   },
   ens: {
@@ -40,6 +48,7 @@ export const tokens = {
     symbol: "ENS",
     name: "Etherem Name Services",
     address: "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+    aTokenAddress: "0x9a14e23A58edf4EFDcB360f68cd1b95ce2081a2F",
     decimals: 18
   },
   comp: {
@@ -47,6 +56,7 @@ export const tokens = {
     symbol: "COMP",
     name: "Compound",
     address: "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+    cTokenAddress: "0x70e36f6BF80a52b3B46b3aF8e106CC0ed743E8e4",
     decimals: 18
   },
   link: {
@@ -54,6 +64,8 @@ export const tokens = {
     symbol: "LINK",
     name: "ChainLink Token",
     address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    aTokenAddress: "0xa06bC25B5805d5F8d82847D191Cb4Af5A3e873E0",
+    cTokenAddress: "0xFAce851a4921ce59e912d19329929CE6da6EB0c7",
     decimals: 18
   },
   uni: {
@@ -61,9 +73,13 @@ export const tokens = {
     symbol: "UNI",
     name: "Uniswap",
     address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+    aTokenAddress: "0xB9D7CB55f463405CDfBe4E90a6D2Df01C2B92BF1",
+    cTokenAddress: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
     decimals: 18
   }
 };
+
+export const dsaMaxValue = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
 export const tokenMapping: Record<string, any> = {
   usdc: {
