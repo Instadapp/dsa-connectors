@@ -7,13 +7,9 @@ import "../../common/basic.sol";
 import "../../common/interfaces.sol";
 
 abstract contract Helpers is Stores, Basic {
-	IMorphoCore public constant morphoCompound =
-		IMorphoCore(0x8888882f8f843896699869179fB6E4f7e3B58888);
 	IMorphoCore public constant morphoAave =
 		IMorphoCore(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
 
-	enum Underlying {
-		AAVEV2,
-		COMPOUNDV2
-	}
+	IMorphoAaveLens public constant morphoAaveLens =
+		IMorphoAaveLens(0x507fA343d0A90786d86C7cd885f5C49263A91FF4);
 }
