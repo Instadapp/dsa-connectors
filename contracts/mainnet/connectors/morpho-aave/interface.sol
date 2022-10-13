@@ -9,20 +9,26 @@ interface IMorphoCore {
 		uint256 _amount
 	) external;
 
+	function supply(
+		address _poolToken,
+		address _onBehalf,
+		uint256 _amount,
+		uint256 _maxGasForMatching
+	) external;
+
 	function borrow(address _poolTokenAddress, uint256 _amount) external;
+
+	function borrow(
+		address _poolToken,
+		uint256 _amount,
+		uint256 _maxGasForMatching
+	) external;
 
 	function withdraw(address _poolTokenAddress, uint256 _amount) external;
 
 	function repay(
 		address _poolTokenAddress,
 		address _onBehalf,
-		uint256 _amount
-	) external;
-
-	function liquidate(
-		address _poolTokenBorrowedAddress,
-		address _poolTokenCollateralAddress,
-		address _borrower,
 		uint256 _amount
 	) external;
 

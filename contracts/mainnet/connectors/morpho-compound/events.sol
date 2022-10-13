@@ -11,16 +11,43 @@ contract Events {
 		uint256 setId
 	);
 
+	event LogDepositWithMaxGas(
+		address tokenAddress,
+		address poolTokenAddress,
+		uint256 amount,
+		uint256 maxGasForMatching,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogDepositOnBehalf(
+		address tokenAddress,
+		address poolTokenAddress,
+		address onBehalf,
+		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
 	event LogBorrow(
-		bool isETH,
+		address tokenAddress,
 		address poolTokenAddress,
 		uint256 amount,
 		uint256 getId,
 		uint256 setId
 	);
 
+	event LogBorrowWithMaxGas(
+		address tokenAddress,
+		address poolTokenAddress,
+		uint256 amount,
+		uint256 maxGasForMatching,
+		uint256 getId,
+		uint256 setId
+	);
+
 	event LogWithdraw(
-		bool isETH,
+		address tokenAddress,
 		address poolTokenAddress,
 		uint256 amt,
 		uint256 getId,
@@ -28,9 +55,18 @@ contract Events {
 	);
 
 	event LogPayback(
-		bool isETH,
+		address tokenAddress,
 		address poolTokenAddress,
 		uint256 amt,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogPaybackOnBehalf(
+		address tokenAddress,
+		address poolTokenAddress,
+		address onBehalf,
+		uint256 amount,
 		uint256 getId,
 		uint256 setId
 	);
