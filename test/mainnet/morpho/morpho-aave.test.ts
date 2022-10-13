@@ -20,6 +20,8 @@ const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'
 const ACC_DAI = '0xcd6Eb888e76450eF584E8B51bB73c76ffBa21FF2'
 const Dai = parseUnits('1', 18)
 
+const user = "0x41bc7d0687e6cea57fa26da78379dfdc5627c56d"
+
 const token_usdc = new ethers.Contract(
   USDC,
   IERC20Minimal__factory.abi,
@@ -49,7 +51,7 @@ describe("Morpho-Aave", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 15718631,
+            blockNumber: 15714501,
           },
         },
       ],
@@ -81,13 +83,13 @@ describe("Morpho-Aave", function () {
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit 10 ETH into DSA wallet", async function () {
+    it("Deposit 1000 ETH into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: parseEther("10"),
+        value: parseEther("1000"),
       });
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        parseEther("10")
+        parseEther("1000")
       );
     });
 
@@ -138,12 +140,12 @@ describe("Morpho-Aave", function () {
 
   describe("Main", function () {
 
-    it("Should deposit ETH max", async function () {
+    it("Should deposit 10 ETH", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "deposit",
-          args: [tokens.eth.address, tokens.eth.aTokenAddress, dsaMaxValue, "0", "0"], // 10 ETH
+          args: [tokens.eth.address, tokens.eth.aTokenAddress, "10000000000000000000", "0", "0"], // 10 ETH
         },
       ];
 
@@ -153,7 +155,7 @@ describe("Morpho-Aave", function () {
 
       await tx.wait();
       expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
-        parseUnits('0', 18))
+        parseUnits('990', 18))
       );
     })
 
@@ -173,6 +175,25 @@ describe("Morpho-Aave", function () {
       await tx.wait();
       expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
         parseUnits('490', 18)
+      );
+    })
+
+    it("Should deposit 100 USDC on behalf", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositOnBehalf",
+          args: [tokens.usdc.address, tokens.usdc.aTokenAddress, user, "100000000", "0", "0"], // 100 USDC
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+      expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
+        parseUnits('390', 18)
       );
     })
 
@@ -213,6 +234,25 @@ describe("Morpho-Aave", function () {
       );
     })
 
+    it("Should payback ETH on behalf", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "paybackOnBehalf",
+          args: [tokens.eth.address, tokens.eth.aTokenAddress, user, dsaMaxValue, "0", "0"], // Max ETH
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
+        parseUnits('125', 18)
+      );
+    })
+
     it("Should withdraw ETH max", async function () {
       const spells = [
         {
@@ -228,7 +268,7 @@ describe("Morpho-Aave", function () {
 
       await tx.wait();
       expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        parseUnits('10', 18))
+        parseUnits('134', 18))
       );
     })
 
@@ -247,7 +287,7 @@ describe("Morpho-Aave", function () {
 
       await tx.wait();
       expect(expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
-        parseUnits('498', 6))
+        parseUnits('398', 6))
       );
     })
   });

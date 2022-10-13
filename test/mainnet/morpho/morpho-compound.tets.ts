@@ -18,7 +18,9 @@ const Usdc = parseUnits('500', 6)
 
 const DAI = '0x6b175474e89094c44da98b954eedeac495271d0f'
 const ACC_DAI = '0xcd6Eb888e76450eF584E8B51bB73c76ffBa21FF2'
-const Dai = parseUnits('1', 18)
+const Dai = parseUnits('400000', 18)
+
+const user = '0x5dd596c901987a2b28c38a9c1dfbf86fffc15d77'
 
 const token_usdc = new ethers.Contract(
   USDC,
@@ -49,7 +51,7 @@ describe("Morpho-Compound", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 15718631,
+            blockNumber: 15714501,
           },
         },
       ],
@@ -113,7 +115,7 @@ describe("Morpho-Compound", function () {
       );
     });
 
-    it("Deposit 1 DAI into DSA wallet", async function () {
+    it("Deposit 400000 DAI into DSA wallet", async function () {
 
       await hre.network.provider.request({
           method: 'hardhat_impersonateAccount',
@@ -131,7 +133,7 @@ describe("Morpho-Compound", function () {
       await token_dai.connect(wallet0).transfer(dsaWallet0.address, Dai);
 
       expect(await token_dai.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
-        parseUnits('1', 18)
+        parseUnits('400000', 18)
       );
     });
   });
@@ -176,6 +178,25 @@ describe("Morpho-Compound", function () {
       );
     })
 
+    it("Should deposit 100 USDC on behalf", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositOnBehalf",
+          args: [tokens.usdc.address, tokens.usdc.cTokenAddress, user, "100000000", "0", "0"], // 100 USDC
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
+      expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
+        parseUnits('390', 18)
+      );
+    })
+
     it("Should borrow DAI into DSA", async function () {
         const spells = [
           {
@@ -191,10 +212,10 @@ describe("Morpho-Compound", function () {
 
         await tx.wait();
         expect(await token_dai.connect(masterSigner).balanceOf(dsaWallet0.address))
-          .to.be.gte(parseUnits('11', 18));
+          .to.be.gte(parseUnits('400010', 18));
     })
 
-    it("Should payback DAI MAX", async function () {
+    it("Should payback DAI max", async function () {
       const spells = [
         {
           connector: connectorName,
@@ -209,8 +230,24 @@ describe("Morpho-Compound", function () {
 
       await tx.wait();
       expect(await token_dai.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.lte(
-        parseUnits('1', 18)
+        parseUnits('400000', 18)
       );
+    })
+
+    it("Should payback DAI on behalf", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "paybackOnBehalf",
+          args: [tokens.dai.address, tokens.dai.cTokenAddress, user, dsaMaxValue, "0", "0"],
+        },
+      ];
+
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+
+      await tx.wait();
     })
 
     it("Should withdraw ETH max", async function () {
@@ -229,25 +266,6 @@ describe("Morpho-Compound", function () {
       await tx.wait();
       expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
         parseUnits('10', 18))
-      );
-    })
-
-    it("Should withdraw 8 USDC max", async function () {
-      const spells = [
-        {
-          connector: connectorName,
-          method: "withdraw",
-          args: [tokens.usdc.address, tokens.usdc.cTokenAddress, "8000000", "0", "0"], // 8 USDC
-        },
-      ];
-
-      const tx = await dsaWallet0
-          .connect(wallet0)
-          .cast(...encodeSpells(spells), wallet1.getAddress());
-
-      await tx.wait();
-      expect(expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(
-        parseUnits('498', 6))
       );
     })
   });
