@@ -280,7 +280,7 @@ abstract contract MorphoAave is Helpers, Events {
 		address _token = _isETH ? wethAddr : _tokenAddress;
 
 		if (_amt == uint256(-1))
-			(, , , _amt) = morphoAaveLens._getCurrentSupplyBalanceInOf(
+			(, , , _amt) = morphoAaveLens.getCurrentSupplyBalanceInOf(
 				_poolTokenAddress,
 				address(this)
 			);
