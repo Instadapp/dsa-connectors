@@ -10,6 +10,28 @@ abstract contract Helpers is Stores, Basic {
 	IMorphoCore public constant MORPHO_COMPOUND =
 		IMorphoCore(0x8888882f8f843896699869179fB6E4f7e3B58888);
 
-	IMorphoCompoundLens public constant morphoCompoundLens =
+	IMorphoCompoundLens public constant MORPHO_COMPOUND_LENS =
 		IMorphoCompoundLens(0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67);
+
+	function _performEthToWethConversion(
+		address _tokenAddress,
+		uint256 _amount,
+		uint256 _getId
+	) internal returns (TokenInterface _tokenContract, uint256 _amt) {
+		_amt = getUint(_getId, _amount);
+
+		bool _isETH = _tokenAddress == ethAddr;
+
+		_tokenContract = _isETH
+			? TokenInterface(wethAddr)
+			: TokenInterface(_tokenAddress);
+
+		if (_amt == uint256(-1)) {
+			_amt = _isETH
+				? address(this).balance
+				: _tokenContract.balanceOf(address(this));
+		}
+
+		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
+	}
 }

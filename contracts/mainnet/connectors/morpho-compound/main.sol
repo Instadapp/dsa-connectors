@@ -25,24 +25,14 @@ abstract contract MorphoCompound is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _amount);
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt
+		) = _performEthToWethConversion(_tokenAddress, _amount, _getId);
 
-		bool _isETH = _tokenAddress == ethAddr;
+		approve(_tokenContract, address(MORPHO_COMPOUND), _amt);
 
-		TokenInterface _tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-		}
-
-		convertEthToWeth(_isETH, _tokenContract, _amt);
-
-		approve(_tokenContract, address(morphoCompound), _amt);
-		morphoCompound.supply(_poolTokenAddress, address(this), _amt);
+		MORPHO_COMPOUND.supply(_poolTokenAddress, address(this), _amt);
 
 		setUint(_setId, _amt);
 
@@ -78,24 +68,14 @@ abstract contract MorphoCompound is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _amount);
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt
+		) = _performEthToWethConversion(_tokenAddress, _amount, _getId);
 
-		bool _isETH = _tokenAddress == ethAddr;
+		approve(_tokenContract, address(MORPHO_COMPOUND), _amt);
 
-		TokenInterface _tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-		}
-
-		convertEthToWeth(_isETH, _tokenContract, _amt);
-
-		approve(_tokenContract, address(morphoCompound), _amt);
-		morphoCompound.supply(
+		MORPHO_COMPOUND.supply(
 			_poolTokenAddress,
 			address(this),
 			_amt,
@@ -137,24 +117,14 @@ abstract contract MorphoCompound is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _amount);
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt
+		) = _performEthToWethConversion(_tokenAddress, _amount, _getId);
 
-		bool _isETH = _tokenAddress == ethAddr;
+		approve(_tokenContract, address(MORPHO_COMPOUND), _amt);
 
-		TokenInterface _tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-		}
-
-		convertEthToWeth(_isETH, _tokenContract, _amt);
-
-		approve(_tokenContract, address(morphoCompound), _amt);
-		morphoCompound.supply(_poolTokenAddress, _onBehalf, _amt);
+		MORPHO_COMPOUND.supply(_poolTokenAddress, _onBehalf, _amt);
 
 		setUint(_setId, _amt);
 
@@ -193,9 +163,9 @@ abstract contract MorphoCompound is Helpers, Events {
 
 		bool _isETH = _tokenAddress == ethAddr;
 
-		morphoCompound.borrow(_poolTokenAddress, _amt);
+		MORPHO_COMPOUND.borrow(_poolTokenAddress, _amt);
 
-		convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -235,9 +205,9 @@ abstract contract MorphoCompound is Helpers, Events {
 
 		bool _isETH = _tokenAddress == ethAddr;
 
-		morphoCompound.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
+		MORPHO_COMPOUND.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
 
-		convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -274,18 +244,17 @@ abstract contract MorphoCompound is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _amount);
 		bool _isETH = _tokenAddress == ethAddr;
-		address _token = _isETH ? wethAddr : _tokenAddress;
 
 		if (_amt == uint256(-1)) {
-			(, , _amt) = morphoCompoundLens.getCurrentSupplyBalanceInOf(
+			(, , _amt) = MORPHO_COMPOUND_LENS.getCurrentSupplyBalanceInOf(
 				_poolTokenAddress,
 				address(this)
 			);
 		}
 
-		morphoCompound.withdraw(_poolTokenAddress, _amt);
+		MORPHO_COMPOUND.withdraw(_poolTokenAddress, _amt);
 
-		convertWethToEth(_isETH, TokenInterface(_token), _amt);
+		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -322,8 +291,8 @@ abstract contract MorphoCompound is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		uint256 _amt = getUint(_getId, _amount);
 
-		TokenInterface _tokenContract = _isETH 
-			? TokenInterface(wethAddr) 
+		TokenInterface _tokenContract = _isETH
+			? TokenInterface(wethAddr)
 			: TokenInterface(_tokenAddress);
 
 		if (_amt == uint256(-1)) {
@@ -331,17 +300,17 @@ abstract contract MorphoCompound is Helpers, Events {
 				? address(this).balance
 				: _tokenContract.balanceOf(address(this));
 
-			(, , uint256 _amtDebt) = morphoCompoundLens
+			(, , uint256 _amtDebt) = MORPHO_COMPOUND_LENS
 				.getCurrentBorrowBalanceInOf(_poolTokenAddress, address(this));
 
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = _amtDSA < _amtDebt ? _amtDSA : _amtDebt;
 		}
 
-		convertEthToWeth(_isETH, _tokenContract, _amt);
+		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
 
-		approve(_tokenContract, address(morphoCompound), _amt);
+		approve(_tokenContract, address(MORPHO_COMPOUND), _amt);
 
-		morphoCompound.repay(_poolTokenAddress, address(this), _amt);
+		MORPHO_COMPOUND.repay(_poolTokenAddress, address(this), _amt);
 
 		setUint(_setId, _amt);
 
@@ -379,9 +348,9 @@ abstract contract MorphoCompound is Helpers, Events {
 	{
 		bool _isETH = _tokenAddress == ethAddr;
 		uint256 _amt = getUint(_getId, _amount);
-		
-		TokenInterface _tokenContract = _isETH 
-			? TokenInterface(wethAddr) 
+
+		TokenInterface _tokenContract = _isETH
+			? TokenInterface(wethAddr)
 			: TokenInterface(_tokenAddress);
 
 		if (_amt == uint256(-1)) {
@@ -389,17 +358,17 @@ abstract contract MorphoCompound is Helpers, Events {
 				? address(this).balance
 				: _tokenContract.balanceOf(address(this));
 
-			(, , uint256 _amtDebt) = morphoCompoundLens
+			(, , uint256 _amtDebt) = MORPHO_COMPOUND_LENS
 				.getCurrentBorrowBalanceInOf(_poolTokenAddress, _onBehalf);
 
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = _amtDSA < _amtDebt ? _amtDSA : _amtDebt;
 		}
 
-		convertEthToWeth(_isETH, _tokenContract, _amt);
+		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
 
-		approve(_tokenContract, address(morphoCompound), _amt);
+		approve(_tokenContract, address(MORPHO_COMPOUND), _amt);
 
-		morphoCompound.repay(_poolTokenAddress, _onBehalf, _amt);
+		MORPHO_COMPOUND.repay(_poolTokenAddress, _onBehalf, _amt);
 
 		setUint(_setId, _amt);
 
@@ -428,10 +397,17 @@ abstract contract MorphoCompound is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		morphoCompound.claimRewards(_poolTokenAddresses, _tradeForMorphoToken);
+		uint256 _amountOfRewards = MORPHO_COMPOUND.claimRewards(
+			_poolTokenAddresses,
+			_tradeForMorphoToken
+		);
 
-		_eventName = "LogClaimed(address[],bool)";
-		_eventParam = abi.encode(_poolTokenAddresses, _tradeForMorphoToken);
+		_eventName = "LogClaimed(address[],bool,uint256)";
+		_eventParam = abi.encode(
+			_poolTokenAddresses,
+			_tradeForMorphoToken,
+			_amountOfRewards
+		);
 	}
 }
 

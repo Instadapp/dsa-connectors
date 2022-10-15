@@ -33,9 +33,9 @@ interface IMorphoCore {
 	) external;
 
 	function claimRewards(
-		address[] calldata _tokenAddresses,
+		address[] calldata _cTokenAddresses,
 		bool _tradeForMorphoToken
-	) external;
+	) external returns (uint256 amountOfRewards);
 }
 
 interface IMorphoCompoundLens {
