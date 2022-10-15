@@ -5,7 +5,7 @@ import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
-import { ConnectV2MorphoAave__factory, IERC20Minimal__factory } from "../../../typechain";
+import { ConnectV2MorphoAaveV2__factory, IERC20Minimal__factory } from "../../../typechain";
 import { parseEther, parseUnits } from "@ethersproject/units";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { dsaMaxValue, tokens } from "../../../scripts/tests/mainnet/tokens";
@@ -64,7 +64,7 @@ describe("Morpho-Aave", function () {
     );
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2MorphoAave__factory,
+      contractArtifact: ConnectV2MorphoAaveV2__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });

@@ -32,28 +32,25 @@ interface IMorphoCore {
 		uint256 _amount
 	) external;
 
-	function claimRewards(
-		address[] calldata _tokenAddresses,
-		bool _tradeForMorphoToken
-	) external;
+	function claimRewards(address[] calldata _assets, bool _tradeForMorphoToken)
+		external
+		returns (uint256 claimedAmount);
 }
 
 interface IMorphoAaveLens {
-	function _getCurrentBorrowBalanceInOf(address _poolToken, address _user)
+	function getCurrentBorrowBalanceInOf(address _poolToken, address _user)
 		external
 		view
 		returns (
-			address underlyingToken,
 			uint256 balanceInP2P,
 			uint256 balanceOnPool,
 			uint256 totalBalance
 		);
 
-	function _getCurrentSupplyBalanceInOf(address _poolToken, address _user)
+	function getCurrentSupplyBalanceInOf(address _poolToken, address _user)
 		external
 		view
 		returns (
-			address underlyingToken,
 			uint256 balanceInP2P,
 			uint256 balanceOnPool,
 			uint256 totalBalance

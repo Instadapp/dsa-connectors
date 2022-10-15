@@ -71,5 +71,9 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogClaimed(address[] tokenAddresses, bool tradeForMorphoToken);
+	event LogClaimed(
+		address[] tokenAddresses,
+		bool tradeForMorphoToken,
+		uint256 claimedAmount
+	);
 }

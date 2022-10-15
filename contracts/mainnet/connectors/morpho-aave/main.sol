@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "./helpers.sol";
 import "./events.sol";
 
-abstract contract MorphoAave is Helpers, Events {
+abstract contract MorphoAaveV2 is Helpers, Events {
 	/**
 	 * @dev Deposit ETH/ERC20_Token.
 	 * @notice Deposit a token to Morpho Aave for lending / collaterization.
@@ -25,25 +25,14 @@ abstract contract MorphoAave is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _amount);
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt
+		) = _performEthToWethConversion(_tokenAddress, _amount, _getId);
 
-		bool _isETH = _tokenAddress == ethAddr;
+		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
-		TokenInterface _tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-		}
-
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
-
-		approve(_tokenContract, address(morphoAave), _amt);
-
-		morphoAave.supply(_poolTokenAddress, address(this), _amt);
+		MORPHO_AAVE.supply(_poolTokenAddress, address(this), _amt);
 
 		setUint(_setId, _amt);
 
@@ -79,25 +68,14 @@ abstract contract MorphoAave is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _amount);
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt
+		) = _performEthToWethConversion(_tokenAddress, _amount, _getId);
 
-		bool _isETH = _tokenAddress == ethAddr;
+		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
-		TokenInterface _tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-		}
-
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
-
-		approve(_tokenContract, address(morphoAave), _amt);
-
-		morphoAave.supply(
+		MORPHO_AAVE.supply(
 			_poolTokenAddress,
 			address(this),
 			_amt,
@@ -139,25 +117,14 @@ abstract contract MorphoAave is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _amount);
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt
+		) = _performEthToWethConversion(_tokenAddress, _amount, _getId);
 
-		bool _isETH = _tokenAddress == ethAddr;
+		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
-		TokenInterface _tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-		}
-
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
-
-		approve(_tokenContract, address(morphoAave), _amt);
-
-		morphoAave.supply(_poolTokenAddress, _onBehalf, _amt);
+		MORPHO_AAVE.supply(_poolTokenAddress, _onBehalf, _amt);
 
 		setUint(_setId, _amt);
 
@@ -196,7 +163,7 @@ abstract contract MorphoAave is Helpers, Events {
 
 		bool _isETH = _tokenAddress == ethAddr;
 
-		morphoAave.borrow(_poolTokenAddress, _amt);
+		MORPHO_AAVE.borrow(_poolTokenAddress, _amt);
 
 		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
@@ -238,7 +205,7 @@ abstract contract MorphoAave is Helpers, Events {
 
 		bool _isETH = _tokenAddress == ethAddr;
 
-		morphoAave.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
+		MORPHO_AAVE.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
 
 		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
@@ -277,17 +244,16 @@ abstract contract MorphoAave is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _amount);
 		bool _isETH = _tokenAddress == ethAddr;
-		address _token = _isETH ? wethAddr : _tokenAddress;
 
 		if (_amt == uint256(-1))
-			(, , , _amt) = morphoAaveLens.getCurrentSupplyBalanceInOf(
+			(, , _amt) = MORPHO_AAVE_LENS.getCurrentSupplyBalanceInOf(
 				_poolTokenAddress,
 				address(this)
 			);
 
-		morphoAave.withdraw(_poolTokenAddress, _amt);
+		MORPHO_AAVE.withdraw(_poolTokenAddress, _amt);
 
-		convertWethToEth(_isETH, TokenInterface(_token), _amt);
+		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -333,17 +299,17 @@ abstract contract MorphoAave is Helpers, Events {
 				? address(this).balance
 				: _tokenContract.balanceOf(address(this));
 
-			(, , , uint256 _amtDebt) = morphoAaveLens
+			(, , uint256 _amtDebt) = MORPHO_AAVE_LENS
 				.getCurrentBorrowBalanceInOf(_poolTokenAddress, address(this));
 
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = _amtDSA < _amtDebt ? _amtDSA : _amtDebt;
 		}
 
 		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
 
-		approve(_tokenContract, address(morphoAave), _amt);
+		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
-		morphoAave.repay(_poolTokenAddress, address(this), _amt);
+		MORPHO_AAVE.repay(_poolTokenAddress, address(this), _amt);
 
 		setUint(_setId, _amt);
 
@@ -391,17 +357,17 @@ abstract contract MorphoAave is Helpers, Events {
 				? address(this).balance
 				: _tokenContract.balanceOf(address(this));
 
-			(, , , uint256 _amtDebt) = morphoAaveLens
-				._getCurrentBorrowBalanceInOf(_poolTokenAddress, _onBehalf);
+			(, , uint256 _amtDebt) = MORPHO_AAVE_LENS
+				.getCurrentBorrowBalanceInOf(_poolTokenAddress, _onBehalf);
 
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = _amtDSA < _amtDebt ? _amtDSA : _amtDebt;
 		}
 
 		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
 
-		approve(_tokenContract, address(morphoAave), _amt);
+		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
-		morphoAave.repay(_poolTokenAddress, _onBehalf, _amt);
+		MORPHO_AAVE.repay(_poolTokenAddress, _onBehalf, _amt);
 
 		setUint(_setId, _amt);
 
@@ -430,13 +396,20 @@ abstract contract MorphoAave is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		morphoAave.claimRewards(_poolTokenAddresses, _tradeForMorphoToken);
+		uint256 _claimedAmount = MORPHO_AAVE.claimRewards(
+			_poolTokenAddresses,
+			_tradeForMorphoToken
+		);
 
-		_eventName = "LogClaimed(address[],bool)";
-		_eventParam = abi.encode(_poolTokenAddresses, _tradeForMorphoToken);
+		_eventName = "LogClaimed(address[],bool,uint256)";
+		_eventParam = abi.encode(
+			_poolTokenAddresses,
+			_tradeForMorphoToken,
+			_claimedAmount
+		);
 	}
 }
 
-contract ConnectV2MorphoAave is MorphoAave {
-	string public constant name = "Morpho-Aave-v1.0";
+contract ConnectV2MorphoAaveV2 is MorphoAaveV2 {
+	string public constant name = "Morpho-AaveV2-v1.0";
 }
