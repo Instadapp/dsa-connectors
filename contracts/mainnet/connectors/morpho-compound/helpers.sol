@@ -7,7 +7,7 @@ import "../../common/basic.sol";
 import "../../common/interfaces.sol";
 
 abstract contract Helpers is Stores, Basic {
-	IMorphoCore public constant morphoCompound =
+	IMorphoCore public constant MORPHO_COMPOUND =
 		IMorphoCore(0x8888882f8f843896699869179fB6E4f7e3B58888);
 
 	IMorphoCompoundLens public constant morphoCompoundLens =
