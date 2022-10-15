@@ -337,7 +337,7 @@ abstract contract MorphoCompound is Helpers, Events {
 			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
 		}
 
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
+		convertEthToWeth(_isETH, _tokenContract, _amt);
 
 		approve(_tokenContract, address(morphoCompound), _amt);
 
