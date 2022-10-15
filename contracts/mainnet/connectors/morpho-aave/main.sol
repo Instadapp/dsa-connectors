@@ -334,7 +334,7 @@ abstract contract MorphoAave is Helpers, Events {
 				: _tokenContract.balanceOf(address(this));
 
 			(, , , uint256 _amtDebt) = morphoAaveLens
-				._getCurrentBorrowBalanceInOf(_poolTokenAddress, address(this));
+				.getCurrentBorrowBalanceInOf(_poolTokenAddress, address(this));
 
 			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
 		}
