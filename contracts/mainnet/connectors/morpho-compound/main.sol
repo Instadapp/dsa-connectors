@@ -195,7 +195,7 @@ abstract contract MorphoCompound is Helpers, Events {
 
 		morphoCompound.borrow(_poolTokenAddress, _amt);
 
-		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
