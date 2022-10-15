@@ -20,18 +20,13 @@ abstract contract Helpers is Stores, Basic {
 	) internal returns (TokenInterface _tokenContract, uint256 _amt) {
 		_amt = getUint(_getId, _amount);
 
-		bool _isETH = _tokenAddress == ethAddr;
-
-		_tokenContract = _isETH
-			? TokenInterface(wethAddr)
-			: TokenInterface(_tokenAddress);
-
-		if (_amt == uint256(-1)) {
-			_amt = _isETH
-				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
+		if (_tokenAddress == ethAddr) {
+		        _tokenContract = TokenInterface(wethAddr);
+		        if (_amt == uint256(-1)) _amt = address(this).balance;
+		        convertEthToWeth(true, _tokenContract, _amt);
+		} else {
+		       _tokenContract = TokenInterface(_tokenAddress);
+		        if (_amt == uint256(-1)) _amt = _tokenContract.balanceOf(address(this)); 
 		}
-
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
 	}
 }
