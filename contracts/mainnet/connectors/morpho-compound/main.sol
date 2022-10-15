@@ -39,7 +39,7 @@ abstract contract MorphoCompound is Helpers, Events {
 				: _tokenContract.balanceOf(address(this));
 		}
 
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
+		convertEthToWeth(_isETH, _tokenContract, _amt);
 
 		approve(_tokenContract, address(morphoCompound), _amt);
 		morphoCompound.supply(_poolTokenAddress, address(this), _amt);
