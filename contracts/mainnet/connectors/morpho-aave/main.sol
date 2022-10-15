@@ -161,11 +161,9 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _amount);
 
-		bool _isETH = _tokenAddress == ethAddr;
-
 		MORPHO_AAVE.borrow(_poolTokenAddress, _amt);
 
-		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
