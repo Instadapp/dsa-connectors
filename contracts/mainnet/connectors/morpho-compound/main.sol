@@ -201,11 +201,9 @@ abstract contract MorphoCompound is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _amount);
 
-		bool _isETH = _tokenAddress == ethAddr;
-
 		MORPHO_COMPOUND.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
 
-		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -252,7 +250,7 @@ abstract contract MorphoCompound is Helpers, Events {
 
 		MORPHO_COMPOUND.withdraw(_poolTokenAddress, _amt);
 
-		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
