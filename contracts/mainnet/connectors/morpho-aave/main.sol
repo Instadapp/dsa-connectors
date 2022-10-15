@@ -201,11 +201,9 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _amount);
 
-		bool _isETH = _tokenAddress == ethAddr;
-
 		MORPHO_AAVE.borrow(_poolTokenAddress, _amt, _maxGasForMatching);
 
-		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -241,8 +239,6 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		bool _isETH = _tokenAddress == ethAddr;
-
 		if (_amt == uint256(-1))
 			(, , _amt) = MORPHO_AAVE_LENS.getCurrentSupplyBalanceInOf(
 				_poolTokenAddress,
@@ -251,7 +247,7 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 
 		MORPHO_AAVE.withdraw(_poolTokenAddress, _amt);
 
-		if (_isETH) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -303,7 +299,7 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 			_amt = _amtDSA < _amtDebt ? _amtDSA : _amtDebt;
 		}
 
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
+		convertEthToWeth(_isETH, _tokenContract, _amt);
 
 		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
@@ -361,7 +357,7 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 			_amt = _amtDSA < _amtDebt ? _amtDSA : _amtDebt;
 		}
 
-		if (_isETH) convertEthToWeth(_isETH, _tokenContract, _amt);
+		convertEthToWeth(_isETH, _tokenContract, _amt);
 
 		approve(_tokenContract, address(MORPHO_AAVE), _amt);
 
