@@ -375,33 +375,6 @@ abstract contract MorphoAaveV2 is Helpers, Events {
 			_setId
 		);
 	}
-
-	/**
-	 * @dev Claim rewards.
-	 * @notice Claim rewards for the given assets from underlying protocol.
-	 * @param _poolTokenAddresses The assets to claim rewards from (aToken or variable debt token).(For ETH: aToken or variable debt token address of WETH)
-	 * @param _tradeForMorphoToken Whether or not to trade reward tokens for MORPHO tokens.
-	 */
-	function claim(
-		address[] calldata _poolTokenAddresses,
-		bool _tradeForMorphoToken
-	)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		uint256 _claimedAmount = MORPHO_AAVE.claimRewards(
-			_poolTokenAddresses,
-			_tradeForMorphoToken
-		);
-
-		_eventName = "LogClaimed(address[],bool,uint256)";
-		_eventParam = abi.encode(
-			_poolTokenAddresses,
-			_tradeForMorphoToken,
-			_claimedAmount
-		);
-	}
 }
 
 contract ConnectV2MorphoAaveV2 is MorphoAaveV2 {

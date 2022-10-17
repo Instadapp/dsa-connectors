@@ -31,11 +31,6 @@ interface IMorphoCore {
 		address _onBehalf,
 		uint256 _amount
 	) external;
-
-	function claimRewards(
-		address[] calldata _cTokenAddresses,
-		bool _tradeForMorphoToken
-	) external returns (uint256 amountOfRewards);
 }
 
 interface IMorphoCompoundLens {

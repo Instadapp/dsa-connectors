@@ -9,7 +9,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Deposit ETH/ERC20_Token.
 	 * @notice Deposit a token to Morpho Compound for lending / collaterization.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to deposit.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to deposit.(For ETH: cETH address)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
@@ -50,7 +50,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Deposit ETH/ERC20_Token.
 	 * @notice Deposit a token to Morpho Compound for lending / collaterization with max gas.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to deposit.(For ETH: cWETH address).
+	 * @param _poolTokenAddress The address of cToken to deposit.(For ETH: cETH address).
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`).
 	 * @param _maxGasForMatching The maximum amount of gas to consume within a matching engine loop.
 	 * @param _getId ID to retrieve amt.
@@ -99,7 +99,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Deposit ETH/ERC20_Token.
 	 * @notice Deposit a token to Morpho Compound for lending / collaterization on behalf of a user.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to deposit.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to deposit.(For ETH: cETH address)
 	 * @param _onBehalf The address of user on behalf to deposit.
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
@@ -143,7 +143,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Borrow ETH/ERC20_Token.
 	 * @notice Borrow a token from Morpho Compound.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to borrow.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to borrow.(For ETH: cETH address)
 	 * @param _amount The amount of the token (in underlying) to borrow.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens borrowed.
@@ -181,7 +181,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Borrow ETH/ERC20_Token.
 	 * @notice Borrow a token from Morpho Compound with max gas.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to borrow.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to borrow.(For ETH: cETH address)
 	 * @param _amount The amount of the token (in underlying) to borrow.
 	 * @param _maxGasForMatching The maximum amount of gas to consume within a matching engine loop.
 	 * @param _getId ID to retrieve amt.
@@ -222,7 +222,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Withdraw ETH/ERC20_Token.
 	 * @notice Withdraw a token from Morpho Compound.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to withdraw.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to withdraw.(For ETH: cETH address)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens withdrawed.
@@ -268,7 +268,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Payback ETH/ERC20_Token.
 	 * @notice Payback a token to Morpho Compound.
 	 * @param _tokenAddress The address of underlying token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to payback.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to payback.(For ETH: cETH address)
 	 * @param _amount The amount of the token (in underlying) to payback. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens paid back.
@@ -324,7 +324,7 @@ abstract contract MorphoCompound is Helpers, Events {
 	 * @dev Payback ETH/ERC20_Token.
 	 * @notice Payback a token to Morpho Compound on behalf of a user.
 	 * @param _tokenAddress The address of underlying token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _poolTokenAddress The address of cToken to payback.(For ETH: cWETH address)
+	 * @param _poolTokenAddress The address of cToken to payback.(For ETH: cETH address)
 	 * @param _onBehalf The address of user who's debt to repay.
 	 * @param _amount The amount of the token (in underlying) to payback. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
@@ -376,33 +376,6 @@ abstract contract MorphoCompound is Helpers, Events {
 			_amt,
 			_getId,
 			_setId
-		);
-	}
-
-	/**
-	 * @dev Claim rewards.
-	 * @notice Claim rewards for the given assets from underlying protocol.
-	 * @param _poolTokenAddresses The cToken addresses to claim rewards from..(For ETH: cToken address of WETH)
-	 * @param _tradeForMorphoToken Whether or not to trade COMP tokens for MORPHO tokens.
-	 */
-	function claim(
-		address[] calldata _poolTokenAddresses,
-		bool _tradeForMorphoToken
-	)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		uint256 _amountOfRewards = MORPHO_COMPOUND.claimRewards(
-			_poolTokenAddresses,
-			_tradeForMorphoToken
-		);
-
-		_eventName = "LogClaimed(address[],bool,uint256)";
-		_eventParam = abi.encode(
-			_poolTokenAddresses,
-			_tradeForMorphoToken,
-			_amountOfRewards
 		);
 	}
 }
