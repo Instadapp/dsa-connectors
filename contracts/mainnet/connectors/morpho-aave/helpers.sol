@@ -28,4 +28,5 @@ abstract contract Helpers is Stores, Basic {
 		       _tokenContract = TokenInterface(_tokenAddress);
 		        if (_amt == uint256(-1)) _amt = _tokenContract.balanceOf(address(this)); 
 		}
+	}
 }
