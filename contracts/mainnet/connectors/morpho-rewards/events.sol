@@ -3,7 +3,11 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 contract Events {
-	event LogClaimedMorpho(uint256 claimable, bytes32[] proofs);
+	event LogClaimedMorpho(
+		address account,
+		uint256 claimable,
+		bytes32[] proof
+	);
 
 	event LogClaimedAave(
 		address[] poolTokenAddresses,

@@ -13,20 +13,21 @@ abstract contract MorphoRewards is Helpers, Events {
 	/**
 	 * @dev Claim Pending MORPHO Rewards.
 	 * @notice Claims rewards.
+	 * @param _account The address of the claimer.
 	 * @param _claimable The overall claimable amount of token rewards.
-	 * @param _proofs The merkle proof that validates this claim.
+	 * @param _proof The merkle proof that validates this claim.
 	 */
-	function claimMorpho(uint256 _claimable, bytes32[] calldata _proofs)
+	function claimMorpho(address _account, uint256 _claimable, bytes32[] calldata _proof)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		require(_proofs.length > 0, "proofs-empty");
+		require(_proof.length > 0, "proofs-empty");
 
-		MORPHO_REWARDS.claim(address(this), _claimable, _proofs);
+		MORPHO_REWARDS.claim(_account, _claimable, _proof);
 
-		_eventName = "LogClaimedMorpho(uint256,bytes32[])";
-		_eventParam = abi.encode(_claimable, _proofs);
+		_eventName = "LogClaimedMorpho(address,uint256,bytes32[])";
+		_eventParam = abi.encode(_account, _claimable, _proof);
 	}
 
 	/**
