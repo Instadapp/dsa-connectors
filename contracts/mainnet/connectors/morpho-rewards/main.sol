@@ -17,7 +17,12 @@ abstract contract MorphoRewards is Helpers, Events {
 	 * @param _claimable The overall claimable amount of token rewards.
 	 * @param _proof The merkle proof that validates this claim.
 	 */
-	function claimMorpho(address _account, uint256 _claimable, bytes32[] calldata _proof)
+	function claimMorpho(
+		address _account,
+		uint256 _claimable,
+		bytes32[] calldata _proof,
+		uint256 _setId
+	)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
@@ -26,8 +31,10 @@ abstract contract MorphoRewards is Helpers, Events {
 
 		MORPHO_REWARDS.claim(_account, _claimable, _proof);
 
-		_eventName = "LogClaimedMorpho(address,uint256,bytes32[])";
-		_eventParam = abi.encode(_account, _claimable, _proof);
+		setUint(_setId, _claimable);
+
+		_eventName = "LogClaimedMorpho(address,uint256,bytes32[],uint256)";
+		_eventParam = abi.encode(_account, _claimable, _proof, _setId);
 	}
 
 	/**
@@ -95,6 +102,6 @@ abstract contract MorphoRewards is Helpers, Events {
 	}
 }
 
-contract ConnectV2MorphoCompound is MorphoRewards {
+contract ConnectV2MorphoRewards is MorphoRewards {
 	string public constant name = "Morpho-Rewards-v1.0";
 }

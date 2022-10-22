@@ -6,7 +6,8 @@ contract Events {
 	event LogClaimedMorpho(
 		address account,
 		uint256 claimable,
-		bytes32[] proof
+		bytes32[] proof,
+		uint256 setId
 	);
 
 	event LogClaimedAave(
