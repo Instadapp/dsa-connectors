@@ -33,8 +33,8 @@ abstract contract MorphoRewards is Helpers, Events {
 
 		setUint(_setId, _claimable);
 
-		_eventName = "LogClaimedMorpho(address,uint256,bytes32[],uint256)";
-		_eventParam = abi.encode(_account, _claimable, _proof, _setId);
+		_eventName = "LogClaimedMorpho(address,uint256,uint256)";
+		_eventParam = abi.encode(_account, _claimable, _setId);
 	}
 
 	/**
