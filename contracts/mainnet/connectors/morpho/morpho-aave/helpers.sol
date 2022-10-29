@@ -2,9 +2,9 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 import "./interface.sol";
-import "../../common/stores.sol";
-import "../../common/basic.sol";
-import "../../common/interfaces.sol";
+import "../../../common/stores.sol";
+import "../../../common/basic.sol";
+import "../../../common/interfaces.sol";
 
 abstract contract Helpers is Stores, Basic {
 	IMorphoCore public constant MORPHO_AAVE =
