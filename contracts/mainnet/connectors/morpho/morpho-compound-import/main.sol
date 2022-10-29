@@ -34,12 +34,12 @@ contract MorphoCompoundImportResolver is MorphoCompoundHelper {
 		// pay back user's debt using flash loan funds
 		_paybackDebt(
 			importInputData_.userAccount,
-			data.borrowCtokens,
+			data.borrowCtokensAddr,
 			data.borrowAmts
 		);
 
 		// transfer user's tokens to DSA
-		_transferTokensToDsa(
+		_transferCTokensToDsa(
 			importInputData_.userAccount,
 			data.supplyCtokens,
 			data.supplyAmts
@@ -47,12 +47,12 @@ contract MorphoCompoundImportResolver is MorphoCompoundHelper {
 
 		// borrow the earlier position from Compound with flash loan fee added
 		_borrowDebtPosition(
-			data.borrowCtokens,
+			data.borrowCtokensAddr,
 			data.borrowAmts,
-			_flashLoanFees
+			importInputData_.flashLoanFees
 		);
 
-		_eventName = "LogCompoundImport(address,address[],address[],uint256[],uint256[])";
+		_eventName = "LogMorphoCompoundImport(address,address[],address[],uint256[],uint256[])";
 		_eventParam = abi.encode(
 			importInputData_.userAccount,
 			importInputData_.supplyCTokens,

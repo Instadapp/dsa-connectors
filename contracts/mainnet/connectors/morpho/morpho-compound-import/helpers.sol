@@ -25,7 +25,8 @@ abstract contract Helpers is DSMath, Basic {
 	IMorphoLens internal constant morphoLens =
 		IMorphoLens(0x930f1b46e1D081Ec1524efD95752bE3eCe51EF67);
 
-	IMorpho internal constant morpho = IMorpho(0x8888882f8f843896699869179fB6E4f7e3B58888)
+	IMorpho internal constant morpho =
+		IMorpho(0x8888882f8f843896699869179fB6E4f7e3B58888);
 
 	struct ImportData {
 		uint256[] borrowAmts;
@@ -70,9 +71,10 @@ contract MorphoCompoundHelper is Helpers {
 			for (uint256 i; i < _length; i++) {
 				address cToken_ = importInputData_.borrowCTokens[i];
 				CTokenInterface ctoken_ = CTokenInterface(cToken_);
-				
-				address token_;
-				token_ = cToken_ == address(cEth) ? wethAddr : ctoken_.underlying();
+
+				address token_ = cToken_ == address(cEth)
+					? wethAddr
+					: ctoken_.underlying();
 
 				require(token_ != address(0), "invalid-ctoken-address");
 
@@ -88,7 +90,10 @@ contract MorphoCompoundHelper is Helpers {
 				// give the morpho approval to spend tokens
 				if (token_ != ethAddr && data.borrowAmts[i] > 0) {
 					// will be required when repaying the borrow amount on behalf of the user
-					TokenInterface(token_).approve(address(morpho), data.borrowAmts[i]);
+					TokenInterface(token_).approve(
+						address(morpho),
+						data.borrowAmts[i]
+					);
 				}
 			}
 		}
@@ -117,19 +122,16 @@ contract MorphoCompoundHelper is Helpers {
 		for (uint256 i; i < _length; i++) {
 			address cToken_ = importInputData_.supplyCTokens[i];
 			CTokenInterface ctoken_ = CTokenInterface(cToken_);
-			address token_ ;
-			token_ = cToken_ == address(cEth) ? wethAddr : ctoken_.underlying();
+			address token_ = cToken_ == address(cEth)
+				? wethAddr
+				: ctoken_.underlying();
 
-			require(
-				token_ != address(0),
-				"invalid-ctoken-address"
-			);
-
+			require(token_ != address(0), "invalid-ctoken-address");
 
 			data.supplyTokens[i] = token_;
 			data.supplyCtokens[i] = ctoken_;
 			data.supplyCtokensAddr[i] = (cToken_);
-			data.supplyAmts[i] = morpho.getCurrentSupplyBalanceInOf(
+			(, , data.supplyAmts[i]) = morpho.getCurrentSupplyBalanceInOf(
 				cToken_,
 				importInputData_.userAccount
 			);
@@ -164,7 +166,7 @@ contract MorphoCompoundHelper is Helpers {
 	 * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has supply positions
 	 * @param _amts array containing the amount supplied for each token
 	 */
-	function _transferTokensToDsa(
+	function _transferCTokensToDsa(
 		address userAccount_,
 		CTokenInterface[] memory cTokenContracts_,
 		uint256[] memory supplyAmts_
@@ -183,11 +185,11 @@ contract MorphoCompoundHelper is Helpers {
 	}
 
 	/**
-	 * @notice borrows the user's debt positions from Compound via DSA, so that its debt positions get imported to DSA
-	 * @dev actually borrow some extra amount than the original position to cover the flash loan fee
-	 * @param _cTokenContracts array containing all interfaces to the cToken contracts in which the user has debt positions
-	 * @param _amts array containing the amounts the user had borrowed originally from Compound plus the flash loan fee
-	 * @param _flashLoanFees flash loan fee (in percentage and scaled up to 10**2)
+	 * @notice borrows the user's debt positions from Morpho via DSA, so that its debt positions get imported to DSA
+	 * @dev borrows some extra amount than the original position to cover the flash loan fee
+	 * @param cTokens_ array containing cToken addresses in which the user has debt positions
+	 * @param borrowAmts_ array containing the amounts the user had borrowed originally from Morpho-Compound
+	 * @param flashLoanFees_ flash loan fees.
 	 */
 	function _borrowDebtPosition(
 		address[] memory cTokens_,
@@ -197,6 +199,9 @@ contract MorphoCompoundHelper is Helpers {
 		uint256 length_ = cTokens_.length;
 		for (uint256 i; i < length_; ++i)
 			if (borrowAmts_[i] > 0)
-				morpho.borrow(cTokens_[i], add(borrowAmts_[i], flashLoanFees_[i]));
+				morpho.borrow(
+					cTokens_[i],
+					add(borrowAmts_[i], flashLoanFees_[i])
+				);
 	}
 }
