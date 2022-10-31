@@ -66,6 +66,27 @@ abstract contract Helpers is DSMath, Basic {
         }
     }
 
+    function _createAndInitializePoolIfNecessary (
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        int24 initialTick
+    ) internal returns (address pool) {
+        (TokenInterface token0Contract_, TokenInterface token1Contract_) = changeEthAddress(
+            tokenA,
+            tokenB
+        );
+        
+        (address token0_, address token1_) =  sortTokenAddress(address(token0Contract_), address(token1Contract_));
+
+        return nftManager.createAndInitializePoolIfNecessary(
+            token0_,
+            token1_,
+            fee,
+            TickMath.getSqrtRatioAtTick(initialTick)
+        );
+    }
+
     /**
      * @dev Mint function which interact with Uniswap v3
      */
