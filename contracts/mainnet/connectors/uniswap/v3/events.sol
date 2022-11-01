@@ -32,4 +32,11 @@ contract Events {
     );
 
     event LogBurnPosition(uint256 tokenId);
+
+    event LogcreateAndInitializePool (
+        address tokenA,
+        address tokenB,
+        uint24 fee,
+        int24 initialTick
+    );
 }
