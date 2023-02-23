@@ -47,11 +47,12 @@ contract Helpers is DSMath, Basic {
 
 		uint256 nativeTokenAmt;
 		if (isNative) {
-			// xcall does not take native asset, must wrap 
-			convertEthToWeth(true, tokenContract, params.amount);
 			params.amount = params.amount == uint256(-1)
 				? address(this).balance
 				: params.amount;
+
+			// xcall does not take native asset, must wrap 
+			convertEthToWeth(true, tokenContract, params.amount);
 
 			nativeTokenAmt = params.amount;
 		} else {
@@ -59,12 +60,12 @@ contract Helpers is DSMath, Basic {
 				? tokenContract.balanceOf(address(this))
 				: params.amount;
 
+			if (params.amount > 0) {
+				tokenContract.approve(connextAddr, params.amount);
+			}
+
 			nativeTokenAmt = 0;
 		}
-
-    if (!isNative && params.amount > 0) {
-      approve(tokenContract, connextAddr, params.amount);
-    }
 
 		connext.xcall{ value: params.relayerFee + nativeTokenAmt }(
 			params.destination,
