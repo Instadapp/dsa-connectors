@@ -41,21 +41,21 @@ contract Helpers is DSMath, Basic {
 	}
 
 	function _xcall(XCallParams memory params) internal {
-    TokenInterface tokenContract = TokenInterface(params.asset);
-
+		uint256 nativeTokenAmt;
 		bool isNative = params.asset == ethAddr;
 
-		uint256 nativeTokenAmt;
 		if (isNative) {
 			params.amount = params.amount == uint256(-1)
 				? address(this).balance
 				: params.amount;
 
 			// xcall does not take native asset, must wrap 
+			TokenInterface tokenContract = TokenInterface(wethAddr);
 			convertEthToWeth(true, tokenContract, params.amount);
 
 			nativeTokenAmt = params.amount;
 		} else {
+			TokenInterface tokenContract = TokenInterface(params.asset);
 			params.amount = params.amount == uint256(-1)
 				? tokenContract.balanceOf(address(this))
 				: params.amount;
