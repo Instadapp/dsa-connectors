@@ -9,6 +9,8 @@ import "../../common/interfaces.sol";
 abstract contract Helpers is Stores, Basic {
 	IMorphoCore public constant MORPHO_AAVE_V3 =
 		IMorphoCore(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
+	
+	uint256 public constant MAX_ITERATION = 10;
 
 	IMorphoAaveLens public constant MORPHO_AAVE_LENS =
 		IMorphoAaveLens(0x507fA343d0A90786d86C7cd885f5C49263A91FF4);

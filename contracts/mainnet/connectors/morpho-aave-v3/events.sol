@@ -6,21 +6,27 @@ contract Events {
 	event LogDeposit(
 		address tokenAddress,
 		uint256 amount,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogDepositWithMaxIterations(
+		address tokenAddress,
+		uint256 amount,
 		uint256 maxIteration,
 		uint256 getId,
 		uint256 setId
 	);
 
-	event LogDepositWithMaxGas(
+	event LogDepositOnBehalf(
 		address tokenAddress,
-		address poolTokenAddress,
 		uint256 amount,
-		uint256 maxGasForMatching,
+		address onBehalf,
 		uint256 getId,
 		uint256 setId
 	);
 
-	event LogDepositOnBehalf(
+	event LogDepositOnBehalfWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
 		address onBehalf,
@@ -72,17 +78,27 @@ contract Events {
 
 	event LogBorrow(
 		address tokenAddress,
-		address poolTokenAddress,
 		uint256 amount,
+		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
 
-	event LogBorrowWithMaxGas(
+	event LogBorrowWithMaxIterations(
 		address tokenAddress,
-		address poolTokenAddress,
 		uint256 amount,
-		uint256 maxGasForMatching,
+		address receiver,
+		uint256 maxIteration,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogBorrowOnBehalfWithMaxIterations(
+		address tokenAddress,
+		uint256 amount,
+		address receiver,
+		address onBehalf,
+		uint256 maxIteration,
 		uint256 getId,
 		uint256 setId
 	);
