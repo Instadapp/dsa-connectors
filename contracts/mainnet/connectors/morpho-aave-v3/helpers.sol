@@ -5,12 +5,13 @@ import "./interface.sol";
 import "../../common/stores.sol";
 import "../../common/basic.sol";
 import "../../common/interfaces.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract Helpers is Stores, Basic {
+abstract contract Helpers is Stores, Basic, Ownable {
 	IMorphoCore public constant MORPHO_AAVE_V3 =
 		IMorphoCore(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
 	
-	uint256 public constant MAX_ITERATION = 10;
+	uint256 public max_iteration = 10;
 
 	IMorphoAaveLens public constant MORPHO_AAVE_LENS =
 		IMorphoAaveLens(0x507fA343d0A90786d86C7cd885f5C49263A91FF4);
@@ -30,5 +31,9 @@ abstract contract Helpers is Stores, Basic {
 		       _tokenContract = TokenInterface(_tokenAddress);
 		        if (_amt == uint256(-1)) _amt = _tokenContract.balanceOf(address(this)); 
 		}
+	}
+
+	function setMaxIteration(uint256 _iter) external onlyOwner {
+		max_iteration = _iter;
 	}
 }

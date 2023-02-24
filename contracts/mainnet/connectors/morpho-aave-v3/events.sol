@@ -35,19 +35,6 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogDepositWithPermit(
-		address tokenAddress,
-		uint256 amount,
-		address onBehalf,
-		uint256 maxIteration,
-		uint256 time,
-		uint8 v,
-		bytes32 r,
-		bytes32 s,
-		uint256 getId,
-		uint256 setId
-	);
-
 	event LogDepositCollateral(
 		address tokenAddress,
 		uint256 amount,
@@ -63,22 +50,18 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogDepositCollateralWithPermit(
+	event LogBorrow(
 		address tokenAddress,
 		uint256 amount,
-		address onBehalf,
-		uint256 maxIteration,
-		uint256 time,
-		uint8 v,
-		bytes32 r,
-		bytes32 s,
+		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
 
-	event LogBorrow(
+	event LogBorrowOnBehalf(
 		address tokenAddress,
 		uint256 amount,
+		address onBehalf,
 		address receiver,
 		uint256 getId,
 		uint256 setId
@@ -96,8 +79,8 @@ contract Events {
 	event LogBorrowOnBehalfWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
-		address receiver,
 		address onBehalf,
+		address receiver,
 		uint256 maxIteration,
 		uint256 getId,
 		uint256 setId
@@ -105,15 +88,49 @@ contract Events {
 
 	event LogWithdraw(
 		address tokenAddress,
-		address poolTokenAddress,
 		uint256 amount,
+		address receiver,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogWithdrawOnBehalf(
+		address tokenAddress,
+		uint256 amount,
+		address onBehalf,
+		address receiver,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogWithdrawWithMaxIterations(
+		address tokenAddress,
+		uint256 amount,
+		address receiver,
+		uint256 maxIteration,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogWithdrawCollateral(
+		address tokenAddress,
+		uint256 amount,
+		address receiver,
+		uint256 getId,
+		uint256 setId
+	);
+
+	event LogWithdrawCollateralOnBehalf(
+		address tokenAddress,
+		uint256 amount,
+		address onBehalf,
+		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
 
 	event LogPayback(
 		address tokenAddress,
-		address poolTokenAddress,
 		uint256 amount,
 		uint256 getId,
 		uint256 setId
@@ -121,9 +138,8 @@ contract Events {
 
 	event LogPaybackOnBehalf(
 		address tokenAddress,
-		address poolTokenAddress,
-		address onBehalf,
 		uint256 amount,
+		address onBehalf,
 		uint256 getId,
 		uint256 setId
 	);
