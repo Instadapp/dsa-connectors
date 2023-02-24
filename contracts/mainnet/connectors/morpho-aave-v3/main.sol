@@ -30,7 +30,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supply(_tokenContract, _amt, address(this), max_iteration);
+		MORPHO_AAVE_V3.supply(address(_tokenContract), _amt, address(this), max_iteration);
 
 		setUint(_setId, _amt);
 
@@ -55,7 +55,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	function depositWithMaxIterations(
 		address _tokenAddress,
 		uint256 _amount,
-		address _maxIteration,
+		uint256 _maxIteration,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -70,7 +70,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supply(_tokenContract, _amt, address(this), _maxIteration);
+		MORPHO_AAVE_V3.supply(address(_tokenContract), _amt, address(this), _maxIteration);
 
 		setUint(_setId, _amt);
 
@@ -111,7 +111,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supply(_tokenContract, _amt, _onBehalf, max_iteration);
+		MORPHO_AAVE_V3.supply(address(_tokenContract), _amt, _onBehalf, max_iteration);
 
 		setUint(_setId, _amt);
 
@@ -154,7 +154,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supply(_tokenContract, _amt, _onBehalf, _maxIteration);
+		MORPHO_AAVE_V3.supply(address(_tokenContract), _amt, _onBehalf, _maxIteration);
 
 		setUint(_setId, _amt);
 
@@ -194,7 +194,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supplyCollateral(_tokenContract, _amt, address(this));
+		MORPHO_AAVE_V3.supplyCollateral(address(_tokenContract), _amt, address(this));
 
 		setUint(_setId, _amt);
 
@@ -234,7 +234,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supplyCollateral(_tokenContract, _amt, _onBehalf);
+		MORPHO_AAVE_V3.supplyCollateral(address(_tokenContract), _amt, _onBehalf);
 
 		setUint(_setId, _amt);
 
@@ -309,7 +309,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		MORPHO_AAVE_V3.borrow(_tokenAddress, _amt, _onBehalf, _receiver, max_iteration);
 
-		convertWethToEth(_tokenAddress == ethAddr, _onBehalf, _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -348,7 +348,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		MORPHO_AAVE_V3.borrow(_tokenAddress, _amt, address(this), _receiver, _maxIteration);
 
-		convertWethToEth(_tokenAddress == ethAddr, address(this), _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -388,7 +388,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		MORPHO_AAVE_V3.borrow(_tokenAddress, _amt, _onBehalf, _receiver, _maxIteration);
 
-		convertWethToEth(_tokenAddress == ethAddr, _onBehalf, _amt);
+		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 

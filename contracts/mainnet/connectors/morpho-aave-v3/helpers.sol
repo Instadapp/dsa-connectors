@@ -13,9 +13,6 @@ abstract contract Helpers is Stores, Basic, Ownable {
 	
 	uint256 public max_iteration = 10;
 
-	IMorphoAaveLens public constant MORPHO_AAVE_LENS =
-		IMorphoAaveLens(0x507fA343d0A90786d86C7cd885f5C49263A91FF4);
-
 	function _performEthToWethConversion(
 		address _tokenAddress,
 		uint256 _amount,
