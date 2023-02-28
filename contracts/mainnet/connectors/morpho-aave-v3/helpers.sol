@@ -5,9 +5,8 @@ import "./interface.sol";
 import "../../common/stores.sol";
 import "../../common/basic.sol";
 import "../../common/interfaces.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract Helpers is Stores, Basic, Ownable {
+abstract contract Helpers is Stores, Basic {
 	IMorphoCore public constant MORPHO_AAVE_V3 =
 		IMorphoCore(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
 	
@@ -30,7 +29,7 @@ abstract contract Helpers is Stores, Basic, Ownable {
 		}
 	}
 
-	function setMaxIteration(uint256 _iter) external onlyOwner {
+	function setMaxIteration(uint256 _iter) external {
 		max_iteration = _iter;
 	}
 }
