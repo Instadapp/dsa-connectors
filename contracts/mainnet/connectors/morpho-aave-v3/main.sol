@@ -86,7 +86,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 	/**
 	 * @dev Deposit ETH/ERC20_Token on behalf of a user.
-	 * @notice Deposit a token to Morpho Aave for lending / collaterization on behalf of a user.
+	 * @notice Deposit a token to Morpho Aave for lending on behalf of a user.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _onBehalf The address of user on behalf of whom we want to deposit.
