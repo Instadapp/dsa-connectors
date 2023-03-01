@@ -425,7 +425,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		MORPHO_AAVE_V3.withdraw(_tokenAddress, _amt, address(this), _receiver, max_iteration);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), _receiver, max_iteration);
 
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
@@ -462,7 +463,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		MORPHO_AAVE_V3.withdraw(_tokenAddress, _amt, _onBehalf, _receiver, max_iteration);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, max_iteration);
 
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
@@ -501,8 +503,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-
-		MORPHO_AAVE_V3.withdraw(_tokenAddress, _amt, _onBehalf, _receiver, _maxIteration);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
@@ -531,8 +533,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-
-		MORPHO_AAVE_V3.withdrawCollateral(_tokenAddress, _amt, address(this), _receiver);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), _receiver);
 
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
@@ -561,7 +563,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		MORPHO_AAVE_V3.withdrawCollateral(_tokenAddress, _amt, _onBehalf, _receiver);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, _onBehalf, _receiver);
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
