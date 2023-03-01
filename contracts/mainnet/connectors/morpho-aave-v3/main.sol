@@ -287,7 +287,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 	/**
 	 * @dev Borrow ETH/ERC20_Token.
-	 * @notice Borrow a token from Morpho Aave.
+	 * @notice Borrow a token from Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to borrow.
 	 * @param _getId ID to retrieve amt.
