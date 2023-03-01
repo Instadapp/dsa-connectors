@@ -7,7 +7,7 @@ import "./events.sol";
 abstract contract MorphoAaveV3 is Helpers, Events {
 	/**
 	 * @dev Deposit ETH/ERC20_Token.
-	 * @notice Deposit a token to Morpho Aave for lending / collaterization.
+	 * @notice Deposit a token to Morpho Aave for lending.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
