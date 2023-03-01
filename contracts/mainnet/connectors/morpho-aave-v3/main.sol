@@ -307,7 +307,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _amount);
 
-		MORPHO_AAVE_V3.borrow(_tokenAddress, _amt, _onBehalf, _receiver, max_iteration);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, max_iteration);
 
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
