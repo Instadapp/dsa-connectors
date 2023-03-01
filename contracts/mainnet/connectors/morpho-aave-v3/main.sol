@@ -89,7 +89,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	 * @notice Deposit a token to Morpho Aave for lending / collaterization on behalf of a user.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
-	 * @param _onBehalf The address of user on behalf to deposit.
+	 * @param _onBehalf The address of user on behalf of whom we want to deposit.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
 	 */
