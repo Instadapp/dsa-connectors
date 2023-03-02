@@ -268,8 +268,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-
-		MORPHO_AAVE_V3.borrow(_tokenAddress, _amt, address(this), _receiver, max_iteration);
+		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, max_iteration);
 
 		convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
 
@@ -615,7 +615,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.repay(_tokenAddress, _amt, address(this));
+		MORPHO_AAVE_V3.repay(address(_tokenContract), _amt, address(this));
 
 		setUint(_setId, _amt);
 
@@ -665,7 +665,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.repay(_tokenAddress, _amt, _onBehalf);
+		MORPHO_AAVE_V3.repay(address(_tokenContract), _amt, _onBehalf);
 
 		setUint(_setId, _amt);
 
