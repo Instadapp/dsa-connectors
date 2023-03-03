@@ -22,12 +22,12 @@ contract Helpers is DSMath, Basic {
 
 	/**
 	 * @param destination The destination domain ID.
-	 * @param asset he address of token to be bridged.(For USDC: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
-	 * @param delegate The address to recieve the token on destination chain.
-	 * @param amount The total amount sent by user (Includes bonder fee, destination chain Tx cost).
-	 * @param slippage The fee to be recieved by bonder at destination chain.
+	 * @param asset The address of token to be bridged.
+	 * @param delegate Address that can revert or forceLocal on destination.
+	 * @param amount The amount to transfer.
+	 * @param slippage Maximum amount of slippage the user will accept in BPS.
 	 * @param relayerFee Relayer fee paid in origin native asset.
-	 * @param callData minimum amount of token out for swap on source chain.
+	 * @param callData Encoded calldata to send.
 	 */
 	struct XCallParams {
     uint32 destination;
