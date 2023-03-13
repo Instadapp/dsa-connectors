@@ -7,7 +7,7 @@ import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addLiquidity } from "../../../scripts/tests/addLiquidity";
-import { addresses } from "../../../scripts/tests/polygon/addresses";
+import { addresses } from "../../../scripts/tests/optimism/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2ConnextOptimism__factory } from "../../../typechain";
 import { Signer, Contract } from "ethers";
