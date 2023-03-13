@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import hre from "hardhat";
-const { ethers } = hre;
+const { ethers, waffle } = hre;
+const { provider, deployContract } = waffle;
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
-import { addLiquidity } from "../../../scripts/tests/addLiquidity";
 import { addresses } from "../../../scripts/tests/optimism/addresses";
 import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2ConnextOptimism__factory } from "../../../typechain";
@@ -15,7 +15,6 @@ import { Signer, Contract } from "ethers";
 describe("Connext Connector [Optimism]", function () {
   const connectorName = "CONNEXT-TEST-A";
 
-  let wallet0: Signer, wallet1:Signer;
   let dsaWallet0: Contract;
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
@@ -26,8 +25,11 @@ describe("Connext Connector [Optimism]", function () {
   const ethAddr = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
   const wethAddr = "0x4200000000000000000000000000000000000006";
 
-  const usdc = new ethers.Contract(usdcAddr, abis.basic.erc20);
-  const weth = new ethers.Contract(wethAddr, abis.basic.erc20);
+  const wallets = provider.getWallets();
+  const [wallet0, wallet1] = wallets;
+
+  // const usdc = new ethers.Contract(usdcAddr, abis.basic.erc20);
+  // const weth = new ethers.Contract(wethAddr, abis.basic.erc20);
 
   before(async () => {
     await hre.network.provider.request({
@@ -37,19 +39,14 @@ describe("Connext Connector [Optimism]", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 12230000
+            blockNumber: 7093500
           }
         }
       ]
     });
 
-    [wallet0, wallet1] = await ethers.getSigners();
     masterSigner = await getMasterSigner();
-
-    instaConnectorsV2 = await ethers.getContractAt(
-      abis.core.connectorsV2, 
-      addresses.core.connectorsV2
-    );
+    instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
       contractArtifact: ConnectV2ConnextOptimism__factory,
@@ -72,14 +69,12 @@ describe("Connext Connector [Optimism]", function () {
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH & USDC into DSA wallet", async function() {
+    it("Deposit ETH & USDC into DSA wallet", async function () {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10"),
+        value: ethers.utils.parseEther("10")
       });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-        ethers.utils.parseEther("10")
-      );
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
 
       // await addLiquidity(
       //   "usdc",
@@ -90,22 +85,19 @@ describe("Connext Connector [Optimism]", function () {
   });
 
   describe("Main", function () {
-
     it("should xcall with eth", async function () {
       const amount = ethers.utils.parseEther("10");
       const domainId = 6648936;
       const slippage = 10000;
-      const relayerFee = ethers.utils.parseEther("1");;
+      const relayerFee = ethers.utils.parseEther("1");
       const getId = 0;
       const callData = "0x";
 
-      const wallet0Address = await wallet0.getAddress();
-
       const xcallParams: any = [
         domainId,
-        wallet0Address,
+        wallet1.address,
         ethAddr,
-        wallet0Address,
+        wallet1.address,
         amount,
         slippage,
         relayerFee,
@@ -120,7 +112,7 @@ describe("Connext Connector [Optimism]", function () {
         }
       ];
 
-      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0Address);
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
     });
   });
