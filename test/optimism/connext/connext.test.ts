@@ -39,7 +39,7 @@ describe("Connext Connector [Optimism]", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 7093500
+            blockNumber: 80768349
           }
         }
       ]
