@@ -9,6 +9,7 @@ contract Events {
 		address delegate,
 		uint256 amount,
 		uint256 slippage,
-		uint256 getId
+		uint256 getId,
+		uint256 setId
 	);
 }

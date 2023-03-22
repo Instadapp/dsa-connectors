@@ -21,16 +21,33 @@ abstract contract ConnextResolver is Helpers {
 	 * @notice Call xcall on Connext.
 	 * @param params XCallParams struct.
 	 * @param getId ID to retrieve amount from last spell.
+	 * @param setId ID stores the amount of tokens deposited.
 	 */
-	function xcall(XCallParams memory params, uint256 getId)
+	function xcall(XCallParams memory params, uint256 getId, uint256 setId)
 		external
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		params.amount = getUint(getId, params.amount);
+		uint256 _amount = getUint(getId, params.amount);
 		TokenInterface tokenContract = TokenInterface(params.asset);
+		bool isNative = params.asset == wethAddr;
+
+		if (isNative) {
+			_amount = _amount == uint256(-1) ? sub(address(this).balance, params.relayerFee) : _amount;
+
+			// xcall does not take native asset, must wrap 
+			convertEthToWeth(true, tokenContract, _amount);
+
+		} else {
+			_amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
+		}
+
+		params.amount = _amount;
+		approve(tokenContract, connextAddr, _amount);
 		_xcall(params);
-		_eventName = "LogXCall(uint32,address,address,address,uint256,uint256,uint256)";
+
+		setUint(setId, _amount);
+		_eventName = "LogXCall(uint32,address,address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			params.destination,
 			params.to,
@@ -38,7 +55,8 @@ abstract contract ConnextResolver is Helpers {
 			params.delegate,
 			params.amount,
 			params.slippage,
-			getId
+			getId,
+			setId
 		);
 	}
 }

@@ -16,14 +16,6 @@ contract Helpers is DSMath, Basic {
 	IConnext internal constant connext = IConnext(connextAddr);
 
 	/**
-	 * @dev InstaReceiver Address
-	 */
-	address internal constant instaReceiverAddr =
-		0x0000000000000000000000000000000000000000; // TODO: Add InstaReceiver address
-	IInstaReceiver internal constant instaReceiver =
-		IInstaReceiver(instaReceiverAddr);
-
-	/**
 	 * @param destination The destination domain ID.
 	 * @param asset The address of token to be bridged.
 	 * @param delegate Address that can revert or forceLocal on destination.
@@ -44,33 +36,7 @@ contract Helpers is DSMath, Basic {
 	}
 
 	function _xcall(XCallParams memory params) internal {
-		uint256 nativeTokenAmt;
-		bool isNative = params.asset == ethAddr;
-
-		if (isNative) {
-			params.amount = params.amount == uint256(-1)
-				? address(this).balance
-				: params.amount;
-
-			// xcall does not take native asset, must wrap
-			TokenInterface tokenContract = TokenInterface(wethAddr);
-			convertEthToWeth(true, tokenContract, params.amount);
-
-			nativeTokenAmt = params.amount;
-		} else {
-			TokenInterface tokenContract = TokenInterface(params.asset);
-			params.amount = params.amount == uint256(-1)
-				? tokenContract.balanceOf(address(this))
-				: params.amount;
-
-			if (params.amount > 0) {
-				tokenContract.approve(connextAddr, params.amount);
-			}
-
-			nativeTokenAmt = 0;
-		}
-
-		connext.xcall{ value: params.relayerFee + nativeTokenAmt }(
+		connext.xcall{ value: params.relayerFee }(
 			params.destination,
 			params.to,
 			params.asset,

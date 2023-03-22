@@ -12,6 +12,7 @@ import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2ConnextOptimism__factory } from "../../../typechain";
 import { Signer, Contract } from "ethers";
 
+
 describe("Connext Connector [Optimism]", function () {
   const connectorName = "CONNEXT-TEST-A";
 
@@ -19,11 +20,14 @@ describe("Connext Connector [Optimism]", function () {
   let masterSigner: Signer;
   let instaConnectorsV2: Contract;
   let connector: Contract;
-
+  let usdcContract: Contract;
+  let signer: any;
+  
   const connextAddr = "0x8f7492DE823025b4CfaAB1D34c58963F2af5DEDA";
   const usdcAddr = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
   const ethAddr = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
   const wethAddr = "0x4200000000000000000000000000000000000006";
+  const account = "0xebe80f029b1c02862b9e8a70a7e5317c06f62cae";
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1] = wallets;
@@ -39,7 +43,7 @@ describe("Connext Connector [Optimism]", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            blockNumber: 80768349
+            blockNumber: 82686991
           }
         }
       ]
@@ -53,8 +57,19 @@ describe("Connext Connector [Optimism]", function () {
       signer: masterSigner,
       connectors: instaConnectorsV2
     });
+    usdcContract = await ethers.getContractAt(abis.basic.erc20, usdcAddr);
+    signer = await ethers.getSigner(account);
 
-    console.log("Connector address", connector.address);
+    await hre.network.provider.send("hardhat_setBalance", [account, ethers.utils.parseEther("10").toHexString()]);
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [account]
+    });
+
+    await usdcContract.connect(signer).transfer(wallet0.address, ethers.utils.parseUnits("10000", 6));
+
+    console.log("deployed connector: ", connector.address);
   });
 
   it("Should have contracts deployed.", async function () {
@@ -76,11 +91,8 @@ describe("Connext Connector [Optimism]", function () {
       });
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
 
-      // await addLiquidity(
-      //   "usdc",
-      //   dsaWallet0.address,
-      //   ethers.utils.parseEther("100000")
-      // );
+      await usdcContract.connect(wallet0).transfer(dsaWallet0.address, ethers.utils.parseUnits("10", 6));
+      expect(await usdcContract.balanceOf(dsaWallet0.address)).to.be.gte(ethers.utils.parseUnits("10", 6));
     });
   });
 
