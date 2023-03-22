@@ -5,7 +5,6 @@ import { TokenInterface } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { IConnext } from "./interface.sol";
-import { IInstaReceiver } from "./interface.sol";
 
 contract Helpers is DSMath, Basic {
 	/**

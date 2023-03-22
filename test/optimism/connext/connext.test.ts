@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre from "hardhat";
 const { ethers, waffle } = hre;
-const { provider, deployContract } = waffle;
+const { provider } = waffle;
 
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
@@ -13,7 +13,7 @@ import { ConnectV2ConnextOptimism__factory } from "../../../typechain";
 import { Signer, Contract } from "ethers";
 
 
-describe("Connext Connector [Optimism]", function () {
+describe("Connext Connector [Optimism]", () => {
   const connectorName = "CONNEXT-TEST-A";
 
   let dsaWallet0: Contract;
@@ -23,17 +23,12 @@ describe("Connext Connector [Optimism]", function () {
   let usdcContract: Contract;
   let signer: any;
   
-  const connextAddr = "0x8f7492DE823025b4CfaAB1D34c58963F2af5DEDA";
   const usdcAddr = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
-  const ethAddr = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
   const wethAddr = "0x4200000000000000000000000000000000000006";
   const account = "0xebe80f029b1c02862b9e8a70a7e5317c06f62cae";
 
   const wallets = provider.getWallets();
   const [wallet0, wallet1] = wallets;
-
-  // const usdc = new ethers.Contract(usdcAddr, abis.basic.erc20);
-  // const weth = new ethers.Contract(wethAddr, abis.basic.erc20);
 
   before(async () => {
     await hre.network.provider.request({
@@ -68,23 +63,22 @@ describe("Connext Connector [Optimism]", function () {
     });
 
     await usdcContract.connect(signer).transfer(wallet0.address, ethers.utils.parseUnits("10000", 6));
-
     console.log("deployed connector: ", connector.address);
   });
 
-  it("Should have contracts deployed.", async function () {
+  it("Should have contracts deployed.", async () => {
     expect(!!instaConnectorsV2.address).to.be.true;
     expect(!!connector.address).to.be.true;
     expect(!!(await masterSigner.getAddress())).to.be.true;
   });
 
-  describe("DSA wallet setup", function () {
-    it("Should build DSA v2", async function () {
+  describe("DSA wallet setup",  () => {
+    it("Should build DSA v2", async () => {
       dsaWallet0 = await buildDSAv2(wallet0.getAddress());
       expect(!!dsaWallet0.address).to.be.true;
     });
 
-    it("Deposit ETH & USDC into DSA wallet", async function () {
+    it("Deposit ETH & USDC into DSA wallet", async () => {
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
         value: ethers.utils.parseEther("10")
@@ -96,19 +90,18 @@ describe("Connext Connector [Optimism]", function () {
     });
   });
 
-  describe("Main", function () {
-    it("should xcall with eth", async function () {
-      const amount = ethers.utils.parseEther("10");
+  describe("Main", () => {
+    it("should xcall with eth", async () => {
+      const amount = ethers.utils.parseEther("5");
       const domainId = 6648936;
       const slippage = 10000;
       const relayerFee = ethers.utils.parseEther("1");
-      const getId = 0;
       const callData = "0x";
 
       const xcallParams: any = [
         domainId,
         wallet1.address,
-        ethAddr,
+        wethAddr,
         wallet1.address,
         amount,
         slippage,
@@ -120,7 +113,37 @@ describe("Connext Connector [Optimism]", function () {
         {
           connector: connectorName,
           method: "xcall",
-          args: [xcallParams, getId]
+          args: [xcallParams, 0, 0]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      const receipt = await tx.wait();
+    });
+
+    it("should xcall with usdc", async () => {
+      const amount = ethers.utils.parseUnits("5", 6);
+      const domainId = 6648936;
+      const slippage = 10000;
+      const relayerFee = ethers.utils.parseEther("1");
+      const callData = "0x";
+
+      const xcallParams: any = [
+        domainId,
+        wallet1.address,
+        usdcAddr,
+        wallet1.address,
+        amount,
+        slippage,
+        relayerFee,
+        callData
+      ];
+
+      const spells = [
+        {
+          connector: connectorName,
+          method: "xcall",
+          args: [xcallParams, 0, 0]
         }
       ];
 
