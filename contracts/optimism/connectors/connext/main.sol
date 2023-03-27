@@ -30,7 +30,7 @@ abstract contract ConnextResolver is Helpers {
 	{
 		uint256 _amount = getUint(getId, params.amount);
 		TokenInterface tokenContract = TokenInterface(params.asset);
-		bool isNative = params.asset == wethAddr;
+		bool isNative = params.asset == ethAddr;
 
 		if (isNative) {
 			_amount = _amount == uint256(-1) ? sub(address(this).balance, params.relayerFee) : _amount;
