@@ -24,7 +24,7 @@ describe("Connext Connector [Optimism]", () => {
   let signer: any;
   
   const usdcAddr = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
-  const wethAddr = "0x4200000000000000000000000000000000000006";
+  const ethAddr = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
   const account = "0xebe80f029b1c02862b9e8a70a7e5317c06f62cae";
 
   const wallets = provider.getWallets();
@@ -101,7 +101,7 @@ describe("Connext Connector [Optimism]", () => {
       const xcallParams: any = [
         domainId,
         wallet1.address,
-        wethAddr,
+        ethAddr,
         wallet1.address,
         amount,
         slippage,
