@@ -33,7 +33,7 @@ abstract contract ConnextResolver is Helpers {
 		bool isNative = params.asset == ethAddr;
 
 		if (isNative) {
-			_amount = _amount == uint256(-1) ? sub(address(this).balance, params.relayerFee) : _amount;
+			_amount = _amount == uint256(-1) ? address(this).balance : _amount;
 			params.asset = wethAddr;
 			tokenContract = TokenInterface(params.asset);
 			// xcall does not take native asset, must wrap 
