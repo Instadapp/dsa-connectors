@@ -8,6 +8,10 @@ import { IArbitrumTokenDistributor } from "./interface.sol";
 
 abstract contract ArbitrumAirdrop is Events, Helpers {
 
+    /**
+	 * @dev DSA Arbitrum airdrop claim function.
+	 * @param setId ID to set the claimable amount in the DSA
+	 */
 	function claimAirdrop(uint256 setId)
 		public
 		returns (string memory eventName_, bytes memory eventParam_)
@@ -21,6 +25,10 @@ abstract contract ArbitrumAirdrop is Events, Helpers {
 		eventParam_ = abi.encode(address(this), claimable, setId);
 	}
 
+    /**
+	 * @dev Delegates votes from signer to `delegatee`.
+	 * @param delegatee The address to delegate the ARB tokens to.
+	 */
 	function delegate(address delegatee)
 		public
 		returns (string memory eventName_, bytes memory eventParam_)
@@ -31,6 +39,12 @@ abstract contract ArbitrumAirdrop is Events, Helpers {
 		eventParam_ = abi.encode(address(this), delegatee);
 	}
 
+    /**
+	 * @dev Delegates votes from signer to `delegatee`.
+	 * @param delegatee The address to delegate the ARB tokens to.
+	 * @param nonce The nonce number.
+	 * @param permits The struct containing signed permit data like v,r,s,expiry.
+	 */
 	function delegateBySig(
 		address delegatee,
 		uint256 nonce,
