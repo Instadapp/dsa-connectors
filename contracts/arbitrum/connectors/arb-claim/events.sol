@@ -10,21 +10,12 @@ contract Events {
 
 	event LogArbTokensDelegated(
 		address indexed account,
-		address indexed delegatee,
-		uint256 indexed delegatedAmount
+		address indexed delegatee
 	);
 
 	event LogArbTokensDelegatedBySig(
 		address indexed account,
 		address indexed delegatee,
-		uint256 indexed delegatedAmount,
 		uint256 nonce
-	);
-
-	event LogArbAirdropClaimedAndDelegated(
-		address indexed account,
-		address indexed delegatee,
-		uint256 indexed claimable,
-		uint256 setId
 	);
 }

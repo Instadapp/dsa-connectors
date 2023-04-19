@@ -2,9 +2,8 @@
 pragma solidity ^0.7.0;
 
 import "./interface.sol";
-import { Basic } from "../../common/basic.sol";
 
-contract Variables is Basic {
+contract Variables {
 	IArbitrumTokenDistributor public constant ARBITRUM_TOKEN_DISTRIBUTOR =
 		IArbitrumTokenDistributor(0x67a24CE4321aB3aF51c2D0a4801c3E111D88C9d9);
 
