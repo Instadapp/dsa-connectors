@@ -7,6 +7,10 @@ import { Events } from "./events.sol";
 import { IArbitrumTokenDistributor } from "./interface.sol";
 
 abstract contract ArbitrumAirdrop is Events, Variables {
+	function claimableArbTokens(address user) public view returns (uint256) {
+		return ARBITRUM_TOKEN_DISTRIBUTOR.claimableTokens(user);
+	}
+
 	function claimArbAirdrop(uint256 setId)
 		public
 		returns (string memory eventName_, bytes memory eventParam_)
@@ -20,12 +24,14 @@ abstract contract ArbitrumAirdrop is Events, Variables {
 		eventParam_ = abi.encode(address(this), claimable, setId);
 	}
 
-    function delegateArbTokens(address delegatee)
+	function delegateArbTokens(address delegatee)
 		public
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
-        uint256 balance = TokenInterface(address(ARB_TOKEN_CONTRACT)).balanceOf(address(this));
-        require(balance > 0, "no-balance-to-delegate");
+		uint256 balance = TokenInterface(address(ARB_TOKEN_CONTRACT)).balanceOf(
+			address(this)
+		);
+		require(balance > 0, "no-balance-to-delegate");
 
 		ARB_TOKEN_CONTRACT.delegate(delegatee);
 
@@ -33,25 +39,47 @@ abstract contract ArbitrumAirdrop is Events, Variables {
 		eventParam_ = abi.encode(address(this), delegatee, balance);
 	}
 
-    function delegateArbTokensBySig(
-        address delegatee,
-        uint256 nonce,
-        SignedPermits calldata permits
-    )
-        public
-        returns (string memory eventName_, bytes memory eventParam_)
-    {
-        uint256 balance = TokenInterface(address(ARB_TOKEN_CONTRACT)).balanceOf(address(this));
-        require(balance > 0, "no-balance-to-delegate");
+	function delegateArbTokensBySig(
+		address delegatee,
+		uint256 nonce,
+		SignedPermits calldata permits
+	) public returns (string memory eventName_, bytes memory eventParam_) {
+		uint256 balance = TokenInterface(address(ARB_TOKEN_CONTRACT)).balanceOf(
+			address(this)
+		);
+		require(balance > 0, "no-balance-to-delegate");
 
-        ARB_TOKEN_CONTRACT.delegateBySig(delegatee, nonce, permits.expiry, permits.v, permits.r, permits.s);
+		ARB_TOKEN_CONTRACT.delegateBySig(
+			delegatee,
+			nonce,
+			permits.expiry,
+			permits.v,
+			permits.r,
+			permits.s
+		);
 
-        eventName_ = "LogArbTokensDelegatedBySig(address,address,uint256,uint256)";
-        eventParam_ = abi.encode(address(this), delegatee, balance, nonce);
-    }
+		eventName_ = "LogArbTokensDelegatedBySig(address,address,uint256,uint256)";
+		eventParam_ = abi.encode(address(this), delegatee, balance, nonce);
+	}
 
-	function claimableArbTokens(address user) public view returns (uint256) {
-		return ARBITRUM_TOKEN_DISTRIBUTOR.claimableTokens(user);
+	function claimAndDelegateArbAirdrop(
+		address delegatee,
+		SignedPermits memory permits,
+		uint256 setId
+	) public returns (string memory eventName_, bytes memory eventParam_) {
+		uint256 claimable = claimableArbTokens(address(this));
+		require(claimable > 0, "0-tokens-claimable");
+		ARBITRUM_TOKEN_DISTRIBUTOR.claimAndDelegate(
+			delegatee,
+			permits.expiry,
+			permits.v,
+			permits.r,
+			permits.s
+		);
+		setUint(setId, claimable);
+
+		eventName_ = "LogArbAirdropClaimedAndDelegated(address,address,uint256,uint256)";
+		eventParam_ = abi.encode(address(this), delegatee, claimable, setId);
 	}
 }
 
