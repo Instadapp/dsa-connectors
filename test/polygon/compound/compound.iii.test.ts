@@ -12,8 +12,6 @@ import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { addresses } from "../../../scripts/tests/polygon/addresses";
 import { tokens, tokenMapping } from "../../../scripts/tests/polygon/tokens";
-// import { addresses } from "../../../scripts/tests/mainnet/addresses";
-// import { tokens, tokenMapping } from "../../../scripts/tests/mainnet/tokens";
 import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
 import { ConnectV2CompoundV3Polygon__factory } from "../../../typechain";
@@ -24,8 +22,6 @@ describe("Compound III", async function () {
   const connectorName = "COMPOUND-POLYGON-V3-TEST-A";
   const market = "0xF25212E676D1F7F89Cd72fFEe66158f541246445";
   const base = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-  // const market = "0xc3d688B66703497DAA19211EEdff47f25384cdc3";
-  // const base = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
   const account = "0xf827c3E5fD68e78aa092245D442398E12988901C";
   const wethWhale = "0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B";
 
@@ -36,7 +32,6 @@ describe("Compound III", async function () {
   ];
   let wethContract: any;
   let baseContract: any;
-  // const linkContract = new ethers.Contract(tokens.link.address, ABI);
 
   const cometABI = [
     {
@@ -153,7 +148,6 @@ describe("Compound III", async function () {
   let instaConnectorsV2: Contract;
   let connector: any;
   let signer: any; 
-  // let wallet0: any;
   let wethSigner: any;
 
   let comet: any;
@@ -179,14 +173,12 @@ describe("Compound III", async function () {
       await masterSigner.getAddress(),
       "0x3635c9adc5de9fffff",
     ]);
-    // [wallet0] = await ethers.getSigners();
 
     signer = await ethers.getSigner(account);
 
     instaConnectorsV2 = await ethers.getContractAt(abis.core.connectorsV2, addresses.core.connectorsV2);
     connector = await deployAndEnableConnector({
       connectorName,
-      // contractArtifact: ConnectV2CompoundV3__factory,
       contractArtifact: ConnectV2CompoundV3Polygon__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2
