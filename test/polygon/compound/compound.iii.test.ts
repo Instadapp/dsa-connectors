@@ -19,7 +19,6 @@ import { constants } from "../../../scripts/constant/constant";
 import { ConnectV2CompoundV3Polygon__factory } from "../../../typechain";
 import { ConnectV2CompoundV3__factory } from "../../../typechain";
 import { MaxUint256 } from "@uniswap/sdk-core";
-import Test from './Test.json'
 
 describe("Compound III", async function () {
   const connectorName = "COMPOUND-POLYGON-V3-TEST-A";
@@ -232,7 +231,6 @@ describe("Compound III", async function () {
     expect(!!dsaWallet1.address).to.be.true;
 
     const bal = await baseContract.balanceOf(wethWhale)
-    console.log("+++++++++++++++++++++++++",bal.toString())
     await baseContract.connect(wethSigner).transfer(dsaWallet0.address, ethers.utils.parseUnits("1000", 6));
     await baseContract.connect(wethSigner).transfer(dsaWallet1.address, ethers.utils.parseUnits("1000", 6));
   });
