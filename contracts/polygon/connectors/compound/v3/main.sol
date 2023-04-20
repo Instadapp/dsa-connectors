@@ -62,7 +62,6 @@ abstract contract CompoundV3Contract is Events, Helpers {
 		approve(tokenContract, market, amt_);
 
 		CometInterface(market).supply(token_, amt_);
-
 		setUint(setId, amt_);
 
 		eventName_ = "LogDeposit(address,address,uint256,uint256,uint256)";
@@ -412,7 +411,6 @@ abstract contract CompoundV3Contract is Events, Helpers {
 		uint256 initialBal = CometInterface(market).borrowBalanceOf(
 			address(this)
 		);
-
 		CometInterface(market).withdraw(token_, amt_);
 
 		uint256 finalBal = CometInterface(market).borrowBalanceOf(
@@ -930,5 +928,5 @@ abstract contract CompoundV3Contract is Events, Helpers {
 }
 
 contract ConnectV2CompoundV3Polygon is CompoundV3Contract {
-	string public name = "CompoundV3-v1.0";
+	string public name = "CompoundV3-Polygon-v1.0";
 }
