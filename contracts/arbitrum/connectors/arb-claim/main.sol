@@ -17,7 +17,8 @@ abstract contract ArbitrumAirdrop is Events, Helpers {
 		returns (string memory eventName_, bytes memory eventParam_)
 	{
 		uint256 claimable = claimableArbTokens(address(this));
-		require(claimable > 0, "0-tokens-claimable");
+
+		// If claimable <= 0, ARB TokenDistributor will revert on claim.
 		ARBITRUM_TOKEN_DISTRIBUTOR.claim();
 		setUint(setId, claimable);
 
@@ -37,30 +38,6 @@ abstract contract ArbitrumAirdrop is Events, Helpers {
 
 		eventName_ = "LogArbTokensDelegated(address,address)";
 		eventParam_ = abi.encode(address(this), delegatee);
-	}
-
-    /**
-	 * @dev Delegates votes from signer to `delegatee`.
-	 * @param delegatee The address to delegate the ARB tokens to.
-	 * @param nonce The nonce number.
-	 * @param permits The struct containing signed permit data like v,r,s,expiry.
-	 */
-	function delegateBySig(
-		address delegatee,
-		uint256 nonce,
-		SignedPermits calldata permits
-	) public returns (string memory eventName_, bytes memory eventParam_) {
-		ARB_TOKEN_CONTRACT.delegateBySig(
-			delegatee,
-			nonce,
-			permits.expiry,
-			permits.v,
-			permits.r,
-			permits.s
-		);
-
-		eventName_ = "LogArbTokensDelegatedBySig(address,address,uint256)";
-		eventParam_ = abi.encode(address(this), delegatee, nonce);
 	}
 }
 
