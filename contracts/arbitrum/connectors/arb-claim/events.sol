@@ -12,10 +12,4 @@ contract Events {
 		address indexed account,
 		address indexed delegatee
 	);
-
-	event LogArbTokensDelegatedBySig(
-		address indexed account,
-		address indexed delegatee,
-		uint256 nonce
-	);
 }

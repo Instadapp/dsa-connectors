@@ -9,11 +9,4 @@ contract Variables {
 
 	IArbTokenContract public constant ARB_TOKEN_CONTRACT =
 		IArbTokenContract(0x912CE59144191C1204E64559FE8253a0e49E6548);
-
-	struct SignedPermits {
-		uint8 v;
-		bytes32 r;
-		bytes32 s;
-		uint256 expiry;
-	}
 }
