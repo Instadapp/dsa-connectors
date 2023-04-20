@@ -9,5 +9,5 @@ import {  CometRewards } from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
 	CometRewards internal constant cometRewards =
-		CometRewards(0x1B0e765F6224C21223AeA2af16c1C46E38885a40);
+		CometRewards(0x45939657d1CA34A8FA39A924B71D28Fe8431e581);
 }

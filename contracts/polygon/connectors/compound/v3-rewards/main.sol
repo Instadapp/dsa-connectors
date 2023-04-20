@@ -63,6 +63,6 @@ abstract contract CompoundV3RewardsResolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2CompoundV3Rewards is CompoundV3RewardsResolver {
-	string public name = "CompoundV3Rewards-v1.0";
+contract ConnectV2CompoundV3PolygonRewards is CompoundV3RewardsResolver {
+	string public name = "CompoundV3-Polygon-Rewards-v1.0";
 }

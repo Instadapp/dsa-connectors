@@ -15,7 +15,6 @@ import { tokens, tokenMapping } from "../../../scripts/tests/polygon/tokens";
 import { abis } from "../../../scripts/constant/abis";
 import { constants } from "../../../scripts/constant/constant";
 import { ConnectV2CompoundV3Polygon__factory } from "../../../typechain";
-import { ConnectV2CompoundV3__factory } from "../../../typechain";
 import { MaxUint256 } from "@uniswap/sdk-core";
 
 describe("Compound III", async function () {
