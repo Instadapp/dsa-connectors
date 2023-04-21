@@ -30,14 +30,14 @@ abstract contract ConnextResolver is Helpers {
 	{
 		uint256 _amount = getUint(getId, params.amount);
 		TokenInterface tokenContract = TokenInterface(params.asset);
-		bool isNative = params.asset == ethAddr;
+		bool isNative = params.asset == maticAddr;
 
 		if (isNative) {
 			_amount = _amount == uint256(-1) ? address(this).balance : _amount;
-			params.asset = wethAddr;
+			params.asset = wmaticAddr;
 			tokenContract = TokenInterface(params.asset);
 			// xcall does not take native asset, must wrap 
-			convertEthToWeth(true, tokenContract, _amount);
+			convertMaticToWmatic(true, tokenContract, _amount);
 
 		} else {
 			_amount = _amount == uint256(-1) ? tokenContract.balanceOf(address(this)) : _amount;
@@ -62,6 +62,6 @@ abstract contract ConnextResolver is Helpers {
 	}
 }
 
-contract ConnectV2ConnextOptimism is ConnextResolver {
+contract ConnectV2ConnextPolygon is ConnextResolver {
 	string public constant name = "Connext-v1.0";
 }
