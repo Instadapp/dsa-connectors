@@ -21,7 +21,7 @@ describe("Compound III", async function () {
   const connectorName = "COMPOUND-POLYGON-V3-TEST-A";
   const market = "0xF25212E676D1F7F89Cd72fFEe66158f541246445";
   const base = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-  const account = "0xf827c3E5fD68e78aa092245D442398E12988901C";
+  const account = "0xF25212E676D1F7F89Cd72fFEe66158f541246445";
   const wethWhale = "0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B";
 
   const ABI = [
@@ -29,7 +29,7 @@ describe("Compound III", async function () {
     "function approve(address spender, uint256 amount) external returns(bool)",
     "function transfer(address recipient, uint256 amount) external returns (bool)"
   ];
-  let wethContract: any;
+  let wmaticContract: any;
   let baseContract: any;
 
   const cometABI = [
@@ -162,7 +162,7 @@ describe("Compound III", async function () {
           forking: {
             //@ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            // blockNumber: 27054896
+            // blockNumber: 41860206
           }
         }
       ]
@@ -199,7 +199,7 @@ describe("Compound III", async function () {
     });
     wethSigner = await ethers.getSigner(wethWhale);
     baseContract = new ethers.Contract(base, ABI, wethSigner)
-    wethContract = new ethers.Contract(tokens.wmatic.address, ABI, wethSigner)
+    wmaticContract = new ethers.Contract(tokens.wmatic.address, ABI, wethSigner)
     comet = new ethers.Contract(market, cometABI, wethSigner)
   });
 
@@ -220,14 +220,10 @@ describe("Compound III", async function () {
     expect(!!dsaWallet3.address).to.be.true;
     wallet = await ethers.getSigner(dsaWallet0.address);
     expect(!!dsaWallet1.address).to.be.true;
-
-    const bal = await baseContract.balanceOf(wethWhale)
-    await baseContract.connect(wethSigner).transfer(dsaWallet0.address, ethers.utils.parseUnits("1000", 6));
-    await baseContract.connect(wethSigner).transfer(dsaWallet1.address, ethers.utils.parseUnits("1000", 6));
   });
 
   describe("DSA wallet setup", function () {
-    it("Deposit ETH into DSA wallet", async function () {
+    it("Deposit Matic into DSA wallet", async function () {
       await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
         params: [wallet.address]
@@ -236,26 +232,26 @@ describe("Compound III", async function () {
       dsa0Signer = await ethers.getSigner(wallet.address);
       await wallet0.sendTransaction({
         to: dsaWallet0.address,
-        value: ethers.utils.parseEther("10")
+        value: ethers.utils.parseEther("1000")
       });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1000"));
       await wallet0.sendTransaction({
         to: dsaWallet1.address,
-        value: ethers.utils.parseEther("10")
+        value: ethers.utils.parseEther("1000")
       });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1000"));
       await wallet0.sendTransaction({
         to: dsaWallet3.address,
-        value: ethers.utils.parseEther("10")
+        value: ethers.utils.parseEther("1000")
       });
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("10"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(ethers.utils.parseEther("1000"));
     });
   });
 
   describe("Main", function () {
     //deposit asset
-    it("Should supply ETH collateral in Compound V3", async function () {
-      const amount = ethers.utils.parseEther("5"); // 5 ETH
+    it("Should supply Matic collateral in Compound V3", async function () {
+      const amount = ethers.utils.parseEther("500"); // 5 Matic
       const spells = [
         {
           connector: connectorName,
@@ -266,15 +262,15 @@ describe("Compound III", async function () {
 
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("5"));
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(ethers.utils.parseEther("500"));
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("5")
+        ethers.utils.parseEther("500")
       );
     });
 
     //deposit asset on behalf of
-    it("Should supply  ETH collateral on behalf of dsaWallet0 in Compound V3", async function () {
-      const amount = ethers.utils.parseEther("1"); // 1 ETH
+    it("Should supply  Matic collateral on behalf of dsaWallet0 in Compound V3", async function () {
+      const amount = ethers.utils.parseEther("100"); // 100 Matic
       const spells = [
         {
           connector: connectorName,
@@ -285,9 +281,9 @@ describe("Compound III", async function () {
 
       const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.lte(ethers.utils.parseEther("9"));
+      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.lte(ethers.utils.parseEther("900"));
       expect((await comet.connect(wallet0).userCollateral(dsaWallet0.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("6")
+        ethers.utils.parseEther("600")
       );
     });
 
@@ -383,9 +379,9 @@ describe("Compound III", async function () {
       );
     });
 
-    it("should withdraw some ETH collateral", async function () {
+    it("should withdraw some Matic collateral", async function () {
       let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
-      const amount_ = ethers.utils.parseEther("2");
+      const amount_ = ethers.utils.parseEther("200");
       const spells = [
         {
           connector: connectorName,
@@ -397,7 +393,7 @@ describe("Compound III", async function () {
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("4")
+        ethers.utils.parseEther("400")
       );
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(initialBal.add(amount_).toString());
     });
@@ -405,7 +401,7 @@ describe("Compound III", async function () {
     it("manager should be able to withdraw collateral from the position and transfer", async function () {
       await wallet1.sendTransaction({
         to: tokens.wmatic.address,
-        value: ethers.utils.parseEther("10")
+        value: ethers.utils.parseEther("1000")
       });
       const amount = ethers.constants.MaxUint256;
       const spells = [
@@ -421,7 +417,7 @@ describe("Compound III", async function () {
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.wmatic.address)).balance).to.be.gte(
         ethers.utils.parseEther("0")
       );
-      expect(await wethContract.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("4"));
+      expect(await wmaticContract.connect(wallet0).balanceOf(dsaWallet1.address)).to.be.gte(ethers.utils.parseEther("400"));
     });
 
     it("Should withdraw collateral to another DSA", async function () {
@@ -429,14 +425,14 @@ describe("Compound III", async function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [market, tokens.matic.address, ethers.utils.parseEther("5"), 0, 0]
+          args: [market, tokens.matic.address, ethers.utils.parseEther("500"), 0, 0]
         }
       ];
 
       const tx1 = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
       let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
 
-      const amount = ethers.utils.parseEther("2");
+      const amount = ethers.utils.parseEther("200");
       const spells = [
         {
           connector: connectorName,
@@ -447,10 +443,10 @@ describe("Compound III", async function () {
 
       const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-      expect(await wethContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(amount);
+      expect(await wmaticContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.gte(amount);
 
       expect((await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("3")
+        ethers.utils.parseEther("300")
       );
     });
 
@@ -459,14 +455,14 @@ describe("Compound III", async function () {
         {
           connector: connectorName,
           method: "deposit",
-          args: [market, tokens.matic.address, ethers.utils.parseEther("3"), 0, 0]
+          args: [market, tokens.matic.address, ethers.utils.parseEther("300"), 0, 0]
         }
       ];
 
       const tx1 = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
       let initialBal = await ethers.provider.getBalance(dsaWallet0.address);
 
-      const amount = ethers.utils.parseEther("2");
+      const amount = ethers.utils.parseEther("200");
       const spells = [
         {
           connector: connectorName,
@@ -480,16 +476,16 @@ describe("Compound III", async function () {
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(initialBal.add(amount));
 
       expect((await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("1")
+        ethers.utils.parseEther("100")
       );
     });
 
-    it("should transfer eth from dsaWallet1 to dsaWallet0 position", async function () {
+    it("should transfer matic from dsaWallet1 to dsaWallet0 position", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "transferAsset",
-          args: [market, tokens.matic.address, dsaWallet0.address, ethers.utils.parseEther("3"), 0, 0]
+          args: [market, tokens.matic.address, dsaWallet0.address, ethers.utils.parseEther("300"), 0, 0]
         }
       ];
 
@@ -499,12 +495,12 @@ describe("Compound III", async function () {
         ethers.utils.parseEther("0")
       );
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("3")
+        ethers.utils.parseEther("300")
       );
     });
 
     it("should transfer base token from dsaWallet1 to dsaWallet0 position", async function () {
-      await baseContract.connect(wethSigner).transfer(dsaWallet1.address, ethers.utils.parseUnits("10", 6));
+      await baseContract.connect(wethSigner).transfer(dsaWallet1.address, ethers.utils.parseUnits("1000", 6));
 
       const spells = [
         {
@@ -547,11 +543,11 @@ describe("Compound III", async function () {
     });
 
     it("should deposit weth using manager", async function () {
-      await wethContract.connect(wethSigner).transfer(dsaWallet0.address, ethers.utils.parseEther("10"));
-      let initialBal = await wethContract.connect(wallet0).balanceOf(dsaWallet0.address);
+      await wmaticContract.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseEther("1000"));
+      let initialBal = await wmaticContract.connect(wallet0).balanceOf(dsaWallet0.address);
 
-      const amount = ethers.utils.parseEther("1");
-      await wethContract.connect(dsa0Signer).approve(market, amount);
+      const amount = ethers.utils.parseEther("100");
+      await wmaticContract.connect(dsa0Signer).approve(market, amount);
 
       const spells = [
         {
@@ -564,9 +560,9 @@ describe("Compound III", async function () {
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
       expect((await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.wmatic.address)).balance).to.be.gte(
-        ethers.utils.parseEther("1")
+        ethers.utils.parseEther("100")
       );
-      expect(await wethContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(initialBal.sub(amount));
+      expect(await wmaticContract.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(initialBal.sub(amount));
     });
 
     it("should allow manager for dsaWallet0's collateral", async function () {
@@ -585,13 +581,13 @@ describe("Compound III", async function () {
       let initialBal = await baseContract.connect(wallet0).balanceOf(dsaWallet0.address);
       await wallet0.sendTransaction({
         to: dsaWallet3.address,
-        value: ethers.utils.parseEther("15")
+        value: ethers.utils.parseEther("1500")
       });
       const spells1 = [
         {
           connector: connectorName,
           method: "deposit",
-          args: [market, tokens.matic.address, ethers.utils.parseEther("15"), 0, 0]
+          args: [market, tokens.matic.address, ethers.utils.parseEther("1500"), 0, 0]
         }
       ];
       const tx1 = await dsaWallet3.connect(wallet0).cast(...encodeSpells(spells1), wallet1.address);
@@ -619,17 +615,17 @@ describe("Compound III", async function () {
         {
           connector: connectorName,
           method: "transferAssetOnBehalf",
-          args: [market, tokens.matic.address, dsaWallet0.address, dsaWallet1.address, ethers.utils.parseEther("1"), 0, 0]
+          args: [market, tokens.matic.address, dsaWallet0.address, dsaWallet1.address, ethers.utils.parseEther("100"), 0, 0]
         }
       ];
 
       const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
       expect((await comet.connect(signer).userCollateral(dsaWallet1.address, tokens.wmatic.address)).balance).to.be.gte(
-        bal1.add(ethers.utils.parseEther("1")).toString()
+        bal1.add(ethers.utils.parseEther("100")).toString()
       );
       expect((await comet.connect(signer).userCollateral(dsaWallet0.address, tokens.wmatic.address)).balance).to.be.gte(
-        bal0.sub(ethers.utils.parseEther("1")).toString()
+        bal0.sub(ethers.utils.parseEther("100")).toString()
       );
     });
 
@@ -655,7 +651,7 @@ describe("Compound III", async function () {
     //   const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
     //   const receipt = await tx.wait();
     //   expect(new BigNumber(await linkContract.connect(signer).balanceOf(dsaWallet0.address)).toFixed()).to.be.gte(
-    //     ethers.utils.parseEther("1")
+    //     ethers.utils.parseEther("100")
     //   );
 
     //   //dsawallet0 --> collateral 0eth, balance 9eth >1link
