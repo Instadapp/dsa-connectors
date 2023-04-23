@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title Compound.
+ * @title Compound Polygon.
  * @dev Rewards.
  */
 
@@ -64,5 +64,5 @@ abstract contract CompoundV3RewardsResolver is Events, Helpers {
 }
 
 contract ConnectV2CompoundV3PolygonRewards is CompoundV3RewardsResolver {
-	string public name = "CompoundV3-Polygon-Rewards-v1.0";
+	string public constant name = "CompoundV3-Polygon-Rewards-v1.0";
 }

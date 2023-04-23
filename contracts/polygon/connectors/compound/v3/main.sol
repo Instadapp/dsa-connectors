@@ -3,7 +3,7 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 /**
- * @title Compound III
+ * @title Compound III Polygon.
  * @dev Lending & Borrowing.
  */
 
@@ -928,5 +928,5 @@ abstract contract CompoundV3Contract is Events, Helpers {
 }
 
 contract ConnectV2CompoundV3Polygon is CompoundV3Contract {
-	string public name = "CompoundV3-Polygon-v1.0";
+	string public constant name = "CompoundV3-Polygon-v1.0";
 }
