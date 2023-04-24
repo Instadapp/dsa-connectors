@@ -62,6 +62,6 @@ abstract contract ConnextResolver is Helpers {
 	}
 }
 
-contract ConnectV2ConnextOptimism is ConnextResolver {
+contract ConnectV2ConnextArbitrum is ConnextResolver {
 	string public constant name = "Connext-v1.0";
 }
