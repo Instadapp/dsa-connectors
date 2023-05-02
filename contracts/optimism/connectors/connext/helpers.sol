@@ -22,6 +22,7 @@ contract Helpers is DSMath, Basic {
 	 * @param slippage Maximum amount of slippage the user will accept in BPS.
 	 * @param relayerFee Relayer fee paid in origin native asset.
 	 * @param callData Encoded calldata to send.
+	 * @param nativeRelayerFee booleam choice for relayer fee asset selection. 
 	 */
 	struct XCallParams {
 		uint32 destination;
@@ -32,9 +33,10 @@ contract Helpers is DSMath, Basic {
 		uint256 slippage;
 		uint256 relayerFee;
 		bytes callData;
+		bool nativeRelayerFee;
 	}
 
-	function _xcall(XCallParams memory params) internal {
+	function _xcallFeeNativeAsset(XCallParams memory params) internal {
 		connext.xcall{ value: params.relayerFee }(
 			params.destination,
 			params.to,
@@ -43,6 +45,19 @@ contract Helpers is DSMath, Basic {
 			params.amount,
 			params.slippage,
 			params.callData
+		);
+	}
+
+	function _xcallFeeTransactingAsseet(XCallParams memory params) internal {
+		connext.xcall(
+			params.destination,
+			params.to,
+			params.asset,
+			params.delegate,
+			params.amount - params.relayerFee,
+			params.slippage,
+			params.callData,
+			params.relayerFee
 		);
 	}
 }
