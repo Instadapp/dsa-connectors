@@ -19,7 +19,7 @@ contract Helpers is DSMath, Basic {
 	 * @param to The address to send the bridged assets to.
 	 * @param asset The address of token to be bridged.
 	 * @param delegate Address that can revert or forceLocal on destination.
-	 * @param amount The amount to transfer.
+	 * @param amount The amount to transfer + relayer fee.
 	 * @param slippage Maximum amount of slippage the user will accept in BPS.
 	 * @param relayerFee Relayer fee paid in origin native asset.
 	 * @param callData Encoded calldata to send.
