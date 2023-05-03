@@ -4,7 +4,7 @@ pragma solidity ^0.7.0;
 contract Events {
 	event LogXCall(
 		uint32 indexed destination,
-		address to,
+		address indexed to,
 		address asset,
 		address delegate,
 		uint256 indexed amount,
