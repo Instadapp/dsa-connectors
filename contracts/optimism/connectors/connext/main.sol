@@ -46,13 +46,7 @@ abstract contract ConnextResolver is Helpers {
 		params.amount = _amount;
 		approve(tokenContract, connextAddr, _amount);
 
-		/// check if user provided relayerFee under native asset or transacting asset
-		if(params.nativeRelayerFee){
-			_xcallFeeNativeAsset(params);
-		}
-		else{
-			_xcallFeeTransactingAsseet(params);
-		}
+		_xcallFeeTransactingAsset(params);
 
 		setUint(setId, _amount);
 		_eventName = "LogXCall(uint32,address,address,address,uint256,uint256,uint256,uint256)";
