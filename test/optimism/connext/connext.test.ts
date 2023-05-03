@@ -97,7 +97,6 @@ describe("Connext Connector [Optimism]", () => {
       const slippage = 10000;
       const relayerFee = ethers.utils.parseEther("1");
       const callData = "0x";
-      const nativeRelayerFee = true;
 
       const xcallParams: any = [
         domainId,
@@ -107,40 +106,7 @@ describe("Connext Connector [Optimism]", () => {
         amount,
         slippage,
         relayerFee,
-        callData,
-        nativeRelayerFee
-      ];
-
-      const spells = [
-        {
-          connector: connectorName,
-          method: "xcall",
-          args: [xcallParams, 0, 0]
-        }
-      ];
-
-      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
-      const receipt = await tx.wait();
-    });
-
-    it("should xcall with usdc", async () => {
-      const amount = ethers.utils.parseUnits("5", 6);
-      const domainId = 6648936;
-      const slippage = 10000;
-      const relayerFee = ethers.utils.parseEther("1");
-      const callData = "0x";
-      const nativeRelayerFee = true;
-
-      const xcallParams: any = [
-        domainId,
-        wallet1.address,
-        usdcAddr,
-        wallet1.address,
-        amount,
-        slippage,
-        relayerFee,
-        callData,
-        nativeRelayerFee
+        callData
       ];
 
       const spells = [
@@ -161,7 +127,6 @@ describe("Connext Connector [Optimism]", () => {
       const slippage = 10000;
       const relayerFee = ethers.utils.parseEther("1");
       const callData = "0x";
-      const nativeRelayerFee = false;
 
       const xcallParams: any = [
         domainId,
@@ -171,8 +136,7 @@ describe("Connext Connector [Optimism]", () => {
         amount,
         slippage,
         relayerFee,
-        callData,
-        nativeRelayerFee
+        callData
       ];
 
       const spells = [
