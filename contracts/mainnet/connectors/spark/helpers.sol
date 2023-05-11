@@ -16,7 +16,7 @@ abstract contract Helpers is DSMath, Basic {
 	 * @dev Spark Pool Data Provider
 	 */
 	AaveDataProviderInterface internal constant sparkData =
-		AaveDataProviderInterface(0x7B4EB56E7CD4b454BA8ff71E4518426369a138a3);
+		AaveDataProviderInterface(0xFc21d6d146E6086B8359705C8b28512a983db0cb);
 
 	/**
 	 * @dev Spark Referral Code
