@@ -22,6 +22,18 @@ describe("Sparklend", function () {
   let dsaWallet0: any;
   let instaConnectorsV2: Contract;
   let masterSigner: Signer;
+  const account = "0x72a53cdbbcc1b9efa39c834a540550e23463aacb";
+  let signer: any;
+
+  const ABI = [
+    "function balanceOf(address account) public view returns (uint256)",
+    "function approve(address spender, uint256 amount) external returns(bool)",
+    "function transfer(address recipient, uint256 amount) external returns (bool)"
+  ];
+
+  const wethContract = new ethers.Contract(tokens.weth.address, ABI);
+  const daiContract = new ethers.Contract(tokens.dai.address, ABI);
+
   before(async () => {
     await hre.network.provider.request({
       method: "hardhat_reset",
@@ -48,6 +60,12 @@ describe("Sparklend", function () {
       connectors: instaConnectorsV2,
     });
     console.log("Connector address", connector.address);
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [account]
+    });
+    signer = await ethers.getSigner(account);
   });
 
   it("should have contracts deployed", async () => {
@@ -222,5 +240,62 @@ describe("Sparklend", function () {
         ethers.utils.parseEther("10")
       );
     });
+
+    it("should deposit without collateral and withdraw", async () => {
+      const amt = parseEther("1"); // 1 eth
+      const setId = "834782373";
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositWithoutCollateral",
+          args: [tokens.eth.address, amt, 0, setId],
+        },
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [tokens.eth.address, amt, setId, 0],
+        },
+      ];
+
+      const tx = await dsaWallet0
+        .connect(wallet0)
+        .cast(...encodeSpells(spells), wallet1.getAddress());
+      await tx.wait();
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
+        ethers.utils.parseEther("10")
+      );
+    });
+
+    // it("should deposit ETH in Sparklend", async function () {
+    //   const amt = parseEther("1");
+    //   const spells = [
+    //     {
+    //       connector: connectorName,
+    //       method: "deposit",
+    //       args: [tokens.eth.address, amt, 0, 0],
+    //     },
+    //     {
+    //       connector: connectorName,
+    //       method: "borrow",
+    //       args: [tokens.dai.address, amt.mul(300), 2, 0, 0],
+    //     },
+    //     {
+    //       connector: connectorName,
+    //       method: "paybackWithATokens",
+    //       args: [tokens.dai.address, amt.mul(300), 2, 0, 0],
+    //     },
+    //   ];
+
+    //   const tx = await dsaWallet0
+    //     .connect(wallet0)
+    //     .cast(...encodeSpells(spells), wallet1.getAddress());
+
+    //   await tx.wait();
+
+    //   expect(await ethers.provider.getBalance(dsaWallet0.address)).to.eq(
+    //     parseEther("9")
+    //   );
+    // });
+
   });
 });
