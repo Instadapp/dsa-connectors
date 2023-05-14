@@ -12,9 +12,7 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { SparkInterface, DTokenInterface } from "./interface.sol";
 
-import "hardhat/console.sol";
-
-abstract contract SparkResolver is Events, Helpers {
+abstract contract SparkConnector is Events, Helpers {
 	/**
 	 * @dev Deposit ETH/ERC20_Token.
 	 * @notice Deposit a token to Sparklend for lending / collaterization.
@@ -264,9 +262,7 @@ abstract contract SparkResolver is Events, Helpers {
 		address _token = isEth ? wethAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
-		console.log(_amt);
 		_amt = _amt == uint256(-1) ? getPaybackBalance(_token, rateMode) : _amt;
-		console.log(_amt);
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
 
@@ -514,6 +510,6 @@ abstract contract SparkResolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2Spark is SparkResolver {
+contract ConnectV2Spark is SparkConnector {
 	string public constant name = "Spark-v1.0";
 }
