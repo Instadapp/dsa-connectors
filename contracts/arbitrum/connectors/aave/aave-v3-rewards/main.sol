@@ -6,8 +6,8 @@ pragma solidity ^0.7.0;
  * @dev Claim Aave v3 rewards.
  */
 
-import { TokenInterface } from "../../../../common/interfaces.sol";
-import { Stores } from "../../../../common/stores.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
+import { Stores } from "../../../common/stores.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
