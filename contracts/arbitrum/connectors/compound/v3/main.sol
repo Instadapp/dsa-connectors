@@ -12,7 +12,7 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CometInterface } from "./interface.sol";
 
-abstract contract CompoundV3Resolver is Events, Helpers {
+abstract contract CompoundV3Contract is Events, Helpers {
 	/**
 	 * @dev Deposit base asset or collateral asset supported by the market.
 	 * @notice Deposit a token to Compound for lending / collaterization.
@@ -929,6 +929,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2CompoundV3Arbitrum is CompoundV3Resolver {
-	string public name = "CompoundV3-v1.0";
+contract ConnectV2CompoundV3Arbitrum is CompoundV3Contract {
+	string public constant name = "CompoundV3-v1.0";
 }
