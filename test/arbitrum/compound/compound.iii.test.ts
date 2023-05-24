@@ -15,7 +15,7 @@ import { tokens, tokenMapping } from "../../../scripts/tests/arbitrum/tokens";
 import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2CompoundV3Arbitrum__factory } from "../../../typechain";
 
-describe("Compound III", function () {
+describe("Compound III Arbitrum", function () {
   const connectorName = "COMPOUND-V3-TEST-A";
   const market = "0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA";
   const base = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8";

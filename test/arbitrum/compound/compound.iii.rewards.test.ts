@@ -15,7 +15,7 @@ import { tokens, tokenMapping } from "../../../scripts/tests/arbitrum/tokens";
 import { abis } from "../../../scripts/constant/abis";
 import { ConnectV2CompoundV3ArbitrumRewards__factory, ConnectV2CompoundV3Arbitrum__factory } from "../../../typechain";
 
-describe("Compound III Rewards", function () {
+describe("Compound III Arbitrum Rewards", function () {
   let connectorName = "COMPOUND-V3-REWARDS-TEST-A";
   const market = "0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA";
   const rewards = "0x88730d254A2f7e6AC8388c3198aFd694bA9f7fae";
