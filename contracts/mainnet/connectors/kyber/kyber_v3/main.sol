@@ -54,6 +54,6 @@ abstract contract KyberResolver is Helpers {
     }
 }
 
-contract ConnectV2KyberV3 is KyberResolver {
-    string public name = "Kyber-v3";
+contract ConnectV2KyberAggregator is KyberResolver {
+    string public name = "Kyber-aggregator-v1.0";
 }

@@ -6,7 +6,7 @@ import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnable
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
 import {
-  ConnectV2KyberV3__factory,
+  ConnectV2KyberAggregator__factory,
 } from "../../../typechain"
 import { parseEther } from "@ethersproject/units";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
@@ -47,7 +47,7 @@ describe("Kyberswap", function() {
 
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV2KyberV3__factory,
+      contractArtifact: ConnectV2KyberAggregator__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
@@ -74,8 +74,10 @@ describe("Kyberswap", function() {
       );
     });
   });
-  describe("Main", function() {
+  describe("Main", async function() {
     it("should swap successfully", async function() {
+      const latestBlock = await hre.ethers.provider.getBlock("latest");
+      console.log('latestBlock: ', latestBlock.number)
       async function getArg() {
         const slippage = 1;
         /* eth -> USDT */
@@ -97,19 +99,18 @@ describe("Kyberswap", function() {
 
         const routeSummary = await axios
           .get(url, { params: params })
-          .then((data) => data.data.routeSummary);
-
-
+          .then((response) => response.data.data.routeSummary);
 
         let txConfig = {
           routeSummary: routeSummary,
           sender: fromAddress,
           recipient: fromAddress,
         };
+
         let url2 = "https://aggregator-api.kyberswap.com/ethereum/api/v1/route/build";
         const calldata = await axios
           .post(url2, txConfig)
-          .then((data) => data.data.data);
+          .then((response) => response.data.data);
 
         function caculateUnitAmt(
           buyAmount: any,
@@ -134,17 +135,19 @@ describe("Kyberswap", function() {
           sellTokenDecimals,
           1
         );
-        console.log('----------------unitAmt-------------', unitAmt.toString())
+        console.log('unitAmt: ', unitAmt.toString())
         return [
           buyTokenAddress,
           sellTokenAddress,
           srcAmount,
           unitAmt,
-          calldata,
+          calldata.data,
           0,
         ];
       }
+      
       let arg = await getArg();
+
       const spells = [
         {
           connector: connectorName,
