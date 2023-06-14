@@ -10,12 +10,12 @@ import {TokenInterface} from "../../common/interfaces.sol";
 import {Stores} from "../../common/stores.sol";
 import {Helpers} from "./helpers.sol";
 
-abstract contract KyberOptimismResolver is Helpers {
+abstract contract KyberPolygonResolver is Helpers {
     /**
-     * @dev Sell ETH/ERC20_Token using KyberSwap.
+     * @dev Sell MATIC/ERC20_Token using KyberSwap.
      * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
-     * @param buyAddr The address of the token to buy.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-     * @param sellAddr The address of the token to sell.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param buyAddr The address of the token to buy.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param sellAddr The address of the token to sell.(For MATIC: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
      * @param sellAmt The amount of the token to sell.
      * @param unitAmt The amount of buyAmt/sellAmt with slippage.
      * @param callData Data from kyberswap API.
@@ -54,6 +54,6 @@ abstract contract KyberOptimismResolver is Helpers {
     }
 }
 
-contract ConnectV2KyberV3Optimism is KyberOptimismResolver {
-    string public name = "Kyber-v3";
+contract ConnectV2KyberAggregatorPolygon is KyberPolygonResolver {
+    string public name = "Kyber-aggregator-v1.0";
 }

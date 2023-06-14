@@ -18,7 +18,7 @@ abstract contract Helpers is DSMath, Basic {
     address internal constant kyberswap =
         0x6131B5fae19EA4f9D964eAc0408E4408b66337b5;
 
-    function _swapHelper(SwapData memory swapData, uint256 wethAmt)
+    function _swapHelper(SwapData memory swapData, uint256 ethAmt)
         internal
         returns (uint256 buyAmt)
     {
@@ -34,7 +34,7 @@ abstract contract Helpers is DSMath, Basic {
         );
 
         uint256 initalBal = getTokenBal(buyToken);
-        (bool success, ) = kyberswap.call{value: wethAmt}(swapData.callData);
+        (bool success, ) = kyberswap.call{value: ethAmt}(swapData.callData);
         if (!success) revert("kyberswap-failed");
 
         uint256 finalBal = getTokenBal(buyToken);
@@ -52,7 +52,7 @@ abstract contract Helpers is DSMath, Basic {
 
         uint256 ethAmt;
 
-        if (address(_sellAddr) == ftmAddr) {
+        if (address(_sellAddr) == ethAddr) {
             ethAmt = swapData._sellAmt;
         } else {
             approve(TokenInterface(_sellAddr), kyberswap, swapData._sellAmt);

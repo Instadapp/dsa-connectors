@@ -10,7 +10,7 @@ import {TokenInterface} from "../../common/interfaces.sol";
 import {Stores} from "../../common/stores.sol";
 import {Helpers} from "./helpers.sol";
 
-abstract contract KyberAvalancheResolver is Helpers {
+abstract contract KyberOptimismResolver is Helpers {
     /**
      * @dev Sell ETH/ERC20_Token using KyberSwap.
      * @notice Swap tokens from exchanges like kyber, 0x etc, with calculation done off-chain.
@@ -54,6 +54,6 @@ abstract contract KyberAvalancheResolver is Helpers {
     }
 }
 
-contract ConnectV2KyberV3Avalanche is KyberAvalancheResolver {
-    string public name = "Kyber-v3";
+contract ConnectV2KyberAggregatorOptimism is KyberOptimismResolver {
+    string public name = "Kyber-aggregator-v1.0";
 }
