@@ -41,7 +41,6 @@ abstract contract KyberResolver is Helpers {
             _sellAmt: sellAmt,
             _buyAmt: 0
         });
-
         swapData = _swap(swapData, setId);
 
         _eventName = "LogSwap(address,address,uint256,uint256,uint256)";

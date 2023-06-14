@@ -88,31 +88,25 @@ describe("Kyberswap", function() {
           .times(new BigNumber(10).pow(sellTokenDecimals))
           .toFixed(0);
         const fromAddress = dsaWallet0.address;
-        let url = `https://api.kyber.network/quote_amount`;
+        let url = `https://aggregator-api.kyberswap.com/ethereum/api/v1/routes`;
         let params = {
-          base: sellTokenAddress,
-          quote: buyTokenAddress,
-          amount: srcAmount,
-          type: "sell",
+          tokenIn: sellTokenAddress,
+          tokenOut: buyTokenAddress,
+          amountIn: srcAmount,
         };
 
-        const buyTokenAmount = await axios
+        const routeSummary = await axios
           .get(url, { params: params })
-          .then((data) => data.data);
-        console.log("--------buy amount--------",buyTokenAmount)
-        let minAmount = new BigNumber(buyTokenAmount)
-          .times(1 - slippage / 100)
-          .toFixed(0);
+          .then((data) => data.data.routeSummary);
+
+
 
         let txConfig = {
-          user_address: fromAddress,
-          src_id: sellTokenAddress,
-          dst_id: buyTokenAddress,
-          src_qty: srcAmount,
-          min_dst_qty: minAmount,
-          gas_price: 'high'
+          routeSummary: routeSummary,
+          sender: fromAddress,
+          recipient: fromAddress,
         };
-        let url2 = "https://api.kyber.network/trade_data";
+        let url2 = "https://aggregator-api.kyberswap.com/ethereum/api/v1/route/build";
         const calldata = await axios
           .post(url2, txConfig)
           .then((data) => data.data.data);
@@ -134,13 +128,13 @@ describe("Kyberswap", function() {
         }
 
         let unitAmt = caculateUnitAmt(
-          buyTokenAmount,
+          routeSummary.amountOut,
           srcAmount,
           buyTokenDecimals,
           sellTokenDecimals,
           1
         );
-
+        console.log('----------------unitAmt-------------', unitAmt.toString())
         return [
           buyTokenAddress,
           sellTokenAddress,
@@ -162,7 +156,6 @@ describe("Kyberswap", function() {
         .connect(wallet0)
         .cast(...encodeSpells(spells), wallet1.address);
       const receipt = await tx.wait();
-
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
         ethers.utils.parseEther("8")
       );

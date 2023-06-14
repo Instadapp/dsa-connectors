@@ -4,7 +4,6 @@ pragma solidity ^0.7.0;
 import {DSMath} from "../../../common/math.sol";
 import {Basic} from "../../../common/basic.sol";
 import {TokenInterface} from "../../../common/interfaces.sol";
-import {AugustusSwapperInterface} from "./interface.sol";
 
 abstract contract Helpers is DSMath, Basic {
     struct SwapData {
@@ -35,7 +34,6 @@ abstract contract Helpers is DSMath, Basic {
         );
 
         uint256 initalBal = getTokenBal(buyToken);
-
         (bool success, ) = kyberswap.call{value: wethAmt}(swapData.callData);
         if (!success) revert("kyberswap-failed");
 
@@ -57,11 +55,8 @@ abstract contract Helpers is DSMath, Basic {
         if (address(_sellAddr) == ethAddr) {
             ethAmt = swapData._sellAmt;
         } else {
-            address tokenProxy = AugustusSwapperInterface(kyberswap)
-                .getTokenTransferProxy();
-            approve(TokenInterface(_sellAddr), tokenProxy, swapData._sellAmt);
+            approve(TokenInterface(_sellAddr), kyberswap, swapData._sellAmt);
         }
-
         swapData._buyAmt = _swapHelper(swapData, ethAmt);
 
         setUint(setId, swapData._buyAmt);
