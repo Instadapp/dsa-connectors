@@ -25,4 +25,6 @@ interface IMorphoCore {
     function withdrawCollateral(address underlying, uint256 amount, address onBehalf, address receiver)
         external
         returns (uint256 withdrawn);
+    
+    function approveManager(address manager, bool isAllowed) external;
 }

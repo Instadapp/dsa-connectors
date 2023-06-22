@@ -271,7 +271,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, max_iteration);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -310,7 +314,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, max_iteration);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -349,7 +357,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, _maxIteration);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -389,7 +401,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -428,7 +444,12 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), _receiver, max_iteration);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
+
 		setUint(_setId, _amt);
 
 		_eventName = "LogWithdraw(address,uint256,address,uint256,uint256)";
@@ -464,7 +485,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		uint256 _amt = getUint(_getId, _amount);
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, max_iteration);
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -504,7 +529,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -534,7 +563,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), _receiver);
 
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -563,7 +596,11 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		uint256 _amt = getUint(_getId, _amount);
 		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, _onBehalf, _receiver);
-		// convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+		if(_tokenAddress == ethAddr) {
+			if(_receiver == address(this))
+				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
+			else revert("cannot convert");
+		}
 
 		setUint(_setId, _amt);
 
@@ -676,6 +713,13 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 			_setId
 		);
 	}
+
+	/// @notice Approves a `manager` to borrow/withdraw on behalf of the sender.
+    /// @param _manager The address of the manager.
+    /// @param _isAllowed Whether `manager` is allowed to manage `msg.sender`'s position or not.
+    function approveManager(address _manager, bool _isAllowed) external {
+        MORPHO_AAVE_V3.approveManager(_manager, _isAllowed);
+    }
 }
 
 contract ConnectV3MorphoAaveV3 is MorphoAaveV3 {
