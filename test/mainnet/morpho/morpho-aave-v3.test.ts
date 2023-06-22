@@ -405,17 +405,17 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "depositCollateral",
-          args: [tokens.usdc.address, "2000000000", "0", "0"], // 2 ETH
+          args: [tokens.usdc.address, "200000000", "0", "0"], // 2 ETH
         },
         {
           connector: connectorName,
           method: "borrow",
-          args: [tokens.eth.address, "10000000000000000", dsaWallet0.address, "0", "0"], // 20 USDC
+          args: [tokens.eth.address, "1000000000000000", dsaWallet0.address, "0", "0"], // 20 USDC
         },
         {
           connector: connectorName,
           method: "payback",
-          args: [tokens.eth.address, "10000000000000000", "0", "0"], // 20 USDC
+          args: [tokens.eth.address, "1000000000000000", "0", "0"], // 20 USDC
         },
       ];
 
