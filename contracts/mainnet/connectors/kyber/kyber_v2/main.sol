@@ -6,7 +6,7 @@ pragma solidity ^0.7.0;
  * @dev Decentralised Swapping.
  */
 
-import { TokenInterface } from "../../common/interfaces.sol";
+import { TokenInterface } from "../../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 

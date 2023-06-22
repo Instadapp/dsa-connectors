@@ -27,6 +27,13 @@ export const tokens = {
     name: "USD Coin",
     address: "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664",
     decimals: 6
+  },
+  weth: {
+    type: "token",
+    symbol: "WETH",
+    name: "Wrapped ETH",
+    address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    decimals: 6
   }
 };
 

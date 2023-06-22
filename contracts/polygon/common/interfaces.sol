@@ -10,6 +10,7 @@ interface TokenInterface {
     function withdraw(uint) external;
     function balanceOf(address) external view returns (uint);
     function decimals() external view returns (uint);
+    function allowance(address owner, address spender) external view returns (uint256);
 }
 
 interface MemoryInterface {
