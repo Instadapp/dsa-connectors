@@ -143,4 +143,6 @@ contract Events {
 		uint256 getId,
 		uint256 setId
 	);
+
+	event LogApproveManger(address manger, bool isAllowed);
 }

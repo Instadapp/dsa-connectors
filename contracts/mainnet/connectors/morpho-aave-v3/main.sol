@@ -717,8 +717,13 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	/// @notice Approves a `manager` to borrow/withdraw on behalf of the sender.
     /// @param _manager The address of the manager.
     /// @param _isAllowed Whether `manager` is allowed to manage `msg.sender`'s position or not.
-    function approveManager(address _manager, bool _isAllowed) external {
+    function approveManager(address _manager, bool _isAllowed) external returns (string memory _eventName, bytes memory _eventParam) {
         MORPHO_AAVE_V3.approveManager(_manager, _isAllowed);
+		_eventName = "LogApproveManger(address,bool)";
+		_eventParam = abi.encode(
+			_manager,
+			_isAllowed
+		);
     }
 }
 
