@@ -53,7 +53,6 @@ contract Events {
 	event LogBorrow(
 		address tokenAddress,
 		uint256 amount,
-		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
@@ -89,7 +88,6 @@ contract Events {
 	event LogWithdraw(
 		address tokenAddress,
 		uint256 amount,
-		address receiver,
 		uint256 getId,
 		uint256 setId
 	);

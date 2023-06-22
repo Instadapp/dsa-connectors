@@ -21,15 +21,11 @@ abstract contract Helpers is Stores, Basic {
 
 		if (_tokenAddress == ethAddr) {
 		        _tokenContract = TokenInterface(wethAddr);
-		        if (_amt == uint256(-1)) _amt = address(this).balance;
+		        if (_amt == type(uint256).max) _amt = address(this).balance;
 		        convertEthToWeth(true, _tokenContract, _amt);
 		} else {
 		       _tokenContract = TokenInterface(_tokenAddress);
-		        if (_amt == uint256(-1)) _amt = _tokenContract.balanceOf(address(this)); 
+		        if (_amt == type(uint256).max) _amt = _tokenContract.balanceOf(address(this)); 
 		}
-	}
-
-	function setMaxIteration(uint256 _iter) external {
-		max_iteration = _iter;
 	}
 }

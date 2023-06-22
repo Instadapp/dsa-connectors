@@ -259,7 +259,6 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	function borrow(
 		address _tokenAddress,
 		uint256 _amount,
-		address _receiver,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -268,22 +267,19 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
-		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, max_iteration);
+		bool _isETH = _tokenAddress == ethAddr;
+		address _token = _isETH ? wethAddr : _tokenAddress;
+		
+		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), address(this), max_iteration);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		convertWethToEth(_isETH, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogBorrow(address,uint256,address,uint256,uint256)";
+		_eventName = "LogBorrow(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
 			_amt,
-			_receiver,
 			_getId,
 			_setId
 		);
@@ -294,6 +290,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	 * @notice Borrow a token from Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to borrow.
+	 * @param _onBehalf The address of user on behalf to borrow.
+	 * @param _receiver The address of receiver to receive the borrowed tokens.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens borrowed.
 	 */
@@ -310,15 +308,12 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
+		bool _isETH = _tokenAddress == ethAddr;
+		address _token = _isETH ? wethAddr : _tokenAddress;
 
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
 		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, max_iteration);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -338,6 +333,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	 * @notice Borrow a token from Morpho Aave.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to borrow.
+	 * @param _receiver The address of receiver to receive the borrowed tokens.
+	 * @param _maxIteration The maximum number of iterations to be used for borrow.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens borrowed.
 	 */
@@ -354,14 +351,12 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		bool _isETH = _tokenAddress == ethAddr;
+		address _token = _isETH ? wethAddr : _tokenAddress;
+
 		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, _maxIteration);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
@@ -398,14 +393,12 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		bool _isETH = _tokenAddress == ethAddr;
+		address _token = _isETH ? wethAddr : _tokenAddress;
+
 		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
@@ -432,7 +425,6 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	function withdraw(
 		address _tokenAddress,
 		uint256 _amount,
-		address _receiver,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -441,22 +433,20 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
-		MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), _receiver, max_iteration);
+		bool _isEth = _tokenAddress == ethAddr;
+		address _token = _isEth? wethAddr : _tokenAddress;
+		
+		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
+		MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), max_iteration);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		convertWethToEth(_isEth, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdraw(address,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdraw(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
 			_amt,
-			_receiver,
 			_getId,
 			_setId
 		);
@@ -467,6 +457,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	 * @notice Withdraw a token from Morpho Aave.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
+	 * @param _onBehalf Address for which tokens are being withdrawn.
+	 * @param _receiver Address to which tokens are being transferred.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens withdrawed.
 	 */
@@ -483,13 +475,13 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		bool _isEth = _tokenAddress == ethAddr;
+		address _token = _isEth ? wethAddr : _tokenAddress;
+
+		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
 		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, max_iteration);
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
@@ -509,6 +501,9 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	 * @notice Withdraw a token from Morpho Aave.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
+	 * @param _onBehalf Address for which tokens are being withdrawn.
+	 * @param _receiver Address to which tokens are being transferred.
+	 * @param _maxIteration Max number of iterations to run.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens withdrawed.
 	 */
@@ -526,14 +521,13 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		bool _isEth = _tokenAddress == ethAddr;
+		address _token = _isEth ? wethAddr : _tokenAddress;
+
+		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
 		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
@@ -548,6 +542,15 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		);
 	}
 
+	/**
+	 * @dev Withdraw ETH/ERC20 collateral token.
+	 * @notice Withdraw a token from Morpho Aave.
+	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
+	 * @param _receiver Address to which tokens are being transferred.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens withdrawed.
+	 */
 	function withdrawCollateral(
 		address _tokenAddress,
 		uint256 _amount,
@@ -560,14 +563,12 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		bool _isEth = _tokenAddress == ethAddr;
+		address _token = _isEth ? wethAddr : _tokenAddress;
+
 		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), _receiver);
 
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
@@ -581,6 +582,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		);
 	}
 
+	/**
+	 * @dev Withdraw ETH/ERC20 collateral token.
+	 * @notice Withdraw a token from Morpho Aave.
+	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
+	 * @param _onBehalf Address for which tokens are being withdrawn.
+	 * @param _receiver Address to which tokens are being transferred.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens withdrawed.
+	 */
 	function withdrawCollateralOnBehalf(
 		address _tokenAddress,
 		uint256 _amount,
@@ -594,13 +605,12 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
 		uint256 _amt = getUint(_getId, _amount);
-		address _token = _tokenAddress == ethAddr ? wethAddr : _tokenAddress;
+		bool _isEth = _tokenAddress == ethAddr;
+		address _token = _isEth ? wethAddr : _tokenAddress;
+
 		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, _onBehalf, _receiver);
-		if(_tokenAddress == ethAddr) {
-			if(_receiver == address(this))
-				convertWethToEth(_tokenAddress == ethAddr, TokenInterface(wethAddr), _amt);
-			else revert("cannot convert");
-		}
+
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
 
 		setUint(_setId, _amt);
 
@@ -717,16 +727,26 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	/// @notice Approves a `manager` to borrow/withdraw on behalf of the sender.
     /// @param _manager The address of the manager.
     /// @param _isAllowed Whether `manager` is allowed to manage `msg.sender`'s position or not.
-    function approveManager(address _manager, bool _isAllowed) external returns (string memory _eventName, bytes memory _eventParam) {
+    function approveManager(address _manager, bool _isAllowed) 
+		external 
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
         MORPHO_AAVE_V3.approveManager(_manager, _isAllowed);
+		
 		_eventName = "LogApproveManger(address,bool)";
 		_eventParam = abi.encode(
 			_manager,
 			_isAllowed
 		);
     }
+
+	/// @notice Updates the max iterations for a `repay` or a `withdraw`.
+    /// @param _iterations New iteration count.
+	function updateMaxIterations(uint256 _iterations) external {
+		max_iteration = _iterations;
+	}
 }
 
-contract ConnectV3MorphoAaveV3 is MorphoAaveV3 {
+contract ConnectV2MorphoAaveV3 is MorphoAaveV3 {
 	string public constant name = "Morpho-AaveV3-v1.0";
 }
