@@ -101,9 +101,10 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogWithdrawWithMaxIterations(
+	event LogWithdrawOnBehalfWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
+		address onBehalf,
 		address receiver,
 		uint256 maxIteration,
 		uint256 getId,
@@ -143,4 +144,9 @@ contract Events {
 	);
 
 	event LogApproveManger(address manger, bool isAllowed);
+
+	event LogUpdateMaxIterations(
+		uint256 oldIterations,
+		uint256 newIterations
+	);
 }

@@ -59,7 +59,7 @@ describe("Morpho-Aave-v3", function () {
           forking: {
             // @ts-ignore
             jsonRpcUrl: hre.config.networks.hardhat.forking.url,
-            // blockNumber: 15714501,
+            blockNumber: 17544460,
           },
         },
       ],
@@ -224,7 +224,7 @@ describe("Morpho-Aave-v3", function () {
       );
     })
 
-    it("Should deposit 2000 USDC as collateral", async function () {
+    it("Should deposit collateral 2000 USDC", async function () {
       const spells = [
         {
           connector: connectorName,
@@ -243,12 +243,12 @@ describe("Morpho-Aave-v3", function () {
       );
     })
 
-    it("Should deposit 2000 USDC as collateral on behalf", async function () {
+    it("Should deposit collateral 2000 USDC on behalf with maxValue", async function () {
       const spells = [
         {
           connector: connectorName,
           method: "depositCollateralOnBehalf",
-          args: [tokens.usdc.address, "2000000000", user, "0", "0"], // 50 USDC
+          args: [tokens.usdc.address, dsaMaxValue, user, "0", "0"], // ~3000 USDC
         },
       ];
 
@@ -258,7 +258,7 @@ describe("Morpho-Aave-v3", function () {
 
       await tx.wait();
       expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
-        parseUnits('1000', 6)
+        parseUnits('1', 6)
       );
     })
 
@@ -281,7 +281,7 @@ describe("Morpho-Aave-v3", function () {
       );
     })
 
-    it("Should withdraw on behalf of user", async function () {
+    it("Should withdraw on behalf of user with maxValue", async function () {
       let ethBala = await ethers.provider.getBalance(user)
       let wethBala = await token_weth.balanceOf(user)
 
@@ -309,7 +309,7 @@ describe("Morpho-Aave-v3", function () {
           {
             connector: connectorName,
             method: "borrow",
-            args: [tokens.weth.address, "500000000000000000", "0", "0"], // 0.7 WETH
+            args: [tokens.weth.address, "500000000000000000", "0", "0"], // 0.5 WETH
           },
         ];
 
@@ -347,7 +347,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "borrowWithMaxIterations",
-          args: [tokens.weth.address, "20000000000000000", dsaWallet0.address, 10, "0", "0"], // 0.7 WETH
+          args: [tokens.weth.address, "20000000000000000", dsaWallet0.address, 10, "0", "0"], // 0.02 WETH
         },
       ];
 
@@ -361,7 +361,26 @@ describe("Morpho-Aave-v3", function () {
     })
 
     it("Test withdrawCollateral ", async function () {
-      const balance = await token_weth.balanceOf(dsaWallet0.address);
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [ACC_USDC],
+      })
+
+      const signer_usdc = await ethers.getSigner(ACC_USDC)
+      await token_usdc.connect(signer_usdc).transfer(dsaWallet0.address, parseUnits('500', 6))
+
+      await hre.network.provider.request({
+          method: 'hardhat_stopImpersonatingAccount',
+          params: [ACC_USDC],
+      })
+
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('500', 6)
+      );
+
+      const balance = await token_usdc.balanceOf(dsaWallet0.address);
+      console.log('balance: ', balance.toString());
+
       const spells = [
         {
           connector: connectorName,
@@ -371,7 +390,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "withdrawCollateral",
-          args: [tokens.usdc.address, "20000000", dsaWallet0.address, "0", "0"], // 20 USDC
+          args: [tokens.usdc.address, "19000000", dsaWallet0.address, "0", "0"], // 19 USDC
         },
       ];
 
@@ -383,8 +402,26 @@ describe("Morpho-Aave-v3", function () {
 
     })
 
-    it("Test withdrawCollateralOnBehalf ", async function () {
-      const balance = await token_weth.balanceOf(dsaWallet0.address);
+    it("Test withdrawCollateralOnBehalf with maxValue", async function () {
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [ACC_USDC],
+      })
+
+      const signer_usdc = await ethers.getSigner(ACC_USDC)
+      await token_usdc.connect(signer_usdc).transfer(dsaWallet0.address, parseUnits('500', 6))
+
+      await hre.network.provider.request({
+          method: 'hardhat_stopImpersonatingAccount',
+          params: [ACC_USDC],
+      })
+
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('500', 6)
+      );
+
+      const balance = await token_usdc.balanceOf(dsaWallet0.address);
+
       const spells = [
         {
           connector: connectorName,
@@ -394,7 +431,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "withdrawCollateralOnBehalf",
-          args: [tokens.usdc.address, "20000000", dsaWallet0.address, user, "0", "0"], // 20 USDC
+          args: [tokens.usdc.address, dsaMaxValue, dsaWallet0.address, user, "0", "0"], // 20 USDC
         },
       ];
 
@@ -404,9 +441,36 @@ describe("Morpho-Aave-v3", function () {
 
       await tx.wait();
 
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('499', 6)
+      );
     })
 
-    it("Test payback ", async function () {
+    it("Test payback with maxValue", async function () {
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [ACC_USDC],
+      })
+
+      await hre.network.provider.request({
+        method: 'hardhat_setBalance',
+        params: [dsaWallet0.address, "1000000000000000000"],
+      })
+
+      const signer_usdc = await ethers.getSigner(ACC_USDC)
+      await token_usdc.connect(signer_usdc).transfer(dsaWallet0.address, parseUnits('500', 6))
+
+      await hre.network.provider.request({
+          method: 'hardhat_stopImpersonatingAccount',
+          params: [ACC_USDC],
+      })
+
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('500', 6)
+      );
+
+      const balance = await token_usdc.balanceOf(dsaWallet0.address);
+
       const spells = [
         {
           connector: connectorName,
@@ -421,7 +485,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "payback",
-          args: [tokens.eth.address, "1000000000000000", "0", "0"], // 20 USDC
+          args: [tokens.eth.address, dsaMaxValue, "0", "0"], // 20 USDC
         },
       ];
 
@@ -431,6 +495,9 @@ describe("Morpho-Aave-v3", function () {
 
       await tx.wait();
 
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('499', 6)
+      );
     })
 
     it("approve manger", async () => {
@@ -438,7 +505,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "approveManager",
-          args: [user, true], // 2 ETH
+          args: [user, true],
         },
       ]
       const tx = await dsaWallet0
