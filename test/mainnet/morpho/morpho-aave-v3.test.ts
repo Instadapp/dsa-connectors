@@ -5,7 +5,7 @@ import { addresses } from "../../../scripts/tests/mainnet/addresses";
 import { deployAndEnableConnector } from "../../../scripts/tests/deployAndEnableConnector";
 import { getMasterSigner } from "../../../scripts/tests/getMasterSigner";
 import { buildDSAv2 } from "../../../scripts/tests/buildDSAv2";
-import { ConnectV3MorphoAaveV3__factory, IERC20Minimal__factory } from "../../../typechain";
+import { ConnectV2MorphoAaveV3__factory, IERC20Minimal__factory } from "../../../typechain";
 import { parseEther, parseUnits } from "@ethersproject/units";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { dsaMaxValue, tokens } from "../../../scripts/tests/mainnet/tokens";
@@ -72,7 +72,7 @@ describe("Morpho-Aave-v3", function () {
     );
     connector = await deployAndEnableConnector({
       connectorName,
-      contractArtifact: ConnectV3MorphoAaveV3__factory,
+      contractArtifact: ConnectV2MorphoAaveV3__factory,
       signer: masterSigner,
       connectors: instaConnectorsV2,
     });
@@ -267,7 +267,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "withdraw",
-          args: [tokens.eth.address, "10000000000000000000", dsaWallet0.address, "0", "0"], // 10 ETH
+          args: [tokens.eth.address, "10000000000000000000", "0", "0"], // 10 ETH
         },
       ];
 
@@ -281,7 +281,10 @@ describe("Morpho-Aave-v3", function () {
       );
     })
 
-    it("Should revert because behalf is different with dsa address", async function () {
+    it("Should withdraw on behalf of user", async function () {
+      let ethBala = await ethers.provider.getBalance(user)
+      let wethBala = await token_weth.balanceOf(user)
+
       const spells = [
         {
           connector: connectorName,
@@ -290,9 +293,13 @@ describe("Morpho-Aave-v3", function () {
         },
       ];
 
-      await expect(dsaWallet0
+      const tx = await dsaWallet0
           .connect(wallet0)
-          .cast(...encodeSpells(spells), wallet1.getAddress())).to.be.revertedWith("cannot convert");
+          .cast(...encodeSpells(spells), wallet1.getAddress());
+      
+      await tx.wait();
+      ethBala = await ethers.provider.getBalance(user)
+      wethBala = await token_weth.balanceOf(user)
 
     })
 
@@ -302,7 +309,7 @@ describe("Morpho-Aave-v3", function () {
           {
             connector: connectorName,
             method: "borrow",
-            args: [tokens.weth.address, "500000000000000000", dsaWallet0.address, "0", "0"], // 0.7 WETH
+            args: [tokens.weth.address, "500000000000000000", "0", "0"], // 0.7 WETH
           },
         ];
 
@@ -349,7 +356,6 @@ describe("Morpho-Aave-v3", function () {
           .cast(...encodeSpells(spells), wallet1.getAddress());
 
       await tx.wait();
-      console.log("====================", balance.toString(), (await token_weth.balanceOf(dsaWallet0.address)).toString())
       expect((await token_weth.balanceOf(dsaWallet0.address)).sub(balance))
         .to.be.eq(parseUnits('2', 16));
     })
@@ -410,7 +416,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "borrow",
-          args: [tokens.eth.address, "1000000000000000", dsaWallet0.address, "0", "0"], // 20 USDC
+          args: [tokens.eth.address, "1000000000000000", "0", "0"], // 20 USDC
         },
         {
           connector: connectorName,

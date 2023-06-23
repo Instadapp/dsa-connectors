@@ -100,6 +100,36 @@ abstract contract MorphoRewards is Helpers, Events {
 			_setId
 		);
 	}
+
+	/**
+	 * @dev Claim Underlying Pool Rewards.
+	 * @notice Claims rewards for the given assets.
+	 * @param _poolTokenAddresses The assets to claim rewards from (aToken or variable debt token).
+	 * @param _onBehalf The address for which rewards are claimed and sent to.
+	 */
+	function claimAaveV3(
+		address[] calldata _poolTokenAddresses,
+		address _onBehalf
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		(address[] memory _rewardTokens, uint256[] memory _claimedAmounts) = MORPHO_AAVE_V3.claimRewards(
+			_poolTokenAddresses,
+			_onBehalf
+		);
+
+		// setUint(_setId, _amountOfRewards);
+
+		_eventName = "LogClaimedAaveV3(address[],address,address[],uint256[])";
+		_eventParam = abi.encode(
+			_poolTokenAddresses,
+			_onBehalf,
+			_rewardTokens,
+			_claimedAmounts
+		);
+	}
 }
 
 contract ConnectV2MorphoRewards is MorphoRewards {
