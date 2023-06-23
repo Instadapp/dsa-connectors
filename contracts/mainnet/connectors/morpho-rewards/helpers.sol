@@ -12,7 +12,7 @@ abstract contract Helpers is Basic {
 		IMorphoCore(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
 
 	IMorphoCoreV3 public constant MORPHO_AAVE_V3 =
-		IMorphoCoreV3(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
+		IMorphoCoreV3(0x33333aea097c193e66081E930c33020272b33333);
 
 	IMorphoRewardsDistributor public constant MORPHO_REWARDS =
 		IMorphoRewardsDistributor(0x3B14E5C73e0A56D607A8688098326fD4b4292135);

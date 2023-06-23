@@ -107,7 +107,7 @@ abstract contract MorphoRewards is Helpers, Events {
 	 * @param _poolTokenAddresses The assets to claim rewards from (aToken or variable debt token).
 	 * @param _onBehalf The address for which rewards are claimed and sent to.
 	 */
-	function claimAaveV3(
+	function claimMorphoAaveV3(
 		address[] calldata _poolTokenAddresses,
 		address _onBehalf
 	)
