@@ -16,7 +16,7 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogClaimedAaveV3(
+	event LogClaimedMorphoAaveV3(
 		address[] poolTokenAddresses,
 		address onBehalf,
 		address[] rewardTokens,
