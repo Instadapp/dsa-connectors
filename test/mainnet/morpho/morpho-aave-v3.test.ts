@@ -129,259 +129,259 @@ describe("Morpho-Aave-v3", function () {
   });
 
   describe("Main", function () {
-    // it("Should deposit 10 ETH", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "deposit",
-    //       args: [tokens.eth.address, "10000000000000000000", "0", "0"], // 10 ETH
-    //     },
-    //   ];
+    it("Should deposit 10 ETH", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: [tokens.eth.address, "10000000000000000000", "0", "0"], // 10 ETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
-    //     parseUnits('990', 18))
-    //   );
-    // })
+      await tx.wait();
+      expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
+        parseUnits('990', 18))
+      );
+    })
 
-    // it("Should deposit 1 ETH with MaxIteration", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "depositWithMaxIterations",
-    //       args: [tokens.eth.address, "1000000000000000000", 5, "0", "0"], // 1 ETH
-    //     },
-    //   ];
+    it("Should deposit 1 ETH with MaxIteration", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositWithMaxIterations",
+          args: [tokens.eth.address, "1000000000000000000", 5, "0", "0"], // 1 ETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
-    //     parseUnits('989', 18))
-    //   );
-    // })
+      await tx.wait();
+      expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
+        parseUnits('989', 18))
+      );
+    })
 
-    // it("Should deposit 10 ETH on behalf", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "depositOnBehalf",
-    //       args: [tokens.eth.address, "10000000000000000000", user, "0", "0"], // 1 ETH
-    //     },
-    //   ];
+    it("Should deposit 10 ETH on behalf", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositOnBehalf",
+          args: [tokens.eth.address, "10000000000000000000", user, "0", "0"], // 1 ETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
-    //     parseUnits('979', 18))
-    //   );
-    // })
+      await tx.wait();
+      expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
+        parseUnits('979', 18))
+      );
+    })
 
-    // it("Should deposit 1 ETH on behalf with MaxIteration", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "depositOnBehalfWithMaxIterations",
-    //       args: [tokens.eth.address, "1000000000000000000", user, 5, "0", "0"], // 1 ETH
-    //     },
-    //   ];
+    it("Should deposit 1 ETH on behalf with MaxIteration", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, "1000000000000000000", user, 5, "0", "0"], // 1 ETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
-    //     parseUnits('978', 18))
-    //   );
-    // })
+      await tx.wait();
+      expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.lte(
+        parseUnits('978', 18))
+      );
+    })
 
-    // it("Should deposit collateral 2000 USDC", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "depositCollateral",
-    //       args: [tokens.usdc.address, "2000000000", "0", "0"], // 50 USDC
-    //     },
-    //   ];
+    it("Should deposit collateral 2000 USDC", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositCollateral",
+          args: [tokens.usdc.address, "2000000000", "0", "0"], // 50 USDC
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
-    //     parseUnits('3000', 6)
-    //   );
-    // })
+      await tx.wait();
+      expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
+        parseUnits('3000', 6)
+      );
+    })
 
-    // it("Should deposit collateral 2000 USDC on behalf with maxValue", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "depositCollateralOnBehalf",
-    //       args: [tokens.usdc.address, dsaMaxValue, user, "0", "0"], // ~3000 USDC
-    //     },
-    //   ];
+    it("Should deposit collateral 2000 USDC on behalf with maxValue", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositCollateralOnBehalf",
+          args: [tokens.usdc.address, dsaMaxValue, user, "0", "0"], // ~3000 USDC
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
-    //     parseUnits('1', 6)
-    //   );
-    // })
+      await tx.wait();
+      expect(await token_usdc.connect(wallet0).balanceOf(dsaWallet0.address)).to.be.lte(
+        parseUnits('1', 6)
+      );
+    })
 
-    // it("Should withdraw 10 ETH", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "withdraw",
-    //       args: [tokens.eth.address, "10000000000000000000", "0", "0"], // 10 ETH
-    //     },
-    //   ];
+    it("Should withdraw 10 ETH", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [tokens.eth.address, "10000000000000000000", "0", "0"], // 10 ETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
-    //     parseUnits('978', 18))
-    //   );
-    // })
+      await tx.wait();
+      expect(expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(
+        parseUnits('978', 18))
+      );
+    })
 
-    // it("Should withdraw on behalf of user with maxValue", async function () {
-    //   let ethBala = await ethers.provider.getBalance(user)
-    //   let wethBala = await token_weth.balanceOf(user)
+    it("Should withdraw on behalf of user with maxValue", async function () {
+      let ethBala = await ethers.provider.getBalance(user)
+      let wethBala = await token_weth.balanceOf(user)
 
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "withdrawOnBehalf",
-    //       args: [tokens.eth.address, dsaMaxValue, dsaWallet0.address, user, "0", "0"], // Max ETH
-    //     },
-    //   ];
+      const spells = [
+        {
+          connector: connectorName,
+          method: "withdrawOnBehalf",
+          args: [tokens.eth.address, dsaMaxValue, dsaWallet0.address, user, "0", "0"], // Max ETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   ethBala = await ethers.provider.getBalance(user)
-    //   wethBala = await token_weth.balanceOf(user)
+      await tx.wait();
+      ethBala = await ethers.provider.getBalance(user)
+      wethBala = await token_weth.balanceOf(user)
 
-    // })
+    })
 
-    // it("Should borrow WETH into DSA", async function () {
-    //     const balance = await token_weth.balanceOf(dsaWallet0.address);
-    //     const spells = [
-    //       {
-    //         connector: connectorName,
-    //         method: "borrow",
-    //         args: [tokens.weth.address, "500000000000000000", "0", "0"], // 0.5 WETH
-    //       },
-    //     ];
+    it("Should borrow WETH into DSA", async function () {
+        const balance = await token_weth.balanceOf(dsaWallet0.address);
+        const spells = [
+          {
+            connector: connectorName,
+            method: "borrow",
+            args: [tokens.weth.address, "500000000000000000", "0", "0"], // 0.5 WETH
+          },
+        ];
 
-    //     const tx = await dsaWallet0
-    //         .connect(wallet0)
-    //         .cast(...encodeSpells(spells), wallet1.getAddress());
+        const tx = await dsaWallet0
+            .connect(wallet0)
+            .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //     await tx.wait();
-    //     expect((await token_weth.balanceOf(dsaWallet0.address)).sub(balance))
-    //       .to.be.eq(parseUnits('5', 17));
-    // })
+        await tx.wait();
+        expect((await token_weth.balanceOf(dsaWallet0.address)).sub(balance))
+          .to.be.eq(parseUnits('5', 17));
+    })
 
-    // it("Should borrow WETH into user", async function () {
-    //   const balance = await token_weth.balanceOf(user);
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "borrowOnBehalf",
-    //       args: [tokens.weth.address, "200000000000000000", dsaWallet0.address, user, "0", "0"], // 0.7 WETH
-    //     },
-    //   ];
+    it("Should borrow WETH into user", async function () {
+      const balance = await token_weth.balanceOf(user);
+      const spells = [
+        {
+          connector: connectorName,
+          method: "borrowOnBehalf",
+          args: [tokens.weth.address, "200000000000000000", dsaWallet0.address, user, "0", "0"], // 0.7 WETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect((await token_weth.balanceOf(user)).sub(balance))
-    //     .to.be.eq(parseUnits('2', 17));
-    // })
+      await tx.wait();
+      expect((await token_weth.balanceOf(user)).sub(balance))
+        .to.be.eq(parseUnits('2', 17));
+    })
 
-    // it("Should borrow WETH into wallet1 using iteration", async function () {
-    //   const balance = await token_weth.balanceOf(dsaWallet0.address);
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "borrowWithMaxIterations",
-    //       args: [tokens.weth.address, "20000000000000000", dsaWallet0.address, 10, "0", "0"], // 0.02 WETH
-    //     },
-    //   ];
+    it("Should borrow WETH into wallet1 using iteration", async function () {
+      const balance = await token_weth.balanceOf(dsaWallet0.address);
+      const spells = [
+        {
+          connector: connectorName,
+          method: "borrowWithMaxIterations",
+          args: [tokens.weth.address, "20000000000000000", dsaWallet0.address, 10, "0", "0"], // 0.02 WETH
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    //   expect((await token_weth.balanceOf(dsaWallet0.address)).sub(balance))
-    //     .to.be.eq(parseUnits('2', 16));
-    // })
+      await tx.wait();
+      expect((await token_weth.balanceOf(dsaWallet0.address)).sub(balance))
+        .to.be.eq(parseUnits('2', 16));
+    })
 
-    // it("Test withdrawCollateral ", async function () {
-    //   await hre.network.provider.request({
-    //     method: 'hardhat_impersonateAccount',
-    //     params: [ACC_USDC],
-    //   })
+    it("Test withdrawCollateral ", async function () {
+      await hre.network.provider.request({
+        method: 'hardhat_impersonateAccount',
+        params: [ACC_USDC],
+      })
 
-    //   const signer_usdc = await ethers.getSigner(ACC_USDC)
-    //   await token_usdc.connect(signer_usdc).transfer(dsaWallet0.address, parseUnits('500', 6))
+      const signer_usdc = await ethers.getSigner(ACC_USDC)
+      await token_usdc.connect(signer_usdc).transfer(dsaWallet0.address, parseUnits('500', 6))
 
-    //   await hre.network.provider.request({
-    //       method: 'hardhat_stopImpersonatingAccount',
-    //       params: [ACC_USDC],
-    //   })
+      await hre.network.provider.request({
+          method: 'hardhat_stopImpersonatingAccount',
+          params: [ACC_USDC],
+      })
 
-    //   expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
-    //     parseUnits('500', 6)
-    //   );
+      expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
+        parseUnits('500', 6)
+      );
 
-    //   const balance = await token_usdc.balanceOf(dsaWallet0.address);
-    //   console.log('balance: ', balance.toString());
+      const balance = await token_usdc.balanceOf(dsaWallet0.address);
+      console.log('balance: ', balance.toString());
 
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "depositCollateral",
-    //       args: [tokens.usdc.address, "20000000", "0", "0"], // 20 USDC
-    //     },
-    //     {
-    //       connector: connectorName,
-    //       method: "withdrawCollateral",
-    //       args: [tokens.usdc.address, "19000000", dsaWallet0.address, "0", "0"], // 19 USDC
-    //     },
-    //   ];
+      const spells = [
+        {
+          connector: connectorName,
+          method: "depositCollateral",
+          args: [tokens.usdc.address, "20000000", "0", "0"], // 20 USDC
+        },
+        {
+          connector: connectorName,
+          method: "withdrawCollateral",
+          args: [tokens.usdc.address, "19000000", dsaWallet0.address, "0", "0"], // 19 USDC
+        },
+      ];
 
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
+      await tx.wait();
 
-    // })
+    })
 
     it("Test withdrawCollateralOnBehalf with maxValue", async function () {
       await hre.network.provider.request({
@@ -496,19 +496,19 @@ describe("Morpho-Aave-v3", function () {
       );
     })
 
-    // it("approve manger", async () => {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "approveManager",
-    //       args: [user, true],
-    //     },
-    //   ]
-    //   const tx = await dsaWallet0
-    //       .connect(wallet0)
-    //       .cast(...encodeSpells(spells), wallet1.getAddress());
+    it("approve manger", async () => {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "approveManager",
+          args: [user, true],
+        },
+      ]
+      const tx = await dsaWallet0
+          .connect(wallet0)
+          .cast(...encodeSpells(spells), wallet1.getAddress());
 
-    //   await tx.wait();
-    // })
+      await tx.wait();
+    })
   });
 });
