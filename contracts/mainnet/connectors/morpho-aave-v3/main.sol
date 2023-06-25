@@ -4,8 +4,6 @@ pragma experimental ABIEncoderV2;
 import "./helpers.sol";
 import "./events.sol";
 
-import "hardhat/console.sol";
-
 abstract contract MorphoAaveV3 is Helpers, Events {
 	/**
 	 * @dev Deposit ETH/ERC20_Token.
