@@ -4,6 +4,8 @@ pragma experimental ABIEncoderV2;
 import "./helpers.sol";
 import "./events.sol";
 
+import "hardhat/console.sol";
+
 abstract contract MorphoAaveV3 is Helpers, Events {
 	/**
 	 * @dev Deposit ETH/ERC20_Token.
@@ -270,16 +272,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		address _token = _isETH ? wethAddr : _tokenAddress;
 		
-		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), address(this), max_iteration);
+		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, address(this), address(this), max_iteration);
 
-		convertWethToEth(_isETH, TokenInterface(_token), _amt);
+		convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _borrowed);
 
 		_eventName = "LogBorrow(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_borrowed,
 			_getId,
 			_setId
 		);
@@ -312,16 +314,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		address _token = _isETH ? wethAddr : _tokenAddress;
 
-		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, max_iteration);
+		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, max_iteration);
 
-		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _borrowed);
 
 		_eventName = "LogBorrowOnBehalf(address,uint256,addresss,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_borrowed,
 			_onBehalf,
 			_receiver,
 			_getId,
@@ -356,16 +358,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		address _token = _isETH ? wethAddr : _tokenAddress;
 
-		MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, _maxIteration);
+		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, _maxIteration);
 
-		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _borrowed);
 
 		_eventName = "LogBorrowWithMaxIterations(address,uint256,addresss,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_borrowed,
 			_receiver,
 			_maxIteration,
 			_getId,
@@ -402,16 +404,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		address _token = _isETH ? wethAddr : _tokenAddress;
 
-		MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, _maxIteration);
+		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
-		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _borrowed);
 
 		_eventName = "LogBorrowOnBehalfWithMaxIterations(address,uint256,addresss,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_borrowed,
 			_onBehalf,
 			_receiver,
 			_maxIteration,
@@ -443,16 +445,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _isEth? wethAddr : _tokenAddress;
 		
 		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
-		MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), max_iteration);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), max_iteration);
 
-		convertWethToEth(_isEth, TokenInterface(_token), _amt);
+		convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _withdrawn);
 
 		_eventName = "LogWithdraw(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_withdrawn,
 			_getId,
 			_setId
 		);
@@ -486,16 +488,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _isEth ? wethAddr : _tokenAddress;
 
 		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
-		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, max_iteration);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, max_iteration);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _withdrawn);
 
 		_eventName = "LogWithdrawOnBehalf(address,uint256,address,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_withdrawn,
 			_onBehalf,
 			_receiver,
 			_getId,
@@ -533,16 +535,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _isEth ? wethAddr : _tokenAddress;
 
 		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
-		MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, _maxIteration);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, _onBehalf, _receiver, _maxIteration);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _withdrawn);
 
 		_eventName = "LogWithdrawOnBehalfWithMaxIterations(address,uint256,address,address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_withdrawn,
 			_onBehalf,
 			_receiver,
 			_maxIteration,
@@ -576,16 +578,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isEth = _tokenAddress == ethAddr;
 		address _token = _isEth ? wethAddr : _tokenAddress;
 
-		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), _receiver);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), _receiver);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _withdrawn);
 
 		_eventName = "LogWithdrawCollateral(address,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_withdrawn,
 			_receiver,
 			_getId,
 			_setId
@@ -619,16 +621,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isEth = _tokenAddress == ethAddr;
 		address _token = _isEth ? wethAddr : _tokenAddress;
 
-		MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, _onBehalf, _receiver);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, _onBehalf, _receiver);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _amt);
+		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _withdrawn);
 
 		_eventName = "LogWithdrawCollateralOnBehalf(address,uint256,address,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
-			_amt,
+			_withdrawn,
 			_onBehalf,
 			_receiver,
 			_getId,
