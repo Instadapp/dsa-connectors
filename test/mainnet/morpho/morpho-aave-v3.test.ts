@@ -9,7 +9,6 @@ import { ConnectV2MorphoAaveV3__factory, IERC20Minimal__factory } from "../../..
 import { parseEther, parseUnits } from "@ethersproject/units";
 import { encodeSpells } from "../../../scripts/tests/encodeSpells";
 import { dsaMaxValue, tokens } from "../../../scripts/tests/mainnet/tokens";
-import morpho_ABI from './morpho-abi.json'
 
 const { ethers } = hre;
 import type { Signer, Contract } from "ethers";
@@ -38,6 +37,7 @@ describe("Morpho-Aave-v3", function () {
 
   let wallet0: Signer, wallet1: Signer;
   let dsaWallet0: any;
+  let dsaWallet1: any;
   let instaConnectorsV2: Contract;
   let masterSigner: Signer;
 
@@ -76,6 +76,8 @@ describe("Morpho-Aave-v3", function () {
     it("Should build DSA v2", async function () {
       dsaWallet0 = await buildDSAv2(wallet0.getAddress());
       expect(!!dsaWallet0.address).to.be.true;
+      dsaWallet1 = await buildDSAv2(wallet0.getAddress());
+      expect(!!dsaWallet1.address).to.be.true;
     });
 
     it("Deposit 1000 ETH into DSA wallet", async function () {
@@ -84,6 +86,11 @@ describe("Morpho-Aave-v3", function () {
         value: parseEther("1000")
       });
       expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.gte(parseEther("1000"));
+      await wallet0.sendTransaction({
+        to: dsaWallet1.address,
+        value: parseEther("1000")
+      });
+      expect(await ethers.provider.getBalance(dsaWallet1.address)).to.be.gte(parseEther("1000"));
     });
 
     it("Deposit 5000 USDC into DSA wallet", async function () {
@@ -397,49 +404,35 @@ describe("Morpho-Aave-v3", function () {
         params: [ACC_USDC]
       });
 
-      await hre.network.provider.request({
-        method: "hardhat_impersonateAccount",
-        params: [user]
-      });
-
-      const signer_user = await ethers.getSigner(user);
-
-      const mophor = new ethers.Contract(
-        "0x33333aea097c193e66081E930c33020272b33333",
-        morpho_ABI,
-        ethers.provider
-      );
-
-      await mophor.connect(signer_user).approveManager(dsaWallet0.address, true)
-
-      await hre.network.provider.request({
-        method: "hardhat_stopImpersonatingAccount",
-        params: [user]
-      });
-
       expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(parseUnits("500", 6));
 
       const balance = await token_usdc.balanceOf(dsaWallet0.address);
 
-      const spells = [
+      let spells = [
+        {
+          connector: connectorName,
+          method: "approveManager",
+          args: [dsaWallet0.address, true] // 20 USDC
+        },
+      ];
+
+      let tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.getAddress());
+      await tx.wait();
+
+      spells = [
         {
           connector: connectorName,
           method: "depositCollateralOnBehalf",
-          args: [tokens.usdc.address, "20000000", user, "0", "0"] // 20 USDC
+          args: [tokens.usdc.address, "20000000", dsaWallet1.address, "0", "0"] // 20 USDC
         },
-        // {
-        //   connector: connectorName,
-        //   method: "approveManager",
-        //   args: [user, true] // 20 USDC
-        // },
         {
           connector: connectorName,
           method: "withdrawCollateralOnBehalf",
-          args: [tokens.usdc.address, dsaMaxValue, user, user, "0", "0"] // 20 USDC
+          args: [tokens.usdc.address, dsaMaxValue, dsaWallet1.address, user, "0", "0"] // 20 USDC
         }
       ];
 
-      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.getAddress());
+      tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.getAddress());
 
       await tx.wait();
 
