@@ -9,7 +9,7 @@
     "check": "ts-node status-checks/huskyCheck.ts",
     "check-husky": "ts-node status-checks/huskyCheck.ts",
     "deploy": "ts-node scripts/deployConnectorsFromCmd.ts",
-    "test:runner": "hardhat run scripts/tests/run-tests.ts",
+    "test:runner": "NODE_OPTIONS='--max-old-space-size=4096' hardhat run scripts/tests/run-tests.ts",
     "typechain": "hardhat typechain",
     "compile": "hardhat compile",
     "deploy:runner": "hardhat run scripts/deployment/deployConnectorsFromCmd.ts",
