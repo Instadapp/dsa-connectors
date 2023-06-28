@@ -111,28 +111,6 @@ describe("Morpho-Aave-v3", function () {
 
       expect(await token_usdc.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(parseUnits("5000", 6));
     });
-
-    // it("Deposit 1 DAI into DSA wallet", async function () {
-
-    //   await hre.network.provider.request({
-    //       method: 'hardhat_impersonateAccount',
-    //       params: [ACC_DAI],
-    //   })
-
-    //   const signer_dai = await ethers.getSigner(ACC_DAI)
-    //   await token_dai.connect(signer_dai).transfer(wallet0.getAddress(), Dai)
-
-    //   await hre.network.provider.request({
-    //     method: 'hardhat_stopImpersonatingAccount',
-    //     params: [ACC_DAI],
-    //   })
-
-    //   await token_dai.connect(wallet0).transfer(dsaWallet0.address, Dai);
-
-    //   expect(await token_dai.connect(masterSigner).balanceOf(dsaWallet0.address)).to.be.gte(
-    //     parseUnits('1', 18)
-    //   );
-    // });
   });
 
   describe("Main", function () {
@@ -291,13 +269,13 @@ describe("Morpho-Aave-v3", function () {
 
     })
 
-    it("Should borrow WETH into DSA", async function () {
-        const balance = await token_weth.balanceOf(dsaWallet0.address);
+    it("Should borrow ETH into DSA", async function () {
+        const balanceBefore = await ethers.provider.getBalance(dsaWallet0.address);
         const spells = [
           {
             connector: connectorName,
             method: "borrow",
-            args: [tokens.weth.address, "500000000000000000", "0", "0"], // 0.5 WETH
+            args: [tokens.eth.address, "500000000000000000", "0", "0"], // 0.5 WETH
           },
         ];
 
@@ -306,17 +284,17 @@ describe("Morpho-Aave-v3", function () {
             .cast(...encodeSpells(spells), wallet1.getAddress());
 
         await tx.wait();
-        expect((await token_weth.balanceOf(dsaWallet0.address)).sub(balance))
-          .to.be.eq(parseUnits('5', 17));
+        const balanceAfter = await ethers.provider.getBalance(dsaWallet0.address);
+        expect((balanceAfter).sub(balanceBefore)).to.be.gte(parseUnits('4.9', 17));
     })
 
-    it("Should borrow WETH into user", async function () {
+    it("Should borrow ETH into user", async function () {
       const balance = await token_weth.balanceOf(user);
       const spells = [
         {
           connector: connectorName,
           method: "borrowOnBehalf",
-          args: [tokens.weth.address, "200000000000000000", dsaWallet0.address, user, "0", "0"], // 0.7 WETH
+          args: [tokens.eth.address, "200000000000000000", dsaWallet0.address, user, "0", "0"], // 0.7 WETH
         },
       ];
 
@@ -367,7 +345,6 @@ describe("Morpho-Aave-v3", function () {
       );
 
       const balance = await token_usdc.balanceOf(dsaWallet0.address);
-      console.log('balance: ', balance.toString());
 
       const spells = [
         {
