@@ -15,3 +15,10 @@ interface IMorphoRewardsDistributor {
 		bytes32[] calldata _proof
 	) external;
 }
+
+interface IMorphoCoreV3 {
+	function claimRewards(
+		address[] calldata _assets,
+		address _onBehalf
+	) external returns (address[] memory _rewardTokens, uint256[] memory _claimedAmounts);
+}

@@ -16,6 +16,13 @@ contract Events {
 		uint256 setId
 	);
 
+	event LogClaimedMorphoAaveV3(
+		address[] poolTokenAddresses,
+		address onBehalf,
+		address[] rewardTokens,
+		uint256[] claimedAmounts
+	);
+
 	event LogClaimedCompound(
 		address[] poolTokenAddresses,
 		bool tradeForMorphoToken,
