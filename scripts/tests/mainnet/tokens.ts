@@ -76,7 +76,35 @@ export const tokens = {
     aTokenAddress: "0xB9D7CB55f463405CDfBe4E90a6D2Df01C2B92BF1",
     cTokenAddress: "0x35A18000230DA775CAc24873d00Ff85BccdeD550",
     decimals: 18
-  }
+  },
+  crvusd: {
+    type: "token",
+    symbol: "crvUSD",
+    name: "Curve.Fi USD Stablecoin",
+    address: "0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E",
+    decimals: 18
+  },
+  sfrxeth: {
+    type: "token",
+    symbol: "sfrxETH",
+    name: "Staked Frax Ether",
+    address: "0xac3E018457B222d93114458476f3E3416Abbe38F",
+    decimals: 18
+  },
+  wsteth: {
+    type: "token",
+    symbol: "wstETH",
+    name: "Wrapped liquid staked Ether 2.0",
+    address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+    decimals: 18
+  },
+  wbtc: {
+    type: "token",
+    symbol: "WBTC",
+    name: "Wrapped BTC",
+    address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+    decimals: 8
+  },
 };
 
 export const dsaMaxValue = "115792089237316195423570985008687907853269984665640564039457584007913129639935";

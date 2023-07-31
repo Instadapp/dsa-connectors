@@ -190,6 +190,6 @@ abstract contract MakerResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2MakerDAO is MakerResolver {
+contract ConnectV2CRV is MakerResolver {
     string public constant name = "CRV-USD-v1";
 }
