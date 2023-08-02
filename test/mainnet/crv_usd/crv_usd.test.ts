@@ -18,7 +18,7 @@ import { ConnectV2CRV__factory, IERC20Minimal__factory } from "../../../typechai
 import { MaxUint256 } from "@uniswap/sdk-core";
 import { USDC_OPTIMISTIC_KOVAN } from "@uniswap/smart-order-router";
 
-import ABI_Ctr from "./ABI.json"
+// import ABI_Ctr from "./ABI.json"
 
 describe("CRV USD", function () {
   const connectorName = "CRV_USD-TEST-A";
