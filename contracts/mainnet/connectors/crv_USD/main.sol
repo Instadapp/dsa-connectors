@@ -132,9 +132,8 @@ abstract contract MakerResolver is Helpers, Events {
             approve(collateralContract, address(controller), _amt);
         }
 
-        uint256[] memory res = controller.user_state(address(this));
-
-        uint256 _debt = debt == uint(-1) ? controller.max_borrowable(_amt, res[3]) : debt;
+        uint256[4] memory res = controller.user_state(address(this));
+        uint256 _debt = debt == uint(-1) ? controller.max_borrowable(_amt + res[0], res[3]) - res[2] : debt;
 
         controller.borrow_more{value: ethAmt}(_amt, _debt);
 

@@ -16,5 +16,5 @@ interface IController {
     function liquidate(address user, uint256 min_x, bool use_eth) external;
     function max_borrowable(uint256 collateral, uint256 N) external view returns(uint256);
     function min_collateral(uint256 debt, uint256 N) external view returns(uint256);
-    function user_state(address user) external view returns(uint256[] memory);
+    function user_state(address user) external view returns(uint256[4] memory);
 }

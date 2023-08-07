@@ -186,77 +186,6 @@ describe("CRV USD", function () {
       );
     });
 
-    // it("Revert when loan exists", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "createLoan",
-    //       args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
-    //     }
-    //   ];
-
-    //   await expect(dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)).to.be.revertedWith('Loan already created');
-    // });
-
-    // it("create loan with maximum debt", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "createLoan",
-    //       args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
-    //     }
-    //   ];
-
-    //   const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
-    //   await tx.wait();
-
-    //   expect(await crvUSD.balanceOf(dsaWallet1.address)).to.be.gt(
-    //     ethers.utils.parseEther("1000")
-    //   );
-
-    //   console.log("maximum debt amount: ", (await crvUSD.balanceOf(dsaWallet1.address)).toString() )
-    // });
-
-    // it("Create Loan with maximum collateral and maximum debt", async function () {
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "createLoan",
-    //       args: [tokens.sfrxeth.address, dsaMaxValue, dsaMaxValue, 10]
-    //     }
-    //   ];
-
-    //   const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
-    //   await tx.wait();
-
-    //   expect(await crvUSD.balanceOf(dsaWallet2.address)).to.be.gt(
-    //     ethers.utils.parseEther("1000").toString()
-    //   );
-    //   expect(await sfrxEth.balanceOf(dsaWallet2.address)).to.be.eq(
-    //     '0'
-    //   );
-    //   console.log("maximum debt amount after maximum collateral: ", (await crvUSD.balanceOf(dsaWallet2.address)).toString() )
-    // });
-
-    // it("Create Loan with eth", async function () {
-    //   const balance = await ethers.provider.getBalance(dsaWallet0.address)
-    //   const spells = [
-    //     {
-    //       connector: connectorName,
-    //       method: "createLoan",
-    //       args: [tokens.eth.address, ethers.utils.parseEther('2').toString(), dsaMaxValue, 10]
-    //     }
-    //   ];
-
-    //   const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
-    //   await tx.wait();
-
-    //   expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.eq(
-    //     ethers.BigNumber.from(balance).sub(ethers.utils.parseEther('2'))
-    //   );
-    //   console.log("maximum debt amount after create loan with 2 eth: ", (await crvUSD.balanceOf(dsaWallet0.address)).toString() )
-    // });
-
     it("add Collateral", async function () {
       const balance = await sfrxEth.balanceOf(dsaWallet0.address)
       const spells = [
@@ -317,7 +246,132 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "borrowMore",
-          args: [tokens.sfrxeth.address, '0', dsaMaxValue]
+          args: [tokens.sfrxeth.address, ethers.utils.parseEther('2'), dsaMaxValue]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+
+      expect(await crvUSD.balanceOf(dsaWallet0.address)).to.be.gt(
+        ethers.BigNumber.from(balance).add(ethers.utils.parseEther('100'))
+      );
+    });
+
+    it("Revert when loan exists", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "createLoan",
+          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
+        }
+      ];
+
+      await expect(dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address)).to.be.revertedWith('Loan already created');
+    });
+
+    it("create loan with maximum debt", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "createLoan",
+          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
+        }
+      ];
+
+      const tx = await dsaWallet1.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+
+      expect(await crvUSD.balanceOf(dsaWallet1.address)).to.be.gt(
+        ethers.utils.parseEther("1000")
+      );
+
+      console.log("maximum debt amount: ", (await crvUSD.balanceOf(dsaWallet1.address)).toString() )
+    });
+
+    it("Create Loan with maximum collateral and maximum debt", async function () {
+      const spells = [
+        {
+          connector: connectorName,
+          method: "createLoan",
+          args: [tokens.sfrxeth.address, dsaMaxValue, dsaMaxValue, 10]
+        }
+      ];
+
+      const tx = await dsaWallet2.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+
+      expect(await crvUSD.balanceOf(dsaWallet2.address)).to.be.gt(
+        ethers.utils.parseEther("1000").toString()
+      );
+      expect(await sfrxEth.balanceOf(dsaWallet2.address)).to.be.eq(
+        '0'
+      );
+      console.log("maximum debt amount after maximum collateral: ", (await crvUSD.balanceOf(dsaWallet2.address)).toString() )
+    });
+
+    it("Create Loan with eth", async function () {
+      const balance = await ethers.provider.getBalance(dsaWallet0.address)
+      const spells = [
+        {
+          connector: connectorName,
+          method: "createLoan",
+          args: [tokens.eth.address, ethers.utils.parseEther('2').toString(), dsaMaxValue, 10]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.eq(
+        ethers.BigNumber.from(balance).sub(ethers.utils.parseEther('2'))
+      );
+      console.log("maximum debt amount after create loan with 2 eth: ", (await crvUSD.balanceOf(dsaWallet0.address)).toString() )
+    });
+
+    it("add Collateral eth", async function () {
+      const balance = await ethers.provider.getBalance(dsaWallet0.address)
+      const spells = [
+        {
+          connector: connectorName,
+          method: "addCollateral",
+          args: [tokens.eth.address, ethers.utils.parseEther('3').toString(), 0, 0]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.eq(
+        ethers.BigNumber.from(balance).sub(ethers.utils.parseEther('3'))
+      );
+    });
+
+    it("remove Collateral eth", async function () {
+      const balance = await ethers.provider.getBalance(dsaWallet0.address)
+      const spells = [
+        {
+          connector: connectorName,
+          method: "removeCollateral",
+          args: [tokens.eth.address, ethers.utils.parseEther('1').toString(), 0, 0]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+
+      expect(await ethers.provider.getBalance(dsaWallet0.address)).to.be.eq(
+        ethers.BigNumber.from(balance).add(ethers.utils.parseEther('1'))
+      );
+    });
+
+    it("borrow more", async function () {
+      const balance = await crvUSD.balanceOf(dsaWallet0.address)
+      const spells = [
+        {
+          connector: connectorName,
+          method: "borrowMore",
+          args: [tokens.eth.address, '0', ethers.utils.parseEther('10')]
         }
       ];
 
@@ -325,8 +379,26 @@ describe("CRV USD", function () {
       await tx.wait();
 
       expect(await crvUSD.balanceOf(dsaWallet0.address)).to.be.eq(
-        ethers.BigNumber.from(balance).add(ethers.utils.parseEther('100'))
+        ethers.BigNumber.from(balance).add(ethers.utils.parseEther('10'))
       );
     });
+
+    it("borrow more", async function () {
+      const balance = await crvUSD.balanceOf(dsaWallet0.address)
+      const spells = [
+        {
+          connector: connectorName,
+          method: "borrowMore",
+          args: [tokens.eth.address, '0', dsaMaxValue]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet1.address);
+      await tx.wait();
+      expect(await crvUSD.balanceOf(dsaWallet0.address)).to.be.gt(
+        ethers.BigNumber.from(balance).add(ethers.utils.parseEther('1000'))
+      );
+    });
+
   });
 });
