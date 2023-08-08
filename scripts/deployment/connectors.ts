@@ -6,6 +6,7 @@ export const connectMapping: Record<string, any> = {
     "AAVE-V2-A": "ConnectV2AaveV2",
     "AUTHORITY-A": "ConnectV2Auth",
     "BASIC-A": "ConnectV2Basic",
+    "BASIC-D": "ConnectV2BasicERC4626",
     "COMP-A": "ConnectV2COMP",
     "COMPOUND-A": "ConnectV2Compound",
     "DYDX-A": "ConnectV2Dydx",
