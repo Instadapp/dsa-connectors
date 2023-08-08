@@ -35,6 +35,7 @@ export const connectors: Record<string, Array<string>> = {
     "AAVE-V2-A",
     "AUTHORITY-A",
     "BASIC-A",
+    "BASIC-D",
     "COMP-A",
     "COMPOUND-A",
     "DYDX-A",

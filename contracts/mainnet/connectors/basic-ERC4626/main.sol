@@ -6,17 +6,18 @@ pragma solidity ^0.7.0;
  * @dev Deposit & Mint & Withdraw & Redeem from DSA.
  */
 
-// import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+// import { IERC4626 } from "@openzeppelin/contracts-latest/interfaces/IERC4626.sol";
 import { IERC4626 } from "./interface.sol";
+import { TokenInterface } from "../../common/interfaces.sol";
 import { DSMath } from "../../common/math.sol";
 import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
 
 abstract contract BasicResolver is Events, DSMath, Basic {
 	/**
-	 * @dev Deposit ERC4626_Token asset.
+	 * @dev Deposit asset to ERC4626_Token.
 	 * @notice Deposit a token to DSA.
-	 * @param token The address of the token to deposit.
+	 * @param token ERC4626 Token address.
 	 * @param amt The amount of the token to deposit. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
@@ -27,23 +28,18 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 		uint256 amt,
 		uint256 getId,
 		uint256 setId
-	)
-		public
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
+	) public returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _amt = getUint(getId, amt);
 		IERC4626 tokenContract = IERC4626(token);
 
-		_amt = _amt == uint256(-1)
-			? tokenContract.balanceOf(address(this))
-			: _amt;
+		address assetToken = tokenContract.asset();
+		TokenInterface assetTokenContract = TokenInterface(assetToken);
 
-		try tokenContract.approve(tokenContract.asset(), _amt) {} catch {
-			tokenContract.approve(tokenContract.asset(), 0);
-			tokenContract.approve(tokenContract.asset(), _amt);
-		}
-		// approve(tokenContract, tokenContract.asset(), _amt);
-		tokenContract.deposit(_amt, address(this));
+		_amt = _amt == uint256(-1) ? assetTokenContract.balanceOf(token) : _amt;
+
+		approve(assetTokenContract, token, _amt);
+
+		tokenContract.deposit(_amt, msg.sender);
 		setUint(setId, _amt);
 
 		_eventName = "LogDeposit(address,uint256,uint256,uint256)";
@@ -51,9 +47,9 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 	}
 
 	/**
-	 * @dev Mint ERC4626_Token share.
+	 * @dev Mint asset to ERC4626_Token.
 	 * @notice Mint a token to DSA.
-	 * @param token The address of the token to mint.
+	 * @param token ERC4626 Token address.
 	 * @param amt The amount of the token to mint. (For max: `uint256(-1)`)
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens minted.
@@ -68,16 +64,14 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 		uint256 _amt = getUint(getId, amt);
 		IERC4626 tokenContract = IERC4626(token);
 
-		_amt = _amt == uint256(-1)
-			? tokenContract.balanceOf(address(this))
-			: _amt;
+		address assetToken = tokenContract.asset();
+		TokenInterface assetTokenContract = TokenInterface(assetToken);
 
-		try tokenContract.approve(tokenContract.asset(), _amt) {} catch {
-			tokenContract.approve(tokenContract.asset(), 0);
-			tokenContract.approve(tokenContract.asset(), _amt);
-		}
-		// approve(tokenContract, tokenContract.asset(), _amt);
-		tokenContract.mint(_amt, address(this));
+		_amt = _amt == uint256(-1) ? assetTokenContract.balanceOf(token) : _amt;
+
+		approve(assetTokenContract, token, _amt);
+
+		tokenContract.mint(_amt, msg.sender);
 		setUint(setId, _amt);
 
 		_eventName = "LogDeposit(address,uint256,uint256,uint256)";
@@ -85,10 +79,11 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 	}
 
 	/**
-	 * @dev Withdraw ERC4626_Token.
+	 * @dev Withdraw asset from ERC4626_Token.
 	 * @notice Withdraw a token to DSA.
-	 * @param token The address of the token to withdraw.
+	 * @param token ERC4626 Token address.
 	 * @param amt The amount of the token to withdraw. (For max: `uint256(-1)`)
+	 * @param to The address of receiver.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
 	 */
@@ -96,32 +91,33 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 	function withdraw(
 		address token,
 		uint256 amt,
-	    address payable to,
+		address payable to,
 		uint256 getId,
 		uint256 setId
-	)
-		public
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
+	) public returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _amt = getUint(getId, amt);
 		IERC4626 tokenContract = IERC4626(token);
 
+		address assetToken = tokenContract.asset();
+		TokenInterface assetTokenContract = TokenInterface(assetToken);
+
 		_amt = _amt == uint256(-1)
-			? tokenContract.balanceOf(address(this))
+			? assetTokenContract.balanceOf(msg.sender)
 			: _amt;
 
-		tokenContract.withdraw(_amt, to, address(this));
+		tokenContract.withdraw(_amt, to, msg.sender);
 		setUint(setId, _amt);
 
-	    _eventName = "LogWithdraw(address,uint256,address,uint256,uint256)";
-	    _eventParam = abi.encode(token, _amt, to, getId, setId);
+		_eventName = "LogWithdraw(address,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, to, getId, setId);
 	}
 
 	/**
-	 * @dev Redeem ERC4626_Token.
-	 * @notice Reddem a token to DSA.
-	 * @param token The address of the token to redeem.
+	 * @dev Redeem asset from ERC4626_Token.
+	 * @notice Redeem a token to DSA.
+	 * @param token ERC4626 Token address.
 	 * @param amt The amount of the token to redeem. (For max: `uint256(-1)`)
+	 * @param to The address of receiver.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens redeemed.
 	 */
@@ -129,25 +125,25 @@ abstract contract BasicResolver is Events, DSMath, Basic {
 	function redeem(
 		address token,
 		uint256 amt,
-	    address payable to,
+		address payable to,
 		uint256 getId,
 		uint256 setId
-	)
-		public
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
+	) public returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _amt = getUint(getId, amt);
 		IERC4626 tokenContract = IERC4626(token);
 
+		address assetToken = tokenContract.asset();
+		TokenInterface assetTokenContract = TokenInterface(assetToken);
+
 		_amt = _amt == uint256(-1)
-			? tokenContract.balanceOf(address(this))
+			? assetTokenContract.balanceOf(msg.sender)
 			: _amt;
 
-		tokenContract.redeem(_amt, to, address(this));
+		tokenContract.redeem(_amt, to, msg.sender);
 		setUint(setId, _amt);
 
-	    _eventName = "LogRedeem(address,uint256,address,uint256,uint256)";
-	    _eventParam = abi.encode(token, _amt, to, getId, setId);
+		_eventName = "LogWithdraw(address,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(token, _amt, to, getId, setId);
 	}
 }
 
