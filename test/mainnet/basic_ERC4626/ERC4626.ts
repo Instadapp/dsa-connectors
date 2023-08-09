@@ -30,7 +30,7 @@ describe("BASIC-D", function () {
   let signer: any;
 
   const daiContract = new ethers.Contract(tokens.dai.address, IERC20Minimal__factory.abi, ethers.provider);
-  //   const erc4626Contract = new ethers.Contract(sDAIaddress, IERC4626__factory.abi, ethers.provider);
+  const erc4626Contract = new ethers.Contract(sDAIaddress, IERC4626__factory.abi, ethers.provider);
 
   const wallets = provider.getWallets();
   const [wallet0] = wallets;
@@ -107,17 +107,78 @@ describe("BASIC-D", function () {
 
   describe("Main", function () {
     it("should deposit asset to ERC4626", async () => {
+      const assets = ethers.utils.parseEther("1");
+      const previewDeposit = await erc4626Contract.previewDeposit(assets);
+      console.log("previewDeposit :>> ", previewDeposit);
+
+      const maxDeposit = await erc4626Contract.maxDeposit(dsaWallet0.address);
+      console.log("maxDeposit :>> ", maxDeposit);
+      //   const maxMint = await erc4626Contract.maxMint();
+      //   console.log("maxMint :>> ", maxMint);
+
       const spells = [
         {
           connector: connectorName,
           method: "deposit",
-          args: [sDAIaddress, ethers.utils.parseEther("1"), 0, 0]
+          args: [sDAIaddress, assets, 0, 0]
         }
       ];
 
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       const receipt = await tx.wait();
     });
+    it("should mint asset to ERC4626", async () => {
+      const daiBalance = await daiContract.balanceOf(dsaWallet0.address);
+      console.log("daiBalance :>> ", daiBalance);
+      const shares = ethers.utils.parseEther("1");
+      const previewMint = await erc4626Contract.previewMint(shares);
+      console.log("previewMint :>> ", previewMint);
+      const spells = [
+        {
+          connector: connectorName,
+          method: "mint",
+          args: [sDAIaddress, previewMint, 0, 0]
+        }
+      ];
 
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
+      const receipt = await tx.wait();
+    });
+    it("should redeem asset to ERC4626", async () => {
+      //   const shares = new BigNumber(1).toString()
+      const balance = await erc4626Contract.balanceOf(dsaWallet0.address);
+      console.log("balance :>> ", balance);
+
+      const maxRedeem: BigNumber = await erc4626Contract.maxRedeem(dsaWallet0.address);
+      console.log("maxRedeem :>> ", maxRedeem);
+
+      const setId = "83478237";
+      const spells = [
+        {
+          connector: connectorName,
+          method: "redeem",
+          args: [sDAIaddress, maxRedeem.div(2), wallet0.address, 0, setId]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
+      const receipt = await tx.wait();
+    });
+    it("should withdraw asset to ERC4626", async () => {
+      const maxWithdraw = await erc4626Contract.maxWithdraw(dsaWallet0.address);
+      console.log("maxWithdraw :>> ", maxWithdraw);
+
+      const setId = "83478237";
+      const spells = [
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [sDAIaddress, maxWithdraw, wallet0.address, 0, setId]
+        }
+      ];
+
+      const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
+      const receipt = await tx.wait();
+    });
   });
 });
