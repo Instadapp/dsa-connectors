@@ -106,6 +106,12 @@ describe("BASIC-D", function () {
   });
 
   describe("Main", function () {
+    it("Calculate Total Asset and Total Supply", async () => {
+      const totalAsset = await erc4626Contract.totalAssets();
+      const totalSupply = await erc4626Contract.totalSupply();
+      console.log("totalAsset :>> ", totalAsset);
+      console.log("totalSupply :>> ", totalSupply);
+    });
     it("should deposit asset to ERC4626", async () => {
       const assets = ethers.utils.parseEther("1");
       const previewDeposit = await erc4626Contract.previewDeposit(assets);
@@ -117,6 +123,11 @@ describe("BASIC-D", function () {
       //   console.log("maxMint :>> ", maxMint);
 
       const spells = [
+        {
+          connector: connectorName,
+          method: "deposit",
+          args: [sDAIaddress, new BigNumber(1).toString(), 0, 0]
+        },
         {
           connector: connectorName,
           method: "deposit",
@@ -134,6 +145,11 @@ describe("BASIC-D", function () {
       const previewMint = await erc4626Contract.previewMint(shares);
       console.log("previewMint :>> ", previewMint);
       const spells = [
+        {
+          connector: connectorName,
+          method: "mint",
+          args: [sDAIaddress, new BigNumber(1).toString(), 0, 0]
+        },
         {
           connector: connectorName,
           method: "mint",
@@ -157,6 +173,11 @@ describe("BASIC-D", function () {
         {
           connector: connectorName,
           method: "redeem",
+          args: [sDAIaddress, new BigNumber(1).toString(), wallet0.address, 0, setId]
+        },
+        {
+          connector: connectorName,
+          method: "redeem",
           args: [sDAIaddress, maxRedeem.div(2), wallet0.address, 0, setId]
         }
       ];
@@ -165,11 +186,16 @@ describe("BASIC-D", function () {
       const receipt = await tx.wait();
     });
     it("should withdraw asset to ERC4626", async () => {
-      const maxWithdraw = await erc4626Contract.maxWithdraw(dsaWallet0.address);
+      const maxWithdraw : BigNumber = await erc4626Contract.maxWithdraw(dsaWallet0.address);
       console.log("maxWithdraw :>> ", maxWithdraw);
 
       const setId = "83478237";
       const spells = [
+        {
+          connector: connectorName,
+          method: "withdraw",
+          args: [sDAIaddress, new BigNumber(1).toString(), wallet0.address, 0, setId]
+        },
         {
           connector: connectorName,
           method: "withdraw",
