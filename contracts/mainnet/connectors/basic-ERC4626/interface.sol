@@ -22,6 +22,8 @@ interface IERC4626 is IERC20 {
         uint256 shares
     );
 
+    function decimals() external view returns (uint8);
+
     /**
      * @dev Returns the address of the underlying token used for the Vault for accounting, depositing, and withdrawing.
      *

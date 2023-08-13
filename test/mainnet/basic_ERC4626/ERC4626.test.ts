@@ -42,8 +42,8 @@ describe("BASIC-D", function () {
         {
           forking: {
             // @ts-ignore
-            jsonRpcUrl: hre.config.networks.hardhat.forking.url
-            // blockNumber: 12796965
+            jsonRpcUrl: hre.config.networks.hardhat.forking?.url,
+            blockNumber: 17907926
           }
         }
       ]
@@ -122,21 +122,30 @@ describe("BASIC-D", function () {
       //   const maxMint = await erc4626Contract.maxMint();
       //   console.log("maxMint :>> ", maxMint);
 
+      const minSharesPerToken = ethers.utils.parseUnits("0.8");
+
+      const beforbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
+      console.log("beforbalance :>> ", beforbalance);
+
       const spells = [
+        // {
+        //   connector: connectorName,
+        //   method: "deposit",
+        //   args: [sDAIaddress, new BigNumber(1).toString(), 0, 0]
+        // },
         {
           connector: connectorName,
           method: "deposit",
-          args: [sDAIaddress, new BigNumber(1).toString(), 0, 0]
-        },
-        {
-          connector: connectorName,
-          method: "deposit",
-          args: [sDAIaddress, assets, 0, 0]
+          args: [sDAIaddress, assets, minSharesPerToken, 0, 0]
         }
       ];
 
       const tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       const receipt = await tx.wait();
+
+      const afterbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
+      console.log("afterbalance :>> ", afterbalance);
+
     });
     it("should mint asset to ERC4626", async () => {
       const daiBalance = await daiContract.balanceOf(dsaWallet0.address);
