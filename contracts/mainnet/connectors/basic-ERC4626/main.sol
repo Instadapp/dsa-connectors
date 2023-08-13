@@ -178,11 +178,11 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			wmul(maxSharesPerToken, _underlyingAmt)
 		);
 
-		uint256 _initalVaultBal = vaultTokenContract.balanceOf(address(this));
+		uint256 _initalVaultBal = vaultTokenContract.balanceOf(to);
 
 		vaultTokenContract.withdraw(_underlyingAmt, to, address(this));
 
-		uint256 _finalVaultBal = vaultTokenContract.balanceOf(address(this));
+		uint256 _finalVaultBal = vaultTokenContract.balanceOf(to);
 
 		require(
 			_maxShares >= sub(_finalVaultBal, _initalVaultBal),
@@ -234,20 +234,19 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			? vaultTokenContract.balanceOf(address(this))
 			: _shareAmt;
 
-		uint256 _minUnderlyingAmt = convertTo18(
+		uint256 _minUnderlyingAmt = convert18ToDec(
 			_vaultShareDecimal,
 			wmul(minTokenPerShares, _shareAmt)
 		);
-		// uint256 _minUnderlyingAmt = (shareAmt * minTokenPerShares) / 10**18;
-
+				
 		uint256 _initalUnderlyingBal = IERC20(_underlyingToken).balanceOf(
-			address(this)
+			to
 		);
 
 		vaultTokenContract.redeem(_shareAmt, to, address(this));
 
 		uint256 _finalUnderlyingBal = IERC20(_underlyingToken).balanceOf(
-			address(this)
+			to
 		);
 
 		require(
