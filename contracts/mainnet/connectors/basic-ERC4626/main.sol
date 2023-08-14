@@ -126,7 +126,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 
 		require(
 			maxTokenPerShares >= sub(_initalUnderlyingBal, _finalUnderlyingBal),
-			"maxUnderlyingAmt-exceeds"
+			"maxTokenPerShares-exceeds"
 		);
 
 		setUint(setId, _shareAmt);
@@ -186,7 +186,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 
 		require(
 			_maxShares >= sub(_finalVaultBal, _initialVaultBal),
-			"minShares-exceeds"
+			"maxShares-exceeds"
 		);
 
 		setUint(setId, _underlyingAmt);
@@ -251,7 +251,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 
 		require(
 			_minUnderlyingAmt <= sub(_finalUnderlyingBal, _initalUnderlyingBal),
-			"minTokens-exceeds"
+			"_minUnderlyingAmt-exceeds"
 		);
 		setUint(setId, _shareAmt);
 
