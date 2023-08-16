@@ -24,7 +24,7 @@ async function deployRunner() {
       name: "chain",
       message: "What chain do you want to deploy on?",
       type: "list",
-      choices: ["mainnet", "polygon", "avalanche", "arbitrum", "optimism", "fantom"]
+      choices: ["mainnet", "polygon", "avalanche", "arbitrum", "optimism", "fantom", "base"]
     }
   ]);
 
