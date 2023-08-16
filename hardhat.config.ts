@@ -43,7 +43,8 @@ const networkGasPriceConfig: Record<string, number> = {
   avalanche: 40,
   arbitrum: 1,
   optimism: 0.001,
-  fantom: 210
+  fantom: 210,
+  base: 8453
 };
 
 function createConfig(network: string) {
@@ -60,6 +61,7 @@ function getNetworkUrl(networkType: string) {
   else if (networkType === "arbitrum") return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "optimism") return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "fantom") return `https://rpc.ftm.tools/`;
+  else if (networkType === "base") return `https://1rpc.io/base`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
@@ -104,7 +106,8 @@ const config: HardhatUserConfig = {
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
     optimism: createConfig("optimism"),
-    fantom: createConfig("fantom")
+    fantom: createConfig("fantom"),
+    base: createConfig("base")
   },
   paths: {
     artifacts: "./artifacts",
@@ -119,7 +122,7 @@ const config: HardhatUserConfig = {
       polygon: String(process.env.POLY_ETHSCAN_KEY),
       arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
       avalanche: String(process.env.AVAX_ETHSCAN_KEY),
-      opera: String(process.env.FTM_ETHSCAN_KEY)
+      opera: String(process.env.FTM_ETHSCAN_KEY),
     }
   },
   typechain: {
