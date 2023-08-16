@@ -26,7 +26,8 @@ const chainIds = {
   polygon: 137,
   arbitrum: 42161,
   optimism: 10,
-  fantom: 250
+  fantom: 250,
+  base: 8453,
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -123,7 +124,18 @@ const config: HardhatUserConfig = {
       arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
       avalanche: String(process.env.AVAX_ETHSCAN_KEY),
       opera: String(process.env.FTM_ETHSCAN_KEY),
-    }
+      // base: String(process.env.BASE_ETHSCAN_KEY),
+    },
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+         apiURL: "https://api.basescan.org/api",
+         browserURL: "https://basescan.org",
+        }
+      }
+    ]
   },
   typechain: {
     outDir: "typechain",
