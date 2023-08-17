@@ -59,6 +59,6 @@ abstract contract ZeroEx is Helpers {
     }
 }
 
-contract ConnectV2ZeroEx is ZeroEx {
+contract ConnectV2ZeroExBase is ZeroEx {
     string public name = "0x-V4";
 }

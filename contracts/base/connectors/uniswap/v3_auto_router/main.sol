@@ -59,6 +59,6 @@ abstract contract AutoRouter is Helpers, Events {
 	}
 }
 
-contract ConnectV2UniswapV3AutoRouter is AutoRouter {
+contract ConnectV2UniswapV3AutoRouterBase is AutoRouter {
 	string public name = "UniswapV3-Auto-Router-v1";
 }

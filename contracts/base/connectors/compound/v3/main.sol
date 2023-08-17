@@ -929,6 +929,6 @@ abstract contract CompoundV3Resolver is Events, Helpers {
 	}
 }
 
-contract ConnectV2CompoundV3 is CompoundV3Resolver {
+contract ConnectV2CompoundV3Base is CompoundV3Resolver {
 	string public name = "CompoundV3-v1.0";
 }

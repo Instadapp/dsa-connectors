@@ -32,6 +32,6 @@ contract ApproveTokensResolver is Events {
     }
 }
 
-contract ConnectV2ApproveTokens is ApproveTokensResolver {
+contract ConnectV2ApproveTokensBase is ApproveTokensResolver {
     string constant public name = "ApproveTokens-v1";
 }

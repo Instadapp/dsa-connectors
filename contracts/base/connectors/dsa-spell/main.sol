@@ -86,6 +86,6 @@ abstract contract DSASpellsResolver is Events, Stores {
 	}
 }
 
-contract ConnectV2DSASpell is DSASpellsResolver {
+contract ConnectV2DSASpellBase is DSASpellsResolver {
 	string public name = "DSA-Spell-v1.0";
 }
