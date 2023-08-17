@@ -11,5 +11,5 @@ abstract contract Helpers is Stores, Basic {
 	 * @dev dexSimulation Address
 	 */
 	address internal constant dexSimulation =
-		0x49B159E897b7701769B1E66061C8dcCd7240c461;
+		0xCe162CbD45C8Ca7646C9B641D17B154D85924a09;
 }
