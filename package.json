@@ -8,7 +8,8 @@
     "coverage": "./node_modules/.bin/solidity-coverage",
     "check": "ts-node status-checks/huskyCheck.ts",
     "check-husky": "ts-node status-checks/huskyCheck.ts",
-    "deploy": "ts-node scripts/deployConnectorsFromCmd.ts",
+    "deploy": "ts-node --files scripts/deploy.ts",
+    "deployAll": "hardhat run scripts/deployment/deployConnectorsFromCmdAll.ts",
     "test:runner": "NODE_OPTIONS='--max-old-space-size=4096' hardhat run scripts/tests/run-tests.ts",
     "typechain": "hardhat typechain",
     "compile": "hardhat compile",
@@ -43,7 +44,7 @@
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.3",
-    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/test-helpers": "^0.5.15",

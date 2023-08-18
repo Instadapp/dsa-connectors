@@ -1,6 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
-import "@tenderly/hardhat-tenderly";
+// import "@tenderly/hardhat-tenderly";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-web3";
 import "hardhat-deploy";
@@ -69,7 +69,7 @@ function getNetworkUrl(networkType: string) {
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-const config: HardhatUserConfig = {
+const config: any = {
   solidity: {
     compilers: [
       {
@@ -124,7 +124,7 @@ const config: HardhatUserConfig = {
       arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
       avalanche: String(process.env.AVAX_ETHSCAN_KEY),
       opera: String(process.env.FTM_ETHSCAN_KEY),
-      // base: String(process.env.BASE_ETHSCAN_KEY),
+      base: String(process.env.BASE_ETHSCAN_KEY),
     },
     customChains: [
       {
@@ -132,7 +132,7 @@ const config: HardhatUserConfig = {
         chainId: 8453,
         urls: {
          apiURL: "https://api.basescan.org/api",
-         browserURL: "https://basescan.org",
+         browserURL: "https://basescan.org"
         }
       }
     ]
