@@ -10,7 +10,7 @@ import { AccountInterface } from "../../common/interfaces.sol";
 import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 
-abstract contract AuthorityResolver is Events, Helpers {
+abstract contract AuthorityConnector is Events, Helpers {
     /**
      * @dev Add New authority
      * @notice Add an address as account authority
@@ -53,6 +53,6 @@ abstract contract AuthorityResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2AuthBase is AuthorityResolver {
+contract ConnectV2AuthBase is AuthorityConnector {
     string public constant name = "Auth-v1.1";
 }
