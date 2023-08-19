@@ -1,6 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
-import "@tenderly/hardhat-tenderly";
+// import "@tenderly/hardhat-tenderly";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-web3";
 import "hardhat-deploy";
@@ -26,7 +26,8 @@ const chainIds = {
   polygon: 137,
   arbitrum: 42161,
   optimism: 10,
-  fantom: 250
+  fantom: 250,
+  base: 8453,
 };
 
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -43,7 +44,8 @@ const networkGasPriceConfig: Record<string, number> = {
   avalanche: 40,
   arbitrum: 1,
   optimism: 0.001,
-  fantom: 210
+  fantom: 210,
+  base: 0.0005
 };
 
 function createConfig(network: string) {
@@ -60,13 +62,14 @@ function getNetworkUrl(networkType: string) {
   else if (networkType === "arbitrum") return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "optimism") return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
   else if (networkType === "fantom") return `https://rpc.ftm.tools/`;
+  else if (networkType === "base") return `https://1rpc.io/base`;
   else return `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`;
 }
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-const config: HardhatUserConfig = {
+const config: any = {
   solidity: {
     compilers: [
       {
@@ -104,7 +107,8 @@ const config: HardhatUserConfig = {
     avalanche: createConfig("avalanche"),
     arbitrum: createConfig("arbitrum"),
     optimism: createConfig("optimism"),
-    fantom: createConfig("fantom")
+    fantom: createConfig("fantom"),
+    base: createConfig("base")
   },
   paths: {
     artifacts: "./artifacts",
@@ -119,8 +123,19 @@ const config: HardhatUserConfig = {
       polygon: String(process.env.POLY_ETHSCAN_KEY),
       arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
       avalanche: String(process.env.AVAX_ETHSCAN_KEY),
-      opera: String(process.env.FTM_ETHSCAN_KEY)
-    }
+      opera: String(process.env.FTM_ETHSCAN_KEY),
+      base: String(process.env.BASE_ETHSCAN_KEY),
+    },
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+         apiURL: "https://api.basescan.org/api",
+         browserURL: "https://basescan.org"
+        }
+      }
+    ]
   },
   typechain: {
     outDir: "typechain",
