@@ -15,7 +15,7 @@ contract Events {
 		address indexed token,
 		uint256 shareAmt,
 		uint256 maxTokenPerShares,
-		uint256 underlyingTokenAmount,
+		uint256 tokensDeducted,
 		uint256 getId,
 		uint256 setId
 	);

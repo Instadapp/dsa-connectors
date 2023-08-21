@@ -41,20 +41,15 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			? _underlyingTokenContract.balanceOf(address(this))
 			: _underlyingAmt;
 
-		// Making sure that the underlying amount is always in 18 decimals.
-		uint256 _underlyingAmt18 = convertTo18(
-			_underlyingTokenContract.decimals(),
-			_underlyingAmt
-		);
+		// Returns final amount in token decimals.
+		uint256 _minShares = wmul(minSharesPerToken, _underlyingAmt);
 
-		uint256 _minShares = convert18ToDec(
-			vaultTokenContract.decimals(),
-			wmul(minSharesPerToken, _underlyingAmt18) // Returns final amount in the floor value of the two token decimals.
-		);
-
+		// Initial share balance
 		uint256 _initialVaultBal = vaultTokenContract.balanceOf(address(this));
 
 		approve(_underlyingTokenContract, vaultToken, _underlyingAmt);
+
+		// Deposit tokens for shares
 		vaultTokenContract.deposit(_underlyingAmt, address(this));
 
 		uint256 _sharesReceieved = sub(
@@ -100,46 +95,32 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		// In vault token decimals
 		_shareAmt = _shareAmt == uint256(-1)
 			? vaultTokenContract.balanceOf(address(this))
 			: _shareAmt;
 
-		// In 18 decimals
-		maxTokenPerShares = convertTo18(
-			vaultTokenContract.decimals(),
-			wmul(maxTokenPerShares, _shareAmt) // Returns final amount in the vault token decimals.
-		);
+		// Returns final amount in token decimals.
+		uint256 _maxTokens = wmul(maxTokenPerShares, _shareAmt);
 
-		// In token decimals
-		maxTokenPerShares = convert18ToDec(
-			underlyingTokenContract.decimals(),
-			maxTokenPerShares
-		);
-
-		// In token decimals
 		uint256 _underlyingTokenAmount = vaultTokenContract.previewMint(
 			_shareAmt
 		);
 
-		// In token decimals
 		uint256 _initalUnderlyingBal = underlyingTokenContract.balanceOf(
 			address(this)
 		);
 
 		approve(underlyingTokenContract, vaultToken, _underlyingTokenAmount);
 
+		// Mint shares for tokens
 		vaultTokenContract.mint(_shareAmt, address(this));
 
-		// In token decimals
-		uint256 _finalUnderlyingBal = underlyingTokenContract.balanceOf(
-			address(this)
+		uint256 _tokensDeducted = sub(
+			_initalUnderlyingBal,
+			underlyingTokenContract.balanceOf(address(this))
 		);
 
-		require(
-			maxTokenPerShares >= sub(_initalUnderlyingBal, _finalUnderlyingBal),
-			"maxTokenPerShares-exceeds"
-		);
+		require(_maxTokens >= _tokensDeducted, "maxTokenPerShares-exceeds");
 
 		setUint(setId, _shareAmt);
 
@@ -148,7 +129,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultToken,
 			_shareAmt,
 			maxTokenPerShares,
-			_underlyingTokenAmount,
+			_tokensDeducted,
 			getId,
 			setId
 		);
@@ -179,33 +160,19 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		// In token decimals
 		_underlyingAmt = _underlyingAmt == uint256(-1)
 			? underlyingTokenContract.balanceOf(address(this))
 			: _underlyingAmt;
 
-		// In 18 decimals
-		_underlyingAmt = convertTo18(
-			underlyingTokenContract.decimals(),
-			_underlyingAmt
-		);
+		// Returns final amount in token decimals.
+		uint256 _maxShares = wmul(maxSharesPerToken, _underlyingAmt);
 
-		// In vault token decimals
-		uint256 _maxShares = convert18ToDec(
-			vaultTokenContract.decimals(),
-			wmul(maxSharesPerToken, _underlyingAmt) // In 18 decimals
-		);
-
-		// In vault token decimals
 		uint256 _initialVaultBal = vaultTokenContract.balanceOf(to);
 
+		// Withdraw tokens for shares
 		vaultTokenContract.withdraw(_underlyingAmt, to, address(this));
 
-		// In vault token decimals
-		uint256 _finalVaultBal = vaultTokenContract.balanceOf(to);
-
-		// In vault token decimals
-		uint256 _sharesBurned = sub(_initialVaultBal, _finalVaultBal);
+		uint256 _sharesBurned = sub(_initialVaultBal, vaultTokenContract.balanceOf(to));
 
 		require(_maxShares >= _sharesBurned, "maxShares-exceeds");
 
@@ -249,38 +216,24 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		// In vault token decimals
 		_shareAmt = _shareAmt == uint256(-1)
 			? vaultTokenContract.balanceOf(address(this))
 			: _shareAmt;
 
-		// In 18 decimals
-		_shareAmt = convertTo18(vaultTokenContract.decimals(), _shareAmt);
+		// Returns final amount in token decimals.
+		uint256 _minUnderlyingAmt = wmul(minTokenPerShares, _shareAmt);
 
-		// In token decimals
-		uint256 _minUnderlyingAmt = convert18ToDec(
-			underlyingTokenContract.decimals(),
-			wmul(minTokenPerShares, _shareAmt) // In 18 decimals
-		);
-
-		// In token decimals
 		uint256 _initalUnderlyingBal = underlyingTokenContract.balanceOf(to);
 
+		// Redeem tokens for shares
 		vaultTokenContract.redeem(_shareAmt, to, address(this));
 
-		// In token decimals
-		uint256 _finalUnderlyingBal = underlyingTokenContract.balanceOf(to);
-
-		// In token decimals
 		uint256 _underlyingAmtReceieved = sub(
-			_finalUnderlyingBal,
+			underlyingTokenContract.balanceOf(to),
 			_initalUnderlyingBal
 		);
 
-		require(
-			_minUnderlyingAmt <= _underlyingAmtReceieved,
-			"_minUnderlyingAmt-exceeds"
-		);
+		require(_minUnderlyingAmt <= _underlyingAmtReceieved, "_minUnderlyingAmt-exceeds");
 
 		setUint(setId, _shareAmt);
 
