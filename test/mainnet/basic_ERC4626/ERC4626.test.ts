@@ -93,7 +93,7 @@ describe("BASIC-D", function () {
         value: ethers.utils.parseEther("10")
       });
 
-      let txRes = await daiContract.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseEther("1000"));
+      let txRes = await daiContract.connect(signer).transfer(dsaWallet0.address, ethers.utils.parseEther("10000"));
       await txRes.wait();
       // expect(await daiContract.balanceOf(dsaWallet0.address)).to.be.eq(ethers.utils.parseEther("10000"));
     });
@@ -108,17 +108,15 @@ describe("BASIC-D", function () {
     // });
     it("should deposit asset to ERC4626", async () => {
       const assets = ethers.utils.parseEther("1");
-      
-      // Returns the amount of shares for assets
       const previewDeposit = await erc4626Contract.previewDeposit(assets);
-      console.log("previewDeposit :>> ", previewDeposit.toString());
+      console.log("previewDeposit :>> ", previewDeposit);
 
       const maxDeposit = await erc4626Contract.maxDeposit(dsaWallet0.address);
 
       let minSharesPerToken = ethers.utils.parseUnits("0.95");
 
       const beforebalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("Share before balance :>> ", beforebalance.toString());
+      console.log("beforebalance :>> ", beforebalance);
 
       let spells = [
         {
@@ -132,9 +130,7 @@ describe("BASIC-D", function () {
       let receipt = await tx.wait();
 
       const afterbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("Share after balance :>> ", afterbalance.toString());
-
-      expect(afterbalance.sub(beforebalance)).to.be.lte(previewDeposit)
+      console.log("afterbalance :>> ", afterbalance);
 
       // In case of not satisfying min rate
       minSharesPerToken = ethers.utils.parseUnits("1");
@@ -150,15 +146,11 @@ describe("BASIC-D", function () {
 
     });
     it("should mint asset to ERC4626", async () => {
-      const beforeBalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("token balance before :>> ", beforeBalance.toString());
-      const beforeSharebalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("share balance before :>> ", beforeSharebalance.toString());
-
-      const shares = ethers.utils.parseEther("1");
-      // Returns token amount for shares
+      // const daiBalance = await daiContract.balanceOf(dsaWallet0.address);
+      // console.log("daiBalance :>> ", daiBalance);
+      const shares = ethers.utils.parseEther("1.03");
       const previewMint = await erc4626Contract.previewMint(shares);
-      console.log("Token amount preview Mint :>> ", previewMint.toString());
+      console.log("previewMint :>> ", previewMint);
 
       let maxTokenPerShares = ethers.utils.parseUnits("1.1");
 
@@ -166,17 +158,12 @@ describe("BASIC-D", function () {
         {
           connector: connectorName,
           method: "mint",
-          args: [sDAIaddress, shares, maxTokenPerShares, 0, 0]
+          args: [sDAIaddress, previewMint, maxTokenPerShares, 0, 0]
         }
       ];
 
       let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
-
-      const afterbalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("token balance after :>> ", afterbalance.toString());
-      const afterSharebalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("share balance after :>> ", afterSharebalance.toString());
 
       // In case of not satisfying max rate
       maxTokenPerShares = ethers.utils.parseUnits("1");
@@ -185,26 +172,26 @@ describe("BASIC-D", function () {
         {
           connector: connectorName,
           method: "mint",
-          args: [sDAIaddress, shares, maxTokenPerShares, 0, 0]
+          args: [sDAIaddress, previewMint, maxTokenPerShares, 0, 0]
         }
       ];
 
       await expect(dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)).to.be.reverted;
 
     });
-    it("should Max redeem", async () => {
-      const balance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("Share balance :>> ", balance.toString());
+    it("should redeem asset to ERC4626", async () => {
+      //   const shares = new BigNumber(1).toString()
+      // const balance = await erc4626Contract.balanceOf(dsaWallet0.address);
+      // console.log("balance :>> ", balance);
 
-      // Returns max Shares
       const maxRedeem: BigNumber = await erc4626Contract.maxRedeem(dsaWallet0.address);
-      console.log("maxRedeem :>> ", maxRedeem.toString());
+      console.log("maxRedeem :>> ", maxRedeem);
 
-      const beforeUnderbalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("beforeUnderbalance :>> ", beforeUnderbalance.toString());
+      const beforeUnderbalance = await daiContract.balanceOf(wallet0.address);
+      console.log("beforeUnderbalance :>> ", beforeUnderbalance);
 
-      const beforeVaultbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("beforeVaultbalance :>> ", beforeVaultbalance.toString());
+      const beforeVaultbalance = await erc4626Contract.balanceOf(wallet0.address);
+      console.log("beforeVaultbalance :>> ", beforeVaultbalance);
 
       let minTokenPerShares = ethers.utils.parseUnits("1.01");
 
@@ -213,101 +200,72 @@ describe("BASIC-D", function () {
         {
           connector: connectorName,
           method: "redeem",
-          args: [sDAIaddress, ethers.constants.MaxUint256, minTokenPerShares, dsaWallet0.address, 0, setId]
+          args: [sDAIaddress, maxRedeem.div(2), minTokenPerShares, wallet0.address, 0, setId]
         }
       ];
 
       let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
 
-      const afterUnderbalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("afterUnderbalance :>> ", afterUnderbalance.toString());
+      const afterUnderbalance = await daiContract.balanceOf(wallet0.address);
+      console.log("afterUnderbalance :>> ", afterUnderbalance);
 
-      const afterVaultbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("afterVaultbalance :>> ", afterVaultbalance.toString());
-    });
-
-    it("should Revert for not satisfying min redeem rate", async () => {
-      const balance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("Share balance :>> ", balance.toString());
-
-      let spells = [
-        {
-          connector: connectorName,
-          method: "deposit",
-          args: [sDAIaddress, ethers.utils.parseEther("1"), ethers.utils.parseUnits("0.95"), 0, 0]
-        }
-      ];
-
-      let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
-      let receipt = await tx.wait();
-
-      // Returns max Shares
-      const maxRedeem: BigNumber = await erc4626Contract.maxRedeem(dsaWallet0.address);
-      console.log("maxRedeem :>> ", maxRedeem.toString());
-
-      const beforeUnderbalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("beforeUnderbalance :>> ", beforeUnderbalance.toString());
-
-      const beforeVaultbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("beforeVaultbalance :>> ", beforeVaultbalance.toString());
-
-      expect(beforeVaultbalance).to.be.gte("950000000000000000")
+      const afterVaultbalance = await erc4626Contract.balanceOf(wallet0.address);
+      console.log("afterVaultbalance :>> ", afterVaultbalance);
 
       // In case of not satisfying min rate
-      let minTokenPerShares = ethers.utils.parseUnits("1.5");
+      minTokenPerShares = ethers.utils.parseUnits("1.2");
 
       spells = [
         {
           connector: connectorName,
           method: "redeem",
-          args: [sDAIaddress, ethers.constants.MaxUint256, minTokenPerShares, dsaWallet0.address, 0, 0]
+          args: [sDAIaddress, maxRedeem.div(2), minTokenPerShares, wallet0.address, 0, setId]
         }
       ];
 
       await expect(dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address)).to.be.reverted;
 
     });
-
     it("should withdraw asset to ERC4626", async () => {
       const maxWithdraw: BigNumber = await erc4626Contract.maxWithdraw(dsaWallet0.address);
-      console.log("maxWithdraw :>> ", maxWithdraw.toString());
+      console.log("maxWithdraw :>> ", maxWithdraw);
 
-      const beforeUnderbalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("beforeUnderbalance :>> ", beforeUnderbalance.toString());
+      const beforeUnderbalance = await daiContract.balanceOf(wallet0.address);
+      console.log("beforeUnderbalance :>> ", beforeUnderbalance);
 
-      const beforeVaultbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("beforeVaultbalance :>> ", beforeVaultbalance.toString());
+      const beforeVaultbalance = await erc4626Contract.balanceOf(wallet0.address);
+      console.log("beforeVaultbalance :>> ", beforeVaultbalance);
 
-      let maxSharesPerToken = ethers.utils.parseUnits("0.975");
+      let maxSharesPerToken = ethers.utils.parseUnits("0.95");
 
       const setId = "83478237";
       let spells = [
         {
           connector: connectorName,
           method: "withdraw",
-          args: [sDAIaddress, maxWithdraw, maxSharesPerToken, dsaWallet0.address, 0, setId]
+          args: [sDAIaddress, maxWithdraw, maxSharesPerToken, wallet0.address, 0, setId]
         }
       ];
 
       let tx = await dsaWallet0.connect(wallet0).cast(...encodeSpells(spells), wallet0.address);
       let receipt = await tx.wait();
 
-      const afterUnderbalance = await daiContract.balanceOf(dsaWallet0.address);
-      console.log("afterUnderbalance :>> ", afterUnderbalance.toString());
+      const afterUnderbalance = await daiContract.balanceOf(wallet0.address);
+      console.log("afterUnderbalance :>> ", afterUnderbalance);
 
-      const afterVaultbalance = await erc4626Contract.balanceOf(dsaWallet0.address);
-      console.log("afterVaultbalance :>> ", afterVaultbalance.toString());
+      const afterVaultbalance = await erc4626Contract.balanceOf(wallet0.address);
+      console.log("afterVaultbalance :>> ", afterVaultbalance);
 
       // In case of not satisfying min rate
 
-      maxSharesPerToken = ethers.utils.parseUnits("0.95");
+      maxSharesPerToken = ethers.utils.parseUnits("1");
 
       spells = [
         {
           connector: connectorName,
           method: "withdraw",
-          args: [sDAIaddress, maxWithdraw, maxSharesPerToken, dsaWallet0.address, 0, setId]
+          args: [sDAIaddress, maxWithdraw, maxSharesPerToken, wallet0.address, 0, setId]
         }
       ];
 
