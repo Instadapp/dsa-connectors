@@ -6,6 +6,7 @@ contract Events {
 		address indexed token,
 		uint256 underlyingAmt,
 		uint256 minSharesPerToken,
+		uint256 sharesReceieved,
 		uint256 getId,
 		uint256 setId
 	);
@@ -14,6 +15,7 @@ contract Events {
 		address indexed token,
 		uint256 shareAmt,
 		uint256 maxTokenPerShares,
+		uint256 tokensDeducted,
 		uint256 getId,
 		uint256 setId
 	);
@@ -22,6 +24,7 @@ contract Events {
 		address indexed token,
 		uint256 underlyingAmt,
 		uint256 maxSharesPerToken,
+		uint256 sharedBurned,
 		address indexed to,
 		uint256 getId,
 		uint256 setId
@@ -31,6 +34,7 @@ contract Events {
 		address indexed token,
 		uint256 shareAmt,
 		uint256 minTokenPerShares,
+		uint256 underlyingAmtReceieved,
 		address to,
 		uint256 getId,
 		uint256 setId
