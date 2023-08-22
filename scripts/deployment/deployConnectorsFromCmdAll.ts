@@ -44,14 +44,6 @@ async function deployRunner() {
   // }
   // connector = connectMapping[chain][connector];
 
-  let { connector } = await inquirer.prompt([
-    {
-      name: "connector",
-      message: "Enter the connector contract name? (ex: ConnectV2Paraswap)",
-      type: "input"
-    }
-  ]);
-
   let { choice } = await inquirer.prompt([
     {
       name: "choice",
@@ -63,17 +55,23 @@ async function deployRunner() {
 
   runchain = choice === "yes" ? "hardhat" : chain;
 
-  console.log(`Deploying ${connector} on ${runchain}, press (ctrl + c) to stop`);
-
+  console.log(`Deploying on ${runchain}, press (ctrl + c) to stop`);
+  
   start = Date.now();
-  await execScript({
-    cmd: "npx",
-    args: ["hardhat", "run", "scripts/deployment/deploy.ts", "--network", `${runchain}`],
-    env: {
-      connectorName: connector,
-      networkType: chain
+  for (let i = 0; i < connectors[chain].length; i++) {
+    try {
+      await execScript({
+        cmd: "npx",
+        args: ["hardhat", "run", "scripts/deployment/deploy.ts", "--network", `${runchain}`],
+        env: {
+          connectorName: connectors[chain][i],
+          networkType: chain
+        }
+      });
+    } catch(e) {
+      console.error(`Failed of ${connectors[chain][i]} connector`)
     }
-  });
+  }
   end = Date.now();
 }
 
