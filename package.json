@@ -28,6 +28,7 @@
   "homepage": "https://github.com/InstaDApp/dsa-connectors-new#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.0-solc-0.7",
+    "@openzeppelin/contracts-latest": "npm:@openzeppelin/contracts@^4.9.3",
     "@typechain/ethers-v5": "^8.0.5",
     "@typechain/hardhat": "^3.0.0",
     "@uniswap/sdk-core": "^3.0.1",
@@ -57,7 +58,7 @@
     "@types/node": "^16.11.11",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
-    "ethereum-waffle": "^3.4.0",
+    "ethereum-waffle": "^4.0.10",
     "ethers": "^5.5.2",
     "hardhat": "^2.14.0",
     "hardhat-deploy": "^0.9.14",
