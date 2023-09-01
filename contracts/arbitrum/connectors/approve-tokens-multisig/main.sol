@@ -33,6 +33,6 @@ contract ApproveTokensResolver is Events {
     }
 }
 
-contract ConnectV2ApproveTokensMultisigAvalanche is ApproveTokensResolver {
+contract ConnectV2ApproveTokensMultisigArbitrum is ApproveTokensResolver {
     string constant public name = "ApproveTokens-v1";
 }

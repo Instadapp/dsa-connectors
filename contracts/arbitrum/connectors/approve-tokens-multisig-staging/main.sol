@@ -9,7 +9,7 @@ import "./interface.sol";
 contract ApproveTokensResolver is Events {
     using SafeERC20 for IERC20;
 
-    IAvoFactoryMultisig public constant AVO_FACTORY = IAvoFactoryMultisig(0xe981E50c7c47F0Df8826B5ce3F533f5E4440e687);
+    IAvoFactoryMultisig public constant AVO_FACTORY = IAvoFactoryMultisig(0x09389f927AE43F93958A4eBF2Bbb24B9fE88f6c5);
 
     function approveTokens(
         address[] calldata tokens,
@@ -33,6 +33,6 @@ contract ApproveTokensResolver is Events {
     }
 }
 
-contract ConnectV2ApproveTokensMultisigAvalanche is ApproveTokensResolver {
+contract ConnectV2ApproveTokensMultisigArbitrum is ApproveTokensResolver {
     string constant public name = "ApproveTokens-v1";
 }
