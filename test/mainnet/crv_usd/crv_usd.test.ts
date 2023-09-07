@@ -174,7 +174,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "createLoan",
-          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), ethers.utils.parseEther('1000'), 10]
+          args: [tokens.sfrxeth.address, "0", ethers.utils.parseEther('1').toString(), ethers.utils.parseEther('1000'), 10]
         }
       ];
 
@@ -192,7 +192,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "addCollateral",
-          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), 0, 0]
+          args: [tokens.sfrxeth.address, "0", ethers.utils.parseEther('1').toString(), 0, 0]
         }
       ];
 
@@ -210,7 +210,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "removeCollateral",
-          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), 0, 0]
+          args: [tokens.sfrxeth.address, "0", ethers.utils.parseEther('1').toString(), 0, 0]
         }
       ];
 
@@ -228,7 +228,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "borrowMore",
-          args: [tokens.sfrxeth.address, '0', ethers.utils.parseEther('50')]
+          args: [tokens.sfrxeth.address, "0", '0', ethers.utils.parseEther('50')]
         }
       ];
 
@@ -246,7 +246,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "borrowMore",
-          args: [tokens.sfrxeth.address, ethers.utils.parseEther('2'), dsaMaxValue]
+          args: [tokens.sfrxeth.address, "0", ethers.utils.parseEther('2'), dsaMaxValue]
         }
       ];
 
@@ -263,7 +263,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "createLoan",
-          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
+          args: [tokens.sfrxeth.address, "0", ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
         }
       ];
 
@@ -275,7 +275,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "createLoan",
-          args: [tokens.sfrxeth.address, ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
+          args: [tokens.sfrxeth.address, "0", ethers.utils.parseEther('1').toString(), dsaMaxValue, 10]
         }
       ];
 
@@ -294,7 +294,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "createLoan",
-          args: [tokens.sfrxeth.address, dsaMaxValue, dsaMaxValue, 10]
+          args: [tokens.sfrxeth.address, "0", dsaMaxValue, dsaMaxValue, 10]
         }
       ];
 
@@ -316,7 +316,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "createLoan",
-          args: [tokens.eth.address, ethers.utils.parseEther('2').toString(), dsaMaxValue, 10]
+          args: [tokens.eth.address, "0", ethers.utils.parseEther('2').toString(), dsaMaxValue, 10]
         }
       ];
 
@@ -335,7 +335,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "addCollateral",
-          args: [tokens.eth.address, ethers.utils.parseEther('3').toString(), 0, 0]
+          args: [tokens.eth.address, "0", ethers.utils.parseEther('3').toString(), 0, 0]
         }
       ];
 
@@ -353,7 +353,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "removeCollateral",
-          args: [tokens.eth.address, ethers.utils.parseEther('1').toString(), 0, 0]
+          args: [tokens.eth.address, "0", ethers.utils.parseEther('1').toString(), 0, 0]
         }
       ];
 
@@ -371,7 +371,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "borrowMore",
-          args: [tokens.eth.address, '0', ethers.utils.parseEther('10')]
+          args: [tokens.eth.address, "0", '0', ethers.utils.parseEther('10')]
         }
       ];
 
@@ -389,7 +389,7 @@ describe("CRV USD", function () {
         {
           connector: connectorName,
           method: "borrowMore",
-          args: [tokens.eth.address, '0', dsaMaxValue]
+          args: [tokens.eth.address, "0", '0', dsaMaxValue]
         }
       ];
 

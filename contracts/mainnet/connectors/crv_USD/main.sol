@@ -15,18 +15,20 @@ abstract contract MakerResolver is Helpers, Events {
     /**
      * @dev Create loan
      * @param collateral collateral token address
+     * @param version   controller version
      * @param amt Amount of collateral to use
      * @param debt Stablecoin debt to take
      * @param N Number of bands to deposit into (to do autoliquidation-deliquidation), can be from MIN_TICKS(4) to MAX_TICKS(50)
     */
     function createLoan(
-        address collateral, 
+        address collateral,
+        uint256 version,
         uint256 amt,
         uint256 debt, 
         uint256 N
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral);
+        IController controller = getController(_collateral, version);
         uint256 _amt = amt;
 
         uint256 ethAmt;
@@ -50,18 +52,20 @@ abstract contract MakerResolver is Helpers, Events {
      * @dev Add collateral
      * @notice Add extra collateral to avoid bad liqidations
      * @param collateral collateral asset address
+     * @param version   controller version
      * @param amt Amount of collateral to add
      * @param getId ID to retrieve amt.
      * @param setId ID stores the collateral amount of tokens added.
     */
     function addCollateral(
         address collateral,
+        uint256 version,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral);
+        IController controller = getController(_collateral, version);
         uint _amt = getUint(getId, amt);
 
         uint ethAmt;
@@ -85,18 +89,20 @@ abstract contract MakerResolver is Helpers, Events {
      * @dev Remove ETH/ERC20_Token Collateral.
      * @notice Remove some collateral without repaying the debt
      * @param collateral collateral asset address
+     * @param version   controller version
      * @param amt Amount of collateral to add
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of tokens deposited.
     */
     function removeCollateral(
         address collateral,
+        uint256 version,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral);
+        IController controller = getController(_collateral, version);
         uint _amt = getUint(getId, amt);
 
         controller.remove_collateral(_amt, collateral == ethAddr);
@@ -110,16 +116,18 @@ abstract contract MakerResolver is Helpers, Events {
     /**
      * @dev Borrow more stablecoins while adding more collateral (not necessary)
      * @param collateral collateral token address
+     * @param version   controller version
      * @param amt Amount of collateral to add
      * @param debt Amount of stablecoin debt to take
     */
     function borrowMore(
         address collateral,
+        uint256 version,
         uint256 amt,
         uint256 debt
     ) external returns (string memory _eventName, bytes memory _eventParam) {
         address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral);
+        IController controller = getController(_collateral, version);
         uint _amt = amt;
 
         uint ethAmt;
@@ -145,18 +153,20 @@ abstract contract MakerResolver is Helpers, Events {
      * @dev Borrow DAI.
      * @notice Borrow DAI using a MakerDAO vault
      * @param collateral collateral token address
+     * @param version   controller version
      * @param amt The amount of debt to repay. If higher than the current debt - will do full repayment
      * @param getId ID to retrieve amt.
      * @param setId ID stores the amount of DAI borrowed.
     */
     function repay(
         address collateral,
+        uint256 version,
         uint256 amt,
         uint256 getId,
         uint256 setId
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral);
+        IController controller = getController(_collateral, version);
         uint _amt = amt;
 
         TokenInterface stableCoin = TokenInterface(CRV_USD);
@@ -173,14 +183,16 @@ abstract contract MakerResolver is Helpers, Events {
     /**
      * @dev Peform a bad liquidation (or self-liquidation) of user if health is not good
      * @param collateral collateral token address
+     * @param version   controller version
      * @param min_x Minimal amount of stablecoin to receive (to avoid liquidators being sandwiched)
     */
     function liquidate(
         address collateral,
+        uint256 version,
         uint256 min_x
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral);
+        IController controller = getController(_collateral, version);
 
         controller.liquidate(address(this), min_x, collateral == ethAddr);
 

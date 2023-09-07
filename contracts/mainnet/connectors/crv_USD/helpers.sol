@@ -17,7 +17,7 @@ abstract contract Helpers is DSMath, Basic {
     /**
      * @dev Get controller address by given collateral asset
      */
-    function getController(address collateral) internal view returns(IController controller) {
-        controller = IController(ctrFactory.get_controller(collateral, 0));
+    function getController(address collateral, uint256 i) internal view returns(IController controller) {
+        controller = IController(ctrFactory.get_controller(collateral, i));
     }
 }
