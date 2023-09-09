@@ -223,6 +223,9 @@ abstract contract CurveUSDResolver is Helpers, Events {
         IController controller = getController(_collateralAddress, controllerVersion);
         uint _min_x = getUint(getId, min_x);
 
+        TokenInterface stableCoin = TokenInterface(CRV_USD);
+        approve(stableCoin, address(controller), _min_x);
+
         controller.liquidate(address(this), _min_x, _isEth);
 
         setUint(setId, _min_x);
