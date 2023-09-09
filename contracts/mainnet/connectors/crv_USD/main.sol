@@ -2,7 +2,7 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title MakerDAO.
+ * @title Curve USD.
  * @dev Collateralized Borrowing.
  */
 
@@ -11,41 +11,52 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import "./interface.sol";
 
-abstract contract MakerResolver is Helpers, Events {
+abstract contract CurveUSDResolver is Helpers, Events {
     /**
      * @dev Create loan
-     * @param collateral collateral token address
-     * @param version   controller version
-     * @param amt Amount of collateral to use
-     * @param debt Stablecoin debt to take
-     * @param N Number of bands to deposit into (to do autoliquidation-deliquidation), can be from MIN_TICKS(4) to MAX_TICKS(50)
+     * @dev If a user already has an existing loan, the function will revert.
+     * @param collateral Collateral token address.(For ETH: `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE`)
+     * @param amount Amount of collateral (For max: `uint256(-1)`)
+     * @param debt Stablecoin debt to take (For max: `uint256(-1)`)
+     * @param numBands Number of bands to deposit into (to do autoliquidation-deliquidation), can only be from MIN_TICKS(4) to MAX_TICKS(50)
+     * @param controllerVersion Controller version,
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of debt borrowed.
     */
     function createLoan(
         address collateral,
-        uint256 version,
-        uint256 amt,
+        uint256 amount,
         uint256 debt, 
-        uint256 N
+        uint256 numBands,
+        uint256 controllerVersion,
+        uint256 getId,
+        uint256 setId
     ) external returns (string memory _eventName, bytes memory _eventParam) {
-        address _collateral = collateral == ethAddr ? wethAddr : collateral;
-        IController controller = getController(_collateral, version);
-        uint256 _amt = amt;
+        uint256 _amt = getUint(getId, amount);
 
-        uint256 ethAmt;
-        if (collateral == ethAddr) {
-            _amt = _amt == uint(-1) ? address(this).balance : _amt;
-            ethAmt = _amt;
+        bool _isEth = collateral == ethAddr;
+        address _collateralAddress = _isEth ? wethAddr : collateral;
+        TokenInterface collateralContract = TokenInterface(_collateralAddress);
+        
+        // Get controller address of collateral.
+        IController controller = getController(_collateralAddress, controllerVersion);
+
+        if (_isEth) {
+            _amt = _amt == uint256(-1) ? address(this).balance : _amt;
+            convertEthToWeth(_isEth, collateralContract, _amt);
         } else {
-            TokenInterface collateralContract = TokenInterface(_collateral);
-            _amt = _amt == uint(-1) ? collateralContract.balanceOf(address(this)) : _amt;
-            approve(collateralContract, address(controller), _amt);
+            _amt = _amt == uint256(-1) ? collateralContract.balanceOf(address(this)) : _amt;
         }
 
-        uint256 _debt = debt == uint(-1) ? controller.max_borrowable(_amt, N) : debt;
+        approve(collateralContract, address(controller), _amt);
 
-        controller.create_loan{value: ethAmt}(_amt, _debt, N);
+        uint256 _debt = debt == uint256(-1) ? controller.max_borrowable(_amt, numBands) : debt;
+
+        controller.create_loan(_amt, _debt, numBands);
+
+        setUint(setId, _debt);
         _eventName = "LogCreateLoan(address,uint256,uint256,uint256)";
-        _eventParam = abi.encode(collateral, amt, debt, N);
+        _eventParam = abi.encode(collateral, _amt, debt, numBands, getId, setId);
     }
 
     /**
@@ -201,6 +212,6 @@ abstract contract MakerResolver is Helpers, Events {
     }
 }
 
-contract ConnectV2CRV is MakerResolver {
-    string public constant name = "CRV-USD-v1";
+contract ConnectV2CurveUSD is CurveUSDResolver {
+    string public constant name = "CurveUSD-v1.0";
 }
