@@ -38,7 +38,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
 const networkGasPriceConfig: Record<string, number> = {
-  mainnet: 100,
+  mainnet: 35,
   polygon: 50,
   avalanche: 40,
   arbitrum: 1,
