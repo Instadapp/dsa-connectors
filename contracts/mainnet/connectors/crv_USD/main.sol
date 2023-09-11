@@ -158,7 +158,7 @@ abstract contract CurveUSDResolver is Helpers, Events {
             ? controller.max_borrowable(res[0], res[3]) - res[2] 
             : debtAmt;
 
-        controller.borrow_more(_amt, _debtAmt);
+        controller.borrow_more(0, _debtAmt);
         
         setUint(setId, _amt);
         _eventName = "LogBorrowMore(address,uint256,uint256,uin256,uin256)";
