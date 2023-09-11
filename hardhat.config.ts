@@ -38,7 +38,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const mnemonic = process.env.MNEMONIC ?? "test test test test test test test test test test test junk";
 
 const networkGasPriceConfig: Record<string, number> = {
-  mainnet: 35,
+  mainnet: 37,
   polygon: 50,
   avalanche: 40,
   arbitrum: 1,
@@ -120,7 +120,17 @@ const config: HardhatUserConfig = {
       arbitrumOne: String(process.env.ARB_ETHSCAN_KEY),
       avalanche: String(process.env.AVAX_ETHSCAN_KEY),
       opera: String(process.env.FTM_ETHSCAN_KEY)
-    }
+    },
+    customChains: [
+      {
+        network: "mainnet",
+        chainId: 1,
+        urls: {
+          apiURL: "http://api.etherscan.io/api",
+          browserURL: "https://etherscan.io"
+        }
+      }
+    ]
   },
   typechain: {
     outDir: "typechain",
