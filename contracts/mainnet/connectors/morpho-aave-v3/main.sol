@@ -648,22 +648,6 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 			_isAllowed
 		);
     }
-
-	/// @notice Updates the max iterations for a `repay` or a `withdraw`.
-    /// @param _iterations New iteration count.
-	function updateMaxIterations(uint256 _iterations)
-		external
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		uint256 _oldIterations = MAX_ITERATIONS;
-		MAX_ITERATIONS = _iterations;
-
-		_eventName = "LogUpdateMaxIterations(uint256,uint256)";
-		_eventParam = abi.encode(
-			_oldIterations,
-			MAX_ITERATIONS
-		);
-	}
 }
 
 contract ConnectV2MorphoAaveV3 is MorphoAaveV3 {
