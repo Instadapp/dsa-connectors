@@ -10,7 +10,7 @@ abstract contract Helpers is Stores, Basic {
 	IMorphoCore public constant MORPHO_AAVE_V3 =
 		IMorphoCore(0x33333aea097c193e66081E930c33020272b33333);
 	
-	uint256 public constant max_iteration = 4;
+	uint256 public constant MAX_ITERATIONS = 4;
 
 	function _performEthToWethConversion(
 		address _tokenAddress,

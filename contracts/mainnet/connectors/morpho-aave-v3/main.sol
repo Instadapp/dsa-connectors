@@ -30,7 +30,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 
 		approve(_tokenContract, address(MORPHO_AAVE_V3), _amt);
 
-		MORPHO_AAVE_V3.supply(address(_tokenContract), _amt, address(this), max_iteration);
+		MORPHO_AAVE_V3.supply(address(_tokenContract), _amt, address(this), MAX_ITERATIONS);
 
 		setUint(_setId, _amt);
 
@@ -229,7 +229,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		address _token = _isETH ? wethAddr : _tokenAddress;
 		
-		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, address(this), address(this), max_iteration);
+		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, address(this), address(this), MAX_ITERATIONS);
 
 		convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
 
@@ -360,7 +360,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		address _token = _isEth? wethAddr : _tokenAddress;
 		
 		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
-		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), max_iteration);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), MAX_ITERATIONS);
 
 		convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
@@ -655,13 +655,13 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		external
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _oldIterations = max_iteration;
-		max_iteration = _iterations;
+		uint256 _oldIterations = MAX_ITERATIONS;
+		MAX_ITERATIONS = _iterations;
 
 		_eventName = "LogUpdateMaxIterations(uint256,uint256)";
 		_eventParam = abi.encode(
 			_oldIterations,
-			max_iteration
+			MAX_ITERATIONS
 		);
 	}
 }
