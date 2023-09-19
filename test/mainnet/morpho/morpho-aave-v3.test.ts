@@ -156,8 +156,8 @@ describe("Morpho-Aave-v3", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "depositOnBehalf",
-          args: [tokens.eth.address, "10000000000000000000", user, "0", "0"], // 1 ETH
+          method: "depositOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, "10000000000000000000", user, 4, "0", "0"], // 1 ETH
         },
       ];
 
@@ -254,8 +254,8 @@ describe("Morpho-Aave-v3", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "withdrawOnBehalf",
-          args: [tokens.eth.address, dsaMaxValue, dsaWallet0.address, user, "0", "0"], // Max ETH
+          method: "withdrawOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, dsaMaxValue, dsaWallet0.address, user, 4, "0", "0"], // Max ETH
         },
       ];
 
@@ -293,8 +293,8 @@ describe("Morpho-Aave-v3", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "borrowOnBehalf",
-          args: [tokens.eth.address, "200000000000000000", dsaWallet0.address, user, "0", "0"], // 0.7 WETH
+          method: "borrowOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, "200000000000000000", dsaWallet0.address, user, 4, "0", "0"], // 0.7 WETH
         },
       ];
 
