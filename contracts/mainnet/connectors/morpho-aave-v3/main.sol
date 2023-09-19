@@ -404,7 +404,7 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		if(_receiver == address(0)) _receiver == address(this);
 
 		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
-		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), _maxIteration);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), _receiver, _maxIteration);
 
 		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
