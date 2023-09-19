@@ -18,14 +18,6 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogDepositOnBehalf(
-		address tokenAddress,
-		uint256 amount,
-		address onBehalf,
-		uint256 getId,
-		uint256 setId
-	);
-
 	event LogDepositOnBehalfWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
@@ -57,15 +49,6 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogBorrowOnBehalf(
-		address tokenAddress,
-		uint256 amount,
-		address onBehalf,
-		address receiver,
-		uint256 getId,
-		uint256 setId
-	);
-
 	event LogBorrowWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
@@ -92,11 +75,11 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogWithdrawOnBehalf(
+	event LogWithdrawWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
-		address onBehalf,
 		address receiver,
+		uint256 maxIteration,
 		uint256 getId,
 		uint256 setId
 	);
