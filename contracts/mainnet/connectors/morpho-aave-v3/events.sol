@@ -52,7 +52,6 @@ contract Events {
 	event LogBorrowWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
-		address receiver,
 		uint256 maxIteration,
 		uint256 getId,
 		uint256 setId
@@ -78,7 +77,6 @@ contract Events {
 	event LogWithdrawWithMaxIterations(
 		address tokenAddress,
 		uint256 amount,
-		address receiver,
 		uint256 maxIteration,
 		uint256 getId,
 		uint256 setId
@@ -97,7 +95,6 @@ contract Events {
 	event LogWithdrawCollateral(
 		address tokenAddress,
 		uint256 amount,
-		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
@@ -127,9 +124,4 @@ contract Events {
 	);
 
 	event LogApproveManger(address manger, bool isAllowed);
-
-	event LogUpdateMaxIterations(
-		uint256 oldIterations,
-		uint256 newIterations
-	);
 }

@@ -6,8 +6,8 @@ import "./events.sol";
 
 abstract contract MorphoAaveV3 is Helpers, Events {
 	/**
-	 * @dev Deposit ETH/ERC20_Token.
-	 * @notice Deposit a token to Morpho Aave for lending.
+	 * @dev Supply ETH/ERC20 Token for lending.
+	 * @notice Supply ETH/ERC20 Token to Morpho Aave for lending. It will be elible for P2P matching but will not have nay borrowing power.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
@@ -44,8 +44,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Deposit ETH/ERC20_Token.
-	 * @notice Deposit a token to Morpho Aave for lending.
+	 * @dev Supply ETH/ERC20 Token for lending with max iterations.
+	 * @notice Supply ETH/ERC20 Token to Morpho Aave for lending with max iterations. It will be elible for P2P matching but will not have nay borrowing power.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _maxIteration The maximum number of iterations allowed during the matching process.
@@ -85,8 +85,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Deposit ETH/ERC20_Token on behalf of a user.
-	 * @notice Deposit a token to Morpho Aave for lending on behalf of a user with max iterations.
+	 * @dev Supply ETH/ERC20 Token on Behalf for lending with max iterations.
+	 * @notice Supply ETH/ERC20 Token on behalf to Morpho Aave for lending with max iterations. It will be elible for P2P matching but will not have nay borrowing power.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _onBehalf The address of user on behalf of whom we want to deposit.
@@ -129,8 +129,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Deposit ETH/ERC20_Token on behalf of a user.
-	 * @notice Deposit a token to Morpho Aave for lending / collaterization.
+	 * @dev Deposit ETH/ERC20 Token for collateralization.
+	 * @notice Deposit a token to Morpho Aave for collaterization. It will not be eligible for P2P matching.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
@@ -167,8 +167,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Deposit ETH/ERC20_Token on behalf of a user.
-	 * @notice Deposit a token to Morpho Aave for lending / collaterization on behalf of a user.
+	 * @dev Deposit ETH/ERC20 Token on behalf for collateralization.
+	 * @notice Deposit a token on behalf to Morpho Aave for collaterization. It will not be eligible for P2P matching.
 	 * @param _tokenAddress The address of underlying token to deposit.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to deposit. (For max: `uint256(-1)`)
 	 * @param _onBehalf The address of user on behalf to deposit.
@@ -208,8 +208,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Borrow ETH/ERC20_Token.
-	 * @notice Borrow a token from Morpho Aave.
+	 * @dev Borrow ETH/ERC20 Token.
+	 * @notice Borrow a token from Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to borrow.
 	 * @param _getId ID to retrieve amt.
@@ -245,12 +245,10 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Borrow ETH/ERC20_Token.
-	 * @notice Borrow a token from Morpho Aave.
+	 * @dev Borrow ETH/ERC20 Token.
+	 * @notice Borrow a token from Morpho Aave V3 with max iterations.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to borrow.
-	 * @param _receiver The address of receiver to receive the borrowed tokens.
-	   Note that if receiver is not the same as the borrower, receiver will receive WETH instead of ETH.
 	 * @param _maxIteration The maximum number of iterations to be used for borrow.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens borrowed.
@@ -258,7 +256,6 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	function borrowWithMaxIterations(
 		address _tokenAddress,
 		uint256 _amount,
-		address _receiver,
 		uint256 _maxIteration,
 		uint256 _getId,
 		uint256 _setId
@@ -271,19 +268,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isETH = _tokenAddress == ethAddr;
 		address _token = _isETH ? wethAddr : _tokenAddress;
 
-		if (_receiver == address(0)) _receiver = address(this);
+		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, address(this), address(this), _maxIteration);
 
-		uint256 _borrowed = MORPHO_AAVE_V3.borrow(_token, _amt, address(this), _receiver, _maxIteration);
-
-		if(_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
+		convertWethToEth(_isETH, TokenInterface(_token), _borrowed);
 
 		setUint(_setId, _borrowed);
 
-		_eventName = "LogBorrowWithMaxIterations(address,uint256,addresss,uint256,uint256,uint256)";
+		_eventName = "LogBorrowWithMaxIterations(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
 			_borrowed,
-			_receiver,
 			_maxIteration,
 			_getId,
 			_setId
@@ -291,8 +285,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Borrow ETH/ERC20_Token.
-	 * @notice Borrow a token from Morpho Aave.
+	 * @dev Borrow ETH/ERC20 Token.
+	 * @notice Borrow a token from Morpho Aave V3 on behalf with max iterations.
 	 * @param _tokenAddress The address of underlying token to borrow.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to borrow.
 	 * @param _onBehalf The address of user on behalf to borrow.
@@ -338,8 +332,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20_Token.
-	 * @notice Withdraw a token from Morpho Aave.
+	 * @dev Withdraw ETH/ERC20 "Supplied" Token.
+	 * @notice Withdraw a supplied token from Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
@@ -376,11 +370,10 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20_Token.
-	 * @notice Withdraw a token from Morpho Aave.
+	 * @dev Withdraw ETH/ERC20 "Supplied" Token.
+	 * @notice Withdraw a supplied token from Morpho Aave V3 with max iterations.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
-	 * @param _receiver Address to which tokens are being transferred.
 	 * @param _maxIteration Max number of iterations to run.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens withdrawed.
@@ -388,7 +381,6 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	function withdrawWithMaxIterations(
 		address _tokenAddress,
 		uint256 _amount,
-		address _receiver,
 		uint256 _maxIteration,
 		uint256 _getId,
 		uint256 _setId
@@ -401,20 +393,17 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isEth = _tokenAddress == ethAddr;
 		address _token = _isEth ? wethAddr : _tokenAddress;
 
-		if(_receiver == address(0)) _receiver == address(this);
-
 		// Morpho will internally handle max amount conversion by taking the minimum of amount or supplied collateral.
-		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), _receiver, _maxIteration);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdraw(_token, _amt, address(this), address(this), _maxIteration);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
+		convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
 		setUint(_setId, _withdrawn);
 
-		_eventName = "LogWithdrawWithMaxIterations(address,uint256,address,uint256,uint256,uint256)";
+		_eventName = "LogWithdrawWithMaxIterations(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
 			_withdrawn,
-			_receiver,
 			_maxIteration,
 			_getId,
 			_setId
@@ -422,8 +411,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20_Token.
-	 * @notice Withdraw a token from Morpho Aave.
+	 * @dev Withdraw ETH/ERC20 "Supplied" Token.
+	 * @notice Withdraw a supplied token from Morpho Aave V3 on behalf with max iterations.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
 	 * @param _onBehalf Address for which tokens are being withdrawn.
@@ -470,19 +459,16 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20 collateral token.
-	 * @notice Withdraw a token from Morpho Aave.
+	 * @dev Withdraw ETH/ERC20 "collateral" token.
+	 * @notice Withdraw a collateral token from Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
-	 * @param _receiver Address to which tokens are being transferred.
-	   Note that if receiver is not the same as the supplier, receiver will receive WETH instead of ETH.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens withdrawed.
 	 */
 	function withdrawCollateral(
 		address _tokenAddress,
 		uint256 _amount,
-		address _receiver,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -494,25 +480,24 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 		bool _isEth = _tokenAddress == ethAddr;
 		address _token = _isEth ? wethAddr : _tokenAddress;
 
-		uint256 _withdrawn = MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), _receiver);
+		uint256 _withdrawn = MORPHO_AAVE_V3.withdrawCollateral(_token, _amt, address(this), address(this));
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
+		convertWethToEth(_isEth, TokenInterface(_token), _withdrawn);
 
 		setUint(_setId, _withdrawn);
 
-		_eventName = "LogWithdrawCollateral(address,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdrawCollateral(address,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_tokenAddress,
 			_withdrawn,
-			_receiver,
 			_getId,
 			_setId
 		);
 	}
 
 	/**
-	 * @dev Withdraw ETH/ERC20 collateral token.
-	 * @notice Withdraw a token from Morpho Aave.
+	 * @dev Withdraw ETH/ERC20 "collateral" token on behalf.
+	 * @notice Withdraw a collateral token on behalf from Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to withdraw.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to withdraw. (For max: `uint256(-1)`)
 	 * @param _onBehalf Address for which tokens are being withdrawn.
@@ -555,8 +540,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Payback ETH/ERC20_Token.
-	 * @notice Payback a token to Morpho Aave.
+	 * @dev Payback ETH/ERC20 Token.
+	 * @notice Payback borrowed token to Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _amount The amount of the token (in underlying) to payback. (For max: `uint256(-1)`)
 	 * @param _getId ID to retrieve amt.
@@ -593,8 +578,8 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 	}
 
 	/**
-	 * @dev Payback ETH/ERC20_Token.
-	 * @notice Payback a token to Morpho Aave.
+	 * @dev Payback ETH/ERC20 Token on behalf.
+	 * @notice Payback borrowed token on bahelf to Morpho Aave V3.
 	 * @param _tokenAddress The address of underlying token to payback.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _onBehalf The address of user who's debt to repay.
 	 * @param _amount The amount of the token (in underlying) to payback. (For max: `uint256(-1)`)
@@ -651,5 +636,5 @@ abstract contract MorphoAaveV3 is Helpers, Events {
 }
 
 contract ConnectV2MorphoAaveV3 is MorphoAaveV3 {
-	string public constant name = "Morpho-AaveV3-v1.0";
+	string public constant name = "Morpho-AaveV3-v1.1";
 }

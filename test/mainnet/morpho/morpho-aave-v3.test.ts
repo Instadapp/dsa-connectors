@@ -313,7 +313,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "borrowWithMaxIterations",
-          args: [tokens.weth.address, "20000000000000000", dsaWallet0.address, 10, "0", "0"], // 0.02 WETH
+          args: [tokens.weth.address, "20000000000000000", 10, "0", "0"], // 0.02 WETH
         },
       ];
 
@@ -355,7 +355,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "withdrawCollateral",
-          args: [tokens.usdc.address, "19000000", dsaWallet0.address, "0", "0"], // 19 USDC
+          args: [tokens.usdc.address, "19000000", "0", "0"], // 19 USDC
         },
       ];
 
