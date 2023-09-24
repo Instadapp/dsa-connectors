@@ -156,8 +156,8 @@ describe("Morpho-Aave-v3", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "depositOnBehalf",
-          args: [tokens.eth.address, "10000000000000000000", user, "0", "0"], // 1 ETH
+          method: "depositOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, "10000000000000000000", user, 4, "0", "0"], // 1 ETH
         },
       ];
 
@@ -254,8 +254,8 @@ describe("Morpho-Aave-v3", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "withdrawOnBehalf",
-          args: [tokens.eth.address, dsaMaxValue, dsaWallet0.address, user, "0", "0"], // Max ETH
+          method: "withdrawOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, dsaMaxValue, dsaWallet0.address, user, 4, "0", "0"], // Max ETH
         },
       ];
 
@@ -293,8 +293,8 @@ describe("Morpho-Aave-v3", function () {
       const spells = [
         {
           connector: connectorName,
-          method: "borrowOnBehalf",
-          args: [tokens.eth.address, "200000000000000000", dsaWallet0.address, user, "0", "0"], // 0.7 WETH
+          method: "borrowOnBehalfWithMaxIterations",
+          args: [tokens.eth.address, "200000000000000000", dsaWallet0.address, user, 4, "0", "0"], // 0.7 WETH
         },
       ];
 
@@ -313,7 +313,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "borrowWithMaxIterations",
-          args: [tokens.weth.address, "20000000000000000", dsaWallet0.address, 10, "0", "0"], // 0.02 WETH
+          args: [tokens.weth.address, "20000000000000000", 10, "0", "0"], // 0.02 WETH
         },
       ];
 
@@ -355,7 +355,7 @@ describe("Morpho-Aave-v3", function () {
         {
           connector: connectorName,
           method: "withdrawCollateral",
-          args: [tokens.usdc.address, "19000000", dsaWallet0.address, "0", "0"], // 19 USDC
+          args: [tokens.usdc.address, "19000000", "0", "0"], // 19 USDC
         },
       ];
 
