@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
 import "./helpers.sol";
 import "./events.sol";
@@ -208,7 +209,7 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		uint256 _amt = getUint(_getId, _assets);
 		if (_amt == uint256(-1)) {
-			Id _id = id(_marketParams); 
+			bytes32 _id = id(_marketParams); 
 			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
 			_amt = _pos.collateral;
 		}
@@ -255,8 +256,8 @@ abstract contract MorphoBlue is Helpers, Events {
 			bool _isMax
 		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
 		if (_isMax) {
-			Id _id = id(_marketParams); 
-			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
+			bytes32 _id = id(_marketParams); 
+			Position memory _pos = MORPHO_BLUE.position(_id, address(this));
 			_amt = _pos.collateral;
 		}
 		address originToken = _marketParams.loanToken;

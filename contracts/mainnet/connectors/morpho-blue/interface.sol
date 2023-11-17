@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity ^0.8.0;
+pragma solidity ^0.7.0;
+pragma experimental ABIEncoderV2;
 
-type Id is bytes32;
+// type Id is bytes32;
 
 struct MarketParams {
     address loanToken;
@@ -59,6 +60,6 @@ interface IMorpho {
 
 	function withdrawCollateral(MarketParams memory marketParams, uint256 assets, address onBehalf, address receiver) external;
 
-	function position(Id id, address user) external view returns(Position memory);
+	function position(bytes32 id, address user) external view returns(Position memory);
 }
 
