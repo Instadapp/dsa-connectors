@@ -34,10 +34,32 @@ abstract contract Helpers is Stores, Basic {
 
     uint256 internal constant MARKET_PARAMS_BYTES_LENGTH = 5 * 32;
 
+	/// @dev A number of virtual assets of 1 enforces a conversion rate between shares and assets when a market is
+    /// empty.
+	uint256 internal constant VIRTUAL_ASSETS = 1;
+
+	/// @dev The number of virtual shares has been chosen low enough to prevent overflows, and high enough to ensure
+    /// high precision computations.
+    uint256 internal constant VIRTUAL_SHARES = 1e6;
+
     /// @notice Returns the id of the market `marketParams`.
     function id(MarketParams memory marketParams) internal pure returns (bytes32 marketParamsId) {
         assembly {
             marketParamsId := keccak256(marketParams, MARKET_PARAMS_BYTES_LENGTH)
         }
     }
+
+	/// @dev Calculates the value of `shares` quoted in assets, rounding up.
+    function _toAssetsUp(uint256 _shares, uint256 _totalAssets, uint256 _totalShares) internal pure returns (uint256) {
+        return _mulDivUp(_shares, _totalAssets + VIRTUAL_ASSETS, _totalShares + VIRTUAL_SHARES);
+    }
+
+	/// @dev Returns (`x` * `y`) / `d` rounded up.
+    function _mulDivUp(uint256 x, uint256 y, uint256 d) internal pure returns (uint256) {
+        return (x * y + (d - 1)) / d;
+    }
+
+	function _getApproveAmount(bytes32 _id, uint256 _assets, uint256 _shares) internal view returns (uint256 _amount) {
+		_amount == 0 ? _assets = _toAssetsUp(_shares, MORPHO_BLUE.market(_id).totalSupplyAssets, MORPHO_BLUE.market(_id).totalSupplyShares) : _assets;
+	}
 }

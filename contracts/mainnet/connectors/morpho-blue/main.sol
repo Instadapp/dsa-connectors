@@ -39,11 +39,13 @@ abstract contract MorphoBlue is Helpers, Events {
 			TokenInterface _tokenContract,
 			uint256 _amt,
 		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-
-		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+			 
+		bytes32 _id = id(_marketParams);
+		uint256 _approveAmount = _getApproveAmount(_id, _amt, _shares);
+		approve(_tokenContract, address(MORPHO_BLUE), _approveAmount);
 		_marketParams.loanToken = address(_tokenContract);
 
-		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _assets, _shares, address(this), _data);
+		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, address(this), _data);
 
 		setUint(_setId, _amt);
 
@@ -85,9 +87,11 @@ abstract contract MorphoBlue is Helpers, Events {
 	{
 		uint256 _amt = getUint(_getId, _assets);
 
-		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _amt);
+		bytes32 _id = id(_marketParams);
+		uint256 _approveAmount = _getApproveAmount(_id, _amt, _shares);
+		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
 
-		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _assets, _shares, _onBehalf, _data);
+		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, _onBehalf, _data);
 
 		setUint(_setId, _amt);
 
@@ -130,7 +134,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
 		_marketParams.loanToken = address(_tokenContract);
 
-		MORPHO_BLUE.supplyCollateral(_marketParams, _assets, address(this), _data);
+		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, address(this), _data);
 
 		setUint(_setId, _amt);
 
@@ -170,7 +174,7 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _amt);
 
-		MORPHO_BLUE.supplyCollateral(_marketParams, _assets, _onBehalf, _data);
+		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, _onBehalf, _data);
 
 		setUint(_setId, _amt);
 
@@ -488,9 +492,27 @@ abstract contract MorphoBlue is Helpers, Events {
 		address _oldLoanToken =  _marketParams.loanToken;
 		_marketParams.loanToken = address(_tokenContract);
 
-		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _amt);
+		if (_isMax) {
+			_assets = 0;
+			_shares = _amt;
+		} else {
+			_assets = _amt;
+		}
+		{
+			bytes32 _id = id(_marketParams);
+			uint256 _approveAmount = _getApproveAmount(_id, _assets, _shares);
 
-		(_assets, _shares) = MORPHO_BLUE.repay(_marketParams, (_isMax ? 0 : _amt), (_isMax ? _amt : _shares), address(this), _data);
+			approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
+		}
+
+
+		(_assets, _shares) = MORPHO_BLUE.repay(
+			_marketParams, 
+			_assets, 
+			_shares, 
+			address(this), 
+			_data
+		);
 
 		convertWethToEth(_oldLoanToken == ethAddr, TokenInterface(wethAddr), _amt);
 
@@ -539,9 +561,25 @@ abstract contract MorphoBlue is Helpers, Events {
 			_isMax = true;
 		}
 
-		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _amt);
+		if (_isMax) {
+			_assets = 0;
+			_shares = _amt;
+		} else {
+			_assets = _amt;
+		}
 
-		(_assets, _shares) = MORPHO_BLUE.repay(_marketParams, (_isMax ? 0 : _amt), (_isMax ? _amt : _shares), address(this), _data);
+		bytes32 _id = id(_marketParams);
+		uint256 _approveAmount = _getApproveAmount(_id, _assets, _shares);
+
+		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
+
+		(_assets, _shares) = MORPHO_BLUE.repay(
+			_marketParams, 
+			_assets, 
+			_shares, 
+			address(this), 
+			_data
+		);
 
 		setUint(_setId, _amt);
 

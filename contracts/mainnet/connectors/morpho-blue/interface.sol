@@ -20,6 +20,19 @@ struct Position {
     uint128 collateral;
 }
 
+/// @dev Warning: `totalSupplyAssets` does not contain the accrued interest since the last interest accrual.
+/// @dev Warning: `totalBorrowAssets` does not contain the accrued interest since the last interest accrual.
+/// @dev Warning: `totalSupplyShares` does not contain the additional shares accrued by `feeRecipient` since the last
+/// interest accrual.
+struct Market {
+    uint128 totalSupplyAssets;
+    uint128 totalSupplyShares;
+    uint128 totalBorrowAssets;
+    uint128 totalBorrowShares;
+    uint128 lastUpdate;
+    uint128 fee;
+}
+
 
 interface IMorpho {
 	function createMarket(MarketParams memory marketParams) external;
@@ -61,5 +74,7 @@ interface IMorpho {
 	function withdrawCollateral(MarketParams memory marketParams, uint256 assets, address onBehalf, address receiver) external;
 
 	function position(bytes32 id, address user) external view returns(Position memory);
+
+    function market(bytes32 id) external view returns(Market memory);
 }
 
