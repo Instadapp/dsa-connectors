@@ -85,15 +85,15 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
+		if (_marketParams.loanToken == ethAddr) {
+			_marketParams.loanToken = wethAddr;
+		}
+		uint256 _amt = getUint(_getId, _assets);
+		if (_amt == uint256(-1)) _amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf); 
 
 		bytes32 _id = id(_marketParams);
 		uint256 _approveAmount = _getApproveAmount(_id, _amt, _shares);
-		approve(_tokenContract, address(MORPHO_BLUE), _approveAmount);
-		_marketParams.loanToken = address(_tokenContract);
+		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
 
 		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, _onBehalf, _data);
 
@@ -174,13 +174,12 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-
-		approve(_tokenContract, address(MORPHO_BLUE), _amt);
-		_marketParams.loanToken = address(_tokenContract);
+		if (_marketParams.loanToken == ethAddr) {
+			_marketParams.loanToken = wethAddr;
+		}
+		uint256 _amt = getUint(_getId, _assets);
+		if (_amt == uint256(-1)) _amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf); 
+		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _amt);
 
 		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, _onBehalf, _data);
 
@@ -218,7 +217,9 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-
+		if (_marketParams.loanToken == ethAddr) {
+			_marketParams.loanToken = wethAddr;
+		}
 		uint256 _amt = getUint(_getId, _assets);
 		if (_amt == uint256(-1)) {
 			bytes32 _id = id(_marketParams); 
@@ -295,7 +296,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	/**
 	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
 	 * @dev Supplying a large amount can revert for overflow.
-	 * @dev 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE native token is not allowed in this mode cause of failing in withdraw of WETH.
+	 * @dev The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _marketParams The market to supply assets to.
 	 * @param _assets The amount of assets to supply.
 	 * @param _shares The amount of shares to mint.
@@ -315,7 +316,9 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-
+		if (_marketParams.loanToken == ethAddr) {
+			_marketParams.loanToken = wethAddr;
+		}
 		uint256 _amt = getUint(_getId, _assets);
 		bool _isMax;
 		if (_amt == uint256(-1)) {
@@ -407,12 +410,14 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
+		if (_marketParams.loanToken == ethAddr) {
+			_marketParams.loanToken = wethAddr;
+		}
+		uint256 _amt = getUint(_getId, _assets);
+		if (_amt == uint256(-1)) {
+			_amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf);
+		}
 
-		_marketParams.loanToken = address(_tokenContract);
 
 		(_assets, _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, _shares, _onBehalf, address(this));
 
@@ -567,12 +572,11 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-			bool _isMax
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-		_marketParams.loanToken = address(_tokenContract);
+		uint256 _amt = getUint(_getId, _assets);
+		bool _isMax;
+		if (_marketParams.loanToken == ethAddr) {
+			_marketParams.loanToken = wethAddr;
+		}
 		if (_amt == uint256(-1)) {
 			_amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf);
 			_isMax = true;
