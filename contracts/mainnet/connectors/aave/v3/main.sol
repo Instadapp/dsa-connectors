@@ -403,6 +403,33 @@ abstract contract AaveResolver is Events, Helpers {
 	}
 
 	/**
+	 * @dev Disable collateral
+	 * @notice Disable an array of tokens as collateral
+	 * @param tokens Array of tokens to disable as collateral
+	 */
+	function disableCollateral(address[] calldata tokens)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _length = tokens.length;
+		require(_length > 0, "0-tokens-not-allowed");
+
+		AaveInterface aave = AaveInterface(aaveProvider.getPool());
+
+		for (uint256 i = 0; i < _length; i++) {
+			bool isEth = tokens[i] == ethAddr;
+			address _token = isEth ? wethAddr : tokens[i];
+			if (getCollateralBalance(_token) > 0 && getIsColl(_token)) {
+				aave.setUserUseReserveAsCollateral(_token, false);
+			}
+		}
+
+		_eventName = "LogDisableCollateral(address[])";
+		_eventParam = abi.encode(tokens);
+	}
+
+	/**
 	 * @dev Swap borrow rate mode
 	 * @notice Swaps user borrow rate mode between variable and stable
 	 * @param token The address of the token to swap borrow rate.(For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
@@ -490,5 +517,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV3 is AaveResolver {
-	string public constant name = "AaveV3-v1.0";
+	string public constant name = "AaveV3-v1.1";
 }

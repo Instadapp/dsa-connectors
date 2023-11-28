@@ -29,6 +29,7 @@ contract Events {
 		uint256 setId
 	);
 	event LogEnableCollateral(address[] tokens);
+	event LogDisableCollateral(address[] tokens);
 	event LogSwapRateMode(address indexed token, uint256 rateMode);
 	event LogSetUserEMode(uint8 categoryId);
 	event LogDelegateBorrow(
