@@ -7,27 +7,17 @@ import "./events.sol";
 
 abstract contract MorphoBlue is Helpers, Events {
 
-	/// @notice Creates the market `marketParams`.
-	/// @param marketParams The market to supply assets to.
-	function createMarket(MarketParams memory marketParams) external {
-		MORPHO_BLUE.createMarket(marketParams);
-	}
-
 	/**
-	 * @dev Supplying a large amount can revert for overflow.
-	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
-	 * @param _marketParams The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @dev Supply ETH/ERC20 Token for lending.
+	 * @notice Supplies assets to Morpho Blue for lending.
+	 * @param _marketParams The market to supply assets to. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _data Arbitrary data to pass to the `onMorphoSupply` callback. Pass empty data if not needed.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
 	 */
 	function supply(
 		MarketParams memory _marketParams,
         uint256 _assets,
-        uint256 _shares,
-        bytes calldata _data,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -35,49 +25,50 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		// Final assets amount and token contract
 		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-			 
-		bytes32 _id = id(_marketParams);
-		uint256 _approveAmount = _getApproveAmount(_id, _amt, _shares);
-		approve(_tokenContract, address(MORPHO_BLUE), _approveAmount);
-		_marketParams.loanToken = address(_tokenContract);
+			TokenInterface _tokenContract, // Loan token contract
+			uint256 _amt
+		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, false, false);
 
-		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, address(this), _data);
+		// Approving loan token for supplying
+		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+		
+		// Updating token addresses
+		_marketParams.loanToken = address(_tokenContract);
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		(, uint256 _shares) = MORPHO_BLUE.supply(_marketParams, _amt, 0, address(this), new bytes(0));
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupply(address,uint256,uint256,address,bytes,uint256,uint256)";
+		_eventName = "LogSupplyAssets(address,address,address,address,uint256,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_assets,
 			_shares,
-			address(this),
-			_data,
 			_getId,
 			_setId
 		);
 	}
 
 	/**
-	 * @dev Supplying a large amount can revert for overflow.
-	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
+	 * @dev Supply ETH/ERC20 Token for lending.
+	 * @notice Supplies assets to Morpho Blue for lending.
 	 * @param _marketParams The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _onBehalf The address that will own the increased supply position.
-	 * @param _data Arbitrary data to pass to the `onMorphoSupply` callback. Pass empty data if not needed.
+	 * @param _onBehalf The address that will get the shares.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
 	 */
 	function supplyOnBehalf(
 		MarketParams memory _marketParams,
         uint256 _assets,
-        uint256 _shares,
         address _onBehalf,
-        bytes calldata _data,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -85,44 +76,100 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (_marketParams.loanToken == ethAddr) {
-			_marketParams.loanToken = wethAddr;
-		}
-		uint256 _amt = getUint(_getId, _assets);
-		if (_amt == uint256(-1)) _amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf); 
+		// Final assets amount and token contract
+		(
+			TokenInterface _tokenContract, // Loan token contract
+			uint256 _amt
+		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, false, false);
 
-		bytes32 _id = id(_marketParams);
-		uint256 _approveAmount = _getApproveAmount(_id, _amt, _shares);
-		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
+		// Approving loan token for supplying
+		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+		
+		// Updating token addresses
+		_marketParams.loanToken = address(_tokenContract);
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
 
-		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, _onBehalf, _data);
+		(, uint256 _shares) = MORPHO_BLUE.supply(_marketParams, _amt, 0, _onBehalf, new bytes(0));
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupply(address,uint256,uint256,address,bytes,uint256,uint256)";
+		_eventName = "LogSupplyAssetsOnBehalf(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_assets,
 			_shares,
 			_onBehalf,
-			_data,
 			_getId,
 			_setId
 		);
 	}
 
 	/**
-	 * @notice Supplies `assets` of collateral on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupplyCollateral` function with the given `data`.
-	 * @param _marketParams The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @dev Supply ETH/ERC20 Token for lending.
+	 * @notice Supplies assets for a perfect share amount to Morpho Blue for lending.
+	 * @param _marketParams The market to supply assets to. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _shares The amount of shares to mint.
+	 * @param _onBehalf The address that will get the shares.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens deposited.
+	 */
+	function supplySharesOnBehalf(
+		MarketParams memory _marketParams,
+        uint256 _shares,
+        address _onBehalf,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		// Final converted assets amount for approval and token contract
+		(
+			TokenInterface _tokenContract, // Loan token contract
+			uint256 _amt
+		) = _performEthToWethSharesConversion(_marketParams, _shares, _onBehalf,  _getId, false);
+
+		// Approving loan token for supplying
+		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+		
+		// Updating token addresses
+		_marketParams.loanToken = address(_tokenContract);
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		(uint256 _assets, ) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, _onBehalf, new bytes(0));
+
+		setUint(_setId, _amt);
+
+		_eventName = "LogSupplySharesOnBehalf(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_assets,
+			_shares,
+			_onBehalf,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Supply ETH/ERC20 Token for collateralization.
+	 * @param _marketParams The market to supply assets to. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _assets The amount of assets to supply.
-	 * @param _data Arbitrary data to pass to the `onMorphoSupply` callback. Pass empty data if not needed.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
 	 */
 	function supplyCollateral(
 		MarketParams memory _marketParams,
         uint256 _assets,
-        bytes calldata _data,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -130,24 +177,31 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		// Final assets amount and token contract
 		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
+			TokenInterface _tokenContract, // Collateral token contract
+			uint256 _amt
+		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, true, false);
 
+		// Approving collateral token
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
-		_marketParams.loanToken = address(_tokenContract);
 
-		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, address(this), _data);
+		// Updating token addresses
+		_marketParams.collateralToken = address(_tokenContract);
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+
+		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, address(this), new bytes(0));
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplyCollateral(address,uint256,address,bytes,uint256,uint256)";
+		_eventName = "LogSupplyCollateral(address,address,address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_assets,
-			address(this),
-			_data,
 			_getId,
 			_setId
 		);
@@ -157,8 +211,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 * @notice Supplies `assets` of collateral on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupplyCollateral` function with the given `data`.
 	 * @param _marketParams The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
 	 * @param _assets The amount of assets to supply.
-	 * @param _onBehalf The address that will own the increased supply position.
-	 * @param _data Arbitrary data to pass to the `onMorphoSupply` callback. Pass empty data if not needed.
+	 * @param _onBehalf The address that will get the shares.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
 	 */
@@ -166,7 +219,6 @@ abstract contract MorphoBlue is Helpers, Events {
 		MarketParams memory _marketParams,
         uint256 _assets,
         address _onBehalf,
-        bytes calldata _data,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -174,34 +226,93 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (_marketParams.loanToken == ethAddr) {
-			_marketParams.loanToken = wethAddr;
-		}
-		uint256 _amt = getUint(_getId, _assets);
-		if (_amt == uint256(-1)) _amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf); 
-		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _amt);
+		// Final assets amount and token contract
+		(
+			TokenInterface _tokenContract, // Collateral token contract
+			uint256 _amt
+		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, true, false);
 
-		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, _onBehalf, _data);
+		// Approving collateral token
+		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+		
+		// Updating token addresses
+		_marketParams.collateralToken = address(_tokenContract);
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+
+		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, _onBehalf, new bytes(0));
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplyCollateral(address,uint256,address,bytes,uint256,uint256)";
+		_eventName = "LogSupplyCollateralOnBehalf(address,address,address,address,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_assets,
 			_onBehalf,
-			_data,
 			_getId,
 			_setId
 		);
 	}
 
 	/**
-	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
-	 * @dev Supplying a large amount can revert for overflow.
-	 * @dev 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE native token is not allowed in this mode cause of failing in withdraw of WETH.
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
+	 * @notice Handles the withdrawal of collateral by a user from a specific market of a specific amount.
+	 * @dev The market to withdraw assets from. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to withdraw assets from.
+	 * @param _assets The amount of assets to withdraw.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens deposited.
+	 */
+	function withdrawCollateral(
+		MarketParams memory _marketParams,
+        uint256 _assets,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(_getId, _assets);
+
+		// Updating token addresses
+		bool _collateralIsEth = _marketParams.collateralToken == ethAddr;
+		_marketParams.collateralToken = _collateralIsEth ? wethAddr : _marketParams.collateralToken;
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+
+		// If amount is max, fetch collateral value from Morpho's contract
+		if (_assets == type(uint256).max) {
+			bytes32 _id = id(_marketParams); 
+			Position memory _pos = MORPHO_BLUE.position(_id, address(this));
+			_amt = _pos.collateral;
+		}
+
+		MORPHO_BLUE.withdrawCollateral(_marketParams, _amt, address(this), address(this));
+
+		convertWethToEth(_collateralIsEth, TokenInterface(wethAddr), _amt);
+
+		setUint(_setId, _amt);
+
+		_eventName = "LogWithdrawCollateral(address,address,address,address,uint256,uint256,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_amt,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Handles the withdrawal of collateral by a user from a specific market of a specific amount.
+	 * @dev The market to withdraw assets from. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to withdraw assets from.
+	 * @param _assets The amount of assets to withdraw.
 	 * @param _onBehalf The address that already deposited position.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
@@ -210,6 +321,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		MarketParams memory _marketParams,
         uint256 _assets,
         address _onBehalf,
+		address _receiver,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -217,144 +329,51 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (_marketParams.loanToken == ethAddr) {
-			_marketParams.loanToken = wethAddr;
-		}
 		uint256 _amt = getUint(_getId, _assets);
-		if (_amt == uint256(-1)) {
+
+		// Updating token addresses
+		bool _collateralIsEth = _marketParams.collateralToken == ethAddr;
+		_marketParams.collateralToken = _collateralIsEth ? wethAddr : _marketParams.collateralToken;
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+
+		if (_amt == type(uint256).max) {
 			bytes32 _id = id(_marketParams); 
 			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
 			_amt = _pos.collateral;
 		}
 
-		MORPHO_BLUE.withdrawCollateral(_marketParams, _amt, _onBehalf, address(this));
+		MORPHO_BLUE.withdrawCollateral(_marketParams, _amt, _onBehalf, _receiver);
+
+		if(_receiver == address(this)) convertWethToEth(_collateralIsEth, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdrawCollateral(address,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdrawCollateralOnBehalf(address,address,address,address,uint256,uint256,address,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_amt,
 			_onBehalf,
+			_receiver,
 			_getId,
 			_setId
 		);
 	}
 
 	/**
-	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
-	 * @dev Supplying a large amount can revert for overflow.
-	 * @dev  The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _getId ID to retrieve amt.
-	 * @param _setId ID stores the amount of tokens deposited.
-	 */
-	function withdrawCollateral(
-		MarketParams memory _marketParams,
-        uint256 _assets,
-        uint256 _shares,
-		uint256 _getId,
-		uint256 _setId
-	)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		uint256 _amt;
-		(
-			TokenInterface _tokenContract,
-			,
-			bool _isMax
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-		if (_isMax) {
-			bytes32 _id = id(_marketParams); 
-			Position memory _pos = MORPHO_BLUE.position(_id, address(this));
-			_amt = _pos.collateral;
-		}
-		address originToken = _marketParams.loanToken;
-		_marketParams.loanToken = address(_tokenContract);
-
-		MORPHO_BLUE.withdrawCollateral(_marketParams, _amt, address(this), address(this));
-
-		convertWethToEth(originToken == ethAddr, TokenInterface(wethAddr), _amt);
-
-		setUint(_setId, _amt);
-
-		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_amt,
-			_shares,
-			address(this),
-			_getId,
-			_setId
-		);
-	}
-
-	/**
-	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
-	 * @dev Supplying a large amount can revert for overflow.
-	 * @dev The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _onBehalf The address that already deposited position.
-	 * @param _getId ID to retrieve amt.
-	 * @param _setId ID stores the amount of tokens deposited.
-	 */
-	function withdrawOnBehalf(
-		MarketParams memory _marketParams,
-        uint256 _assets,
-        uint256 _shares,
-        address _onBehalf,
-		uint256 _getId,
-		uint256 _setId
-	)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		if (_marketParams.loanToken == ethAddr) {
-			_marketParams.loanToken = wethAddr;
-		}
-		uint256 _amt = getUint(_getId, _assets);
-		bool _isMax;
-		if (_amt == uint256(-1)) {
-			_amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf);
-			_isMax = true;
-		}
-
-		MORPHO_BLUE.withdraw(_marketParams, (_isMax ? 0 : _amt), (_isMax ? _amt : _shares), _onBehalf, address(this));
-
-		setUint(_setId, _amt);
-
-		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_amt,
-			_shares,
-			_onBehalf,
-			_getId,
-			_setId
-		);
-	}
-
-	/**
-	 * @notice Supplies `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoSupply` function with the given `data`.
-	 * @dev Supplying a large amount can revert for overflow.
-	 * @dev  The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
+	 * @notice Handles the withdrawal of supply.
+	 * @dev  The market to withdraw assets from.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to withdraw assets from.
+	 * @param _assets The amount of assets to withdraw.
 	 * @param _getId ID to retrieve amt.
 	 * @param _setId ID stores the amount of tokens deposited.
 	 */
 	function withdraw(
 		MarketParams memory _marketParams,
         uint256 _assets,
-        uint256 _shares,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -362,45 +381,97 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
+		uint256 _amt = getUint(_getId, _assets);
+		bool _isEth = _marketParams.loanToken == ethAddr;
+		_marketParams.loanToken = _isEth ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
 
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-			bool _isMax
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-		address originToken = _marketParams.loanToken;
-		_marketParams.loanToken = address(_tokenContract);
+		if (_amt == type(uint256).max) {
+			bytes32 _id = id(_marketParams); 
+			Position memory _pos = MORPHO_BLUE.position(_id, address(this));
+			uint256 _shares = _pos.supplyShares;
+			_amt = _toAssetsUp(_shares, MORPHO_BLUE.market(_id).totalSupplyAssets, MORPHO_BLUE.market(_id).totalSupplyShares);
+		}
 
-		(_assets, _shares) = MORPHO_BLUE.withdraw(_marketParams, (_isMax ? 0 : _amt), (_isMax ? _amt : _shares), address(this), address(this));
+		MORPHO_BLUE.withdraw(_marketParams, _amt, 0, address(this), address(this));
 
-		convertWethToEth(originToken == ethAddr, TokenInterface(wethAddr), _amt);
+		convertWethToEth(_isEth, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdraw(address,address,address,address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_amt,
-			_shares,
-			address(this),
 			_getId,
 			_setId
 		);
 	}
 
 	/**
-	 * @notice Borrows `assets` or `shares` on behalf of `onBehalf` to `receiver`. receiver should be address(this)
-	 * @dev The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _onBehalf The address that will own the borrow position.
+	 * @notice Handles the withdrawal of a specified amount of assets by a user from a specific market.
+	 * @dev The market to withdraw assets from. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The parameters of the market.
+	 * @param _assets The amount of assets the user is withdrawing.
+	 * @param _onBehalf The address who's position to withdraw from.
 	 * @param _getId ID to retrieve amt.
-	 * @param _setId ID stores the amount of tokens borrowed.
+	 * @param _setId ID stores the amount of tokens deposited.
 	 */
-	function borrowOnBehalf(
+	function withdrawOnBehalf(
 		MarketParams memory _marketParams,
         uint256 _assets,
+        address _onBehalf,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(_getId, _assets);
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		if (_amt == type(uint256).max) {
+			bytes32 _id = id(_marketParams); 
+			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
+			uint256 _shares = _pos.supplyShares;
+			_amt = _toAssetsUp(_shares, MORPHO_BLUE.market(_id).totalSupplyAssets, MORPHO_BLUE.market(_id).totalSupplyShares);
+		}
+
+		MORPHO_BLUE.withdraw(_marketParams, _amt, 0, _onBehalf, address(this));
+
+		setUint(_setId, _amt);
+
+		_eventName = "LogWithdrawOnBehalf(address,address,address,address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_amt,
+			_onBehalf,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Handles the withdrawal of a specified amount of assets by a user from a specific market.
+	 * @dev The market to withdraw assets from. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The parameters of the market.
+	 * @param _shares The amount of shares the user is withdrawing.
+	 * @param _onBehalf The address who's position to withdraw from.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens deposited.
+	 */
+	function withdrawSharesOnBehalf(
+		MarketParams memory _marketParams,
         uint256 _shares,
         address _onBehalf,
 		uint256 _getId,
@@ -410,22 +481,283 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		if (_marketParams.loanToken == ethAddr) {
-			_marketParams.loanToken = wethAddr;
+		uint256 _shareAmt = getUint(_getId, _shares);
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		if (_shareAmt == type(uint256).max) {
+			bytes32 _id = id(_marketParams); 
+			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
+			_shareAmt = _pos.supplyShares;
 		}
+
+		MORPHO_BLUE.withdraw(_marketParams, 0, _shareAmt, _onBehalf, address(this));
+
+		setUint(_setId, _shareAmt);
+
+		_eventName = "LogWithdrawSharesOnBehalf(address,address,address,address,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_shareAmt,
+			_onBehalf,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Borrows assets.
+	 * @dev The market to borrow assets from.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to borrow assets from.
+	 * @param _assets The amount of assets to borrow.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens borrowed.
+	 */
+	function borrow(
+		MarketParams memory _marketParams,
+        uint256 _assets,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
 		uint256 _amt = getUint(_getId, _assets);
-		if (_amt == uint256(-1)) {
-			_amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf);
-		}
+		bool _isETH = _marketParams.loanToken == ethAddr;
 
+		_marketParams.loanToken = _isETH ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
 
-		(_assets, _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, _shares, _onBehalf, address(this));
+		(, uint256 _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, 0, address(this), address(this));
+
+		convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogBorrow(address,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogBorrow(address,address,address,address,uint256,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_amt,
+			_shares,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Borrows `assets` on behalf of `onBehalf` to `receiver`.
+	 * @dev The market to borrow assets from. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams  The market to borrow assets from.
+	 * @param _assets The amount of assets to borrow.
+	 * @param _onBehalf The address that will recieve the borrowing assets and own the borrow position.
+	 * @param _receiver The address that will recieve the borrowed assets.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens borrowed.
+	 */
+	function borrowOnBehalf(
+		MarketParams memory _marketParams,
+        uint256 _assets,
+        address _onBehalf,
+		address _receiver,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _amt = getUint(_getId, _assets);
+		bool _isETH = _marketParams.loanToken == ethAddr;
+
+		_marketParams.loanToken = _isETH ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		(, uint256 _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, 0, _onBehalf, _receiver);
+
+		if (_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+
+		setUint(_setId, _amt);
+
+		_eventName = "LogBorrowOnBehalf(address,address,address,address,uint256,uint256,uint256,address,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_amt,
+			_shares,
+			_onBehalf,
+			_receiver,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Borrows `shares` on behalf of `onBehalf` to `receiver`.
+	 * @dev The market to borrow assets from. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to borrow assets from.
+	 * @param _shares The amount of shares to mint.
+	 * @param _onBehalf The address that will own the borrow position.
+	 * @param _receiver The address that will recieve the borrowed assets.
+	 * @param _getId ID to retrieve shares amt.
+	 * @param _setId ID stores the amount of tokens borrowed.
+	 */
+	function borrowOnBehalfShares(
+		MarketParams memory _marketParams,
+        uint256 _shares,
+        address _onBehalf,
+		address _receiver,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		uint256 _shareAmt = getUint(_getId, _shares);
+		bool _isETH = _marketParams.loanToken == ethAddr;
+
+		_marketParams.loanToken = _isETH ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		(uint256 _assets, ) = MORPHO_BLUE.borrow(_marketParams, 0, _shareAmt, _onBehalf, _receiver);
+
+		if (_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(wethAddr), _assets);
+
+		setUint(_setId, _assets);
+
+		_eventName = "LogBorrowShares(address,address,address,address,uint256,uint256,uint256,address,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_assets,
+			_shareAmt,
+			_onBehalf,
+			_receiver,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Repays assets.
+	 * @dev The market to repay assets to. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to repay assets to.
+	 * @param _assets The amount of assets to repay.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens repaid.
+	 */
+	function repay(
+		MarketParams memory _marketParams,
+        uint256 _assets,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		// Final assets amount and token contract
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt // Assets final amount to repay
+		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, false, true);
+
+		// Approving loan token for repaying
+		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+
+		// Updating token addresses
+		_marketParams.loanToken = address(_tokenContract);
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		(, uint256 _shares) = MORPHO_BLUE.repay(
+			_marketParams, 
+			_amt, 
+			0, 
+			address(this), 
+			new bytes(0)
+		);
+
+		setUint(_setId, _amt);
+
+		_eventName = "LogPayback(address,address,address,address,uint256,uint256,uint256,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
+			_assets,
+			_shares,
+			_getId,
+			_setId
+		);
+	}
+
+	/**
+	 * @notice Repays assets on behalf.
+	 * @dev The market to repay assets to. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to repay assets to.
+	 * @param _assets The amount of assets to repay.
+	 * @param _onBehalf The address whose loan will be repaid.
+	 * @param _getId ID to retrieve amt.
+	 * @param _setId ID stores the amount of tokens repaid.
+	 */
+	function repayOnBehalf(
+		MarketParams memory _marketParams,
+        uint256 _assets,
+		address _onBehalf,
+		uint256 _getId,
+		uint256 _setId
+	)
+		external
+		payable
+		returns (string memory _eventName, bytes memory _eventParam)
+	{
+		// Final assets amount and token contract
+		(
+			TokenInterface _tokenContract,
+			uint256 _amt // Assets final amount to repay
+		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, false, true);
+
+		// Approving loan token for repaying
+		approve(_tokenContract, address(MORPHO_BLUE), _amt);
+
+		// Updating token addresses
+		_marketParams.loanToken = address(_tokenContract);
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+
+		(, uint256 _shares) = MORPHO_BLUE.repay(
+			_marketParams, 
+			_amt, 
+			0, 
+			_onBehalf, 
+			new bytes(0)
+		);
+
+		setUint(_setId, _amt);
+
+		_eventName = "LogPaybackOnBehalf(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventParam = abi.encode(
+			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_assets,
 			_shares,
 			_onBehalf,
@@ -435,136 +767,18 @@ abstract contract MorphoBlue is Helpers, Events {
 	}
 
 	/**
-	 * @notice Borrows `assets` or `shares`. receiver should be address(this)
-	 * @dev The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
+	 * @notice Repays shares on behalf.
+	 * @dev The market to repay assets to. (For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+	 * @param _marketParams The market to repay assets to.
+	 * @param _shares The amount of shares to burn.
+	 * @param _onBehalf The address whose loan will be repaid.
 	 * @param _getId ID to retrieve amt.
-	 * @param _setId ID stores the amount of tokens borrowed.
+	 * @param _setId ID stores the amount of tokens repaid.
 	 */
-	function borrow(
+	function repayOnBehalfShares(
 		MarketParams memory _marketParams,
-        uint256 _assets,
-        uint256 _shares,
-		uint256 _getId,
-		uint256 _setId
-	)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-
-		address _oldLoanToken =  _marketParams.loanToken;
-		_marketParams.loanToken = address(_tokenContract);
-
-		(_assets, _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, _shares, address(this), address(this));
-
-		convertWethToEth(_oldLoanToken == ethAddr, TokenInterface(wethAddr), _amt);
-
-		setUint(_setId, _amt);
-
-		_eventName = "LogBorrow(address,uint256,uint256,address,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_assets,
-			_shares,
-			address(this),
-			_getId,
-			_setId
-		);
-	}
-
-	/**
-	 * @notice Repays `assets` or `shares`.
-	 * @dev The market to supply assets to.(For ETH of loanToken in _marketParams: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _data Arbitrary data to pass to the `onMorphoRepay` callback. Pass empty data if not needed.
-	 * @param _getId ID to retrieve amt.
-	 * @param _setId ID stores the amount of tokens borrowed.
-	 */
-	function repay(
-		MarketParams memory _marketParams,
-        uint256 _assets,
-        uint256 _shares,
-        bytes memory _data,
-		uint256 _getId,
-		uint256 _setId
-	)
-		external
-		payable
-		returns (string memory _eventName, bytes memory _eventParam)
-	{
-		(
-			TokenInterface _tokenContract,
-			uint256 _amt,
-			bool _isMax
-		) = _performEthToWethConversion(_marketParams.loanToken, _assets, _getId);
-
-		address _oldLoanToken =  _marketParams.loanToken;
-		_marketParams.loanToken = address(_tokenContract);
-
-		if (_isMax) {
-			_assets = 0;
-			_shares = _amt;
-		} else {
-			_assets = _amt;
-		}
-		{
-			bytes32 _id = id(_marketParams);
-			uint256 _approveAmount = _getApproveAmount(_id, _assets, _shares);
-
-			approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
-		}
-
-
-		(_assets, _shares) = MORPHO_BLUE.repay(
-			_marketParams, 
-			_assets, 
-			_shares, 
-			address(this), 
-			_data
-		);
-
-		convertWethToEth(_oldLoanToken == ethAddr, TokenInterface(wethAddr), _amt);
-
-		setUint(_setId, _amt);
-
-		_eventName = "LogPayback(address,uint256,uint256,address,bytes,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_assets,
-			_shares,
-			address(this),
-			_data,
-			_getId,
-			_setId
-		);
-	}
-
-	/**
-	 * @notice Repays `assets` or `shares` on behalf of `onBehalf`, optionally calling back the caller's `onMorphoReplay` function with the given `data`.
-	 * @dev 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE native token is not allowed in this mode cause of failing in withdraw of WETH.
-	 * @param _marketParams The market to supply assets to.
-	 * @param _assets The amount of assets to supply.
-	 * @param _shares The amount of shares to mint.
-	 * @param _onBehalf The address that will own the borrow position.
-	 * @param _data Arbitrary data to pass to the `onMorphoRepay` callback. Pass empty data if not needed.
-	 * @param _getId ID to retrieve amt.
-	 * @param _setId ID stores the amount of tokens borrowed.
-	 */
-	function repayOnBehalf(
-		MarketParams memory _marketParams,
-        uint256 _assets,
         uint256 _shares,
 		address _onBehalf,
-        bytes memory _data,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -572,45 +786,34 @@ abstract contract MorphoBlue is Helpers, Events {
 		payable
 		returns (string memory _eventName, bytes memory _eventParam)
 	{
-		uint256 _amt = getUint(_getId, _assets);
-		bool _isMax;
-		if (_marketParams.loanToken == ethAddr) {
-			_marketParams.loanToken = wethAddr;
-		}
-		if (_amt == uint256(-1)) {
-			_amt = TokenInterface(_marketParams.loanToken).balanceOf(_onBehalf);
-			_isMax = true;
-		}
+		// Final assets amount and token contract
+		(
+			TokenInterface _tokenContract,
+			uint256 _assetsAmt // Assets final amount to repay
+		) = _performEthToWethSharesConversion(_marketParams, _shares, _onBehalf, _getId, true);
 
-		if (_isMax) {
-			_assets = 0;
-			_shares = _amt;
-		} else {
-			_assets = _amt;
-		}
+		approve(_tokenContract, address(MORPHO_BLUE), _assetsAmt);
 
-		bytes32 _id = id(_marketParams);
-		uint256 _approveAmount = _getApproveAmount(_id, _assets, _shares);
-
-		approve(TokenInterface(_marketParams.loanToken), address(MORPHO_BLUE), _approveAmount);
-
-		(_assets, _shares) = MORPHO_BLUE.repay(
+		(uint256 _assets, ) = MORPHO_BLUE.repay(
 			_marketParams, 
-			_assets, 
-			_shares, 
-			address(this), 
-			_data
+			_assetsAmt, 
+			0, 
+			_onBehalf, 
+			new bytes(0)
 		);
 
-		setUint(_setId, _amt);
+		setUint(_setId, _assets);
 
-		_eventName = "LogPayback(address,uint256,uint256,address,bytes,uint256,uint256)";
+		_eventName = "LogPaybackShares(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			_marketParams.loanToken,
+			_marketParams.collateralToken,
+			_marketParams.oracle,
+			_marketParams.irm,
+			_marketParams.lltv,
 			_assets,
 			_shares,
-			address(this),
-			_data,
+			_onBehalf,
 			_getId,
 			_setId
 		);

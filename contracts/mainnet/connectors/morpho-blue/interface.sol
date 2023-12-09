@@ -2,8 +2,6 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-// type Id is bytes32;
-
 struct MarketParams {
     address loanToken;
     address collateralToken;
