@@ -6,11 +6,7 @@ import "./interface.sol";
 contract Events {
 
 	event LogSupplyAssets(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 assets,
         uint256 shares,
 		uint256 getId,
@@ -18,11 +14,7 @@ contract Events {
 	);
 
 	event LogSupplyAssetsOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 assets,
         uint256 shares,
 		address onBehalf,
@@ -31,11 +23,7 @@ contract Events {
 	);
 
 	event LogSupplySharesOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 assets,
         uint256 shares,
         address onBehalf,
@@ -44,22 +32,14 @@ contract Events {
 	);
 
 	event LogSupplyCollateral(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 assets,
 		uint256 getId,
 		uint256 setId
 	);
 
 	event LogSupplyCollateralOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 assets,
 		address onBehalf,
 		uint256 getId,
@@ -67,11 +47,7 @@ contract Events {
 	);
 
 	event LogBorrow(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
 		uint256 getId,
@@ -79,11 +55,7 @@ contract Events {
 	);
 
 	event LogBorrowOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
 		address onBehalf,
@@ -93,11 +65,7 @@ contract Events {
 	);
 
 	event LogBorrowShares(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
 		address onBehalf,
@@ -107,22 +75,14 @@ contract Events {
 	);
 
 	event LogWithdraw(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 getId,
 		uint256 setId
 	);
 
 	event LogWithdrawOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		address onBehalf,
 		uint256 getId,
@@ -130,11 +90,7 @@ contract Events {
 	);
 
 	event LogWithdrawSharesOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 shares,
 		address onBehalf,
 		uint256 getId,
@@ -142,22 +98,14 @@ contract Events {
 	);
 
 	event LogWithdrawCollateral(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 getId,
 		uint256 setId
 	);
 
 	event LogWithdrawCollateralOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		address onBehalf,
 		address reciever,
@@ -166,11 +114,7 @@ contract Events {
 	);
 
 	event LogPayback(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
 		uint256 getId,
@@ -178,11 +122,7 @@ contract Events {
 	);
 
 	event LogPaybackOnBehalf(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
 		address onBehalf,
@@ -191,11 +131,7 @@ contract Events {
 	);
 
 	event LogPaybackShares(
-		address loanToken,
-		address collateralToken,
-		address oracle,
-		address irm,
-		uint256 lltv,
+		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
 		address onBehalf,

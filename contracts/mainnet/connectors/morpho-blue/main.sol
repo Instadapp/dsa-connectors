@@ -42,13 +42,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplyAssets(address,address,address,address,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogSupplyAssets((address,address,address,address,unit256),unit256,unit256,unit256,unit256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shares,
 			_getId,
@@ -93,13 +89,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplyAssetsOnBehalf(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogSupplyAssetsOnBehalf((address,address,address,address,unit256),uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shares,
 			_onBehalf,
@@ -145,13 +137,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplySharesOnBehalf(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogSupplySharesOnBehalf((address,address,address,address,unit256),uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shares,
 			_onBehalf,
@@ -194,13 +182,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplyCollateral(address,address,address,address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogSupplyCollateral((address,address,address,address,unit256),uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_getId,
 			_setId
@@ -243,13 +227,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogSupplyCollateralOnBehalf(address,address,address,address,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogSupplyCollateralOnBehalf((address,address,address,address,unit256),uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_onBehalf,
 			_getId,
@@ -295,13 +275,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdrawCollateral(address,address,address,address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogWithdrawCollateral((address,address,address,address,unit256),uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_amt,
 			_getId,
 			_setId
@@ -348,13 +324,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdrawCollateralOnBehalf(address,address,address,address,uint256,uint256,address,address,uint256,uint256)";
+		_eventName = "LogWithdrawCollateralOnBehalf((address,address,address,address,unit256),uint256,address,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_amt,
 			_onBehalf,
 			_receiver,
@@ -399,13 +371,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdraw(address,address,address,address,uint256,uint256,uint256,uint256)";
+		_eventName = "LogWithdraw((address,address,address,address,unit256),uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_amt,
 			_getId,
 			_setId
@@ -447,13 +415,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogWithdrawOnBehalf(address,address,address,address,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdrawOnBehalf((address,address,address,address,unit256),uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_amt,
 			_onBehalf,
 			_getId,
@@ -495,13 +459,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _shareAmt);
 
-		_eventName = "LogWithdrawSharesOnBehalf(address,address,address,address,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdrawSharesOnBehalf((address,address,address,address,unit256),uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_shareAmt,
 			_onBehalf,
 			_getId,
@@ -539,13 +499,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogBorrow(address,address,address,address,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogBorrow((address,address,address,address,unit256),uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_amt,
 			_shares,
 			_getId,
@@ -587,13 +543,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogBorrowOnBehalf(address,address,address,address,uint256,uint256,uint256,address,address,uint256,uint256)";
+		_eventName = "LogBorrowOnBehalf((address,address,address,address,unit256),uint256,uint256,address,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_amt,
 			_shares,
 			_onBehalf,
@@ -637,13 +589,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _assets);
 
-		_eventName = "LogBorrowShares(address,address,address,address,uint256,uint256,uint256,address,address,uint256,uint256)";
+		_eventName = "LogBorrowShares((address,address,address,address,unit256),uint256,uint256,address,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shareAmt,
 			_onBehalf,
@@ -694,13 +642,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogPayback(address,address,address,address,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogPayback((address,address,address,address,unit256),uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shares,
 			_getId,
@@ -751,13 +695,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _amt);
 
-		_eventName = "LogPaybackOnBehalf(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogPaybackOnBehalf((address,address,address,address,unit256),uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shares,
 			_onBehalf,
@@ -804,13 +744,9 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		setUint(_setId, _assets);
 
-		_eventName = "LogPaybackShares(address,address,address,address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogPaybackShares((address,address,address,address,unit256),uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
-			_marketParams.loanToken,
-			_marketParams.collateralToken,
-			_marketParams.oracle,
-			_marketParams.irm,
-			_marketParams.lltv,
+			_marketParams,
 			_assets,
 			_shares,
 			_onBehalf,
