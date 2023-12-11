@@ -22,17 +22,28 @@ abstract contract Helpers is Stores, Basic {
     /// high precision computations.
     uint256 internal constant VIRTUAL_SHARES = 1e6;
 
+	enum Mode {
+		Collateral,
+		Repay,
+		Other // Neither collateral nor repay
+	}
+
 	/// @notice Handles Eth to Weth conversion if assets are provided.
 	function _performEthToWethConversion(
 		MarketParams memory _marketParams,
 		uint256 _assets,
 		address _onBehalf,
 		uint256 _getId,
-		bool _isCollateral,
-		bool _isRepay
+		Mode _mode
 	) internal returns (TokenInterface _tokenContract, uint256 _amt) {
 		_amt = getUint(_getId, _assets);
-		bool _isEth = _isCollateral ? _marketParams.collateralToken == ethAddr : _marketParams.loanToken == ethAddr;
+
+		bool _isEth;
+		if (_mode == Mode.Collateral) {
+			_isEth = _marketParams.collateralToken == ethAddr;
+		} else {
+			_isEth = _marketParams.loanToken == ethAddr;
+		}
 
 		// Set the correct token contract
 		_tokenContract = _isEth ? TokenInterface(wethAddr) : TokenInterface(_marketParams.loanToken);
@@ -40,7 +51,7 @@ abstract contract Helpers is Stores, Basic {
 		// Check for max value
 		if (_assets == type(uint256).max) {
 			uint256 _maxAvailable = _isEth ? address(this).balance : _tokenContract.balanceOf(address(this));
-			if (_isRepay) {
+			if (_mode == Mode.Repay) {
 				uint256 _amtDebt = getPaybackBalance(_marketParams, _onBehalf);
 				_amt = min(_maxAvailable, _amtDebt);
 			} else {

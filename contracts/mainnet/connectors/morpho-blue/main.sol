@@ -29,7 +29,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Loan token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, false, false);
+		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, Mode.Other);
 
 		// Approving loan token for supplying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
@@ -77,7 +77,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Loan token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, false, false);
+		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, Mode.Other);
 
 		// Approving loan token for supplying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
@@ -171,7 +171,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Collateral token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, true, false);
+		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, Mode.Collateral);
 
 		// Approving collateral token
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
@@ -216,7 +216,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Collateral token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, true, false);
+		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, Mode.Collateral);
 
 		// Approving collateral token
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
@@ -638,7 +638,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract,
 			uint256 _amt // Assets final amount to repay
-		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, false, true);
+		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, Mode.Repay);
 
 		// Approving loan token for repaying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
@@ -692,7 +692,7 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract,
 			uint256 _amt // Assets final amount to repay
-		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, false, true);
+		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, Mode.Repay);
 
 		// Approving loan token for repaying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
