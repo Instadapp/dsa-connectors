@@ -34,26 +34,22 @@ abstract contract Helpers is Stores, Basic {
 		address _onBehalf,
 		uint256 _getId,
 		Mode _mode
-	) internal returns (TokenInterface _tokenContract, uint256 _amt) {
+	) internal returns (MarketParams memory, uint256 _amt) {
 		_amt = getUint(_getId, _assets);
 
-		bool _isEth;
-		if (_mode == Mode.Collateral) {
-			_isEth = _marketParams.collateralToken == ethAddr;
-		} else {
-			_isEth = _marketParams.loanToken == ethAddr;
-		}
+		bool _isEth = _mode == Mode.Collateral
+			? _marketParams.collateralToken == ethAddr
+			: _marketParams.loanToken == ethAddr;
 
-		// Set the correct token contract
-		_tokenContract = _isEth
-			? TokenInterface(wethAddr)
-			: TokenInterface(_marketParams.loanToken);
+		_marketParams = updateTokenAddresses(_marketParams);
 
 		// Check for max value
 		if (_assets == type(uint256).max) {
 			uint256 _maxAvailable = _isEth
 				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
+				: TokenInterface(_marketParams.loanToken).balanceOf(
+					address(this)
+				);
 			if (_mode == Mode.Repay) {
 				uint256 _amtDebt = getPaybackBalance(_marketParams, _onBehalf);
 				_amt = min(_maxAvailable, _amtDebt);
@@ -64,8 +60,14 @@ abstract contract Helpers is Stores, Basic {
 
 		// Perform conversion if necessary
 		if (_isEth) {
-			convertEthToWeth(true, _tokenContract, _amt);
+			convertEthToWeth(
+				true,
+				TokenInterface(_marketParams.loanToken),
+				_amt
+			);
 		}
+
+		return (_marketParams, _amt);
 	}
 
 	/// @notice Handles Eth to Weth conversion if shares are provided.
@@ -75,24 +77,29 @@ abstract contract Helpers is Stores, Basic {
 		address _onBehalf,
 		uint256 _getId,
 		bool _isRepay
-	) internal returns (TokenInterface _tokenContract, uint256 _assets) {
+	) internal returns (MarketParams memory, uint256 _assets) {
 		uint256 _shareAmt = getUint(_getId, _shares);
 		bool _isEth = _marketParams.loanToken == ethAddr;
 
-		// Set the token contract based on whether the loan token is ETH
-		_tokenContract = _isEth
-			? TokenInterface(wethAddr)
-			: TokenInterface(_marketParams.loanToken);
+		_marketParams = updateTokenAddresses(_marketParams);
 
-		// Handle the max share case or normal share conversion
-		if (_isRepay && _shares == type(uint256).max) {
+		// Handle the max share case
+		if (_shares == type(uint256).max) {
 			uint256 _maxAvailable = _isEth
 				? address(this).balance
-				: _tokenContract.balanceOf(address(this));
-			_assets = min(
-				_maxAvailable,
-				getPaybackBalance(_marketParams, _onBehalf)
-			);
+				: TokenInterface(_marketParams.loanToken).balanceOf(
+					address(this)
+				);
+
+			// If it's repay calculate the min of balance available and debt to repay
+			if (_isRepay) {
+				_assets = min(
+					_maxAvailable,
+					getPaybackBalance(_marketParams, _onBehalf)
+				);
+			} else {
+				_assets = _maxAvailable;
+			}
 		} else {
 			bytes32 _id = id(_marketParams);
 			_assets = _toAssetsUp(
@@ -104,8 +111,14 @@ abstract contract Helpers is Stores, Basic {
 
 		// Perform ETH to WETH conversion if necessary
 		if (_isEth) {
-			convertEthToWeth(true, _tokenContract, _assets);
+			convertEthToWeth(
+				true,
+				TokenInterface(_marketParams.loanToken),
+				_assets
+			);
 		}
+
+		return (_marketParams, _assets);
 	}
 
 	/// @notice Helper function to find the minimum of two values
@@ -162,5 +175,19 @@ abstract contract Helpers is Stores, Basic {
 		uint256 d
 	) internal pure returns (uint256) {
 		return (x * y + (d - 1)) / d;
+	}
+
+	function updateTokenAddresses(
+		MarketParams memory _marketParams
+	) internal returns (MarketParams memory) {
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr
+			? wethAddr
+			: _marketParams.loanToken;
+
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
+
+		return _marketParams;
 	}
 }
