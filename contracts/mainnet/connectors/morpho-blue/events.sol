@@ -13,20 +13,11 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogSupplyAssetsOnBehalf(
+	event LogSupplyOnBehalf(
 		MarketParams marketParams,
 		uint256 assets,
         uint256 shares,
 		address onBehalf,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogSupplySharesOnBehalf(
-		MarketParams marketParams,
-		uint256 assets,
-        uint256 shares,
-        address onBehalf,
 		uint256 getId,
 		uint256 setId
 	);
@@ -59,17 +50,7 @@ contract Events {
 		uint256 amounts,
 		uint256 shares,
 		address onBehalf,
-		address reciever,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogBorrowShares(
-		MarketParams marketParams,
-		uint256 amounts,
-		uint256 shares,
-		address onBehalf,
-		address reciever,
+		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
@@ -77,6 +58,7 @@ contract Events {
 	event LogWithdraw(
 		MarketParams marketParams,
 		uint256 amounts,
+		uint256 shares,
 		uint256 getId,
 		uint256 setId
 	);
@@ -84,13 +66,6 @@ contract Events {
 	event LogWithdrawOnBehalf(
 		MarketParams marketParams,
 		uint256 amounts,
-		address onBehalf,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogWithdrawSharesOnBehalf(
-		MarketParams marketParams,
 		uint256 shares,
 		address onBehalf,
 		uint256 getId,
@@ -108,12 +83,12 @@ contract Events {
 		MarketParams marketParams,
 		uint256 amounts,
 		address onBehalf,
-		address reciever,
+		address receiver,
 		uint256 getId,
 		uint256 setId
 	);
 
-	event LogPayback(
+	event LogRepay(
 		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
@@ -121,16 +96,7 @@ contract Events {
 		uint256 setId
 	);
 
-	event LogPaybackOnBehalf(
-		MarketParams marketParams,
-		uint256 amounts,
-		uint256 shares,
-		address onBehalf,
-		uint256 getId,
-		uint256 setId
-	);
-
-	event LogPaybackShares(
+	event LogRepayOnBehalf(
 		MarketParams marketParams,
 		uint256 amounts,
 		uint256 shares,
