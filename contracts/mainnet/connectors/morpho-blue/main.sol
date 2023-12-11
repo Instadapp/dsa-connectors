@@ -6,7 +6,6 @@ import "./helpers.sol";
 import "./events.sol";
 
 abstract contract MorphoBlue is Helpers, Events {
-
 	/**
 	 * @dev Supply ETH/ERC20 Token for lending.
 	 * @notice Supplies assets to Morpho Blue for lending.
@@ -17,7 +16,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function supply(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -29,17 +28,31 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Loan token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, Mode.Other);
+		) = _performEthToWethConversion(
+				_marketParams,
+				_assets,
+				address(this),
+				_getId,
+				Mode.Other
+			);
 
 		// Approving loan token for supplying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
-		
+
 		// Updating token addresses
 		_marketParams.loanToken = address(_tokenContract);
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		uint256 _shares;
-		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, 0, address(this), new bytes(0));
+		(_assets, _shares) = MORPHO_BLUE.supply(
+			_marketParams,
+			_amt,
+			0,
+			address(this),
+			new bytes(0)
+		);
 
 		setUint(_setId, _assets);
 
@@ -64,8 +77,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function supplyOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _assets,
-        address _onBehalf,
+		uint256 _assets,
+		address _onBehalf,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -77,17 +90,31 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Loan token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, Mode.Other);
+		) = _performEthToWethConversion(
+				_marketParams,
+				_assets,
+				_onBehalf,
+				_getId,
+				Mode.Other
+			);
 
 		// Approving loan token for supplying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
-		
+
 		// Updating token addresses
 		_marketParams.loanToken = address(_tokenContract);
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		uint256 _shares;
-		(_assets, _shares) = MORPHO_BLUE.supply(_marketParams, _amt, 0, _onBehalf, new bytes(0));
+		(_assets, _shares) = MORPHO_BLUE.supply(
+			_marketParams,
+			_amt,
+			0,
+			_onBehalf,
+			new bytes(0)
+		);
 
 		setUint(_setId, _assets);
 
@@ -113,8 +140,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function supplySharesOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _shares,
-        address _onBehalf,
+		uint256 _shares,
+		address _onBehalf,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -125,17 +152,31 @@ abstract contract MorphoBlue is Helpers, Events {
 		// Final converted assets amount for approval and token contract
 		(
 			TokenInterface _tokenContract, // Loan token contract
-			uint256 _amt  // Shares amount converted to assets
-		) = _performEthToWethSharesConversion(_marketParams, _shares, _onBehalf,  _getId, false);
+			uint256 _amt // Shares amount converted to assets
+		) = _performEthToWethSharesConversion(
+				_marketParams,
+				_shares,
+				_onBehalf,
+				_getId,
+				false
+			);
 
 		// Approving loan token for supplying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
-		
+
 		// Updating token addresses
 		_marketParams.loanToken = address(_tokenContract);
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
-		(uint256 _assets, ) = MORPHO_BLUE.supply(_marketParams, _amt, _shares, _onBehalf, new bytes(0));
+		(uint256 _assets, ) = MORPHO_BLUE.supply(
+			_marketParams,
+			_amt,
+			_shares,
+			_onBehalf,
+			new bytes(0)
+		);
 
 		setUint(_setId, _assets);
 
@@ -159,7 +200,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function supplyCollateral(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -171,26 +212,34 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Collateral token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, Mode.Collateral);
+		) = _performEthToWethConversion(
+				_marketParams,
+				_assets,
+				address(this),
+				_getId,
+				Mode.Collateral
+			);
 
 		// Approving collateral token
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
 
 		// Updating token addresses
 		_marketParams.collateralToken = address(_tokenContract);
-		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr
+			? wethAddr
+			: _marketParams.loanToken;
 
-		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, address(this), new bytes(0));
+		MORPHO_BLUE.supplyCollateral(
+			_marketParams,
+			_amt,
+			address(this),
+			new bytes(0)
+		);
 
 		setUint(_setId, _amt);
 
 		_eventName = "LogSupplyCollateral((address,address,address,address,unit256),uint256,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams,
-			_assets,
-			_getId,
-			_setId
-		);
+		_eventParam = abi.encode(_marketParams, _assets, _getId, _setId);
 	}
 
 	/**
@@ -203,8 +252,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function supplyCollateralOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _assets,
-        address _onBehalf,
+		uint256 _assets,
+		address _onBehalf,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -216,16 +265,29 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract, // Collateral token contract
 			uint256 _amt
-		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, Mode.Collateral);
+		) = _performEthToWethConversion(
+				_marketParams,
+				_assets,
+				_onBehalf,
+				_getId,
+				Mode.Collateral
+			);
 
 		// Approving collateral token
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
-		
+
 		// Updating token addresses
 		_marketParams.collateralToken = address(_tokenContract);
-		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr
+			? wethAddr
+			: _marketParams.loanToken;
 
-		MORPHO_BLUE.supplyCollateral(_marketParams, _amt, _onBehalf, new bytes(0));
+		MORPHO_BLUE.supplyCollateral(
+			_marketParams,
+			_amt,
+			_onBehalf,
+			new bytes(0)
+		);
 
 		setUint(_setId, _amt);
 
@@ -249,7 +311,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function withdrawCollateral(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -261,29 +323,33 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		// Updating token addresses
 		bool _collateralIsEth = _marketParams.collateralToken == ethAddr;
-		_marketParams.collateralToken = _collateralIsEth ? wethAddr : _marketParams.collateralToken;
-		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _collateralIsEth
+			? wethAddr
+			: _marketParams.collateralToken;
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr
+			? wethAddr
+			: _marketParams.loanToken;
 
 		// If amount is max, fetch collateral value from Morpho's contract
 		if (_amt == type(uint256).max) {
-			bytes32 _id = id(_marketParams); 
+			bytes32 _id = id(_marketParams);
 			Position memory _pos = MORPHO_BLUE.position(_id, address(this));
 			_amt = _pos.collateral;
 		}
 
-		MORPHO_BLUE.withdrawCollateral(_marketParams, _amt, address(this), address(this));
+		MORPHO_BLUE.withdrawCollateral(
+			_marketParams,
+			_amt,
+			address(this),
+			address(this)
+		);
 
 		convertWethToEth(_collateralIsEth, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
 		_eventName = "LogWithdrawCollateral((address,address,address,address,unit256),uint256,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams,
-			_amt,
-			_getId,
-			_setId
-		);
+		_eventParam = abi.encode(_marketParams, _amt, _getId, _setId);
 	}
 
 	/**
@@ -297,8 +363,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function withdrawCollateralOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _assets,
-        address _onBehalf,
+		uint256 _assets,
+		address _onBehalf,
 		address _receiver,
 		uint256 _getId,
 		uint256 _setId
@@ -311,18 +377,28 @@ abstract contract MorphoBlue is Helpers, Events {
 
 		// Updating token addresses
 		bool _collateralIsEth = _marketParams.collateralToken == ethAddr;
-		_marketParams.collateralToken = _collateralIsEth ? wethAddr : _marketParams.collateralToken;
-		_marketParams.loanToken = _marketParams.loanToken == ethAddr ? wethAddr : _marketParams.loanToken;
+		_marketParams.collateralToken = _collateralIsEth
+			? wethAddr
+			: _marketParams.collateralToken;
+		_marketParams.loanToken = _marketParams.loanToken == ethAddr
+			? wethAddr
+			: _marketParams.loanToken;
 
 		if (_amt == type(uint256).max) {
-			bytes32 _id = id(_marketParams); 
+			bytes32 _id = id(_marketParams);
 			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
 			_amt = _pos.collateral;
 		}
 
-		MORPHO_BLUE.withdrawCollateral(_marketParams, _amt, _onBehalf, _receiver);
+		MORPHO_BLUE.withdrawCollateral(
+			_marketParams,
+			_amt,
+			_onBehalf,
+			_receiver
+		);
 
-		if(_receiver == address(this)) convertWethToEth(_collateralIsEth, TokenInterface(wethAddr), _amt);
+		if (_receiver == address(this))
+			convertWethToEth(_collateralIsEth, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -347,7 +423,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function withdraw(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -358,17 +434,29 @@ abstract contract MorphoBlue is Helpers, Events {
 		uint256 _amt = getUint(_getId, _assets);
 		bool _isEth = _marketParams.loanToken == ethAddr;
 		_marketParams.loanToken = _isEth ? wethAddr : _marketParams.loanToken;
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		if (_amt == type(uint256).max) {
-			bytes32 _id = id(_marketParams); 
+			bytes32 _id = id(_marketParams);
 			Position memory _pos = MORPHO_BLUE.position(_id, address(this));
 			uint256 _shares = _pos.supplyShares;
-			_amt = _toAssetsUp(_shares, MORPHO_BLUE.market(_id).totalSupplyAssets, MORPHO_BLUE.market(_id).totalSupplyShares);
+			_amt = _toAssetsUp(
+				_shares,
+				MORPHO_BLUE.market(_id).totalSupplyAssets,
+				MORPHO_BLUE.market(_id).totalSupplyShares
+			);
 		}
 
 		uint256 _shares;
-		(_assets, _shares) = MORPHO_BLUE.withdraw(_marketParams, _amt, 0, address(this), address(this));
+		(_assets, _shares) = MORPHO_BLUE.withdraw(
+			_marketParams,
+			_amt,
+			0,
+			address(this),
+			address(this)
+		);
 
 		convertWethToEth(_isEth, TokenInterface(wethAddr), _assets);
 
@@ -395,8 +483,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function withdrawOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _assets,
-        address _onBehalf,
+		uint256 _assets,
+		address _onBehalf,
 		address _receiver,
 		uint256 _getId,
 		uint256 _setId
@@ -408,19 +496,32 @@ abstract contract MorphoBlue is Helpers, Events {
 		uint256 _amt = getUint(_getId, _assets);
 		bool _isEth = _marketParams.loanToken == ethAddr;
 		_marketParams.loanToken = _isEth ? wethAddr : _marketParams.loanToken;
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		if (_amt == type(uint256).max) {
-			bytes32 _id = id(_marketParams); 
+			bytes32 _id = id(_marketParams);
 			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
 			uint256 _shares = _pos.supplyShares;
-			_amt = _toAssetsUp(_shares, MORPHO_BLUE.market(_id).totalSupplyAssets, MORPHO_BLUE.market(_id).totalSupplyShares);
+			_amt = _toAssetsUp(
+				_shares,
+				MORPHO_BLUE.market(_id).totalSupplyAssets,
+				MORPHO_BLUE.market(_id).totalSupplyShares
+			);
 		}
 
 		uint256 _shares;
-		(_assets, _shares) = MORPHO_BLUE.withdraw(_marketParams, _amt, 0, _onBehalf, _receiver);
+		(_assets, _shares) = MORPHO_BLUE.withdraw(
+			_marketParams,
+			_amt,
+			0,
+			_onBehalf,
+			_receiver
+		);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(wethAddr), _assets);
+		if (_receiver == address(this))
+			convertWethToEth(_isEth, TokenInterface(wethAddr), _assets);
 
 		setUint(_setId, _assets);
 
@@ -446,8 +547,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function withdrawSharesOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _shares,
-        address _onBehalf,
+		uint256 _shares,
+		address _onBehalf,
 		address _receiver,
 		uint256 _getId,
 		uint256 _setId
@@ -459,17 +560,26 @@ abstract contract MorphoBlue is Helpers, Events {
 		uint256 _shareAmt = getUint(_getId, _shares);
 		bool _isEth = _marketParams.loanToken == ethAddr;
 		_marketParams.loanToken = _isEth ? wethAddr : _marketParams.loanToken;
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		if (_shareAmt == type(uint256).max) {
-			bytes32 _id = id(_marketParams); 
+			bytes32 _id = id(_marketParams);
 			Position memory _pos = MORPHO_BLUE.position(_id, _onBehalf);
 			_shareAmt = _pos.supplyShares;
 		}
 
-		(uint256 _assets,) = MORPHO_BLUE.withdraw(_marketParams, 0, _shareAmt, _onBehalf, _receiver);
+		(uint256 _assets, ) = MORPHO_BLUE.withdraw(
+			_marketParams,
+			0,
+			_shareAmt,
+			_onBehalf,
+			_receiver
+		);
 
-		if(_receiver == address(this)) convertWethToEth(_isEth, TokenInterface(wethAddr), _assets);
+		if (_receiver == address(this))
+			convertWethToEth(_isEth, TokenInterface(wethAddr), _assets);
 
 		setUint(_setId, _assets);
 
@@ -494,7 +604,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function borrow(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -506,22 +616,24 @@ abstract contract MorphoBlue is Helpers, Events {
 		bool _isETH = _marketParams.loanToken == ethAddr;
 
 		_marketParams.loanToken = _isETH ? wethAddr : _marketParams.loanToken;
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
-		(, uint256 _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, 0, address(this), address(this));
+		(, uint256 _shares) = MORPHO_BLUE.borrow(
+			_marketParams,
+			_amt,
+			0,
+			address(this),
+			address(this)
+		);
 
 		convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
 		_eventName = "LogBorrow((address,address,address,address,unit256),uint256,uint256,uint256,uint256)";
-		_eventParam = abi.encode(
-			_marketParams,
-			_amt,
-			_shares,
-			_getId,
-			_setId
-		);
+		_eventParam = abi.encode(_marketParams, _amt, _shares, _getId, _setId);
 	}
 
 	/**
@@ -536,8 +648,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function borrowOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _assets,
-        address _onBehalf,
+		uint256 _assets,
+		address _onBehalf,
 		address _receiver,
 		uint256 _getId,
 		uint256 _setId
@@ -550,11 +662,20 @@ abstract contract MorphoBlue is Helpers, Events {
 		bool _isETH = _marketParams.loanToken == ethAddr;
 
 		_marketParams.loanToken = _isETH ? wethAddr : _marketParams.loanToken;
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
-		(, uint256 _shares) = MORPHO_BLUE.borrow(_marketParams, _amt, 0, _onBehalf, _receiver);
+		(, uint256 _shares) = MORPHO_BLUE.borrow(
+			_marketParams,
+			_amt,
+			0,
+			_onBehalf,
+			_receiver
+		);
 
-		if (_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
+		if (_receiver == address(this))
+			convertWethToEth(_isETH, TokenInterface(wethAddr), _amt);
 
 		setUint(_setId, _amt);
 
@@ -582,8 +703,8 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function borrowOnBehalfShares(
 		MarketParams memory _marketParams,
-        uint256 _shares,
-        address _onBehalf,
+		uint256 _shares,
+		address _onBehalf,
 		address _receiver,
 		uint256 _getId,
 		uint256 _setId
@@ -596,11 +717,20 @@ abstract contract MorphoBlue is Helpers, Events {
 		bool _isETH = _marketParams.loanToken == ethAddr;
 
 		_marketParams.loanToken = _isETH ? wethAddr : _marketParams.loanToken;
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
-		(uint256 _assets, ) = MORPHO_BLUE.borrow(_marketParams, 0, _shareAmt, _onBehalf, _receiver);
+		(uint256 _assets, ) = MORPHO_BLUE.borrow(
+			_marketParams,
+			0,
+			_shareAmt,
+			_onBehalf,
+			_receiver
+		);
 
-		if (_receiver == address(this)) convertWethToEth(_isETH, TokenInterface(wethAddr), _assets);
+		if (_receiver == address(this))
+			convertWethToEth(_isETH, TokenInterface(wethAddr), _assets);
 
 		setUint(_setId, _assets);
 
@@ -626,7 +756,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function repay(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		uint256 _getId,
 		uint256 _setId
 	)
@@ -638,21 +768,29 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract,
 			uint256 _amt // Assets final amount to repay
-		) = _performEthToWethConversion(_marketParams, _assets, address(this), _getId, Mode.Repay);
+		) = _performEthToWethConversion(
+				_marketParams,
+				_assets,
+				address(this),
+				_getId,
+				Mode.Repay
+			);
 
 		// Approving loan token for repaying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
 
 		// Updating token addresses
 		_marketParams.loanToken = address(_tokenContract);
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		uint256 _shares;
 		(_assets, _shares) = MORPHO_BLUE.repay(
-			_marketParams, 
-			_amt, 
-			0, 
-			address(this), 
+			_marketParams,
+			_amt,
+			0,
+			address(this),
 			new bytes(0)
 		);
 
@@ -679,7 +817,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function repayOnBehalf(
 		MarketParams memory _marketParams,
-        uint256 _assets,
+		uint256 _assets,
 		address _onBehalf,
 		uint256 _getId,
 		uint256 _setId
@@ -692,21 +830,29 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract,
 			uint256 _amt // Assets final amount to repay
-		) = _performEthToWethConversion(_marketParams, _assets, _onBehalf, _getId, Mode.Repay);
+		) = _performEthToWethConversion(
+				_marketParams,
+				_assets,
+				_onBehalf,
+				_getId,
+				Mode.Repay
+			);
 
 		// Approving loan token for repaying
 		approve(_tokenContract, address(MORPHO_BLUE), _amt);
 
 		// Updating token addresses
 		_marketParams.loanToken = address(_tokenContract);
-		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr ? wethAddr : _marketParams.collateralToken;
+		_marketParams.collateralToken = _marketParams.collateralToken == ethAddr
+			? wethAddr
+			: _marketParams.collateralToken;
 
 		uint256 _shares;
 		(_assets, _shares) = MORPHO_BLUE.repay(
-			_marketParams, 
-			_amt, 
-			0, 
-			_onBehalf, 
+			_marketParams,
+			_amt,
+			0,
+			_onBehalf,
 			new bytes(0)
 		);
 
@@ -734,7 +880,7 @@ abstract contract MorphoBlue is Helpers, Events {
 	 */
 	function repayOnBehalfShares(
 		MarketParams memory _marketParams,
-        uint256 _shares,
+		uint256 _shares,
 		address _onBehalf,
 		uint256 _getId,
 		uint256 _setId
@@ -747,15 +893,21 @@ abstract contract MorphoBlue is Helpers, Events {
 		(
 			TokenInterface _tokenContract,
 			uint256 _assetsAmt // Assets final amount to repay
-		) = _performEthToWethSharesConversion(_marketParams, _shares, _onBehalf, _getId, true);
+		) = _performEthToWethSharesConversion(
+				_marketParams,
+				_shares,
+				_onBehalf,
+				_getId,
+				true
+			);
 
 		approve(_tokenContract, address(MORPHO_BLUE), _assetsAmt);
 
 		(uint256 _assets, ) = MORPHO_BLUE.repay(
-			_marketParams, 
-			_assetsAmt, 
-			0, 
-			_onBehalf, 
+			_marketParams,
+			_assetsAmt,
+			0,
+			_onBehalf,
 			new bytes(0)
 		);
 

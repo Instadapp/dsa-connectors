@@ -4,11 +4,10 @@ pragma experimental ABIEncoderV2;
 import "./interface.sol";
 
 contract Events {
-
 	event LogSupplyAssets(
 		MarketParams marketParams,
 		uint256 assets,
-        uint256 shares,
+		uint256 shares,
 		uint256 getId,
 		uint256 setId
 	);
@@ -16,7 +15,7 @@ contract Events {
 	event LogSupplyOnBehalf(
 		MarketParams marketParams,
 		uint256 assets,
-        uint256 shares,
+		uint256 shares,
 		address onBehalf,
 		uint256 getId,
 		uint256 setId
