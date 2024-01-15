@@ -37,9 +37,16 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		_underlyingAmt = _underlyingAmt == uint256(-1)
-			? _underlyingTokenContract.balanceOf(address(this))
-			: _underlyingAmt;
+		if (_underlyingAmt == uint256(-1)) {
+			if (address(_underlyingTokenContract) == wethAddr) {
+				TokenInterface(wethAddr).deposit{value: address(this).balance}();
+			}
+			_underlyingAmt = _underlyingTokenContract.balanceOf(address(this));
+		} else {
+			if (address(_underlyingTokenContract) == wethAddr) {
+				TokenInterface(wethAddr).deposit{value: _underlyingAmt}();
+			}
+		}
 
 		// Returns final amount in token decimals.
 		uint256 _minShares = wmul(minSharesPerToken, _underlyingAmt);
@@ -106,6 +113,10 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			_shareAmt
 		);
 
+		if (address(underlyingTokenContract) == wethAddr) {
+			TokenInterface(wethAddr).deposit{value: address(this).balance}();
+		}
+
 		uint256 _initalUnderlyingBal = underlyingTokenContract.balanceOf(
 			address(this)
 		);
@@ -121,6 +132,10 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		);
 
 		require(_maxTokens >= _tokensDeducted, "maxTokenPerShares-exceeds");
+
+		if (_tokensDeducted > 0 && address(underlyingTokenContract) == wethAddr) {
+			TokenInterface(wethAddr).withdraw(_tokensDeducted);
+		}
 
 		setUint(setId, _shareAmt);
 
@@ -160,9 +175,16 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		_underlyingAmt = _underlyingAmt == uint256(-1)
-			? underlyingTokenContract.balanceOf(address(this))
-			: _underlyingAmt;
+		if (_underlyingAmt == uint256(-1)) {
+			if (address(underlyingTokenContract) == wethAddr) {
+				TokenInterface(wethAddr).deposit{value: address(this).balance}();
+			}
+			_underlyingAmt = underlyingTokenContract.balanceOf(address(this));
+		} else {
+			if (address(underlyingTokenContract) == wethAddr) {
+				TokenInterface(wethAddr).deposit{value: _underlyingAmt}();
+			}
+		}
 
 		// Returns final amount in token decimals.
 		uint256 _maxShares = wmul(maxSharesPerToken, _underlyingAmt);
@@ -223,6 +245,10 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		// Returns final amount in token decimals.
 		uint256 _minUnderlyingAmt = wmul(minTokenPerShares, _shareAmt);
 
+		if (address(underlyingTokenContract) == wethAddr && to == address(this)) {
+			TokenInterface(wethAddr).deposit{value: address(this).balance}();
+		}
+
 		uint256 _initalUnderlyingBal = underlyingTokenContract.balanceOf(to);
 
 		// Redeem tokens for shares
@@ -234,6 +260,10 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		);
 
 		require(_minUnderlyingAmt <= _underlyingAmtReceieved, "_minUnderlyingAmt-exceeds");
+
+		if (_underlyingAmtReceieved > 0 && to == address(this) && address(underlyingTokenContract) == wethAddr) {
+			TokenInterface(wethAddr).withdraw(_underlyingAmtReceieved);
+		}
 
 		setUint(setId, _shareAmt);
 
@@ -251,5 +281,5 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 }
 
 contract ConnectV2BasicERC4626 is BasicConnector {
-	string public constant name = "BASIC-ERC4626-v1.0";
+	string public constant name = "BASIC-ERC4626-v1.1";
 }
