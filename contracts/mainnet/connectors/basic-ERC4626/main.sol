@@ -37,15 +37,15 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		if (_underlyingAmt == uint256(-1)) {
-			if (address(_underlyingTokenContract) == wethAddr) {
-				TokenInterface(wethAddr).deposit{value: address(this).balance}();
-			}
-			_underlyingAmt = _underlyingTokenContract.balanceOf(address(this));
+		bool _isEth = vaultToken == ethAddr;
+
+		if (_isEth) {
+			_underlyingAmt = _underlyingAmt == uint256(-1) ? address(this).balance : _underlyingTokenContract.balanceOf(address(this));
+			convertEthToWeth(_isEth, TokenInterface(wethAddr), _underlyingAmt);
 		} else {
-			if (address(_underlyingTokenContract) == wethAddr) {
-				TokenInterface(wethAddr).deposit{value: _underlyingAmt}();
-			}
+			_underlyingAmt = _underlyingAmt == uint256(-1)
+				? _underlyingTokenContract.balanceOf(address(this))
+				: _underlyingAmt;
 		}
 
 		// Returns final amount in token decimals.
