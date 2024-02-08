@@ -24,7 +24,7 @@ contract SparkImportResolver is SparkHelpers {
 
 		ImportData memory data;
 
-		SparkInterface spark = SparkInterface(sparkProvider.getPool());
+		SparkInterface spark = SparkInterface(sparkPoolProvider.getPool());
 
 		data = getBorrowAmounts(userAccount, spark, inputData, data);
 		data = getSupplyAmounts(userAccount, inputData, data);
@@ -105,7 +105,7 @@ contract SparkImportResolver is SparkHelpers {
 
 		ImportData memory data;
 
-		SparkInterface spark = SparkInterface(sparkProvider.getPool());
+		SparkInterface spark = SparkInterface(sparkPoolProvider.getPool());
 
 		data = getBorrowAmounts(userAccount, spark, inputData, data);
 		data = getSupplyAmounts(userAccount, inputData, data);
@@ -205,5 +205,5 @@ contract SparkImportResolver is SparkHelpers {
 }
 
 contract ConnectV2SparkImport is SparkImportResolver {
-	string public constant name = "Spark-import-v1.1";
+	string public constant name = "Spark-import-v1.0";
 }
