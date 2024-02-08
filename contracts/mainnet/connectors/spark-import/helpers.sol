@@ -17,7 +17,7 @@ abstract contract Helper is DSMath, Basic {
 	/**
 	 * @dev Spark Lending Pool Provider
 	 */
-	SparkPoolProviderInterface internal constant sparkProvider =
+	SparkPoolProviderInterface internal constant sparkPoolProvider =
 		SparkPoolProviderInterface(0x02C3eA4e34C0cBd694D2adFa2c690EECbC1793eE);
 
 	/**
