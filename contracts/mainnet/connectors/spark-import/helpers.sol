@@ -12,7 +12,7 @@ abstract contract Helper is DSMath, Basic {
 	/**
 	 * @dev Spark referal code
 	 */
-	uint16 internal constant referalCode = 3228;
+	uint16 internal constant referalCode = 0;
 
 	/**
 	 * @dev Spark Lending Pool Provider
