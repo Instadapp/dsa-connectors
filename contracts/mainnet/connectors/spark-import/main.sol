@@ -10,7 +10,7 @@ import { SparkInterface, STokenInterface } from "./interface.sol";
 import "./helpers.sol";
 import "./events.sol";
 
-contract SparkImportResolver is SparkHelpers {
+contract SparkImport is SparkHelpers {
 	function _importSpark(address userAccount, ImportInputData memory inputData)
 		internal
 		returns (string memory _eventName, bytes memory _eventParam)
@@ -204,6 +204,6 @@ contract SparkImportResolver is SparkHelpers {
 	}
 }
 
-contract ConnectV2SparkImport is SparkImportResolver {
+contract ConnectV2SparkImport is SparkImport {
 	string public constant name = "Spark-import-v1.0";
 }
