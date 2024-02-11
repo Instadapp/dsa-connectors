@@ -2,7 +2,7 @@
 pragma solidity ^0.7.0;
 
 /**
- * @title Basic D.
+ * @title Basic D V2.
  * @dev Deposit, Mint, Withdraw, & Redeem from ERC4626 DSA.
  */
 
@@ -14,19 +14,18 @@ import { Basic } from "../../common/basic.sol";
 import { Events } from "./events.sol";
 
 abstract contract BasicConnector is Events, DSMath, Basic {
+
 	/**
 	 * @dev Deposit underlying asset to ERC4626 Vault.
 	 * @notice Mints vault shares by depositing exactly amount of underlying assets
 	 * @param vaultToken ERC4626 Token address.
 	 * @param underlyingAmt The amount of the underlying asset to deposit. (For max: `uint256(-1)`)
-	 * @param minSharesPerToken The min share rate of deposit. Should always be in 18 decimals.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens deposited.
-	 */
+	*/
 	function deposit(
 		address vaultToken,
 		uint256 underlyingAmt,
-		uint256 minSharesPerToken,
 		uint256 getId,
 		uint256 setId
 	) public returns (string memory _eventName, bytes memory _eventParam) {
@@ -41,31 +40,18 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			? _underlyingTokenContract.balanceOf(address(this))
 			: _underlyingAmt;
 
-		// Returns final amount in token decimals.
-		uint256 _minShares = wmul(minSharesPerToken, _underlyingAmt);
-
-		// Initial share balance
-		uint256 _initialVaultBal = vaultTokenContract.balanceOf(address(this));
-
 		approve(_underlyingTokenContract, vaultToken, _underlyingAmt);
 
 		// Deposit tokens for shares
-		vaultTokenContract.deposit(_underlyingAmt, address(this));
-
-		uint256 _sharesReceieved = sub(
-			vaultTokenContract.balanceOf(address(this)),
-			_initialVaultBal
-		);
-
-		require(_minShares <= _sharesReceieved, "Less shares received");
+		uint256 _sharesReceieved =
+			vaultTokenContract.deposit(_underlyingAmt, address(this));
 
 		setUint(setId, _sharesReceieved);
 
-		_eventName = "LogDeposit(address,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogDeposit(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			vaultToken,
 			_underlyingAmt,
-			minSharesPerToken,
 			_sharesReceieved,
 			getId,
 			setId
@@ -77,14 +63,12 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 	 * @notice Mints vault shares by minting exactly amount of underlying assets
 	 * @param vaultToken ERC4626 Token address.
 	 * @param shareAmt The amount of the share to mint. (For max: `uint256(-1)`)
-	 * @param maxTokenPerShares The max underyling token rate of mint. Always in 18 decimals.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens minted.
 	 */
 	function mint(
 		address vaultToken,
 		uint256 shareAmt,
-		uint256 maxTokenPerShares,
 		uint256 getId,
 		uint256 setId
 	) public returns (string memory _eventName, bytes memory _eventParam) {
@@ -95,41 +79,23 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			vaultTokenContract.asset()
 		);
 
-		_shareAmt = _shareAmt == uint256(-1)
-			? vaultTokenContract.balanceOf(address(this))
-			: _shareAmt;
-
-		// Returns final amount in token decimals.
-		uint256 _maxTokens = wmul(maxTokenPerShares, _shareAmt);
-
 		uint256 _underlyingTokenAmount = vaultTokenContract.previewMint(
 			_shareAmt
-		);
-
-		uint256 _initalUnderlyingBal = underlyingTokenContract.balanceOf(
-			address(this)
 		);
 
 		approve(underlyingTokenContract, vaultToken, _underlyingTokenAmount);
 
 		// Mint shares for tokens
-		vaultTokenContract.mint(_shareAmt, address(this));
+		uint256 _tokensDeposited = 
+			vaultTokenContract.mint(_shareAmt, address(this));
 
-		uint256 _tokensDeducted = sub(
-			_initalUnderlyingBal,
-			underlyingTokenContract.balanceOf(address(this))
-		);
+		setUint(setId, _tokensDeposited);
 
-		require(_maxTokens >= _tokensDeducted, "maxTokenPerShares-exceeds");
-
-		setUint(setId, _shareAmt);
-
-		_eventName = "LogMint(address,uint256,uint256,uint256,uint256,uint256)";
+		_eventName = "LogMint(address,uint256,uint256,uint256,uint256)";
 		_eventParam = abi.encode(
 			vaultToken,
 			_shareAmt,
-			maxTokenPerShares,
-			_tokensDeducted,
+			_tokensDeposited,
 			getId,
 			setId
 		);
@@ -140,7 +106,6 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 	 * @notice Withdraw vault shares with exactly amount of underlying assets
 	 * @param vaultToken ERC4626 Token address.
 	 * @param underlyingAmt The amount of the token to withdraw. (For max: `uint256(-1)`)
-	 * @param maxSharesPerToken The max share rate of withdrawn amount. Always send in 18 decimals.
 	 * @param to The address of receiver.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens withdrawn.
@@ -148,7 +113,6 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 	function withdraw(
 		address vaultToken,
 		uint256 underlyingAmt,
-		uint256 maxSharesPerToken,
 		address payable to,
 		uint256 getId,
 		uint256 setId
@@ -164,25 +128,16 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			? underlyingTokenContract.balanceOf(address(this))
 			: _underlyingAmt;
 
-		// Returns final amount in token decimals.
-		uint256 _maxShares = wmul(maxSharesPerToken, _underlyingAmt);
-
-		uint256 _initialVaultBal = vaultTokenContract.balanceOf(to);
-
 		// Withdraw tokens for shares
-		vaultTokenContract.withdraw(_underlyingAmt, to, address(this));
-
-		uint256 _sharesBurned = sub(_initialVaultBal, vaultTokenContract.balanceOf(to));
-
-		require(_maxShares >= _sharesBurned, "maxShares-exceeds");
+		uint256 _sharesBurned =
+			vaultTokenContract.withdraw(_underlyingAmt, to, address(this));
 
 		setUint(setId, _underlyingAmt);
 
-		_eventName = "LogWithdraw(address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogWithdraw(address,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			vaultToken,
 			_underlyingAmt,
-			maxSharesPerToken,
 			_sharesBurned,
 			to,
 			getId,
@@ -195,7 +150,6 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 	 * @notice Redeem vault shares with exactly amount of underlying assets
 	 * @param vaultToken ERC4626 Token address.
 	 * @param shareAmt The amount of the token to redeem. (For max: `uint256(-1)`)
-	 * @param minTokenPerShares The min underlying token rate of withdraw. Always in 18 decimals.
 	 * @param to The address of receiver.
 	 * @param getId ID to retrieve amt.
 	 * @param setId ID stores the amount of tokens redeem.
@@ -204,7 +158,6 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 	function redeem(
 		address vaultToken,
 		uint256 shareAmt,
-		uint256 minTokenPerShares,
 		address payable to,
 		uint256 getId,
 		uint256 setId
@@ -220,28 +173,16 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 			? vaultTokenContract.balanceOf(address(this))
 			: _shareAmt;
 
-		// Returns final amount in token decimals.
-		uint256 _minUnderlyingAmt = wmul(minTokenPerShares, _shareAmt);
-
-		uint256 _initalUnderlyingBal = underlyingTokenContract.balanceOf(to);
-
 		// Redeem tokens for shares
-		vaultTokenContract.redeem(_shareAmt, to, address(this));
-
-		uint256 _underlyingAmtReceieved = sub(
-			underlyingTokenContract.balanceOf(to),
-			_initalUnderlyingBal
-		);
-
-		require(_minUnderlyingAmt <= _underlyingAmtReceieved, "_minUnderlyingAmt-exceeds");
+		uint256 _underlyingAmtReceieved =
+			vaultTokenContract.redeem(_shareAmt, to, address(this));
 
 		setUint(setId, _shareAmt);
 
-		_eventName = "LogRedeem(address,uint256,uint256,uint256,address,uint256,uint256)";
+		_eventName = "LogRedeem(address,uint256,uint256,address,uint256,uint256)";
 		_eventParam = abi.encode(
 			vaultToken,
 			_shareAmt,
-			minTokenPerShares,
 			_underlyingAmtReceieved,
 			to,
 			getId,
@@ -250,6 +191,6 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 	}
 }
 
-contract ConnectV2BasicERC4626 is BasicConnector {
-	string public constant name = "BASIC-ERC4626-v1.0";
+contract ConnectV2BasicERC4626V2 is BasicConnector {
+	string public constant name = "BASIC-ERC4626-v2.0";
 }
