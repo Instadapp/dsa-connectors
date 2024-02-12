@@ -26,7 +26,7 @@ contract SparkImportPermitResolver is SparkHelpers {
 
 		ImportData memory data;
 
-		SparkInterface spark = SparkInterface(sparkProvider.getPool());
+		SparkInterface spark = SparkInterface(sparkPoolProvider.getPool());
 
 		data = getBorrowAmounts(userAccount, spark, inputData, data);
 		data = getSupplyAmounts(userAccount, inputData, data);
@@ -120,7 +120,7 @@ contract SparkImportPermitResolver is SparkHelpers {
 
 		ImportData memory data;
 
-		SparkInterface spark = SparkInterface(sparkProvider.getPool());
+		SparkInterface spark = SparkInterface(sparkPoolProvider.getPool());
 
 		data = getBorrowAmounts(userAccount, spark, inputData, data);
 		data = getSupplyAmounts(userAccount, inputData, data);
@@ -250,6 +250,6 @@ contract SparkImportPermitResolver is SparkHelpers {
 	}
 }
 
-contract ConnectV2SparkImportPermitPolygon is SparkImportPermitResolver {
+contract ConnectV2SparkImportPermit is SparkImportPermitResolver {
 	string public constant name = "Spark-import-permit-v1.0";
 }
