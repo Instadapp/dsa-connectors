@@ -268,7 +268,7 @@ abstract contract SparkConnector is Events, Helpers {
 				? address(this).balance
 				: tokenContract.balanceOf(address(this));
 			uint256 _amtDebt = getPaybackBalance(_token, rateMode);
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = _amtDSA > _amtDebt ? _amtDebt : _amtDSA;
 		}
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
@@ -526,5 +526,5 @@ abstract contract SparkConnector is Events, Helpers {
 }
 
 contract ConnectV2Spark is SparkConnector {
-	string public constant name = "Spark-v1.0";
+	string public constant name = "Spark-v1.1";
 }

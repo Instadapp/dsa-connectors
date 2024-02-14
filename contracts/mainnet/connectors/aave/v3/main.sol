@@ -268,7 +268,7 @@ abstract contract AaveResolver is Events, Helpers {
 				? address(this).balance
 				: tokenContract.balanceOf(address(this));
 			uint256 _amtDebt = getPaybackBalance(_token, rateMode);
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = _amtDSA > _amtDebt ? _amtDebt : _amtDSA;
 		}
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
@@ -531,5 +531,5 @@ abstract contract AaveResolver is Events, Helpers {
 }
 
 contract ConnectV2AaveV3 is AaveResolver {
-	string public constant name = "AaveV3-v1.1";
+	string public constant name = "AaveV3-v1.2";
 }
