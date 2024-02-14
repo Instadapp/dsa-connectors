@@ -366,7 +366,7 @@ abstract contract SparkConnector is Events, Helpers {
 				rateMode,
 				onBehalfOf
 			);
-			_amt = _amtDSA <= _amtDebt ? _amtDSA : _amtDebt;
+			_amt = amtDSA > _amtDebt ? _amtDebt : _amtDSA;
 		}
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
