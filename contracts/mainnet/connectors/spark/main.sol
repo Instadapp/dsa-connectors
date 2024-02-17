@@ -262,7 +262,14 @@ abstract contract SparkConnector is Events, Helpers {
 		address _token = isEth ? wethAddr : token;
 
 		TokenInterface tokenContract = TokenInterface(_token);
-		_amt = _amt == uint256(-1) ? getPaybackBalance(_token, rateMode) : _amt;
+
+		if (_amt == uint256(-1)) {
+			uint256 _amtDSA = isEth
+				? address(this).balance
+				: tokenContract.balanceOf(address(this));
+			uint256 _amtDebt = getPaybackBalance(_token, rateMode);
+			_amt = _amtDSA > _amtDebt ? _amtDebt : _amtDSA;
+		}
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
 
@@ -350,9 +357,17 @@ abstract contract SparkConnector is Events, Helpers {
 
 		TokenInterface tokenContract = TokenInterface(_token);
 
-		_amt = _amt == uint256(-1)
-			? getOnBehalfOfPaybackBalance(_token, rateMode, onBehalfOf)
-			: _amt;
+		if (_amt == uint256(-1)) {
+			uint256 _amtDSA = isEth
+				? address(this).balance
+				: tokenContract.balanceOf(address(this));
+			uint256 _amtDebt = getOnBehalfOfPaybackBalance(
+				_token,
+				rateMode,
+				onBehalfOf
+			);
+			_amt = _amtDSA > _amtDebt ? _amtDebt : _amtDSA;
+		}
 
 		if (isEth) convertEthToWeth(isEth, tokenContract, _amt);
 
@@ -511,5 +526,5 @@ abstract contract SparkConnector is Events, Helpers {
 }
 
 contract ConnectV2Spark is SparkConnector {
-	string public constant name = "Spark-v1.0";
+	string public constant name = "Spark-v1.1";
 }
