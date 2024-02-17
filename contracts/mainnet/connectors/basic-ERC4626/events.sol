@@ -5,7 +5,6 @@ contract Events {
 	event LogDeposit(
 		address indexed token,
 		uint256 underlyingAmt,
-		uint256 minSharesPerToken,
 		uint256 sharesReceieved,
 		uint256 getId,
 		uint256 setId
@@ -14,8 +13,7 @@ contract Events {
 	event LogMint(
 		address indexed token,
 		uint256 shareAmt,
-		uint256 maxTokenPerShares,
-		uint256 tokensDeducted,
+		uint256 tokensDeposited,
 		uint256 getId,
 		uint256 setId
 	);
@@ -23,7 +21,6 @@ contract Events {
 	event LogWithdraw(
 		address indexed token,
 		uint256 underlyingAmt,
-		uint256 maxSharesPerToken,
 		uint256 sharedBurned,
 		address indexed to,
 		uint256 getId,
@@ -33,7 +30,6 @@ contract Events {
 	event LogRedeem(
 		address indexed token,
 		uint256 shareAmt,
-		uint256 minTokenPerShares,
 		uint256 underlyingAmtReceieved,
 		address to,
 		uint256 getId,
