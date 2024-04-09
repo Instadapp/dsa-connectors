@@ -1,7 +1,7 @@
 {
   "name": "dsa-connectors",
   "version": "1.0.0",
-  "description": "",
+  "description": " ",
   "directories": {},
   "scripts": {
     "test": "hardhat run scripts/tests/global-test.ts",
