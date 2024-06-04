@@ -26,6 +26,15 @@ contract Events {
         uint256 setId
     );
 
+    event LogPaybackOnBehalf(
+        address indexed token,
+        address cToken,
+        uint256 tokenAmt,
+        address borrower,
+        uint256 getId,
+        uint256 setId
+    );
+
     event LogPayback(
         address indexed token,
         address cToken,
