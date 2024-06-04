@@ -13,7 +13,7 @@ import { Helpers } from "./helpers.sol";
 import { Events } from "./events.sol";
 import { CETHInterface, CTokenInterface } from "./interface.sol";
 
-abstract contract CompoundResolver is Events, Helpers {
+abstract contract CompoundConnector is Events, Helpers {
     /**
      * @dev Deposit ETH/ERC20_Token.
      * @notice Deposit a token to Compound for lending / collaterization.
@@ -497,6 +497,6 @@ abstract contract CompoundResolver is Events, Helpers {
     }
 }
 
-contract ConnectV2Compound is CompoundResolver {
-    string public name = "Compound-v1.1";
+contract ConnectV2Compound is CompoundConnector {
+    string public name = "Compound-v1.2";
 }
