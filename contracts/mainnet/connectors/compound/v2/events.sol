@@ -60,13 +60,4 @@ contract Events {
         uint256 getId,
         uint256 setId
     );
-    
-    event LogLiquidate(
-        address indexed borrower,
-        address indexed tokenToPay,
-        address indexed tokenInReturn,
-        uint256 tokenAmt,
-        uint256 getId,
-        uint256 setId
-    );
 }
