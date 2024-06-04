@@ -97,8 +97,8 @@ describe("Compound", function () {
                 },
                 {
                     connector: connectorName,
-                    method: "payback",
-                    args: ["DAI-A", 0, setId, 0]
+                    method: "paybackOnBehalf",
+                    args: ["DAI-A", 0, dsaWallet0.address, setId, 0]
                 }
             ]
 
