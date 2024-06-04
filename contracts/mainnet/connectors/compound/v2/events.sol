@@ -30,7 +30,7 @@ contract Events {
         address indexed token,
         address cToken,
         uint256 tokenAmt,
-        address borrower,
+        address indexed borrower,
         uint256 getId,
         uint256 setId
     );
