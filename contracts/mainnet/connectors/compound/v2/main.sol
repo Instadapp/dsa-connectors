@@ -207,6 +207,46 @@ abstract contract CompoundResolver is Events, Helpers {
     }
 
     /**
+     * @dev Payback borrowed ETH/ERC20_Token.
+     * @notice Payback debt owed.
+     * @param token The address of the token to payback. (For ETH: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE)
+     * @param cToken The address of the corresponding cToken.
+     * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+     * @param borrower The address whose debt needs to be repaid.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens paid back.
+    */
+    function paybackRawOnBehalf(
+        address token,
+        address cToken,
+        uint256 amt,
+        address borrower,
+        uint256 getId,
+        uint256 setId
+    ) public payable returns (string memory _eventName, bytes memory _eventParam) {
+        uint _amt = getUint(getId, amt);
+
+        require(token != address(0) && cToken != address(0), "invalid token/ctoken address");
+
+        CTokenInterface cTokenContract = CTokenInterface(cToken);
+        _amt = _amt == uint(-1) ? cTokenContract.borrowBalanceCurrent(borrower) : _amt;
+
+        if (token == ethAddr) {
+            require(address(this).balance >= _amt, "not-enough-eth");
+            CETHInterface(cToken).repayBorrowBehalf{value: _amt}(borrower);
+        } else {
+            TokenInterface tokenContract = TokenInterface(token);
+            require(tokenContract.balanceOf(address(this)) >= _amt, "not-enough-token");
+            approve(tokenContract, cToken, _amt);
+            require(cTokenContract.repayBorrowBehalf(borrower, _amt) == 0, "repay-failed.");
+        }
+        setUint(setId, _amt);
+
+        _eventName = "LogPaybackOnBehalf(address,address,uint256,address,uint256,uint256)";
+        _eventParam = abi.encode(token, cToken, _amt, borrower, getId, setId);
+    }
+
+    /**
      * @dev Payback borrowed ETH/ERC20_Token using the Mapping.
      * @notice Payback debt owed.
      * @param tokenId The token id of the token to payback.(For eg: COMP-A)
@@ -222,6 +262,26 @@ abstract contract CompoundResolver is Events, Helpers {
     ) external payable returns (string memory _eventName, bytes memory _eventParam) {
         (address token, address cToken) = compMapping.getMapping(tokenId);
         (_eventName, _eventParam) = paybackRaw(token, cToken, amt, getId, setId);
+    }
+
+    /**
+     * @dev Payback borrowed ETH/ERC20_Token using the Mapping.
+     * @notice Payback debt owed.
+     * @param tokenId The token id of the token to payback.(For eg: COMP-A)
+     * @param amt The amount of the token to payback. (For max: `uint256(-1)`)
+     * @param borrower The address whose debt needs to be repaid.
+     * @param getId ID to retrieve amt.
+     * @param setId ID stores the amount of tokens paid back.
+    */
+    function paybackOnBehalf(
+        string calldata tokenId,
+        uint256 amt,
+        address borrower,
+        uint256 getId,
+        uint256 setId
+    ) external payable returns (string memory _eventName, bytes memory _eventParam) {
+        (address token, address cToken) = compMapping.getMapping(tokenId);
+        (_eventName, _eventParam) = paybackRawOnBehalf(token, cToken, amt, borrower, getId, setId);
     }
 
     /**
