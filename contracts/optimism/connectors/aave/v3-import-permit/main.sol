@@ -254,5 +254,5 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 }
 
 contract ConnectV2AaveV3ImportPermitOptimism is AaveV3ImportPermitResolver {
-	string public constant name = "Aave-v3-import-permit-v1";
+	string public constant name = "Aave-v3-import-permit-v1.1";
 }
