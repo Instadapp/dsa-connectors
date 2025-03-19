@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.7.0;
 
 import { DSMath } from "../../../common/math.sol";
 import { Basic } from "../../../common/basic.sol";
@@ -24,7 +24,7 @@ abstract contract Helper is DSMath, Basic {
 	 * @dev Aave Protocol Data Provider
 	 */
 	AaveDataProviderInterface internal constant aaveData =
-		AaveDataProviderInterface(0x41393e5e337606dc3821075Af65AeE84D7688CBD);
+		AaveDataProviderInterface(0x497a1994c46d4f6C864904A9f1fac6328Cb7C8a6);
 
 	function getIsColl(address token, address user)
 		internal
