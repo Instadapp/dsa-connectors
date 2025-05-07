@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
  * @title Aave v3 import connector .
  * @dev  Import EOA's aave V3 position to DSA's aave v3 position
  */
+
 import { TokenInterface, AccountInterface } from "../../../common/interfaces.sol";
 import { AaveInterface, ATokenInterface } from "./interface.sol";
 import "./helpers.sol";
@@ -249,6 +250,6 @@ contract AaveV3ImportPermitResolver is AaveHelpers {
 	}
 }
 
-contract ConnectV2AaveV3ImportPermitArbitrum is AaveV3ImportPermitResolver {
-	string public constant name = "Aave-v3-import-permit-v1.2";
+contract ConnectV2AaveV3ImportPermit is AaveV3ImportPermitResolver {
+	string public constant name = "Aave-v3-import-permit-v1.1";
 }
