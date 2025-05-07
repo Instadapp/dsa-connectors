@@ -28,7 +28,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		uint256 underlyingAmt,
 		uint256 getId,
 		uint256 setId
-	) public returns (string memory _eventName, bytes memory _eventParam) {
+	) public payable returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _underlyingAmt = getUint(getId, underlyingAmt);
 
 		IERC4626 vaultTokenContract = IERC4626(vaultToken);
@@ -71,7 +71,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		uint256 shareAmt,
 		uint256 getId,
 		uint256 setId
-	) public returns (string memory _eventName, bytes memory _eventParam) {
+	) public payable returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _shareAmt = getUint(getId, shareAmt);
 
 		IERC4626 vaultTokenContract = IERC4626(vaultToken);
@@ -116,7 +116,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		address payable to,
 		uint256 getId,
 		uint256 setId
-	) public returns (string memory _eventName, bytes memory _eventParam) {
+	) public payable returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _underlyingAmt = getUint(getId, underlyingAmt);
 
 		IERC4626 vaultTokenContract = IERC4626(vaultToken);
@@ -161,7 +161,7 @@ abstract contract BasicConnector is Events, DSMath, Basic {
 		address payable to,
 		uint256 getId,
 		uint256 setId
-	) public returns (string memory _eventName, bytes memory _eventParam) {
+	) public payable returns (string memory _eventName, bytes memory _eventParam) {
 		uint256 _shareAmt = getUint(getId, shareAmt);
 
 		IERC4626 vaultTokenContract = IERC4626(vaultToken);
