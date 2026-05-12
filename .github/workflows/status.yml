@@ -1,6 +1,6 @@
 name: PR status checks
 on:
-  pull_request_target:
+  pull_request:
     types: [assigned, opened, synchronize, reopened]
 
 jobs:
@@ -12,15 +12,13 @@ jobs:
       matrix:
         node-version: [16.x]
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Use Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             node_modules
@@ -37,7 +35,7 @@ jobs:
           output=$(npx ts-node ./status-checks/index.ts | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
           cat <<< "$output" > "./pr/status-check-output"
           echo ${{ github.event.number }} > ./pr/number
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: pr
           path: pr/
