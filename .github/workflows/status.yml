@@ -1,6 +1,6 @@
 name: PR status checks
 on:
-  pull_request_target:
+  pull_request:
     types: [assigned, opened, synchronize, reopened]
 
 jobs:
@@ -13,8 +13,6 @@ jobs:
         node-version: [16.x]
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -25,7 +23,7 @@ jobs:
           path: |
             node_modules
             */*/node_modules
-          key: ${{ runner.os }}-${{ matrix.node_version }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install and build
         run: |
           npm install
@@ -33,7 +31,6 @@ jobs:
         id: status_check
         run: |
           mkdir -p pr
-          # Run status checks, Remove ANSI colors from the text
           output=$(npx ts-node ./status-checks/index.ts | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
           cat <<< "$output" > "./pr/status-check-output"
           echo ${{ github.event.number }} > ./pr/number
