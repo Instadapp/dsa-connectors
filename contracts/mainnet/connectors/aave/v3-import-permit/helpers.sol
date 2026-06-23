@@ -18,13 +18,13 @@ abstract contract Helper is DSMath, Basic {
 	 * @dev Aave Lending Pool Provider
 	 */
 	AavePoolProviderInterface internal constant aaveProvider =
-		AavePoolProviderInterface(0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb);
+		AavePoolProviderInterface(0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e);
 
 	/**
 	 * @dev Aave Protocol Data Provider
 	 */
 	AaveDataProviderInterface internal constant aaveData =
-		AaveDataProviderInterface(0x7F23D86Ee20D869112572136221e173428DD740B);
+		AaveDataProviderInterface(0x497a1994c46d4f6C864904A9f1fac6328Cb7C8a6);
 
 	function getIsColl(address token, address user)
 		internal
@@ -53,6 +53,13 @@ abstract contract Helper is DSMath, Basic {
 		address[] borrowTokens;
 		bool convertStable;
 		uint256[] flashLoanFees;
+	}
+
+	struct SignedPermits {
+		uint8[] v;
+		bytes32[] r;
+		bytes32[] s;
+		uint256[] expiry;
 	}
 }
 
@@ -112,8 +119,8 @@ contract AaveHelpers is Helper {
 				}
 			}
 			for (uint256 i = 0; i < inputData.borrowTokens.length; i++) {
-				address _token = inputData.borrowTokens[i] == maticAddr
-					? wmaticAddr
+				address _token = inputData.borrowTokens[i] == ethAddr
+					? wethAddr
 					: inputData.borrowTokens[i];
 				data._borrowTokens[i] = _token;
 
@@ -173,8 +180,8 @@ contract AaveHelpers is Helper {
 			}
 		}
 		for (uint256 i = 0; i < inputData.supplyTokens.length; i++) {
-			address _token = inputData.supplyTokens[i] == maticAddr
-				? wmaticAddr
+			address _token = inputData.supplyTokens[i] == ethAddr
+				? wethAddr
 				: inputData.supplyTokens[i];
 			(address _aToken, , ) = aaveData.getReserveTokensAddresses(_token);
 			data._supplyTokens[i] = _token;
@@ -220,6 +227,28 @@ contract AaveHelpers is Helper {
 			if (amts[i] > 0) {
 				_paybackBehalfOne(aave, tokens[i], amts[i], 2, user);
 			}
+		}
+	}
+
+	function _PermitATokens(
+		address userAccount,
+		ATokenInterface[] memory aTokenContracts,
+		address[] memory tokens,
+		uint8[] memory v,
+		bytes32[] memory r,
+		bytes32[] memory s,
+		uint256[] memory expiry
+	) internal {
+		for (uint256 i = 0; i < tokens.length; i++) {
+			aTokenContracts[i].permit(
+				userAccount,
+				address(this),
+				uint256(-1),
+				expiry[i],
+				v[i],
+				r[i],
+				s[i]
+			);
 		}
 	}
 
